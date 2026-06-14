@@ -1,8 +1,10 @@
 'use client';
 
-import { Bell, Search, User, X, CheckCheck, Menu } from 'lucide-react';
+import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useSidebar } from './SidebarContext';
+import { useLanguage, Language } from '@/components/features/LanguageContext';
+import { useTimeFilter, TimeRange } from '@/components/features/TimeFilterContext';
 
 interface AlertLog {
   id: string;
@@ -18,6 +20,8 @@ export function Header({ role = 'Admin' }: { role?: string }) {
   const [activeTab, setActiveTab] = useState<'unread' | 'read'>('unread');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { setIsMobileOpen } = useSidebar();
+  const { language, setLanguage, texts } = useLanguage();
+  const { timeRange, setTimeRange } = useTimeFilter();
 
   const fetchNotifications = async () => {
     try {
@@ -101,12 +105,44 @@ export function Header({ role = 'Admin' }: { role?: string }) {
           </div>
           <input
             className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
-            placeholder="Search across your farm..."
+            placeholder={texts.common.search + "..."}
             type="search"
           />
         </div>
       </div>
       <div className="flex items-center gap-4">
+        {/* Time Filter Dropdown */}
+        <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
+          <Calendar size={14} className="text-indigo-500 mr-2 ml-1" />
+          <select 
+            value={timeRange} 
+            onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-6 pl-0"
+          >
+            <option value="all">{texts.common.allTime}</option>
+            <option value="weekly">{texts.common.weekly}</option>
+            <option value="monthly">{texts.common.monthly}</option>
+            <option value="yearly">{texts.common.yearly}</option>
+          </select>
+        </div>
+
+        {/* Language Selection Dropdown */}
+        <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
+          <Globe size={14} className="text-indigo-500 mr-2 ml-1" />
+          <select 
+            value={language} 
+            onChange={(e) => setLanguage(e.target.value as Language)}
+            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-6 pl-0"
+          >
+            <option value="en">English (EN)</option>
+            <option value="es">Español (ES)</option>
+            <option value="ar">العربية (AR)</option>
+            <option value="de">Deutsch (DE)</option>
+            <option value="fr">Français (FR)</option>
+            <option value="zh">中文 (ZH)</option>
+          </select>
+        </div>
+
         {/* Notification Bell */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -129,7 +165,7 @@ export function Header({ role = 'Admin' }: { role?: string }) {
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">
                 <div className="flex items-center gap-2">
                   <Bell size={16} className="text-indigo-600" />
-                  <span className="text-sm font-semibold text-slate-800">Notifications</span>
+                  <span className="text-sm font-semibold text-slate-800">{texts.dashboard.alertLogsQueue}</span>
                   {unreadNotifications.length > 0 && (
                     <span className="text-[10px] font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded-full">
                       {unreadNotifications.length}
@@ -185,7 +221,7 @@ export function Header({ role = 'Admin' }: { role?: string }) {
                   <div className="py-10 flex flex-col items-center justify-center text-center gap-2">
                     <Bell size={28} className="text-slate-200" />
                     <p className="text-xs text-slate-400 font-medium">
-                      {activeTab === 'unread' ? 'All caught up! No unread alerts.' : 'No read notifications yet.'}
+                      {activeTab === 'unread' ? texts.dashboard.allCaughtUpAlerts : 'No read notifications.'}
                     </p>
                   </div>
                 ) : (

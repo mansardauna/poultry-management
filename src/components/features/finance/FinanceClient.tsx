@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, Wallet, ArrowDown, ArrowUp, Coins, Percent, User, Edit2, Trash2 } from 'lucide-react';
-import { TEXTS } from "@/lib/constants/texts";
+import { useLanguage } from "../LanguageContext";
+import { useTimeFilter } from "../TimeFilterContext";
 import { Expense, Sale } from "@/data/types";
 import { 
   Dialog, 
@@ -28,6 +29,8 @@ interface FinanceClientProps {
 export function FinanceClient({ initialSales, initialExpenses, role }: FinanceClientProps) {
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
+  const { texts } = useLanguage();
+  const { filterByTimeRange } = useTimeFilter();
   const [open, setOpen] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -150,8 +153,11 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
     }
   };
 
-  const totalRevenue = sales.reduce((sum, s) => sum + s.totalAmount, 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const filteredSales = filterByTimeRange(sales);
+  const filteredExpenses = filterByTimeRange(expenses);
+
+  const totalRevenue = filteredSales.reduce((sum, s) => sum + s.totalAmount, 0);
+  const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
   
   // Gaa Saka Formula Reconciliation
   const netInflowPool = openingFund + totalRevenue;
@@ -164,8 +170,8 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{TEXTS.finance.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{TEXTS.finance.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{texts.finance.title}</h1>
+          <p className="text-sm text-slate-500 mt-1">{texts.finance.subtitle}</p>
         </div>
         <div className="flex gap-2">
           <button 
@@ -178,7 +184,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
             onClick={handleOpen}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
           >
-            <Plus size={20} /> {TEXTS.finance.logExpense}
+            <Plus size={20} /> {texts.finance.logExpense}
           </button>
         </div>
       </div>
@@ -189,7 +195,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{TEXTS.finance.totalRevenue}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance.totalRevenue}</p>
                 <p className="text-2xl font-semibold text-slate-900 mt-2">₦{totalRevenue.toLocaleString()}</p>
               </div>
               <div className="text-indigo-600">
@@ -204,7 +210,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{TEXTS.finance.totalExpenses}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance.totalExpenses}</p>
                 <p className="text-2xl font-semibold text-red-650 mt-2">₦{totalExpenses.toLocaleString()}</p>
               </div>
               <div className="text-red-500">

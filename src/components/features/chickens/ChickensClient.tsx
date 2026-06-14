@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
+import { useLanguage } from "../LanguageContext";
+import { useTimeFilter } from "../TimeFilterContext";
 import { Plus, AlertTriangle, MapPin, Shield, Edit2, Trash2 } from 'lucide-react';
-import { TEXTS } from "@/lib/constants/texts";
 import { ChickenBatch } from "@/data/types";
 import { 
   Dialog, 
@@ -28,6 +29,8 @@ interface ChickensClientProps {
 
 export function ChickensClient({ initialData, role }: ChickensClientProps) {
   const [batches, setBatches] = useState<ChickenBatch[]>(initialData);
+  const { texts } = useLanguage();
+  const { filterByTimeRange } = useTimeFilter();
   
   const canEdit = role === 'Admin' || role === 'Manager';
   
@@ -296,8 +299,8 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       {/* Page Title & Commands */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{TEXTS.chickens.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{TEXTS.chickens.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{texts.chickens.title}</h1>
+          <p className="text-sm text-slate-500 mt-1">{texts.chickens.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button 
@@ -322,7 +325,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onClick={handleOpen}
             className="bg-indigo-600 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
           >
-            <Plus size={20} /> {TEXTS.chickens.addBatch}
+            <Plus size={20} /> {texts.chickens.addBatch}
           </button>
         </div>
       </div>
@@ -330,7 +333,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       {/* Batches Table Card */}
       <Card>
         <CardHeader>
-          <CardTitle>{TEXTS.chickens.activeBatches}</CardTitle>
+          <CardTitle>{texts.chickens.activeBatches}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -349,7 +352,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
                 </tr>
               </thead>
               <tbody>
-                {batches.map((batch) => (
+                {filterByTimeRange(batches).map((batch) => (
                   <tr key={batch.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-900">{batch.id}</td>
                     <td className="px-4 py-3">

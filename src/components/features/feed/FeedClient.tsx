@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
 import { Plus, BarChart2, AlertTriangle, MapPin, Truck, Edit2, Trash2 } from 'lucide-react';
-import { TEXTS } from "@/lib/constants/texts";
+import { useLanguage } from "../LanguageContext";
+import { useTimeFilter } from "../TimeFilterContext";
 import { FeedInventory, DailyFeedLog, ChickenBatch, ProcurePipeline } from "@/data/types";
 import { 
   Dialog, 
@@ -30,6 +31,8 @@ interface FeedClientProps {
 
 export function FeedClient({ initialFeeds, initialLogs, batches, initialProcurePipeline, role }: FeedClientProps) {
   const [feeds, setFeeds] = useState<FeedInventory[]>(initialFeeds);
+  const { texts } = useLanguage();
+  const { filterByTimeRange, timeRange } = useTimeFilter();
   const canEdit = role === 'Admin' || role === 'Manager';
   const [logs, setLogs] = useState<DailyFeedLog[]>(initialLogs);
   const [procurePipeline, setProcurePipeline] = useState<ProcurePipeline[]>(initialProcurePipeline);
@@ -321,20 +324,19 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   const layerMash = feeds.find(f => f.type === 'Layer mash');
   const isLayerMashCritical = layerMash && layerMash.quantityKg <= 50;
 
-  // Weekly consumption summary (last 7 days)
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  const weeklyLogs = logs.filter(l => new Date(l.date) >= sevenDaysAgo);
-  const weeklyKgTotal = weeklyLogs.reduce((sum, l) => sum + l.quantityConsumedKg, 0);
+  // Filter consumption logs based on the active timeframe
+  const filteredLogs = filterByTimeRange(logs);
+  const weeklyKgTotal = filteredLogs.reduce((sum, l) => sum + l.quantityConsumedKg, 0);
 
   // Per-type weekly breakdown
   const weeklyByType: Record<string, number> = {};
-  weeklyLogs.forEach(l => {
+  filteredLogs.forEach(l => {
     const feed = feeds.find(f => f.id === l.feedId);
     if (feed) weeklyByType[feed.type] = (weeklyByType[feed.type] || 0) + l.quantityConsumedKg;
   });
 
-  const dailyAvgConsumption = weeklyKgTotal / 7;
+  const divisor = timeRange === 'weekly' ? 7 : timeRange === 'monthly' ? 30 : timeRange === 'yearly' ? 365 : 30;
+  const dailyAvgConsumption = weeklyKgTotal / divisor;
   const daysOfSupply = dailyAvgConsumption > 0 ? Math.floor(totalFeedKg / dailyAvgConsumption) : null;
 
   return (
@@ -342,8 +344,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Header Controls */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{TEXTS.feed.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{TEXTS.feed.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{texts.feed.title}</h1>
+          <p className="text-sm text-slate-500 mt-1">{texts.feed.subtitle}</p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -356,13 +358,13 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             onClick={handleOpenUsage}
             className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-50 transition-colors"
           >
-            {TEXTS.feed.logUsage}
+            {texts.feed.logUsage}
           </button>
           <button 
             onClick={handleOpenRestock}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
           >
-            <Plus size={20} /> {TEXTS.feed.receiveStock}
+            <Plus size={20} /> {texts.feed.receiveStock}
           </button>
         </div>
       </div>
@@ -479,16 +481,13 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             })}
           </CardContent>
         </Card>
-      )}
-
-
-      {/* Layout Split: Inventory Table vs Procurement Pipeline */}
+      )}      {/* Layout Split: Inventory Table vs Procurement Pipeline */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Current Inventory Table */}
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
-              {TEXTS.feed.currentInventory}
+              {texts.feed.currentInventory}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -545,16 +544,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">{texts.common.date}</th>
                     <th className="px-4 py-3">Milestone Action</th>
                     <th className="px-4 py-3">New Supplier</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">ETA</th>
-                    {canEdit && <th className="px-4 py-3">Actions</th>}
+                    {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {procurePipeline.map((pipe) => (
+                  {filterByTimeRange(procurePipeline).map((pipe) => (
                     <tr key={pipe.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-500">{pipe.date}</td>
                       <td className="px-4 py-3 text-slate-900 font-semibold">{pipe.milestone}</td>
@@ -596,7 +595,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       <Card>
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
-            {TEXTS.feed.consumptionLogs}
+            {texts.feed.consumptionLogs}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -604,15 +603,15 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             <table className="w-full text-xs text-left">
               <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">{texts.common.date}</th>
                   <th className="px-4 py-3">Feed Type</th>
                   <th className="px-4 py-3">Batch ID</th>
                   <th className="px-4 py-3">Amount (kg)</th>
-                  {canEdit && <th className="px-4 py-3">Actions</th>}
+                  {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {logs.map((log) => {
+                {filterByTimeRange(logs).map((log) => {
                   const feed = feeds.find(f => f.id === log.feedId);
                   return (
                     <tr key={log.id} className="hover:bg-slate-50">

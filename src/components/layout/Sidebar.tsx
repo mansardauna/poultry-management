@@ -35,6 +35,7 @@ import {
 import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
 import { WorkspaceOnboarding } from '../features/WorkspaceOnboarding';
+import { useLanguage } from '../features/LanguageContext';
 import toast from 'react-hot-toast';
 
 interface SidebarProps {
@@ -149,6 +150,7 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { workspaces, activeWorkspace, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
+  const { texts } = useLanguage();
 
   const isAdmin = role === 'Admin';
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
@@ -315,7 +317,7 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
                       isCollapsed ? 'mr-0' : 'mr-3'
                     )}
                   />
-                  {!isCollapsed && <span className="truncate">{item.name}</span>}
+                  {!isCollapsed && <span className="truncate">{texts.menu[item.name] || item.name}</span>}
                   
                   {/* Active Indicator */}
                   {isActive && (
@@ -334,10 +336,10 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
               "group flex items-center px-3 py-3 text-sm font-semibold rounded-md hover:bg-indigo-900 hover:text-white transition-colors",
               isCollapsed ? 'justify-center' : ''
             )}
-            title={isCollapsed ? "Settings" : undefined}
+            title={isCollapsed ? texts.menu.Settings : undefined}
           >
             <Settings size={22} className={clsx("text-indigo-400 group-hover:text-blue-300 flex-shrink-0 transition-colors", isCollapsed ? 'mr-0' : 'mr-3')} />
-            {!isCollapsed && "Settings"}
+            {!isCollapsed && texts.menu.Settings}
           </Link>
           <button
             onClick={handleLogout}
@@ -345,10 +347,10 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
               "group flex items-center w-full px-3 py-3 text-sm font-medium rounded-md text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-colors",
               isCollapsed ? 'justify-center' : ''
             )}
-            title={isCollapsed ? "Logout" : undefined}
+            title={isCollapsed ? texts.menu.Logout : undefined}
           >
             <LogOut size={22} className={clsx("flex-shrink-0 transition-colors", isCollapsed ? 'mr-0' : 'mr-3')} />
-            {!isCollapsed && "Logout"}
+            {!isCollapsed && texts.menu.Logout}
           </button>
         </div>
       </div>

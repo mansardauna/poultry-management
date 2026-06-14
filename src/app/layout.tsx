@@ -14,6 +14,9 @@ export const metadata: Metadata = {
 };
 
 import { WorkspaceProvider } from "@/components/features/WorkspaceContext";
+import { LanguageProvider } from "@/components/features/LanguageContext";
+import { TimeFilterProvider } from "@/components/features/TimeFilterContext";
+import { Preloader } from "@/components/features/Preloader";
 
 export default function RootLayout({
   children,
@@ -23,9 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full antialiased ${poppins.variable} font-sans`}>
       <body className="h-full bg-slate-50 text-slate-900 font-sans">
-        <WorkspaceProvider>
-          {children}
-        </WorkspaceProvider>
+        <LanguageProvider>
+          <TimeFilterProvider>
+            <Preloader />
+            <WorkspaceProvider>
+              {children}
+            </WorkspaceProvider>
+          </TimeFilterProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

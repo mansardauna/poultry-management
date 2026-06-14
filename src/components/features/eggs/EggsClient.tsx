@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
 import { Plus, BarChart2, AlertTriangle, CheckSquare, Edit2, Trash2 } from 'lucide-react';
-import { TEXTS } from "@/lib/constants/texts";
+import { useLanguage } from "../LanguageContext";
+import { useTimeFilter } from "../TimeFilterContext";
 import { EggRecord, ChickenBatch, CushionAudit, MaturationLog } from "@/data/types";
 import { 
   Dialog, 
@@ -30,6 +31,8 @@ interface EggsClientProps {
 
 export function EggsClient({ initialEggs, batches, initialCushionAudits, initialMaturationLogs, role }: EggsClientProps) {
   const [eggs, setEggs] = useState<EggRecord[]>(initialEggs);
+  const { texts } = useLanguage();
+  const { filterByTimeRange } = useTimeFilter();
   const canEdit = role === 'Admin' || role === 'Manager';
   const [cushionAudits, setCushionAudits] = useState<CushionAudit[]>(initialCushionAudits);
   const [maturationLogs, setMaturationLogs] = useState<MaturationLog[]>(initialMaturationLogs);
@@ -392,9 +395,10 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
     }
   };
 
-  const totalGoodEggs = eggs.reduce((sum, e) => sum + e.goodEggs, 0);
-  const totalBrokenEggs = eggs.reduce((sum, e) => sum + e.brokenEggs, 0);
-  const totalSpoiltEggs = eggs.reduce((sum, e) => sum + e.spoiltEggs, 0);
+  const filteredEggs = filterByTimeRange(eggs);
+  const totalGoodEggs = filteredEggs.reduce((sum, e) => sum + e.goodEggs, 0);
+  const totalBrokenEggs = filteredEggs.reduce((sum, e) => sum + e.brokenEggs, 0);
+  const totalSpoiltEggs = filteredEggs.reduce((sum, e) => sum + e.spoiltEggs, 0);
   const totalCollected = totalGoodEggs + totalBrokenEggs + totalSpoiltEggs;
 
   return (
@@ -402,27 +406,27 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       {/* Header and Controls */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{TEXTS.eggs.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{TEXTS.eggs.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{texts.eggs.title}</h1>
+          <p className="text-sm text-slate-500 mt-1">{texts.eggs.subtitle}</p>
         </div>
         <div className="flex gap-3">
           <button 
             onClick={handleOpenAudit}
             className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors"
           >
-            Audit Cushioning
+            {texts.eggs.auditCushioning}
           </button>
           <button 
             onClick={handleOpenMaturation}
             className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors"
           >
-            Log Maturation
+            {texts.eggs.logMaturation}
           </button>
           <button 
             onClick={handleOpenCollect}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
           >
-            <Plus size={20} /> {TEXTS.eggs.logCollection}
+            <Plus size={20} /> {texts.eggs.logCollection}
           </button>
         </div>
       </div>
@@ -446,7 +450,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{TEXTS.eggs.totalCollected}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.totalCollected}</p>
                 <p className="text-3xl font-semibold text-slate-900 mt-2">{totalCollected.toLocaleString()}</p>
               </div>
               <div className="text-indigo-650">
@@ -460,7 +464,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{TEXTS.eggs.goodEggs}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.goodEggs}</p>
                 <p className="text-3xl font-semibold text-emerald-650 mt-2">{totalGoodEggs.toLocaleString()}</p>
               </div>
               <div className="text-emerald-600">
@@ -474,7 +478,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{TEXTS.eggs.brokenEggs}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.brokenEggs}</p>
                 <p className="text-3xl font-semibold text-red-650 mt-2">{totalBrokenEggs.toLocaleString()}</p>
               </div>
               <div className="text-red-500">
@@ -488,7 +492,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{TEXTS.eggs.spoiltEggs}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.spoiltEggs}</p>
                 <p className="text-3xl font-semibold text-amber-600 mt-2">{totalSpoiltEggs.toLocaleString()}</p>
               </div>
               <div className="text-amber-500">
@@ -505,7 +509,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <Card>
             <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <CheckSquare size={18} className="text-indigo-650" /> Nesting Box Cushioning Audits (Database Log)
+              <CheckSquare size={18} className="text-indigo-650" /> {texts.eggs.cushionAudits}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -516,15 +520,15 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">{texts.common.date}</th>
                     <th className="px-4 py-3">Nesting Box</th>
-                    <th className="px-4 py-3">Cushioning Status</th>
+                    <th className="px-4 py-3">{texts.common.status}</th>
                     <th className="px-4 py-3">Action Completed</th>
-                    {canEdit && <th className="px-4 py-3">Actions</th>}
+                    {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {cushionAudits.map((log) => (
+                  {filterByTimeRange(cushionAudits).map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-400">{log.date}</td>
                       <td className="px-4 py-3 font-semibold text-slate-900">{log.boxName}</td>
@@ -564,7 +568,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <BarChart2 size={18} className="text-indigo-650" /> Newly Laying Birds Maturation Logs (Database Log)
+              <BarChart2 size={18} className="text-indigo-650" /> {texts.eggs.maturationLogs}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -575,16 +579,16 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">{texts.common.date}</th>
                     <th className="px-4 py-3">Bird ID</th>
                     <th className="px-4 py-3">Eggs Count</th>
                     <th className="px-4 py-3">Avg Egg Weight (g)</th>
-                    <th className="px-4 py-3">Notes</th>
-                    {canEdit && <th className="px-4 py-3">Actions</th>}
+                    <th className="px-4 py-3">{texts.common.notes}</th>
+                    {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {maturationLogs.map((log) => (
+                  {filterByTimeRange(maturationLogs).map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-400">{log.date}</td>
                       <td className="px-4 py-3 font-semibold text-slate-900">{log.birdId}</td>
@@ -622,7 +626,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       <Card>
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
-            {TEXTS.eggs.collectionLogs}
+            {texts.eggs.collectionLogs}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -630,16 +634,16 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <table className="w-full text-xs text-left">
               <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">{texts.common.date}</th>
                   <th className="px-4 py-3">Batch ID</th>
                   <th className="px-4 py-3">Good Eggs</th>
                   <th className="px-4 py-3">Broken / Cracked</th>
                   <th className="px-4 py-3">Spoilt</th>
-                  {canEdit && <th className="px-4 py-3">Actions</th>}
+                  {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {eggs.map((egg) => (
+                {filterByTimeRange(eggs).map((egg) => (
                   <tr key={egg.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-950">{egg.date}</td>
                     <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{egg.batchId}</td>
