@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,12 +21,19 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * Props for the FinanceClient component.
+ */
 interface FinanceClientProps {
   initialSales: Sale[];
   initialExpenses: Expense[];
   role: string;
 }
 
+/**
+ * FinanceClient component for managing farm finances.
+ * @param props The component props.
+ */
 export function FinanceClient({ initialSales, initialExpenses, role }: FinanceClientProps) {
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
@@ -61,6 +69,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
 
   useEffect(() => {
     refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleOpen = () => setOpen(true);
@@ -337,7 +346,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
       {/* Expense Ledger Table */}
       <Card>
         <CardHeader className="border-b border-slate-100">
-          <CardTitle>{TEXTS.finance.expenseLedger}</CardTitle>
+          <CardTitle>{texts.finance.expenseLedger}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -397,7 +406,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               label="Expense Category"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Feed">Feed</MenuItem>
               <MenuItem value="Drugs">Drugs & Vaccines</MenuItem>
@@ -445,7 +454,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Expense Category</InputLabel>
-            <Select value={category} onChange={(e) => setCategory(e.target.value)} label="Expense Category" style={{ borderRadius: 2 }}>
+            <Select value={category} onChange={(e) => setCategory(e.target.value)} label="Expense Category" className="rounded-sm">
               <MenuItem value="Feed">Feed</MenuItem>
               <MenuItem value="Drugs">Drugs &amp; Vaccines</MenuItem>
               <MenuItem value="Salaries">Staff Salaries</MenuItem>

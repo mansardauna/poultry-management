@@ -1,3 +1,4 @@
+'use strict';
 import { NextResponse } from 'next/server';
 
 type AuthRole = 'Admin' | 'Manager' | 'Staff';
@@ -32,6 +33,7 @@ function findUser(username: string) {
   );
 }
 
+/** Exported function POST */
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const username = typeof body?.username === 'string' ? body.username.trim() : '';

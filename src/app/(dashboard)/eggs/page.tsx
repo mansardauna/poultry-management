@@ -1,3 +1,4 @@
+'use strict';
 import { db } from "@/lib/drizzle";
 import * as schema from "@/lib/schema";
 import { EggsClient } from "@/components/features/eggs/EggsClient";
@@ -5,6 +6,7 @@ import type { EggRecord, ChickenBatch, CushionAudit, MaturationLog } from "@/dat
 
 import { cookies } from 'next/headers';
 
+/** Exported function default */
 export default async function EggsPage() {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get('pfms_auth');

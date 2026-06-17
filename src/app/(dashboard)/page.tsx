@@ -1,3 +1,4 @@
+'use strict';
 import { db } from "@/lib/drizzle";
 import * as schema from "@/lib/schema";
 import { DashboardClient } from "@/components/features/dashboard/DashboardClient";
@@ -27,6 +28,7 @@ import type {
   FarmPen,
 } from "@/data/types";
 
+/** Exported function default */
 export default async function Home() {
   const batches = (await db.select().from(schema.batches)) as ChickenBatch[];
   const eggs = (await db.select().from(schema.eggs)) as EggRecord[];

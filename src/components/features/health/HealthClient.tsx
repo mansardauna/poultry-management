@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -18,6 +19,11 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * HealthClient component for managing flock health and vaccinations.
+ * @param props The component props.
+ * @param props.role The user role.
+ */
 export function HealthClient({ role }: { role: string }) {
   const [templates, setTemplates] = useState<MedicationTemplate[]>([]);
   const [schedules, setSchedules] = useState<MedicationSchedule[]>([]);
@@ -52,6 +58,7 @@ export function HealthClient({ role }: { role: string }) {
 
   useEffect(() => {
     refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSaveTemplate = async () => {
@@ -278,7 +285,7 @@ export function HealthClient({ role }: { role: string }) {
               value={selectedBatchId}
               onChange={(e) => setSelectedBatchId(e.target.value)}
               label="Select Batch"
-              style={{ borderRadius: 8 }}
+              className="rounded-lg"
             >
               {batches.map(b => (
                 <MenuItem key={b.id} value={b.id}>{b.id} ({b.breed} - {b.quantity} birds)</MenuItem>
@@ -291,7 +298,7 @@ export function HealthClient({ role }: { role: string }) {
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
               label="Select Template"
-              style={{ borderRadius: 8 }}
+              className="rounded-lg"
             >
               {templates.map(t => (
                 <MenuItem key={t.id} value={t.id}>{t.name} ({t.targetType})</MenuItem>
@@ -341,7 +348,7 @@ export function HealthClient({ role }: { role: string }) {
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
               label="Target Flock Type"
-              style={{ borderRadius: 8 }}
+              className="rounded-lg"
             >
               <MenuItem value="Broilers">Broilers</MenuItem>
               <MenuItem value="Layers">Layers</MenuItem>

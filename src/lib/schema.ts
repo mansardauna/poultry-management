@@ -1,5 +1,9 @@
+'use strict';
 import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 
+/**
+ * @constant
+ */
 export const batches = sqliteTable('batches', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -15,6 +19,9 @@ export const batches = sqliteTable('batches', {
   projectedSellingPrice: real('projectedSellingPrice'),
 });
 
+/**
+ * @constant
+ */
 export const eggs = sqliteTable('eggs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -25,6 +32,9 @@ export const eggs = sqliteTable('eggs', {
   batchId: text('batchId').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const feeds = sqliteTable('feeds', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -34,6 +44,9 @@ export const feeds = sqliteTable('feeds', {
   lastRestock: text('lastRestock').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const feedLogs = sqliteTable('feedLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -43,6 +56,9 @@ export const feedLogs = sqliteTable('feedLogs', {
   batchId: text('batchId').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const staff = sqliteTable('staff', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -54,6 +70,9 @@ export const staff = sqliteTable('staff', {
   assignedBranches: text('assignedBranches', { mode: 'json' }), // string[]
 });
 
+/**
+ * @constant
+ */
 export const sales = sqliteTable('sales', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -66,6 +85,9 @@ export const sales = sqliteTable('sales', {
   status: text('status').notNull(), // 'Paid' | 'Pending'
 });
 
+/**
+ * @constant
+ */
 export const expenses = sqliteTable('expenses', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -75,6 +97,9 @@ export const expenses = sqliteTable('expenses', {
   description: text('description').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const cushionAudits = sqliteTable('cushionAudits', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -84,6 +109,9 @@ export const cushionAudits = sqliteTable('cushionAudits', {
   actionTaken: text('actionTaken').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const maturationLogs = sqliteTable('maturationLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -95,6 +123,9 @@ export const maturationLogs = sqliteTable('maturationLogs', {
   notes: text('notes').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const procurePipeline = sqliteTable('procurePipeline', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -105,6 +136,9 @@ export const procurePipeline = sqliteTable('procurePipeline', {
   eta: text('eta').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const cctvLogs = sqliteTable('cctvLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -114,6 +148,9 @@ export const cctvLogs = sqliteTable('cctvLogs', {
   status: text('status').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const invoices = sqliteTable('invoices', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -127,6 +164,9 @@ export const invoices = sqliteTable('invoices', {
   status: text('status').notNull(), // 'Paid' | 'Pending' | 'Overdue'
 });
 
+/**
+ * @constant
+ */
 export const tasks = sqliteTable('tasks', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -136,6 +176,9 @@ export const tasks = sqliteTable('tasks', {
   date: text('date').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const alertSettings = sqliteTable('alertSettings', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -146,6 +189,9 @@ export const alertSettings = sqliteTable('alertSettings', {
   notifyWhatsapp: integer('notifyWhatsapp', { mode: 'boolean' }).notNull(),
 });
 
+/**
+ * @constant
+ */
 export const alertLogs = sqliteTable('alertLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -155,6 +201,9 @@ export const alertLogs = sqliteTable('alertLogs', {
   read: integer('read', { mode: 'boolean' }).default(false),
 });
 
+/**
+ * @constant
+ */
 export const mortalityLogs = sqliteTable('mortalityLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -164,6 +213,9 @@ export const mortalityLogs = sqliteTable('mortalityLogs', {
   cause: text('cause').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const medicationTemplates = sqliteTable('medicationTemplates', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -172,6 +224,9 @@ export const medicationTemplates = sqliteTable('medicationTemplates', {
   stages: text('stages', { mode: 'json' }).notNull(), // MedicationTemplateStage[]
 });
 
+/**
+ * @constant
+ */
 export const medicationSchedules = sqliteTable('medicationSchedules', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -182,6 +237,9 @@ export const medicationSchedules = sqliteTable('medicationSchedules', {
   status: text('status').notNull(), // 'Pending' | 'Completed'
 });
 
+/**
+ * @constant
+ */
 export const payrollLogs = sqliteTable('payrollLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -191,6 +249,9 @@ export const payrollLogs = sqliteTable('payrollLogs', {
   period: text('period').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const equipment = sqliteTable('equipment', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -201,6 +262,9 @@ export const equipment = sqliteTable('equipment', {
   lastMaintenance: text('lastMaintenance').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const contacts = sqliteTable('contacts', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -211,6 +275,9 @@ export const contacts = sqliteTable('contacts', {
   notes: text('notes').notNull(),
 });
 
+/**
+ * @constant
+ */
 export const farmPens = sqliteTable('farmPens', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
@@ -221,6 +288,9 @@ export const farmPens = sqliteTable('farmPens', {
   temperatureLogs: text('temperatureLogs', { mode: 'json' }).notNull(),
 });
 
+/**
+ * @constant
+ */
 export const workspaces = sqliteTable('workspaces', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -229,6 +299,9 @@ export const workspaces = sqliteTable('workspaces', {
 });
 
 
+/**
+ * @constant
+ */
 export const systemSettings = sqliteTable('systemSettings', {
   id: text('id').primaryKey(),
   workspaceId: text('workspaceId').notNull().default('main'),
@@ -239,6 +312,12 @@ export const systemSettings = sqliteTable('systemSettings', {
   adminPhone: text('adminPhone').default('+2340000000000'),
 });
 
+/**
+ * Database schema.
+ */
+/**
+ * @constant
+ */
 export const schema = {
   batches,
   eggs,

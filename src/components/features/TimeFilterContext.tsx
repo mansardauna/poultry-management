@@ -1,10 +1,17 @@
+'use strict';
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
+/**
+ * Defines the available time ranges for filtering.
+ */
 export type TimeRange = 'weekly' | 'monthly' | 'yearly' | 'all';
 
+/**
+ * Context type for time filtering.
+ */
 interface TimeFilterContextType {
   timeRange: TimeRange;
   setTimeRange: (range: TimeRange) => void;
@@ -13,6 +20,11 @@ interface TimeFilterContextType {
 
 const TimeFilterContext = createContext<TimeFilterContextType | undefined>(undefined);
 
+/**
+ * Provider for time filtering.
+ *
+ * @param props - Component properties.
+ */
 export function TimeFilterProvider({ children }: { children: React.ReactNode }) {
   const [timeRange, setTimeRangeState] = useState<TimeRange>('all');
 
@@ -74,6 +86,11 @@ export function TimeFilterProvider({ children }: { children: React.ReactNode }) 
   );
 }
 
+/**
+ * Hook to access the current time filter context.
+ *
+ * @returns The time filter context.
+ */
 export function useTimeFilter() {
   const context = useContext(TimeFilterContext);
   if (context === undefined) {

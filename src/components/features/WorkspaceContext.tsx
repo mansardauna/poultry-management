@@ -1,8 +1,12 @@
+'use strict';
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
+/**
+ * Represents a workspace.
+ */
 export interface Workspace {
   id: string;
   name: string;
@@ -10,6 +14,9 @@ export interface Workspace {
   createdAt: string;
 }
 
+/**
+ * Context type for workspace management.
+ */
 interface WorkspaceContextType {
   workspaces: Workspace[];
   activeWorkspace: Workspace | null;
@@ -28,6 +35,11 @@ const DEFAULT_WORKSPACE: Workspace = {
   createdAt: new Date().toISOString(),
 };
 
+/**
+ * Provider for workspace management.
+ *
+ * @param props - Component properties.
+ */
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspaceState] = useState<Workspace | null>(null);
@@ -136,6 +148,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Hook to access the current workspace context.
+ *
+ * @returns The workspace context.
+ */
 export function useWorkspace() {
   const context = useContext(WorkspaceContext);
   if (context === undefined) {

@@ -1,9 +1,11 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 import { and, eq } from 'drizzle-orm';
 import { getWorkspaceId } from '@/lib/workspace';
 
+/** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const [farmPens, batches] = await Promise.all([
@@ -16,6 +18,7 @@ export async function GET() {
   });
 }
 
+/** Exported function POST */
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -35,11 +38,12 @@ export async function POST(request: Request) {
     await db.insert(schema.farmPens).values(newPen);
     
     return NextResponse.json(newPen, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to add farm pen' }, { status: 500 });
   }
 }
 
+/** Exported function PUT */
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -48,11 +52,12 @@ export async function PUT(request: Request) {
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
     await db.update(schema.farmPens).set(fields).where(and(eq(schema.farmPens.id, id), eq(schema.farmPens.workspaceId, workspaceId)));
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update pen' }, { status: 500 });
   }
 }
 
+/** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -61,7 +66,7 @@ export async function DELETE(request: Request) {
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
     await db.delete(schema.farmPens).where(and(eq(schema.farmPens.id, id), eq(schema.farmPens.workspaceId, workspaceId)));
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete pen' }, { status: 500 });
   }
 }

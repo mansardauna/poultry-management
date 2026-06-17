@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,12 +24,20 @@ import {
 } from '@mui/material';
 import { useWorkspace } from '../WorkspaceContext';
 
+/**
+ * Props for the StaffClient component.
+ */
 interface StaffClientProps {
   initialStaff: Staff[];
   initialTasks: StaffTask[];
   role?: string;
 }
 
+/**
+ * Client component for staff management.
+ *
+ * @param props - Component properties.
+ */
 export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: StaffClientProps) {
   const canEdit = role === 'Admin';
   const [staff, setStaff] = useState<Staff[]>(initialStaff);
@@ -66,6 +75,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshData();
   }, []);
 
@@ -530,7 +540,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
               label="Assign To"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               {staff.map(s => (
                 <MenuItem key={s.id} value={s.name}>{s.name} ({s.role})</MenuItem>

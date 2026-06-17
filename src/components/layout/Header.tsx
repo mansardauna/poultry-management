@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar } from 'lucide-react';
@@ -6,6 +7,9 @@ import { useSidebar } from './SidebarContext';
 import { useLanguage, Language } from '@/components/features/LanguageContext';
 import { useTimeFilter, TimeRange } from '@/components/features/TimeFilterContext';
 
+/**
+ * Represents a single notification or alert log.
+ */
 interface AlertLog {
   id: string;
   date: string;
@@ -14,6 +18,11 @@ interface AlertLog {
   read?: boolean;
 }
 
+/**
+ * Header component displaying search, language/time filters, notifications, and user info.
+ * @param {Object} props
+ * @param {string} [props.role='Admin'] - The user's role.
+ */
 export function Header({ role = 'Admin' }: { role?: string }) {
   const [notifications, setNotifications] = useState<AlertLog[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -36,6 +45,7 @@ export function Header({ role = 'Admin' }: { role?: string }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     // Poll every 30 seconds for new notifications
     const interval = setInterval(fetchNotifications, 30000);

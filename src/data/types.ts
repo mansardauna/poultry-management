@@ -1,3 +1,7 @@
+'use strict';
+/**
+ * @interface
+ */
 export interface ChickenBatch {
   id: string;
   breed: string;
@@ -12,6 +16,9 @@ export interface ChickenBatch {
   projectedSellingPrice?: number | null;
 }
 
+/**
+ * @interface
+ */
 export interface EggRecord {
   id: string;
   date: string;
@@ -21,6 +28,9 @@ export interface EggRecord {
   batchId: string;
 }
 
+/**
+ * @interface
+ */
 export interface FeedInventory {
   id: string;
   type: string; // 'Starter' | 'Grower' | 'Finisher' | 'Layer mash'
@@ -29,6 +39,9 @@ export interface FeedInventory {
   lastRestock: string;
 }
 
+/**
+ * @interface
+ */
 export interface DailyFeedLog {
   id: string;
   date: string;
@@ -37,6 +50,9 @@ export interface DailyFeedLog {
   batchId: string;
 }
 
+/**
+ * @interface
+ */
 export interface Staff {
   id: string;
   name: string;
@@ -47,6 +63,9 @@ export interface Staff {
   assignedBranches?: unknown; // string[]
 }
 
+/**
+ * @interface
+ */
 export interface Sale {
   id: string;
   date: string;
@@ -58,6 +77,9 @@ export interface Sale {
   status: string; // 'Paid' | 'Pending'
 }
 
+/**
+ * @interface
+ */
 export interface Expense {
   id: string;
   date: string;
@@ -66,6 +88,9 @@ export interface Expense {
   description: string;
 }
 
+/**
+ * @interface
+ */
 export interface CushionAudit {
   id: string;
   date: string;
@@ -74,6 +99,9 @@ export interface CushionAudit {
   actionTaken: string;
 }
 
+/**
+ * @interface
+ */
 export interface MaturationLog {
   id: string;
   date: string;
@@ -84,6 +112,9 @@ export interface MaturationLog {
   notes: string;
 }
 
+/**
+ * @interface
+ */
 export interface ProcurePipeline {
   id: string;
   date: string;
@@ -93,6 +124,9 @@ export interface ProcurePipeline {
   eta: string;
 }
 
+/**
+ * @interface
+ */
 export interface CctvLog {
   id: string;
   date: string;
@@ -101,6 +135,9 @@ export interface CctvLog {
   status: string;
 }
 
+/**
+ * @interface
+ */
 export interface Invoice {
   id: string;
   date: string;
@@ -113,6 +150,9 @@ export interface Invoice {
   status: string; // 'Paid' | 'Pending' | 'Overdue'
 }
 
+/**
+ * @interface
+ */
 export interface StaffTask {
   id: string;
   assignedTo: string;
@@ -121,6 +161,9 @@ export interface StaffTask {
   date: string;
 }
 
+/**
+ * @interface
+ */
 export interface AlertSettings {
   feedThresholdKg: number;
   eggDropPercentage: number;
@@ -129,6 +172,9 @@ export interface AlertSettings {
   notifyWhatsapp: boolean;
 }
 
+/**
+ * @interface
+ */
 export interface AlertLog {
   id: string;
   date: string;
@@ -137,6 +183,9 @@ export interface AlertLog {
   read?: boolean | null;
 }
 
+/**
+ * @interface
+ */
 export interface MortalityLog {
   id: string;
   date: string;
@@ -145,12 +194,18 @@ export interface MortalityLog {
   cause: string;
 }
 
+/**
+ * @interface
+ */
 export interface MedicationTemplateStage {
   dayOffset: number;
   medicationName: string;
   type: 'Vaccine' | 'Medication' | 'Supplement';
 }
 
+/**
+ * @interface
+ */
 export interface MedicationTemplate {
   id: string;
   name: string;
@@ -158,6 +213,9 @@ export interface MedicationTemplate {
   stages: unknown; // MedicationTemplateStage[]
 }
 
+/**
+ * @interface
+ */
 export interface MedicationSchedule {
   id: string;
   batchId: string;
@@ -167,6 +225,9 @@ export interface MedicationSchedule {
   status: string; // 'Pending' | 'Completed'
 }
 
+/**
+ * @interface
+ */
 export interface PayrollLog {
   id: string;
   date: string;
@@ -175,6 +236,9 @@ export interface PayrollLog {
   period: string;
 }
 
+/**
+ * @interface
+ */
 export interface EquipmentInventory {
   id: string;
   name: string;
@@ -184,6 +248,9 @@ export interface EquipmentInventory {
   lastMaintenance: string;
 }
 
+/**
+ * @interface
+ */
 export interface ContactRecord {
   id: string;
   name: string;
@@ -193,6 +260,9 @@ export interface ContactRecord {
   notes: string;
 }
 
+/**
+ * @interface
+ */
 export interface FarmPen {
   id: string;
   name: string;
@@ -202,6 +272,9 @@ export interface FarmPen {
   temperatureLogs: unknown; // { date: string; tempCelsius: number }[]
 }
 
+/**
+ * @interface
+ */
 export interface Workspace {
   id: string;
   name: string;
@@ -209,6 +282,9 @@ export interface Workspace {
   createdAt: string;
 }
 
+/**
+ * @interface
+ */
 export interface DatabaseSchema {
   batches: ChickenBatch[];
   eggs: EggRecord[];

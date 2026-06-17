@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import React, { useState } from 'react';
@@ -5,6 +6,11 @@ import { Box, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspace } from './WorkspaceContext';
 
+/**
+ * Modal component for onboarding a new workspace/branch.
+ *
+ * @param props - Component properties.
+ */
 export function WorkspaceOnboarding({ onClose }: { onClose: () => void }) {
   const { addWorkspace } = useWorkspace();
   const [name, setName] = useState('');

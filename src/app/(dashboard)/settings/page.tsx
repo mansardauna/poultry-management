@@ -1,3 +1,4 @@
+'use strict';
 import { db } from "@/lib/drizzle";
 import * as schema from "@/lib/schema";
 import { SettingsClient } from "@/components/features/settings/SettingsClient";
@@ -5,6 +6,7 @@ import { getWorkspaceId } from "@/lib/workspace";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 
+/** Exported function default */
 export default async function SettingsPage() {
   const workspaceId = await getWorkspaceId();
   

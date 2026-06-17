@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import Link from 'next/link';
@@ -5,13 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useSidebar } from './SidebarContext';
 import {
-  Grid,
   Box,
-  Archive,
-  BarChart2,
   ShoppingCart,
-  Wallet,
-  User,
   Settings,
   Video,
   Menu,
@@ -29,8 +25,7 @@ import {
   Plus,
   X,
   Pencil,
-  Trash2,
-  Check
+  Trash2
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
@@ -38,6 +33,9 @@ import { WorkspaceOnboarding } from '../features/WorkspaceOnboarding';
 import { useLanguage } from '../features/LanguageContext';
 import toast from 'react-hot-toast';
 
+/**
+ * Sidebar component properties.
+ */
 interface SidebarProps {
   role?: string;
 }
@@ -59,12 +57,19 @@ const menuItems = [
 
 const FARM_TYPES = ['Layer Farm', 'Broiler Farm', 'Hatchery', 'Mixed Use', 'Main'];
 
+/**
+ * Properties for EditBranchModal component.
+ */
 interface EditModalProps {
   workspace: Workspace;
   onClose: () => void;
   onSave: (name: string, type: string) => Promise<void>;
 }
 
+/**
+ * Modal for editing branch properties.
+ * @param {EditModalProps} props
+ */
 function EditBranchModal({ workspace, onClose, onSave }: EditModalProps) {
   const [name, setName] = useState(workspace.name);
   const [type, setType] = useState(workspace.type);
@@ -78,8 +83,8 @@ function EditBranchModal({ workspace, onClose, onSave }: EditModalProps) {
       await onSave(name.trim(), type);
       toast.success('Branch updated successfully');
       onClose();
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to update branch');
+    } catch (err: unknown) {
+      toast.error((err as Error)?.message || 'Failed to update branch');
     } finally {
       setIsSaving(false);
     }
@@ -139,6 +144,10 @@ function EditBranchModal({ workspace, onClose, onSave }: EditModalProps) {
   );
 }
 
+/**
+ * Main sidebar navigation component.
+ * @param {SidebarProps} props
+ */
 export function Sidebar({ role = 'Admin' }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -167,8 +176,8 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
     try {
       await deleteWorkspace(ws.id);
       toast.success(`"${ws.name}" deleted`);
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to delete branch');
+    } catch (err: unknown) {
+      toast.error((err as Error)?.message || 'Failed to delete branch');
     } finally {
       setDeletingId(null);
     }

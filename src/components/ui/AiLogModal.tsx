@@ -1,13 +1,14 @@
+'use strict';
 'use client';
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   Button as MuiButton,
   CircularProgress,
   Typography,
@@ -15,19 +16,33 @@ import {
 } from '@mui/material';
 import { Sparkles } from 'lucide-react';
 
+/**
+ * Props for the AiLogModal component.
+ * @property onSuccess - Optional callback invoked after the report is successfully processed.
+ */
 interface AiLogModalProps {
   onSuccess?: () => void;
 }
 
+/**
+ * Modal dialog that accepts a free-text daily farm report and uses
+ * a pattern-matching parser to extract key metrics (eggs, feed, mortality,
+ * sales, expenses) and writes them directly to the database.
+ */
 export function AiLogModal({ onSuccess }: AiLogModalProps) {
   const [open, setOpen] = useState(false);
   const [reportText, setReportText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<unknown>(null);
 
+  /** Opens the modal dialog. */
   const handleOpen = () => setOpen(true);
-  
+
+  /**
+   * Closes the modal and resets all form state after the close animation completes.
+   * Does nothing if a report is currently being processed.
+   */
   const handleClose = () => {
     if (!isProcessing) {
       setOpen(false);
@@ -40,28 +55,32 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
     }
   };
 
+  /**
+   * Submits the free-text report to the AI parser API endpoint.
+   * On success, stores the extracted data and triggers the onSuccess callback.
+   */
   const handleProcessLog = async () => {
     if (!reportText.trim()) return;
-    
+
     setIsProcessing(true);
-    
+
     try {
       const res = await fetch('/api/ai-parse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: reportText })
       });
-      
+
       if (res.ok) {
         const result = await res.json();
         setExtractedData(result.extracted);
         setIsProcessing(false);
         setSuccess(true);
-        
+
         if (onSuccess) {
           onSuccess();
         }
-        
+
         setTimeout(() => {
           handleClose();
         }, 3000);
@@ -78,15 +97,15 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
 
   return (
     <>
-      <button 
+      <button
         onClick={handleOpen}
         className="bg-white border-2 border-indigo-600 text-indigo-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
       >
         <Sparkles size={18} /> AI Auto-Log
       </button>
 
-      <Dialog 
-        open={open} 
+      <Dialog
+        open={open}
         onClose={handleClose}
         fullWidth
         maxWidth="sm"
@@ -100,7 +119,7 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
         <DialogContent className="flex flex-col gap-4">
           {success ? (
             <Box sx={{ py: 3, textAlign: "center" }}>
-              <Sparkles size={48} color="#4f46e5" style={{ margin: '0 auto', marginBottom: '16px' }} />
+              <Sparkles size={48} color="#4f46e5" className="mx-auto mb-4 block" />
               <Typography variant="h6" sx={{ fontFamily: "var(--font-cal-sans)", color: "#1e293b" }}>
                 Database Updated Successfully!
               </Typography>
@@ -109,12 +128,12 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
               </Typography>
               {extractedData && (
                 <Box sx={{ mt: 2, p: 2, bgcolor: "#f8fafc", border: "1px solid #e2e8f0", textAlign: "left" }} className="font-mono text-xs text-slate-700 space-y-1">
-                  {extractedData.eggsGood > 0 && <div>🥚 Good Eggs: {extractedData.eggsGood}</div>}
-                  {extractedData.eggsBroken > 0 && <div>🥚 Cracked Eggs: {extractedData.eggsBroken}</div>}
-                  {extractedData.feedUsedKg > 0 && <div>🌾 Feed Used: {extractedData.feedUsedKg} kg</div>}
-                  {extractedData.mortalityCount > 0 && <div>💀 Mortality: {extractedData.mortalityCount} birds</div>}
-                  {extractedData.salesAmount > 0 && <div>💰 Sales Recorded: ₦{extractedData.salesAmount.toLocaleString()}</div>}
-                  {extractedData.expenseAmount > 0 && <div>💸 Expenses Logged: ₦{extractedData.expenseAmount.toLocaleString()}</div>}
+                  {(extractedData as { eggsGood: number }).eggsGood > 0 && <div>🥚 Good Eggs: {(extractedData as { eggsGood: number }).eggsGood}</div>}
+                  {(extractedData as { eggsBroken: number }).eggsBroken > 0 && <div>🥚 Cracked Eggs: {(extractedData as { eggsBroken: number }).eggsBroken}</div>}
+                  {(extractedData as { feedUsedKg: number }).feedUsedKg > 0 && <div>🌾 Feed Used: {(extractedData as { feedUsedKg: number }).feedUsedKg} kg</div>}
+                  {(extractedData as { mortalityCount: number }).mortalityCount > 0 && <div>💀 Mortality: {(extractedData as { mortalityCount: number }).mortalityCount} birds</div>}
+                  {(extractedData as { salesAmount: number }).salesAmount > 0 && <div>💰 Sales Recorded: ₦{(extractedData as { salesAmount: number }).salesAmount.toLocaleString()}</div>}
+                  {(extractedData as { expenseAmount: number }).expenseAmount > 0 && <div>💸 Expenses Logged: ₦{(extractedData as { expenseAmount: number }).expenseAmount.toLocaleString()}</div>}
                 </Box>
               )}
             </Box>
@@ -147,20 +166,20 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
         </DialogContent>
         {!success && (
           <DialogActions sx={{ p: 2, pt: 0 }}>
-            <MuiButton 
-              onClick={handleClose} 
+            <MuiButton
+              onClick={handleClose}
               disabled={isProcessing}
               sx={{ borderRadius: 2, fontFamily: 'var(--font-dm-sans)', color: '#64748b' }}
             >
               Cancel
             </MuiButton>
-            <MuiButton 
-              onClick={handleProcessLog} 
+            <MuiButton
+              onClick={handleProcessLog}
               variant="contained"
               disabled={!reportText.trim() || isProcessing}
-              sx={{ 
-                borderRadius: 2, 
-                bgcolor: '#4f46e5', 
+              sx={{
+                borderRadius: 2,
+                bgcolor: '#4f46e5',
                 '&:hover': { bgcolor: '#4338ca' },
                 fontFamily: 'var(--font-dm-sans)',
                 boxShadow: 'none',

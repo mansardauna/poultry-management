@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState } from 'react';
@@ -11,23 +12,44 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 import { Settings, BellRing, User, DollarSign, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
+/**
+ * Represents a workspace.
+ */
 interface Workspace {
   id: string;
   name: string;
   type: string;
 }
 
+/**
+ * Represents the shape of system-level settings stored in the database.
+ */
+interface SystemSettings {
+  id?: string;
+  eggCratePriceSmall?: number;
+  eggCratePriceLarge?: number;
+  adminName?: string;
+  adminEmail?: string;
+  adminPhone?: string;
+}
+
+/**
+ * Props for the SettingsClient component.
+ */
 interface SettingsClientProps {
   initialSettings: AlertSettings | undefined;
-  systemSettings: any;
+  systemSettings: SystemSettings | undefined;
   workspaces: Workspace[];
   workspaceId: string;
 }
 
-export function SettingsClient({ initialSettings, systemSettings, workspaces, workspaceId }: SettingsClientProps) {
-  const router = useRouter();
+/**
+ * SettingsClient component for configuring platform settings.
+ *
+ * @param props - Component properties.
+ */
+export function SettingsClient({ initialSettings, systemSettings, workspaceId }: SettingsClientProps) {
   
   // Alert Settings
   const [feedThresholdKg, setFeedThresholdKg] = useState(String(initialSettings?.feedThresholdKg || 50));
@@ -60,7 +82,7 @@ export function SettingsClient({ initialSettings, systemSettings, workspaces, wo
       });
       if (res.ok) toast.success('Alert settings saved successfully!');
       else toast.error('Failed to save alert settings');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Error saving settings');
     }
   };
@@ -82,7 +104,7 @@ export function SettingsClient({ initialSettings, systemSettings, workspaces, wo
       });
       if (res.ok) toast.success('System settings saved successfully!');
       else toast.error('Failed to save system settings');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Error saving system settings');
     }
   };
@@ -108,7 +130,7 @@ export function SettingsClient({ initialSettings, systemSettings, workspaces, wo
         const data = await res.json();
         toast.error(data.error || 'Failed to delete workspace');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An error occurred');
     } finally {
       setIsDeleting(false);

@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,16 +6,13 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
-  ClipboardCheck,
   AlertTriangle,
   BarChart2,
   ArrowUp,
-  Video,
   CheckCircle,
   Activity,
   Coins,
   CheckSquare,
-  Settings,
   Bell,
   MapPin
 } from 'lucide-react';
@@ -33,35 +31,24 @@ import {
   CartesianGrid,
   Legend
 } from 'recharts';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
-  FormControlLabel, 
-  Checkbox, 
-  Button as MuiButton 
-} from '@mui/material';
 
+/**
+ * Props for the DashboardClient component.
+ */
 interface DashboardClientProps {
   initialData: DatabaseSchema;
 }
 
+/**
+ * Client component for the main dashboard view.
+ * @param {DashboardClientProps} props - The component props.
+ */
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const [data, setData] = useState<DatabaseSchema>(initialData);
   const { activeWorkspace, workspaces } = useWorkspace();
-  const [openSettings, setOpenSettings] = useState(false);
   const { texts, language } = useLanguage();
   const { timeRange, filterByTimeRange } = useTimeFilter();
   
-  // Settings Form State
-  const [feedThresholdKg, setFeedThresholdKg] = useState(String(initialData.alertSettings?.feedThresholdKg || 50));
-  const [eggDropPercentage, setEggDropPercentage] = useState(String(initialData.alertSettings?.eggDropPercentage || 15));
-  const [notifySms, setNotifySms] = useState(initialData.alertSettings?.notifySms || false);
-  const [notifyEmail, setNotifyEmail] = useState(initialData.alertSettings?.notifyEmail || false);
-  const [notifyWhatsapp, setNotifyWhatsapp] = useState(initialData.alertSettings?.notifyWhatsapp || false);
-
   const refreshData = async () => {
     try {
       const res = await fetch('/api/all');
@@ -76,6 +63,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
   useEffect(() => {
     refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const today = new Date();

@@ -1,5 +1,7 @@
+'use strict';
 import Link from 'next/link';
 
+/** Exported function default */
 export default function NotFound() {
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-50 gap-4">

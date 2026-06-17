@@ -1,8 +1,10 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 
+/** Exported function POST */
 export async function POST(request: Request) {
   try {
     const { text } = await request.json();
@@ -118,7 +120,7 @@ export async function POST(request: Request) {
         expenseAmount
       }
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to process AI report' }, { status: 500 });
   }
 }

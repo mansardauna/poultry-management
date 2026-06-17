@@ -1,7 +1,9 @@
+'use strict';
 'use client';
 
 import { useEffect } from 'react';
 
+/** Exported function default */
 export default function Error({
   error,
   reset,

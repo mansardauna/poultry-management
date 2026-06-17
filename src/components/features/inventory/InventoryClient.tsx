@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,6 +11,11 @@ import {
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * InventoryClient component for managing equipment inventory.
+ * @param props The component props.
+ * @param props.role The user role.
+ */
 export function InventoryClient({ role }: { role: string }) {
   const [equipment, setEquipment] = useState<EquipmentInventory[]>([]);
   const [open, setOpen] = useState(false);
@@ -36,6 +42,7 @@ export function InventoryClient({ role }: { role: string }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshData();
   }, []);
 

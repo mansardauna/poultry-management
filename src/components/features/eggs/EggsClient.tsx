@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,6 +22,9 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * Props for the EggsClient component.
+ */
 interface EggsClientProps {
   initialEggs: EggRecord[];
   batches: ChickenBatch[];
@@ -29,6 +33,10 @@ interface EggsClientProps {
   role: string;
 }
 
+/**
+ * Client component for managing egg records, cushion audits, and maturation logs.
+ * @param {EggsClientProps} props - The component props.
+ */
 export function EggsClient({ initialEggs, batches, initialCushionAudits, initialMaturationLogs, role }: EggsClientProps) {
   const [eggs, setEggs] = useState<EggRecord[]>(initialEggs);
   const { texts } = useLanguage();
@@ -93,6 +101,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
 
   useEffect(() => {
     refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleOpenCollect = () => setOpenCollect(true);
@@ -740,7 +749,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               value={auditBox}
               onChange={(e) => setAuditBox(e.target.value)}
               label="Nesting Box"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Box #1">Box #1</MenuItem>
               <MenuItem value="Box #2">Box #2</MenuItem>
@@ -754,7 +763,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               value={auditCondition}
               onChange={(e) => setAuditCondition(e.target.value)}
               label="Cushion Condition"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Optimal Cushioning">Optimal Cushioning</MenuItem>
               <MenuItem value="Compressed - Low Straw">Compressed - Low Straw (Requires Replenishing)</MenuItem>
@@ -794,7 +803,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               value={maturationBirdId}
               onChange={(e) => setMaturationBirdId(e.target.value)}
               label="Newly Laying Bird ID"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Bird-NL01">Bird-NL01 (Isa Brown newly laying)</MenuItem>
               <MenuItem value="Bird-NL02">Bird-NL02 (Isa Brown newly laying)</MenuItem>
@@ -901,7 +910,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               value={editAuditBox}
               onChange={(e) => setEditAuditBox(e.target.value)}
               label="Nesting Box"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Box #1">Box #1</MenuItem>
               <MenuItem value="Box #2">Box #2</MenuItem>
@@ -915,7 +924,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               value={editAuditCondition}
               onChange={(e) => setEditAuditCondition(e.target.value)}
               label="Cushion Condition"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Optimal Cushioning">Optimal Cushioning</MenuItem>
               <MenuItem value="Compressed - Low Straw">Compressed - Low Straw (Requires Replenishing)</MenuItem>
@@ -955,7 +964,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               value={editMaturationBirdId}
               onChange={(e) => setEditMaturationBirdId(e.target.value)}
               label="Newly Laying Bird ID"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Bird-NL01">Bird-NL01 (Isa Brown newly laying)</MenuItem>
               <MenuItem value="Bird-NL02">Bird-NL02 (Isa Brown newly laying)</MenuItem>

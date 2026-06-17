@@ -1,23 +1,33 @@
+'use strict';
 'use client';
 
 import { Plus } from 'lucide-react';
 import { FormControl, InputLabel, Select, MenuItem, Button as MuiButton, Box } from '@mui/material';
 import Link from 'next/link';
 
+/**
+ * Props for the SelectWithAdd component.
+ * @property label      - The label displayed above the Select field.
+ * @property value      - The currently selected item's ID.
+ * @property onChange   - Callback fired when the user selects a different item.
+ * @property items      - The list of selectable options with `id` and `label`.
+ * @property addPath    - The navigation path for the "Add" button shown when the list is empty.
+ * @property disabled   - Whether the select is disabled. Defaults to false.
+ * @property children   - Optional custom MenuItem children to render inside the Select.
+ */
 interface SelectWithAddProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
   items: { id: string; label: string }[];
-  addPath: string; // e.g., '/batches', '/feed', '/contacts'
+  addPath: string;
   disabled?: boolean;
-  style?: React.CSSProperties;
-  children?: React.ReactNode; // Allow custom MenuItem children
+  children?: React.ReactNode;
 }
 
 /**
- * Select component with an "Add" button that appears when the list is empty.
- * Clicking the button navigates to the management page for that resource.
+ * A dropdown select that shows an "Add" navigation button when the items list is empty.
+ * When items are available it renders a standard MUI Select with all provided items.
  */
 export function SelectWithAdd({
   label,
@@ -26,7 +36,6 @@ export function SelectWithAdd({
   items,
   addPath,
   disabled = false,
-  style,
   children
 }: SelectWithAddProps) {
   const isEmpty = items.length === 0;
@@ -36,11 +45,7 @@ export function SelectWithAdd({
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', width: '100%' }}>
         <FormControl fullWidth variant="outlined" disabled>
           <InputLabel>{label}</InputLabel>
-          <Select
-            value=""
-            label={label}
-            style={{ ...style, borderRadius: 2 }}
-          />
+          <Select value="" label={label} className="rounded-sm" />
         </FormControl>
         <Link href={addPath}>
           <MuiButton
@@ -70,7 +75,7 @@ export function SelectWithAdd({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         label={label}
-        style={{ ...style, borderRadius: 2 }}
+        className="rounded-sm"
       >
         {children}
         {items.map((item) => (

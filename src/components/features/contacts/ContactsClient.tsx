@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,6 +11,11 @@ import {
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * Client component for managing contacts.
+ *
+ * @param props - Component properties containing user role.
+ */
 export function ContactsClient({ role }: { role: string }) {
   const [contacts, setContacts] = useState<ContactRecord[]>([]);
   const [open, setOpen] = useState(false);
@@ -35,6 +41,7 @@ export function ContactsClient({ role }: { role: string }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     refreshData();
   }, []);
 

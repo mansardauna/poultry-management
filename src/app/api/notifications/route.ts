@@ -1,9 +1,11 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { getWorkspaceId } from '@/lib/workspace';
 
+/** Exported function GET */
 export async function GET() {
   try {
     const workspaceId = await getWorkspaceId();
@@ -18,6 +20,7 @@ export async function GET() {
   }
 }
 
+/** Exported function POST */
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();

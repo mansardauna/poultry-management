@@ -1,3 +1,4 @@
+'use strict';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { schema } from './schema';
@@ -11,4 +12,7 @@ const client = createClient({
   ...(authToken ? { authToken } : {}),
 });
 
+/**
+ * Database instance.
+ */
 export const db = drizzle(client, { schema });

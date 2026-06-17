@@ -1,3 +1,4 @@
+'use strict';
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
@@ -8,6 +9,7 @@ const poppins = Poppins({
   variable: "--font-poppins"
 });
 
+/** Exported component/variable metadata */
 export const metadata: Metadata = {
   title: "PFMS | Poultry Farm Management System",
   description: "Modern poultry farm operations platform",
@@ -18,6 +20,7 @@ import { LanguageProvider } from "@/components/features/LanguageContext";
 import { TimeFilterProvider } from "@/components/features/TimeFilterContext";
 import { Preloader } from "@/components/features/Preloader";
 
+/** Exported function default */
 export default function RootLayout({
   children,
 }: Readonly<{

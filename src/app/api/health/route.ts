@@ -1,9 +1,11 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 import { and, eq } from 'drizzle-orm';
 import { getWorkspaceId } from '@/lib/workspace';
 
+/** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const [templates, schedules] = await Promise.all([
@@ -16,6 +18,7 @@ export async function GET() {
   });
 }
 
+/** Exported function POST */
 export async function POST(req: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -50,7 +53,7 @@ export async function POST(req: Request) {
       }
 
       const start = new Date(startDate);
-      const newSchedules = (template.stages as any[]).map((stage: any, i: number) => {
+      const newSchedules = (template.stages as unknown[]).map((stage: unknown, i: number) => {
         const schedDate = new Date(start);
         schedDate.setDate(schedDate.getDate() + stage.dayOffset);
         return {
@@ -69,11 +72,12 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
 }
 
+/** Exported function PUT */
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -88,11 +92,12 @@ export async function PUT(request: Request) {
         .where(and(eq(schema.medicationSchedules.id, body.id), eq(schema.medicationSchedules.workspaceId, workspaceId)));
     }
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
 
+/** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -106,7 +111,7 @@ export async function DELETE(request: Request) {
       await db.delete(schema.medicationSchedules).where(and(eq(schema.medicationSchedules.id, id), eq(schema.medicationSchedules.workspaceId, workspaceId)));
     }
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }

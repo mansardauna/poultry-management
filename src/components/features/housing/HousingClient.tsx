@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,6 +11,11 @@ import {
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * HousingClient component for managing farm housing and pens.
+ * @param props The component props.
+ * @param props.role The user role.
+ */
 export function HousingClient({ role }: { role: string }) {
   const [pens, setPens] = useState<FarmPen[]>([]);
   const [batches, setBatches] = useState<ChickenBatch[]>([]);
@@ -37,6 +43,7 @@ export function HousingClient({ role }: { role: string }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshData();
   }, []);
 

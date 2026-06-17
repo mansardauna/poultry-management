@@ -1,3 +1,7 @@
+'use strict';
+/**
+ * Application text constants.
+ */
 export const TEXTS = {
   dashboard: {
     title: "Farm Overview",

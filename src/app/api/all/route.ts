@@ -1,7 +1,9 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 
+/** Exported function GET */
 export async function GET() {
   const batches = await db.select().from(schema.batches);
   const eggs = await db.select().from(schema.eggs);

@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,6 +22,9 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * Props for the FeedClient component.
+ */
 interface FeedClientProps {
   initialFeeds: FeedInventory[];
   initialLogs: DailyFeedLog[];
@@ -29,6 +33,10 @@ interface FeedClientProps {
   role: string;
 }
 
+/**
+ * Client component for managing feed inventory and logs.
+ * @param {FeedClientProps} props - The component props.
+ */
 export function FeedClient({ initialFeeds, initialLogs, batches, initialProcurePipeline, role }: FeedClientProps) {
   const [feeds, setFeeds] = useState<FeedInventory[]>(initialFeeds);
   const { texts } = useLanguage();
@@ -86,6 +94,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
   useEffect(() => {
     refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleOpenUsage = () => setOpenUsage(true);
@@ -657,7 +666,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               value={useFeedId}
               onChange={(e) => setUseFeedId(e.target.value)}
               label="Feed Type"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               {feeds.map(f => (
                 <MenuItem key={f.id} value={f.id}>{f.type} ({f.quantityKg}kg available)</MenuItem>
@@ -670,7 +679,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               value={useBatchId}
               onChange={(e) => setUseBatchId(e.target.value)}
               label="Chicken Batch"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               {batches.map(b => (
                 <MenuItem key={b.id} value={b.id}>{b.id} ({b.breed} - {b.type})</MenuItem>
@@ -711,7 +720,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               value={restockFeedId}
               onChange={(e) => setRestockFeedId(e.target.value)}
               label="Feed Type"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               {feeds.map(f => (
                 <MenuItem key={f.id} value={f.id}>{f.type}</MenuItem>
@@ -779,7 +788,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               value={pipelineSupplier}
               onChange={(e) => setPipelineSupplier(e.target.value)}
               label="Partner Supplier"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Supreme Feed Mills Ltd.">Supreme Feed Mills Ltd.</MenuItem>
               <MenuItem value="AgroFeeds Logistics Team">AgroFeeds Logistics Team</MenuItem>
@@ -792,7 +801,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               value={pipelineStatus}
               onChange={(e) => setPipelineStatus(e.target.value)}
               label="Restructured Status"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Secured (Awaiting Transit)">Secured (Contract signed & awaiting transit)</MenuItem>
               <MenuItem value="In Transit (Shipping)">In Transit (Shipping via verified route)</MenuItem>
@@ -878,7 +887,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               value={editPipelineStatus}
               onChange={(e) => setEditPipelineStatus(e.target.value)}
               label="Status"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Under Negotiations">Under Negotiations</MenuItem>
               <MenuItem value="Under Contract">Under Contract</MenuItem>

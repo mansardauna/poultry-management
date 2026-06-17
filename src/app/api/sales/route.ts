@@ -1,9 +1,11 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 import { and, eq } from 'drizzle-orm';
 import { getWorkspaceId } from '@/lib/workspace';
 
+/** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const sales = await db.select().from(schema.sales).where(eq(schema.sales.workspaceId, workspaceId));
@@ -17,6 +19,7 @@ export async function GET() {
   });
 }
 
+/** Exported function POST */
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -99,11 +102,12 @@ export async function POST(request: Request) {
     };
 
     return NextResponse.json({ sale: newSale, invoice: invoiceRecord }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to record sale' }, { status: 500 });
   }
 }
 
+/** Exported function PUT */
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -112,11 +116,12 @@ export async function PUT(request: Request) {
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
     await db.update(schema.sales).set(fields).where(and(eq(schema.sales.id, id), eq(schema.sales.workspaceId, workspaceId)));
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update sale' }, { status: 500 });
   }
 }
 
+/** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -125,7 +130,7 @@ export async function DELETE(request: Request) {
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
     await db.delete(schema.sales).where(and(eq(schema.sales.id, id), eq(schema.sales.workspaceId, workspaceId)));
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete sale' }, { status: 500 });
   }
 }

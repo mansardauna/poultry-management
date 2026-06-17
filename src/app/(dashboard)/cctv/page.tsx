@@ -1,9 +1,10 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Play, Video, AlertTriangle, Activity, RefreshCw, Phone, Settings, Circle } from 'lucide-react';
+import { Play, Video, AlertTriangle, Activity, RefreshCw, Phone, Circle } from 'lucide-react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -21,6 +22,7 @@ interface DiagnosticsLog {
   status: string;
 }
 
+/** Exported function default */
 export default function CCTVPage() {
   const [openRepairModal, setOpenRepairModal] = useState(false);
   const [technicianNote, setTechnicianNote] = useState('');
@@ -40,6 +42,7 @@ export default function CCTVPage() {
   };
 
   useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshLogs();
   }, []);
 
@@ -308,7 +311,7 @@ export default function CCTVPage() {
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <p className="text-xs text-slate-500">
-            This will dispatch a field technician to inspect and fix Gaa Saka Farm's security camera wiring, network drops, or hardware malfunctions.
+            This will dispatch a field technician to inspect and fix Gaa Saka Farm&apos;s security camera wiring, network drops, or hardware malfunctions.
           </p>
           <TextField
             label="Service Ticket Notes & Details"

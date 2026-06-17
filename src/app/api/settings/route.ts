@@ -1,9 +1,11 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { getWorkspaceId } from '@/lib/workspace';
 
+/** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   
@@ -65,7 +67,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, alertSettings: newSettings });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
   }
 }

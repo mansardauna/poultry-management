@@ -1,10 +1,17 @@
+'use strict';
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
+/**
+ * Supported language codes.
+ */
 export type Language = 'en' | 'es' | 'ar' | 'de' | 'fr' | 'zh';
 
+/**
+ * Dictionary mapping for translations.
+ */
 export interface TranslationDict {
   common: {
     add: string;
@@ -1107,6 +1114,9 @@ const translations: Record<Language, TranslationDict> = {
   }
 };
 
+/**
+ * Context type for language settings.
+ */
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -1116,6 +1126,11 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+/**
+ * Provider for language settings.
+ *
+ * @param props - Component properties.
+ */
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('en');
 
@@ -1153,6 +1168,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Hook to access the current language context.
+ *
+ * @returns The language context.
+ */
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (context === undefined) {

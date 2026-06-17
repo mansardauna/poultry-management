@@ -1,3 +1,4 @@
+'use strict';
 'use server';
 
 import { NextResponse } from 'next/server';
@@ -29,6 +30,7 @@ async function ensureWorkspaceTable() {
   await client.close();
 }
 
+/** Exported function GET */
 export async function GET() {
   await ensureWorkspaceTable();
   const workspaces = await db.select().from(schema.workspaces);
@@ -47,6 +49,7 @@ export async function GET() {
   return NextResponse.json(workspaces);
 }
 
+/** Exported function POST */
 export async function POST(request: Request) {
   await ensureWorkspaceTable();
   const body = await request.json();
@@ -66,6 +69,7 @@ export async function POST(request: Request) {
   return NextResponse.json(createdWorkspace, { status: 201 });
 }
 
+/** Exported function PUT */
 export async function PUT(request: Request) {
   await ensureWorkspaceTable();
   const body = await request.json();
@@ -82,6 +86,7 @@ export async function PUT(request: Request) {
   return NextResponse.json({ success: true });
 }
 
+/** Exported function DELETE */
 export async function DELETE(request: Request) {
   await ensureWorkspaceTable();
   const { searchParams } = new URL(request.url);

@@ -1,7 +1,12 @@
+'use strict';
 'use client';
 
 import React, { useState, useEffect } from 'react';
 
+/**
+ * Global preloader component.
+ * Tracks active fetch requests and shows a progress bar.
+ */
 export function Preloader() {
   const [activeRequests, setActiveRequests] = useState(0);
   const [visible, setVisible] = useState(false);

@@ -1,9 +1,9 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
 import { Plus, ShoppingCart, Coins, BarChart2, FileText, MessageSquare, Printer, Trash2 } from 'lucide-react';
 import { TEXTS } from "@/lib/constants/texts";
 import { Sale, Invoice, ChickenBatch } from "@/data/types";
@@ -20,6 +20,9 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * Props for the SalesClient component.
+ */
 interface SalesClientProps {
   initialSales: Sale[];
   initialInvoices: Invoice[];
@@ -27,6 +30,10 @@ interface SalesClientProps {
   role?: string;
 }
 
+/**
+ * SalesClient component for managing sales and invoices.
+ * @param props The component props.
+ */
 export function SalesClient({ initialSales, initialInvoices, batches, role = 'Staff' }: SalesClientProps) {
   const canEdit = role === 'Admin';
   const [sales, setSales] = useState<Sale[]>(initialSales);
@@ -63,6 +70,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshData();
   }, []);
 
@@ -414,7 +422,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               value={type}
               onChange={(e) => setType(e.target.value)}
               label="Product Type"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Eggs">Eggs</MenuItem>
               <MenuItem value="Chickens">Chickens (Live Birds)</MenuItem>
@@ -429,7 +437,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 value={selectedBatchId}
                 onChange={(e) => setSelectedBatchId(e.target.value)}
                 label="Select Batch to Deduct Birds From"
-                style={{ borderRadius: 2 }}
+                className="rounded-sm"
               >
                 {activeBatches.map(b => (
                   <MenuItem key={b.id} value={b.id}>{b.id} ({b.breed} - {b.quantity} birds in {b.farmSection})</MenuItem>
@@ -462,7 +470,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
               label="Payment Channel"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Cash">Cash</MenuItem>
               <MenuItem value="Bank transfer">Bank transfer</MenuItem>

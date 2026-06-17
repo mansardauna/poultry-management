@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const content = fs.readFileSync('src/lib/schema.ts', 'utf8');
 const tablesToSkip = ['workspaces', 'schema'];

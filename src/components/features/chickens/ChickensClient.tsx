@@ -1,3 +1,4 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,12 +22,18 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+/**
+ * Props for the ChickensClient component.
+ */
 interface ChickensClientProps {
   initialData: ChickenBatch[];
   role: string;
 }
 
-
+/**
+ * Client component for managing chicken batches, mortality, vaccination, and transfers.
+ * @param {ChickensClientProps} props - The component props.
+ */
 export function ChickensClient({ initialData, role }: ChickensClientProps) {
   const [batches, setBatches] = useState<ChickenBatch[]>(initialData);
   const { texts } = useLanguage();
@@ -428,7 +435,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               value={type}
               onChange={(e) => setType(e.target.value)}
               label="Type"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Layers">Layers</MenuItem>
               <MenuItem value="Broilers">Broilers</MenuItem>
@@ -441,7 +448,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               value={farmSection}
               onChange={(e) => setFarmSection(e.target.value)}
               label="Farm Section"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Section A">Section A</MenuItem>
               <MenuItem value="Section B">Section B</MenuItem>
@@ -454,7 +461,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               value={vaccinationStatus}
               onChange={(e) => setVaccinationStatus(e.target.value)}
               label="Vaccination Status"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Up to Date">Up to Date</MenuItem>
               <MenuItem value="Pending">Pending</MenuItem>
@@ -586,7 +593,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               value={targetSection}
               onChange={(e) => setTargetSection(e.target.value)}
               label="Target Section"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Section A">Section A</MenuItem>
               <MenuItem value="Section B">Section B</MenuItem>
@@ -641,7 +648,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               value={type}
               onChange={(e) => setType(e.target.value)}
               label="Type"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Layers">Layers</MenuItem>
               <MenuItem value="Broilers">Broilers</MenuItem>
@@ -654,7 +661,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               value={farmSection}
               onChange={(e) => setFarmSection(e.target.value)}
               label="Farm Section"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Section A">Section A</MenuItem>
               <MenuItem value="Section B">Section B</MenuItem>
@@ -667,7 +674,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               value={vaccinationStatus}
               onChange={(e) => setVaccinationStatus(e.target.value)}
               label="Vaccination Status"
-              style={{ borderRadius: 2 }}
+              className="rounded-sm"
             >
               <MenuItem value="Up to Date">Up to Date</MenuItem>
               <MenuItem value="Pending">Pending</MenuItem>

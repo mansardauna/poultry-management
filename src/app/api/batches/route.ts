@@ -1,15 +1,18 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 import { and, eq } from 'drizzle-orm';
 import { getWorkspaceId } from '@/lib/workspace';
 
+/** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const batchesData = await db.select().from(schema.batches).where(eq(schema.batches.workspaceId, workspaceId));
   return NextResponse.json(batchesData);
 }
 
+/** Exported function POST */
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -126,11 +129,12 @@ export async function POST(request: Request) {
     });
     
     return NextResponse.json(newBatch, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to manage batch operations' }, { status: 500 });
   }
 }
 
+/** Exported function PUT */
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -143,11 +147,12 @@ export async function PUT(request: Request) {
       .where(and(eq(schema.batches.id, id), eq(schema.batches.workspaceId, workspaceId)));
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update batch' }, { status: 500 });
   }
 }
 
+/** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -157,7 +162,7 @@ export async function DELETE(request: Request) {
 
     await db.delete(schema.batches).where(and(eq(schema.batches.id, id), eq(schema.batches.workspaceId, workspaceId)));
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete batch' }, { status: 500 });
   }
 }

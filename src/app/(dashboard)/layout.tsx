@@ -1,9 +1,17 @@
+'use strict';
 import { cookies } from 'next/headers';
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 import { Toaster } from 'react-hot-toast';
 
+/**
+ * DashboardLayout wraps all pages inside the `(dashboard)` route group.
+ * It reads the `pfms_auth` cookie to determine the current user's role
+ * and passes it to the Sidebar and Header components for role-based rendering.
+ *
+ * @param children - The dashboard page content to render inside the main area.
+ */
 export default async function DashboardLayout({
   children,
 }: Readonly<{
@@ -16,7 +24,7 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="h-full flex overflow-hidden">
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,

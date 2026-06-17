@@ -1,9 +1,11 @@
+'use strict';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle';
 import * as schema from '@/lib/schema';
 import { getWorkspaceId } from '@/lib/workspace';
 import { eq } from 'drizzle-orm';
 
+/** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const cctvLogsData = await db.select().from(schema.cctvLogs).where(eq(schema.cctvLogs.workspaceId, workspaceId));
@@ -11,6 +13,7 @@ export async function GET() {
   return NextResponse.json(cctvLogsData);
 }
 
+/** Exported function POST */
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
@@ -76,7 +79,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to complete CCTV action' }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+'use strict';
 import { db } from "@/lib/drizzle";
 import * as schema from "@/lib/schema";
 import { FeedClient } from "@/components/features/feed/FeedClient";
@@ -5,6 +6,7 @@ import type { FeedInventory, DailyFeedLog, ChickenBatch, ProcurePipeline } from 
 
 import { cookies } from 'next/headers';
 
+/** Exported function default */
 export default async function FeedPage() {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get('pfms_auth');
