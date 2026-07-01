@@ -1,5 +1,6 @@
 'use strict';
 import { NextResponse } from 'next/server';
+import { SignJWT } from 'jose';
 
 type AuthRole = 'Admin' | 'Manager' | 'Staff';
 
@@ -55,10 +56,17 @@ export async function POST(request: Request) {
     );
   }
 
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-please-change');
+  const token = await new SignJWT({ role: user.role, username: user.username })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('24h')
+    .sign(secret);
+
   const response = NextResponse.json({ ok: true, role: user.role });
   response.cookies.set({
     name: 'pfms_auth',
-    value: user.role,
+    value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

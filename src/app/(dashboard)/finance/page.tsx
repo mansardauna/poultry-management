@@ -10,8 +10,13 @@ import { cookies } from 'next/headers';
 export default async function FinancePage() {
   const cookieStore = await cookies();
   const role = cookieStore.get('pfms_auth')?.value || 'Staff';
-  const sales = (await db.select().from(schema.sales)) as Sale[];
-  const expenses = (await db.select().from(schema.expenses)) as Expense[];
+
+  const [salesRaw, expensesRaw] = await Promise.all([
+    db.select().from(schema.sales),
+    db.select().from(schema.expenses)
+  ]);
+  const sales = salesRaw as Sale[];
+  const expenses = expensesRaw as Expense[];
 
   return <FinanceClient initialSales={sales} initialExpenses={expenses} role={role} />;
 }

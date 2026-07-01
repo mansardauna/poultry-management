@@ -9,8 +9,13 @@ import { cookies } from 'next/headers';
 export default async function StaffPage() {
   const cookieStore = await cookies();
   const role = cookieStore.get('pfms_auth')?.value || 'Staff';
-  const staff = (await db.select().from(schema.staff)) as Staff[];
-  const tasks = (await db.select().from(schema.tasks)) as StaffTask[];
+
+  const [staffRaw, tasksRaw] = await Promise.all([
+    db.select().from(schema.staff),
+    db.select().from(schema.tasks)
+  ]);
+  const staff = staffRaw as Staff[];
+  const tasks = tasksRaw as StaffTask[];
 
   return (
     <StaffClient 

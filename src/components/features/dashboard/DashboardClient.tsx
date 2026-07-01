@@ -309,7 +309,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               <span className={`flex items-center font-semibold px-2 py-0.5 ${recentMortality === 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
                 {recentMortality === 0 ? '0.0%' : `−${flockPct}%`}
               </span>
-              <span className="text-slate-400 ml-2">{texts.dashboard.flockMortalityRate} ({texts.common[timeRange]})</span>
+              <span className="text-slate-400 ml-2">{texts.dashboard.flockMortalityRate} ({texts.common[timeRange === 'all' ? 'allTime' : timeRange as 'weekly' | 'monthly' | 'yearly']})</span>
             </div>
           </CardContent>
         </Card>
@@ -436,6 +436,10 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
               <span className="text-sm font-medium text-slate-500">{texts.dashboard.totalExpenses}</span>
               <span className="text-sm text-red-600">₦{totalExpenses.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-slate-100">
+              <span className="text-sm font-medium text-slate-500">Feed Conversion Ratio</span>
+              <span className="text-sm text-amber-600 font-bold">{currentYield > 0 ? (totalFeedKg / (currentYield / 30)).toFixed(2) : '0.00'} kg/crate</span>
             </div>
             <div className="bg-slate-50 p-4 border border-slate-200">
               <p className="text-xs  text-slate-800 uppercase">{texts.dashboard.currentInventoryAudit}</p>

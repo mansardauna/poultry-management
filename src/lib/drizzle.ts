@@ -3,13 +3,11 @@ import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { schema } from './schema';
 
-const databaseUrl = process.env.DATABASE_URL ?? 'file:src/data/database.sqlite';
-const authToken = process.env.DATABASE_AUTH_TOKEN;
+const databaseUrl = 'file:src/data/database.sqlite';
 
-// Use a remote SQL endpoint when DATABASE_URL is set, otherwise fall back to local SQLite.
+// Use strictly local SQLite file to ensure no remote database connections are made.
 const client = createClient({
   url: databaseUrl,
-  ...(authToken ? { authToken } : {}),
 });
 
 /**

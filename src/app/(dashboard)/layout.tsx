@@ -1,5 +1,5 @@
 'use strict';
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
@@ -17,9 +17,8 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get('pfms_auth');
-  const role = authCookie?.value || 'Staff';
+  const headersList = await headers();
+  const role = headersList.get('x-user-role') || 'Staff';
 
   return (
     <SidebarProvider>

@@ -11,10 +11,18 @@ export default async function FeedPage() {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get('pfms_auth');
   const role = authCookie?.value || 'Staff';
-  const feeds = (await db.select().from(schema.feeds)) as FeedInventory[];
-  const feedLogs = (await db.select().from(schema.feedLogs)) as DailyFeedLog[];
-  const batches = (await db.select().from(schema.batches)) as ChickenBatch[];
-  const procurePipeline = (await db.select().from(schema.procurePipeline)) as ProcurePipeline[];
+
+  const [feedsRaw, feedLogsRaw, batchesRaw, procurePipelineRaw] = await Promise.all([
+    db.select().from(schema.feeds),
+    db.select().from(schema.feedLogs),
+    db.select().from(schema.batches),
+    db.select().from(schema.procurePipeline)
+  ]);
+  
+  const feeds = feedsRaw as FeedInventory[];
+  const feedLogs = feedLogsRaw as DailyFeedLog[];
+  const batches = batchesRaw as ChickenBatch[];
+  const procurePipeline = procurePipelineRaw as ProcurePipeline[];
 
   return (
     <FeedClient 

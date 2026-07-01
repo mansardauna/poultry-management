@@ -9,9 +9,15 @@ import { cookies } from 'next/headers';
 export default async function SalesPage() {
   const cookieStore = await cookies();
   const role = cookieStore.get('pfms_auth')?.value || 'Staff';
-  const sales = (await db.select().from(schema.sales)) as Sale[];
-  const invoices = (await db.select().from(schema.invoices)) as Invoice[];
-  const batches = (await db.select().from(schema.batches)) as ChickenBatch[];
+
+  const [salesRaw, invoicesRaw, batchesRaw] = await Promise.all([
+    db.select().from(schema.sales),
+    db.select().from(schema.invoices),
+    db.select().from(schema.batches)
+  ]);
+  const sales = salesRaw as Sale[];
+  const invoices = invoicesRaw as Invoice[];
+  const batches = batchesRaw as ChickenBatch[];
 
   return (
     <SalesClient 

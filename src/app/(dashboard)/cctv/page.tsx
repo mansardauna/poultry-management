@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Play, Video, AlertTriangle, Activity, RefreshCw, Phone, Circle } from 'lucide-react';
+import { Play, Video, AlertTriangle, Activity, RefreshCw, Phone, Circle, QrCode } from 'lucide-react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -25,6 +25,8 @@ interface DiagnosticsLog {
 /** Exported function default */
 export default function CCTVPage() {
   const [openRepairModal, setOpenRepairModal] = useState(false);
+  const [openConnectModal, setOpenConnectModal] = useState(false);
+  const [cameraId, setCameraId] = useState('');
   const [technicianNote, setTechnicianNote] = useState('');
   const [diagnosticsLogs, setDiagnosticsLogs] = useState<DiagnosticsLog[]>([]);
   const [isCameraBRebooting, setIsCameraBRebooting] = useState(false);
@@ -50,6 +52,18 @@ export default function CCTVPage() {
   const handleCloseRepair = () => {
     setOpenRepairModal(false);
     setTechnicianNote('');
+  };
+
+  const handleOpenConnect = () => setOpenConnectModal(true);
+  const handleCloseConnect = () => {
+    setOpenConnectModal(false);
+    setCameraId('');
+  };
+
+  const handleConnectCamera = () => {
+    if (!cameraId) return;
+    toast.success(`Successfully paired with camera ${cameraId}!`);
+    handleCloseConnect();
   };
 
   const handleDispatchTechnician = async () => {
@@ -128,6 +142,12 @@ export default function CCTVPage() {
           <p className="text-sm text-slate-500 mt-1">Real-time Gaa Saka Farm security monitoring & system health</p>
         </div>
         <div className="flex gap-3">
+          <button 
+            onClick={handleOpenConnect}
+            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 text-sm font-semibold uppercase transition-colors flex items-center gap-2"
+          >
+            <QrCode size={18} /> Connect Camera
+          </button>
           <button 
             onClick={handleOpenRepair}
             className="bg-red-650 hover:bg-red-700 text-white px-4 py-2 text-sm font-semibold uppercase transition-colors flex items-center gap-2"
@@ -333,6 +353,40 @@ export default function CCTVPage() {
             sx={{ bgcolor: '#dc2626', '&:hover': { bgcolor: '#b91c1c' }, borderRadius: 2, boxShadow: 'none' }}
           >
             Dispatch Now
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Connect Camera Modal */}
+      <Dialog open={openConnectModal} onClose={handleCloseConnect} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 600 }}>Pair New Camera via QR Code</DialogTitle>
+        <DialogContent className="flex flex-col gap-6 pt-4 items-center text-center">
+          <div className="h-2" />
+          <p className="text-xs text-slate-500">
+            Scan this QR code using the Gaa Saka Camera App, or manually enter the Camera ID below to pair it to the central NVR system.
+          </p>
+          <div className="bg-slate-50 p-6 rounded-lg border-2 border-dashed border-indigo-200 flex flex-col items-center justify-center gap-3 w-48 h-48">
+            <QrCode size={96} className="text-indigo-600" />
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">NVR-SYNC-AWAIT</span>
+          </div>
+          <TextField
+            label="Hardware Camera ID (e.g. CAM-2938-X)"
+            fullWidth
+            variant="outlined"
+            placeholder="Enter ID manually..."
+            value={cameraId}
+            onChange={(e) => setCameraId(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <MuiButton onClick={handleCloseConnect} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton 
+            onClick={handleConnectCamera} 
+            variant="contained" 
+            disabled={!cameraId}
+            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
+          >
+            Pair Camera
           </MuiButton>
         </DialogActions>
       </Dialog>

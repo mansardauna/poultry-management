@@ -22,7 +22,17 @@ export default async function SettingsPage() {
     notifyWhatsapp: true,
   };
 
-  const systemSettings = (await db.select().from(schema.systemSettings).where(eq(schema.systemSettings.workspaceId, workspaceId)).limit(1))[0] ?? {
+  const rawSystemSettings = (await db.select().from(schema.systemSettings).where(eq(schema.systemSettings.workspaceId, workspaceId)).limit(1))[0];
+  const systemSettings = rawSystemSettings ? {
+    ...rawSystemSettings,
+    eggCratePriceSmall: rawSystemSettings.eggCratePriceSmall ?? undefined,
+    eggCratePriceLarge: rawSystemSettings.eggCratePriceLarge ?? undefined,
+    adminName: rawSystemSettings.adminName ?? undefined,
+    adminEmail: rawSystemSettings.adminEmail ?? undefined,
+    adminPhone: rawSystemSettings.adminPhone ?? undefined,
+  } : {
+    id: 'default',
+    workspaceId,
     eggCratePriceSmall: 4200,
     eggCratePriceLarge: 4400,
     adminName: 'Farm Admin',
@@ -32,7 +42,6 @@ export default async function SettingsPage() {
 
   const workspaces = await db.select().from(schema.workspaces);
   
-  // Fetch all staff members across all workspaces for branch assignment
   const allStaff = await db.select().from(schema.staff);
 
   return <SettingsClient 
@@ -40,7 +49,5 @@ export default async function SettingsPage() {
     systemSettings={systemSettings} 
     workspaces={workspaces} 
     workspaceId={workspaceId} 
-    role={role}
-    staff={allStaff}
   />;
 }

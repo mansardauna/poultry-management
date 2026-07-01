@@ -126,14 +126,33 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
               <Typography variant="body2" color="textSecondary" sx={{ fontFamily: "var(--font-dm-sans)", mt: 1 }}>
                 The AI has extracted the following metrics:
               </Typography>
-              {extractedData && (
-                <Box sx={{ mt: 2, p: 2, bgcolor: "#f8fafc", border: "1px solid #e2e8f0", textAlign: "left" }} className="font-mono text-xs text-slate-700 space-y-1">
-                  {(extractedData as { eggsGood: number }).eggsGood > 0 && <div>🥚 Good Eggs: {(extractedData as { eggsGood: number }).eggsGood}</div>}
-                  {(extractedData as { eggsBroken: number }).eggsBroken > 0 && <div>🥚 Cracked Eggs: {(extractedData as { eggsBroken: number }).eggsBroken}</div>}
-                  {(extractedData as { feedUsedKg: number }).feedUsedKg > 0 && <div>🌾 Feed Used: {(extractedData as { feedUsedKg: number }).feedUsedKg} kg</div>}
-                  {(extractedData as { mortalityCount: number }).mortalityCount > 0 && <div>💀 Mortality: {(extractedData as { mortalityCount: number }).mortalityCount} birds</div>}
-                  {(extractedData as { salesAmount: number }).salesAmount > 0 && <div>💰 Sales Recorded: ₦{(extractedData as { salesAmount: number }).salesAmount.toLocaleString()}</div>}
-                  {(extractedData as { expenseAmount: number }).expenseAmount > 0 && <div>💸 Expenses Logged: ₦{(extractedData as { expenseAmount: number }).expenseAmount.toLocaleString()}</div>}
+              {!!extractedData && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: "#f8fafc", border: "1px solid #e2e8f0", textAlign: "left", maxHeight: "300px", overflowY: "auto" }} className="font-mono text-xs text-slate-700 space-y-2">
+                  {/* Staff Updates */}
+                  {(extractedData as any).staffChanges?.removeAll && <div className="text-red-600">🧹 Removed all previous staff records.</div>}
+                  {(extractedData as any).staffChanges?.add?.map((s: any, i: number) => (
+                    <div key={'s'+i}>👥 Added Staff: {s.name} ({s.role}) - ₦{s.salary.toLocaleString()}</div>
+                  ))}
+                  
+                  {/* Eggs */}
+                  {(extractedData as any).eggs?.map((e: any, i: number) => (
+                    <div key={'e'+i}>🥚 Collected {e.goodEggs} eggs on {e.date} {e.notes ? `(${e.notes})` : ''}</div>
+                  ))}
+
+                  {/* Expenses */}
+                  {(extractedData as any).expenses?.map((ex: any, i: number) => (
+                    <div key={'ex'+i}>💸 Logged Expense: ₦{ex.amount.toLocaleString()} for {ex.description} ({ex.category}) on {ex.date}</div>
+                  ))}
+
+                  {/* Medications */}
+                  {(extractedData as any).medications?.map((m: any, i: number) => (
+                    <div key={'m'+i}>💊 Scheduled: {m.name} on {m.date}</div>
+                  ))}
+
+                  {/* Basic Metrics */}
+                  {(extractedData as any).feedUsedKg > 0 && <div>🌾 Feed Used: {(extractedData as any).feedUsedKg} kg</div>}
+                  {(extractedData as any).mortalityCount > 0 && <div>💀 Mortality: {(extractedData as any).mortalityCount} birds</div>}
+                  {(extractedData as any).salesAmount > 0 && <div>💰 Sales Recorded: ₦{(extractedData as any).salesAmount.toLocaleString()}</div>}
                 </Box>
               )}
             </Box>

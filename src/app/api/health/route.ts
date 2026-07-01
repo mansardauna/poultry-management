@@ -47,13 +47,13 @@ export async function POST(req: Request) {
       const { templateId, batchId, startDate } = body;
       const templates = await db.select().from(schema.medicationTemplates).where(and(eq(schema.medicationTemplates.id, templateId), eq(schema.medicationTemplates.workspaceId, workspaceId)));
       const template = templates.length > 0 ? templates[0] : null;
-      
+
       if (!template) {
         return NextResponse.json({ error: 'Template not found' }, { status: 404 });
       }
 
       const start = new Date(startDate);
-      const newSchedules = (template.stages as unknown[]).map((stage: unknown, i: number) => {
+      const newSchedules = (template.stages as any[]).map((stage: any, i: number) => {
         const schedDate = new Date(start);
         schedDate.setDate(schedDate.getDate() + stage.dayOffset);
         return {

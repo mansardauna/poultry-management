@@ -2,7 +2,8 @@
 'use client';
 
 import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSidebar } from './SidebarContext';
 import { useLanguage, Language } from '@/components/features/LanguageContext';
 import { useTimeFilter, TimeRange } from '@/components/features/TimeFilterContext';
@@ -27,10 +28,32 @@ export function Header({ role = 'Admin' }: { role?: string }) {
   const [notifications, setNotifications] = useState<AlertLog[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'unread' | 'read'>('unread');
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const { setIsMobileOpen } = useSidebar();
   const { language, setLanguage, texts } = useLanguage();
   const { timeRange, setTimeRange } = useTimeFilter();
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return;
+
+    if (query.includes('egg')) router.push('/eggs');
+    else if (query.includes('feed') || query.includes('wheat')) router.push('/feed');
+    else if (query.includes('financ') || query.includes('money')) router.push('/finance');
+    else if (query.includes('sale') || query.includes('invoice')) router.push('/sales');
+    else if (query.includes('staff') || query.includes('user')) router.push('/staff');
+    else if (query.includes('health') || query.includes('sick')) router.push('/health');
+    else if (query.includes('inventor') || query.includes('equip')) router.push('/inventory');
+    else if (query.includes('cctv') || query.includes('camera')) router.push('/cctv');
+    else if (query.includes('hous') || query.includes('pen')) router.push('/housing');
+    else if (query.includes('batch') || query.includes('chicken')) router.push('/chickens');
+    else router.push('/');
+
+    setSearchQuery('');
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -109,7 +132,7 @@ export function Header({ role = 'Admin' }: { role?: string }) {
       </button>
 
       <div className="flex flex-1 md:ml-0 ml-2">
-        <div className="w-full max-w-md relative">
+        <form onSubmit={handleSearch} className="w-full max-w-md relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={20} className="text-slate-400" />
           </div>
@@ -117,8 +140,10 @@ export function Header({ role = 'Admin' }: { role?: string }) {
             className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
             placeholder={texts.common.search + "..."}
             type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
-        </div>
+        </form>
       </div>
       <div className="flex items-center gap-4">
         {/* Time Filter Dropdown */}

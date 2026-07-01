@@ -11,10 +11,17 @@ export default async function EggsPage() {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get('pfms_auth');
   const role = authCookie?.value || 'Staff';
-  const eggs = (await db.select().from(schema.eggs)) as EggRecord[];
-  const batches = (await db.select().from(schema.batches)) as ChickenBatch[];
-  const cushionAudits = (await db.select().from(schema.cushionAudits)) as CushionAudit[];
-  const maturationLogs = (await db.select().from(schema.maturationLogs)) as MaturationLog[];
+
+  const [eggsRaw, batchesRaw, cushionAuditsRaw, maturationLogsRaw] = await Promise.all([
+    db.select().from(schema.eggs),
+    db.select().from(schema.batches),
+    db.select().from(schema.cushionAudits),
+    db.select().from(schema.maturationLogs)
+  ]);
+  const eggs = eggsRaw as EggRecord[];
+  const batches = batchesRaw as ChickenBatch[];
+  const cushionAudits = cushionAuditsRaw as CushionAudit[];
+  const maturationLogs = maturationLogsRaw as MaturationLog[];
 
   return (
     <EggsClient 

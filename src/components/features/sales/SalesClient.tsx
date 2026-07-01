@@ -208,7 +208,17 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               : 'border-transparent text-slate-400 hover:text-slate-600'
           }`}
         >
-          <FileText size={16} /> Active Invoices ({invoices.length})
+          <FileText size={16} /> Paid Invoices ({invoices.filter(i => i.status === 'Paid').length})
+        </button>
+        <button
+          onClick={() => setActiveTab('unpaid-invoices' as any)}
+          className={`py-2 px-4 font-semibold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${
+            activeTab === 'unpaid-invoices' 
+              ? 'border-red-500 text-red-600' 
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          <FileText size={16} /> Unpaid Invoices ({invoices.filter(i => i.status !== 'Paid').length})
         </button>
       </div>
 
@@ -321,7 +331,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         /* Invoices List view */
         <Card>
           <CardHeader>
-            <CardTitle>Generated Customer Invoices</CardTitle>
+            <CardTitle>{activeTab === 'unpaid-invoices' ? 'Unpaid Customer Invoices' : 'Paid Customer Invoices'}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -339,7 +349,9 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {invoices.map((inv) => (
+                  {invoices
+                    .filter(inv => activeTab === 'unpaid-invoices' ? inv.status !== 'Paid' : inv.status === 'Paid')
+                    .map((inv) => (
                     <tr key={inv.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-semibold text-slate-900">{inv.id}</td>
                       <td className="px-4 py-3 text-slate-400">{inv.date}</td>

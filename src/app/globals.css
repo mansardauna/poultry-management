@@ -42,3 +42,18 @@
     @apply font-heading uppercase;
   }
 }
+
+/* Custom Sidebar Scrollbar */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: #6366f1;
+  border-radius: 10px;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background-color: #4f46e5;
+}

@@ -8,6 +8,8 @@ import { Plus, Wallet, ArrowDown, ArrowUp, Coins, Percent, User, Edit2, Trash2 }
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { Expense, Sale } from "@/data/types";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { 
   Dialog, 
   DialogTitle, 
@@ -162,6 +164,22 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
     }
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text('Financial Statement - Gaa Saka Farm', 14, 22);
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 32);
+    
+    autoTable(doc, {
+      startY: 45,
+      head: [['Date', 'Category', 'Description', 'Amount (NGN)']],
+      body: expenses.map(e => [e.date, e.category, e.description, e.amount.toString()]),
+    });
+    doc.save('farm-financial-report.pdf');
+    toast.success('PDF Exported Successfully!');
+  };
+
   const filteredSales = filterByTimeRange(sales);
   const filteredExpenses = filterByTimeRange(expenses);
 
@@ -183,6 +201,12 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <p className="text-sm text-slate-500 mt-1">{texts.finance.subtitle}</p>
         </div>
         <div className="flex gap-2">
+          <button 
+            onClick={handleExportPDF}
+            className="bg-white border-2 border-slate-200 text-slate-700 px-4 py-2 rounded-md text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
+          >
+            Export PDF
+          </button>
           <button 
             onClick={handleProcessPayroll}
             className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2"

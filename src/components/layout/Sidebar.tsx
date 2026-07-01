@@ -302,7 +302,7 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
             <X size={24} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto py-4 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto py-4 scrollbar-custom">
           <nav className="space-y-1 px-3">
             {visibleItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href + '/'));
