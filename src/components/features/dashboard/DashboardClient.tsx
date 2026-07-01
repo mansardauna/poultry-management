@@ -25,6 +25,8 @@ import {
   ResponsiveContainer, 
   BarChart, 
   Bar, 
+  LineChart,
+  Line,
   XAxis, 
   YAxis, 
   Tooltip, 
@@ -96,11 +98,13 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
       const eggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
-      const mortalityThatDay = (data.mortalityLogs || []).filter(m => m.date === dateStr).reduce((sum, m) => sum + m.count, 0);
+      const badEggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + (e.brokenEggs || 0) + (e.spoiltEggs || 0), 0);
+      const revenueThatDay = data.sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
         name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { weekday: 'short' }),
         Eggs: eggsThatDay,
-        Mortality: mortalityThatDay,
+        CrackedSpoilt: badEggsThatDay,
+        Revenue: revenueThatDay,
         Label: texts.dashboard.observed
       });
       currentYield += eggsThatDay;
@@ -118,11 +122,13 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
       const eggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
-      const mortalityThatDay = (data.mortalityLogs || []).filter(m => m.date === dateStr).reduce((sum, m) => sum + m.count, 0);
+      const badEggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + (e.brokenEggs || 0) + (e.spoiltEggs || 0), 0);
+      const revenueThatDay = data.sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
         name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { day: 'numeric', month: 'short' }),
         Eggs: eggsThatDay,
-        Mortality: mortalityThatDay,
+        CrackedSpoilt: badEggsThatDay,
+        Revenue: revenueThatDay,
         Label: texts.dashboard.observed
       });
       currentYield += eggsThatDay;
@@ -145,15 +151,21 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         return ed.getFullYear() === year && ed.getMonth() === month;
       }).reduce((sum, e) => sum + e.goodEggs, 0);
 
-      const mortalityInMonth = (data.mortalityLogs || []).filter(m => {
-         const md = new Date(m.date);
-         return md.getFullYear() === year && md.getMonth() === month;
-      }).reduce((sum, m) => sum + m.count, 0);
+      const badEggsInMonth = data.eggs.filter(e => {
+         const ed = new Date(e.date);
+         return ed.getFullYear() === year && ed.getMonth() === month;
+      }).reduce((sum, e) => sum + (e.brokenEggs || 0) + (e.spoiltEggs || 0), 0);
+
+      const revenueInMonth = data.sales.filter(s => {
+         const sd = new Date(s.date);
+         return sd.getFullYear() === year && sd.getMonth() === month;
+      }).reduce((sum, s) => sum + s.totalAmount, 0);
 
       chartData.push({
         name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { month: 'short' }),
         Eggs: eggsInMonth,
-        Mortality: mortalityInMonth,
+        CrackedSpoilt: badEggsInMonth,
+        Revenue: revenueInMonth,
         Label: texts.dashboard.observed
       });
       currentYield += eggsInMonth;
@@ -384,31 +396,59 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
       {/* Daily Egg Production Chart & Weekly Comparative Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
-              {texts.dashboard.eggProductionVolumeChart}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
-                    labelClassName=" text-slate-800 text-xs uppercase"
-                  />
-                  <Legend />
-                  <Bar dataKey="Eggs" fill="#4f46e5" name={texts.dashboard.eggsCollectedLegend} />
-                  <Bar dataKey="Mortality" fill="#ef4444" name={texts.dashboard.mortalityLossesLegend} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <Card>
+            <CardHeader className="border-b border-slate-100">
+              <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+                {texts.dashboard.eggProductionVolumeChart}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
+                      labelClassName=" text-slate-800 text-xs uppercase"
+                    />
+                    <Legend />
+                    <Bar dataKey="Eggs" fill="#4f46e5" name="Good Eggs Collected" />
+                    <Bar dataKey="CrackedSpoilt" fill="#ef4444" name="Cracked / Spoilt" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="border-b border-slate-100">
+              <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+                Sales & Revenue Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
+                      labelClassName=" text-slate-800 text-xs uppercase"
+                      formatter={(value: number) => [`₦${value.toLocaleString()}`, "Revenue"]}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Sales Revenue (₦)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="flex flex-col space-y-6">
           {/* Weekly Comparative Analytics Card */}
