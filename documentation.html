@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaa Saka Poultry Farm Management System - Comprehensive Documentation</title>
+    <!-- Tailwind CSS via CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            line-height: 1.6;
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            color: #4f46e5;
+            padding-left: 0.5rem;
+        }
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background-color: #6366f1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="scrollbar-custom">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-72 bg-white border-r border-slate-200 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-indigo-600 uppercase tracking-wider">PFMS Docs</h2>
+                <p class="text-xs text-slate-500 font-medium mt-1">v2.0.0 Architecture</p>
+            </div>
+            
+            <nav class="space-y-6">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Getting Started</h3>
+                    <ul class="space-y-2 text-sm font-medium text-slate-600">
+                        <li><a href="#introduction" class="nav-link block">Introduction</a></li>
+                        <li><a href="#architecture" class="nav-link block">System Architecture</a></li>
+                        <li><a href="#installation" class="nav-link block">Installation</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Core Modules</h3>
+                    <ul class="space-y-2 text-sm font-medium text-slate-600">
+                        <li><a href="#dashboard" class="nav-link block">Dashboard & Analytics</a></li>
+                        <li><a href="#flock" class="nav-link block">Flock Management</a></li>
+                        <li><a href="#egg-tracking" class="nav-link block">Egg Tracking</a></li>
+                        <li><a href="#finance" class="nav-link block">Finance & Invoicing</a></li>
+                        <li><a href="#cctv" class="nav-link block">CCTV & Security</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Advanced Features</h3>
+                    <ul class="space-y-2 text-sm font-medium text-slate-600">
+                        <li><a href="#ai-logger" class="nav-link block">AI Smart Logger</a></li>
+                        <li><a href="#localization" class="nav-link block">Localization (i18n)</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-12 lg:p-20 max-w-5xl">
+            
+            <!-- Header -->
+            <header class="mb-16 border-b border-slate-200 pb-10">
+                <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">Official Documentation</span>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
+                    Gaa Saka Poultry Farm Management System
+                </h1>
+                <p class="text-lg text-slate-600 max-w-3xl">
+                    A comprehensive, modern, and robust software solution designed to digitize and automate the day-to-day operations of modern poultry farms.
+                </p>
+            </header>
+
+            <!-- Section: Introduction -->
+            <section id="introduction" class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm">1</span>
+                    Introduction
+                </h2>
+                <div class="prose max-w-none text-slate-600 space-y-4">
+                    <p>The Gaa Saka Poultry Farm Management System (PFMS) is engineered to solve the complex operational challenges faced by poultry farm managers. It unifies flock tracking, financial accounting, hardware security monitoring, and staff management into a single, cohesive interface.</p>
+                    <p>Built with an emphasis on <strong>premium UI/UX</strong> and <strong>high performance</strong>, the platform ensures that critical metrics are always available at a glance, allowing farm owners to make data-driven decisions rapidly.</p>
+                </div>
+            </section>
+
+            <!-- Section: Architecture -->
+            <section id="architecture" class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm">2</span>
+                    System Architecture
+                </h2>
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Technology Stack</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                            <h4 class="font-bold text-indigo-600 mb-2">Frontend</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-1 text-slate-600">
+                                <li>Next.js 16 (React Framework)</li>
+                                <li>TailwindCSS (Styling & Design System)</li>
+                                <li>Recharts (Data Visualization)</li>
+                                <li>Lucide React (Iconography)</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                            <h4 class="font-bold text-emerald-600 mb-2">Backend & Database</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-1 text-slate-600">
+                                <li>Next.js App Router (API Routes)</li>
+                                <li>Drizzle ORM (Database Query Builder)</li>
+                                <li>SQLite (Lightweight relational database)</li>
+                                <li>JOSE (JWT Authentication)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-slate-600">The application strictly follows a modular architecture separating data fetching logic from client-side state management. It leverages Next.js Server Components where applicable, passing serialized state down to highly interactive Client Components.</p>
+            </section>
+
+            <!-- Section: Dashboard -->
+            <section id="dashboard" class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm">3</span>
+                    Dashboard & Analytics
+                </h2>
+                <div class="prose max-w-none text-slate-600 space-y-4">
+                    <p>The central dashboard acts as the nerve center of the farm. It aggregates data from all modules to provide real-time KPIs.</p>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Egg Production Volume Chart:</strong> A comparative Bar Chart that tracks the daily collection of <em>Good Eggs</em> against <em>Cracked/Spoilt Eggs</em>. Mortality data has been intentionally decoupled from this chart to ensure strict focus on yield efficiency.</li>
+                        <li><strong>Sales & Revenue Trend:</strong> A Line Chart illustrating the monetary influx over selected time filters (Weekly, Monthly, Yearly).</li>
+                        <li><strong>Dynamic KPIs:</strong> Calculates Net Growth Percentages, Feed Conversion Ratios, and Break-Even Analysis based on incurred expenses versus projected flock value.</li>
+                        <li><strong>Alerts Queue:</strong> Flags critical system warnings such as low feed thresholds or offline CCTV arrays.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section: Egg Tracking -->
+            <section id="egg-tracking" class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm">4</span>
+                    Egg Tracking
+                </h2>
+                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-6 rounded-r-lg">
+                    <h4 class="text-lg font-bold text-indigo-900 mb-2">Inventory Mathematics Rule</h4>
+                    <p class="text-indigo-800 text-sm">The system enforces a strict conversion rule where <strong>1 Crate = 30 Pieces</strong>. All logging modules dynamically convert pieces to crates to maintain standardized inventory units.</p>
+                </div>
+                <p class="text-slate-600 mt-4">Egg logging categorizes output into three precise metrics:</p>
+                <ul class="list-decimal pl-6 mt-2 space-y-2 text-slate-600">
+                    <li><strong>Good Eggs:</strong> Saleable inventory.</li>
+                    <li><strong>Broken Eggs:</strong> Eggs damaged during collection or transport.</li>
+                    <li><strong>Spoilt Eggs:</strong> Unusable yield discarded due to biological defects.</li>
+                </ul>
+            </section>
+
+            <!-- Section: Finance & Invoicing -->
+            <section id="finance" class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm">5</span>
+                    Finance & Invoicing
+                </h2>
+                <div class="prose max-w-none text-slate-600 space-y-4">
+                    <p>The financial suite handles both the macro and micro economics of the farm.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="border border-slate-200 p-5 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-slate-800 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Paid Invoices</h4>
+                            <p class="text-sm mt-2">Formerly categorized as "Active", these represent successfully closed transactions where capital has hit the farm accounts.</p>
+                        </div>
+                        <div class="border border-slate-200 p-5 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-slate-800 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Unpaid Invoices</h4>
+                            <p class="text-sm mt-2">Outstanding accounts receivables. These are distinctly separated in the UI to allow managers to chase pending payments efficiently.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: CCTV -->
+            <section id="cctv" class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm">6</span>
+                    CCTV & Security
+                </h2>
+                <div class="prose max-w-none text-slate-600 space-y-4">
+                    <p>Physical farm security is integrated directly into the digital dashboard. The CCTV module allows for:</p>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Live Status Monitoring:</strong> Visual indicators of camera uptime, jitter, and offline alerts.</li>
+                        <li><strong>Hardware Pairing:</strong> A built-in "Connect Camera" function that renders an <em>NVR-SYNC-AWAIT</em> QR Code. Staff can scan this code using a companion app or manually enter the Camera ID to provision new hardware to the surveillance array.</li>
+                        <li><strong>Technician Dispatch:</strong> Immediate logging of hardware faults assigned to maintenance teams.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section: AI Logger -->
+            <section id="ai-logger" class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm">7</span>
+                    AI Smart Logger
+                </h2>
+                <div class="prose max-w-none text-slate-600 space-y-4">
+                    <p>A flagship feature designed to eliminate manual data entry friction. The AI Smart Logger accepts conversational English and translates it directly into database transactions.</p>
+                    <div class="bg-slate-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                        <p class="text-slate-400">// Example User Input:</p>
+                        <p>"Log that Abdulrahman Monsur collected 3 crates on Sunday. We bought 2k fuel and 3,500 vaccine today."</p>
+                        <br>
+                        <p class="text-slate-400">// AI Parses to JSON API payload mapping to:</p>
+                        <p>1. Eggs Table -> +90 Pieces (Good)</p>
+                        <p>2. Expense Table -> ₦2,000 (Fuel), ₦3,500 (Medical)</p>
+                        <p>3. Staff Table -> Task associated with Abdulrahman</p>
+                    </div>
+                    <p class="text-sm mt-2">This is powered by Google's Gemini LLM utilizing strict JSON Schema validation.</p>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="border-t border-slate-200 pt-8 pb-12 text-center text-slate-500 text-sm">
+                <p>&copy; 2026 Gaa Saka Poultry Farms. Comprehensive Architecture Documentation.</p>
+                <p class="mt-1">Generated dynamically for the development team.</p>
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>
