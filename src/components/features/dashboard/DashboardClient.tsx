@@ -439,7 +439,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                     <Tooltip 
                       contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
                       labelClassName=" text-slate-800 text-xs uppercase"
-                      formatter={(value: number) => [`₦${value.toLocaleString()}`, "Revenue"]}
+                      formatter={(value: any) => [`₦${Number(value || 0).toLocaleString()}`, "Revenue"]}
                     />
                     <Legend />
                     <Line type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Sales Revenue (₦)" />

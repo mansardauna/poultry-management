@@ -41,7 +41,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   const [activeBatches, setActiveBatches] = useState<ChickenBatch[]>(batches);
   
   // Tabs for Sales vs Invoices
-  const [activeTab, setActiveTab] = useState<'sales' | 'invoices'>('sales');
+  const [activeTab, setActiveTab] = useState<'sales' | 'invoices' | 'unpaid-invoices'>('sales');
 
   const [open, setOpen] = useState(false);
   const [openInvoiceView, setOpenInvoiceView] = useState(false);

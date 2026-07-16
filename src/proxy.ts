@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
   // Public paths
-  if (path === '/login' || path.startsWith('/api/') || path.includes('.')) {
+  if (path === '/' || path === '/login' || path.startsWith('/api/') || path.includes('.')) {
     return NextResponse.next();
   }
 

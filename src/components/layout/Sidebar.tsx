@@ -41,18 +41,18 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { name: 'Dashboard', href: '/', icon: Home, roles: ['Admin', 'Manager'] },
-  { name: 'Batches', href: '/chickens', icon: Package, roles: ['Admin', 'Manager', 'Staff'] },
-  { name: 'Housing', href: '/housing', icon: Home, roles: ['Admin', 'Manager'] },
-  { name: 'Eggs', href: '/eggs', icon: Egg, roles: ['Admin', 'Manager', 'Staff'] },
-  { name: 'Feed', href: '/feed', icon: Wheat, roles: ['Admin', 'Manager', 'Staff'] },
-  { name: 'Health', href: '/health', icon: Activity, roles: ['Admin', 'Manager'] },
-  { name: 'Inventory', href: '/inventory', icon: Wrench, roles: ['Admin', 'Manager'] },
-  { name: 'Contacts', href: '/contacts', icon: UserSquare2, roles: ['Admin', 'Manager'] },
-  { name: 'Finance', href: '/finance', icon: CircleDollarSign, roles: ['Admin'] },
-  { name: 'Sales & Invoices', href: '/sales', icon: ShoppingCart, roles: ['Admin', 'Manager'] },
-  { name: 'Staff Management', href: '/staff', icon: Users, roles: ['Admin', 'Manager'] },
-  { name: 'CCTV Monitoring', href: '/cctv', icon: Video, roles: ['Admin'] },
+  { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['Admin', 'Manager'] },
+  { name: 'Batches', href: '/dashboard/chickens', icon: Package, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Housing', href: '/dashboard/housing', icon: Home, roles: ['Admin', 'Manager'] },
+  { name: 'Eggs', href: '/dashboard/eggs', icon: Egg, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Feed', href: '/dashboard/feed', icon: Wheat, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Health', href: '/dashboard/health', icon: Activity, roles: ['Admin', 'Manager'] },
+  { name: 'Inventory', href: '/dashboard/inventory', icon: Wrench, roles: ['Admin', 'Manager'] },
+  { name: 'Contacts', href: '/dashboard/contacts', icon: UserSquare2, roles: ['Admin', 'Manager'] },
+  { name: 'Finance', href: '/dashboard/finance', icon: CircleDollarSign, roles: ['Admin'] },
+  { name: 'Sales & Invoices', href: '/dashboard/sales', icon: ShoppingCart, roles: ['Admin', 'Manager'] },
+  { name: 'Staff Management', href: '/dashboard/staff', icon: Users, roles: ['Admin', 'Manager'] },
+  { name: 'CCTV Monitoring', href: '/dashboard/cctv', icon: Video, roles: ['Admin'] },
 ];
 
 const FARM_TYPES = ['Layer Farm', 'Broiler Farm', 'Hatchery', 'Mixed Use', 'Main'];
