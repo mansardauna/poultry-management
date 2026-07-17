@@ -1,16 +1,9 @@
-'use strict';
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import { schema } from './schema';
 
-const databaseUrl = 'file:src/data/database.sqlite';
+const databaseUrl = process.env.DATABASE_URL ?? 'postgresql://postgres:password@localhost:5432/postgres';
 
-// Use strictly local SQLite file to ensure no remote database connections are made.
-const client = createClient({
-  url: databaseUrl,
-});
+const client = postgres(databaseUrl, { prepare: false });
 
-/**
- * Database instance.
- */
 export const db = drizzle(client, { schema });

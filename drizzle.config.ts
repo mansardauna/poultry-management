@@ -9,7 +9,7 @@ const dbCredentials = databaseDialect === 'turso'
 export default defineConfig({
   schema: './src/lib/schema.ts',
   out: './src/data/migrations',
-  dialect: databaseDialect,
+  dialect: 'postgresql',
   dbCredentials,
   verbose: true,
   strict: true,

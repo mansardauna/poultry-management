@@ -1,10 +1,10 @@
 'use strict';
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, integer, real, boolean, json, serial } from 'drizzle-orm/pg-core';
 
 /**
  * @constant
  */
-export const batches = sqliteTable('batches', {
+export const batches = pgTable('batches', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   breed: text('breed').notNull(),
@@ -22,7 +22,7 @@ export const batches = sqliteTable('batches', {
 /**
  * @constant
  */
-export const eggs = sqliteTable('eggs', {
+export const eggs = pgTable('eggs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -35,7 +35,7 @@ export const eggs = sqliteTable('eggs', {
 /**
  * @constant
  */
-export const feeds = sqliteTable('feeds', {
+export const feeds = pgTable('feeds', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   type: text('type').notNull(), // 'Starter' | 'Grower' | 'Finisher' | 'Layer mash'
@@ -47,7 +47,7 @@ export const feeds = sqliteTable('feeds', {
 /**
  * @constant
  */
-export const feedLogs = sqliteTable('feedLogs', {
+export const feedLogs = pgTable('feedLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -59,7 +59,7 @@ export const feedLogs = sqliteTable('feedLogs', {
 /**
  * @constant
  */
-export const staff = sqliteTable('staff', {
+export const staff = pgTable('staff', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -67,13 +67,13 @@ export const staff = sqliteTable('staff', {
   salary: real('salary').notNull(),
   attendanceDays: integer('attendanceDays').notNull(),
   contact: text('contact').notNull(),
-  assignedBranches: text('assignedBranches', { mode: 'json' }), // string[]
+  assignedBranches: json('assignedBranches'), // string[]
 });
 
 /**
  * @constant
  */
-export const sales = sqliteTable('sales', {
+export const sales = pgTable('sales', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -88,7 +88,7 @@ export const sales = sqliteTable('sales', {
 /**
  * @constant
  */
-export const expenses = sqliteTable('expenses', {
+export const expenses = pgTable('expenses', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -100,7 +100,7 @@ export const expenses = sqliteTable('expenses', {
 /**
  * @constant
  */
-export const cushionAudits = sqliteTable('cushionAudits', {
+export const cushionAudits = pgTable('cushionAudits', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -112,7 +112,7 @@ export const cushionAudits = sqliteTable('cushionAudits', {
 /**
  * @constant
  */
-export const maturationLogs = sqliteTable('maturationLogs', {
+export const maturationLogs = pgTable('maturationLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -126,7 +126,7 @@ export const maturationLogs = sqliteTable('maturationLogs', {
 /**
  * @constant
  */
-export const procurePipeline = sqliteTable('procurePipeline', {
+export const procurePipeline = pgTable('procurePipeline', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -139,7 +139,7 @@ export const procurePipeline = sqliteTable('procurePipeline', {
 /**
  * @constant
  */
-export const cctvLogs = sqliteTable('cctvLogs', {
+export const cctvLogs = pgTable('cctvLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -151,7 +151,7 @@ export const cctvLogs = sqliteTable('cctvLogs', {
 /**
  * @constant
  */
-export const invoices = sqliteTable('invoices', {
+export const invoices = pgTable('invoices', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -167,7 +167,7 @@ export const invoices = sqliteTable('invoices', {
 /**
  * @constant
  */
-export const tasks = sqliteTable('tasks', {
+export const tasks = pgTable('tasks', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   assignedTo: text('assignedTo').notNull(),
@@ -179,32 +179,32 @@ export const tasks = sqliteTable('tasks', {
 /**
  * @constant
  */
-export const alertSettings = sqliteTable('alertSettings', {
+export const alertSettings = pgTable('alertSettings', {
   workspaceId: text('workspaceId').notNull().default('main'),
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: serial('id').primaryKey(),
   feedThresholdKg: real('feedThresholdKg').notNull(),
   eggDropPercentage: real('eggDropPercentage').notNull(),
-  notifySms: integer('notifySms', { mode: 'boolean' }).notNull(),
-  notifyEmail: integer('notifyEmail', { mode: 'boolean' }).notNull(),
-  notifyWhatsapp: integer('notifyWhatsapp', { mode: 'boolean' }).notNull(),
+  notifySms: boolean('notifySms').notNull(),
+  notifyEmail: boolean('notifyEmail').notNull(),
+  notifyWhatsapp: boolean('notifyWhatsapp').notNull(),
 });
 
 /**
  * @constant
  */
-export const alertLogs = sqliteTable('alertLogs', {
+export const alertLogs = pgTable('alertLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
   message: text('message').notNull(),
   severity: text('severity').notNull(), // 'Critical' | 'Warning' | 'Info'
-  read: integer('read', { mode: 'boolean' }).default(false),
+  read: boolean('read').default(false),
 });
 
 /**
  * @constant
  */
-export const mortalityLogs = sqliteTable('mortalityLogs', {
+export const mortalityLogs = pgTable('mortalityLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -216,18 +216,18 @@ export const mortalityLogs = sqliteTable('mortalityLogs', {
 /**
  * @constant
  */
-export const medicationTemplates = sqliteTable('medicationTemplates', {
+export const medicationTemplates = pgTable('medicationTemplates', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   targetType: text('targetType').notNull(), // 'Layers' | 'Broilers' | 'Chicks'
-  stages: text('stages', { mode: 'json' }).notNull(), // MedicationTemplateStage[]
+  stages: json('stages').notNull(), // MedicationTemplateStage[]
 });
 
 /**
  * @constant
  */
-export const medicationSchedules = sqliteTable('medicationSchedules', {
+export const medicationSchedules = pgTable('medicationSchedules', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   batchId: text('batchId').notNull(),
@@ -240,7 +240,7 @@ export const medicationSchedules = sqliteTable('medicationSchedules', {
 /**
  * @constant
  */
-export const payrollLogs = sqliteTable('payrollLogs', {
+export const payrollLogs = pgTable('payrollLogs', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   date: text('date').notNull(),
@@ -252,7 +252,7 @@ export const payrollLogs = sqliteTable('payrollLogs', {
 /**
  * @constant
  */
-export const equipment = sqliteTable('equipment', {
+export const equipment = pgTable('equipment', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -265,7 +265,7 @@ export const equipment = sqliteTable('equipment', {
 /**
  * @constant
  */
-export const contacts = sqliteTable('contacts', {
+export const contacts = pgTable('contacts', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -278,20 +278,20 @@ export const contacts = sqliteTable('contacts', {
 /**
  * @constant
  */
-export const farmPens = sqliteTable('farmPens', {
+export const farmPens = pgTable('farmPens', {
   workspaceId: text('workspaceId').notNull().default('main'),
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   capacity: integer('capacity').notNull(),
   currentBatchId: text('currentBatchId'),
   status: text('status').notNull(),
-  temperatureLogs: text('temperatureLogs', { mode: 'json' }).notNull(),
+  temperatureLogs: json('temperatureLogs').notNull(),
 });
 
 /**
  * @constant
  */
-export const workspaces = sqliteTable('workspaces', {
+export const workspaces = pgTable('workspaces', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   type: text('type').notNull(),
@@ -302,7 +302,7 @@ export const workspaces = sqliteTable('workspaces', {
 /**
  * @constant
  */
-export const systemSettings = sqliteTable('systemSettings', {
+export const systemSettings = pgTable('systemSettings', {
   id: text('id').primaryKey(),
   workspaceId: text('workspaceId').notNull().default('main'),
   eggCratePriceSmall: real('eggCratePriceSmall').default(4200),

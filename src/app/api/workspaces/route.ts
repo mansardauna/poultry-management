@@ -2,37 +2,12 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { createClient } from '@libsql/client';
 import { db } from '@/lib/drizzle';
 import { schema } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 
-const databaseUrl = process.env.DATABASE_URL ?? 'file:src/data/database.sqlite';
-const authToken = process.env.DATABASE_AUTH_TOKEN;
-
-function getRawClient() {
-  return createClient({
-    url: databaseUrl,
-    ...(authToken ? { authToken } : {})
-  });
-}
-
-async function ensureWorkspaceTable() {
-  const client = getRawClient();
-  await client.execute({
-    sql: `CREATE TABLE IF NOT EXISTS workspaces (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      type TEXT NOT NULL,
-      createdAt TEXT NOT NULL
-    )`
-  });
-  await client.close();
-}
-
 /** Exported function GET */
 export async function GET() {
-  await ensureWorkspaceTable();
   const workspaces = await db.select().from(schema.workspaces);
 
   if (workspaces.length === 0) {
@@ -51,7 +26,6 @@ export async function GET() {
 
 /** Exported function POST */
 export async function POST(request: Request) {
-  await ensureWorkspaceTable();
   const body = await request.json();
 
   if (!body?.id || !body?.name || !body?.type) {
@@ -71,7 +45,6 @@ export async function POST(request: Request) {
 
 /** Exported function PUT */
 export async function PUT(request: Request) {
-  await ensureWorkspaceTable();
   const body = await request.json();
   const { id, name, type } = body;
 
@@ -88,7 +61,6 @@ export async function PUT(request: Request) {
 
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
-  await ensureWorkspaceTable();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 
