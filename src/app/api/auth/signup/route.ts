@@ -68,10 +68,14 @@ export async function POST(request: Request) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup Database Error:', error);
     return NextResponse.json(
-      { error: `Internal server error: ${error instanceof Error ? error.message : String(error)}` },
+      { error: `Internal server error: ${error.message} | Code: ${error.code} | Detail: ${error.detail} | Hint: ${error.hint}` },
+      { status: 500 }
+    );
+  }
+}
       { status: 500 }
     );
   }
