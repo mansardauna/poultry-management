@@ -1,38 +1,12 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
+import bcrypt from 'bcryptjs';
+import { db } from '@/lib/drizzle';
+import { schema } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
 
 type AuthRole = 'Admin' | 'Manager' | 'Staff';
-
-type AuthUser = {
-  username: string;
-  password: string;
-  role: AuthRole;
-};
-
-const authUsers: AuthUser[] = [
-  {
-    role: 'Admin',
-    username: process.env.PFMS_ADMIN_USERNAME ?? 'owner',
-    password: process.env.PFMS_ADMIN_PASSWORD ?? 'PoultryFarm@2026!',
-  },
-  {
-    role: 'Manager',
-    username: process.env.PFMS_MANAGER_USERNAME ?? 'manager',
-    password: process.env.PFMS_MANAGER_PASSWORD ?? 'Manager@2026!',
-  },
-  {
-    role: 'Staff',
-    username: process.env.PFMS_STAFF_USERNAME ?? 'staff',
-    password: process.env.PFMS_STAFF_PASSWORD ?? 'Staff@2026!',
-  },
-];
-
-function findUser(username: string) {
-  return authUsers.find(
-    (user) => user.username.toLowerCase() === username.toLowerCase(),
-  );
-}
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -47,9 +21,28 @@ export async function POST(request: Request) {
     );
   }
 
-  const user = findUser(username);
+  // Check if database has any users
+  const allUsers = await db.select().from(schema.users).limit(1);
+  
+  if (allUsers.length === 0) {
+    // Smart Initialization: Create the first user as Admin
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync(password, salt);
+    
+    await db.insert(schema.users).values({
+      id: `usr_${Date.now()}`,
+      username: username,
+      passwordHash: passwordHash,
+      role: 'Admin',
+      createdAt: new Date().toISOString(),
+    });
+  }
 
-  if (!user || user.password !== password) {
+  // Authenticate user
+  const foundUsers = await db.select().from(schema.users).where(eq(schema.users.username, username)).limit(1);
+  const user = foundUsers[0];
+
+  if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
     return NextResponse.json(
       { error: 'Invalid username or password' },
       { status: 401 },

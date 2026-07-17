@@ -313,6 +313,18 @@ export const systemSettings = pgTable('systemSettings', {
 });
 
 /**
+ * @constant
+ */
+export const users = pgTable('users', {
+  id: text('id').primaryKey(),
+  workspaceId: text('workspaceId').notNull().default('main'),
+  username: text('username').notNull().unique(),
+  passwordHash: text('passwordHash').notNull(),
+  role: text('role').notNull(),
+  createdAt: text('createdAt').notNull(),
+});
+
+/**
  * Database schema.
  */
 /**
@@ -343,4 +355,5 @@ export const schema = {
   farmPens,
   workspaces,
   systemSettings,
+  users,
 };
