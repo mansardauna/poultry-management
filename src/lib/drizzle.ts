@@ -4,6 +4,6 @@ import { schema } from './schema';
 
 const databaseUrl = process.env.DATABASE_URL ?? 'postgresql://postgres:password@localhost:5432/postgres';
 
-const client = postgres(databaseUrl, { prepare: false });
+const client = postgres(databaseUrl, { prepare: false, ssl: 'require' });
 
 export const db = drizzle(client, { schema });
