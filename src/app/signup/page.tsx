@@ -8,23 +8,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 /** Exported function default */
-export default function LoginPage() {
+export default function SignupPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('Staff');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, role }),
     });
 
     setIsSubmitting(false);
@@ -36,7 +37,7 @@ export default function LoginPage() {
     }
 
     const body = await response.json().catch(() => null);
-    setError(body?.error || 'Invalid username or password');
+    setError(body?.error || 'Error creating account');
   };
 
   return (
@@ -55,16 +56,16 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 to-transparent pointer-events-none" />
         </div>
         
-        {/* Right Side: Login Form */}
+        {/* Right Side: Signup Form */}
         <div className="w-full md:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white relative">
           <div className="mb-8 text-center md:text-left">
             <h1 className="text-3xl font-bold uppercase tracking-wider text-slate-800 mb-2">
-              Welcome Back
+              Create Account
             </h1>
-            <p className="text-sm font-medium text-indigo-600">Gaa Saka Poultry Farm Management</p>
+            <p className="text-sm font-medium text-indigo-600">Join Gaa Saka Poultry Farm</p>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleSignup} className="space-y-5">
             {error && (
               <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm text-center border border-red-200 font-medium">
                 {error}
@@ -79,9 +80,21 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  placeholder="Enter your username"
+                  placeholder="Choose a username"
                   required
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Role</label>
+                <select 
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
+                >
+                  <option value="Admin">Admin</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Staff">Staff</option>
+                </select>
               </div>
               <div className="relative">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
@@ -90,7 +103,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  placeholder="Enter your password"
+                  placeholder="Choose a secure password"
                   required
                 />
                 <button 
@@ -108,12 +121,12 @@ export default function LoginPage() {
               disabled={isSubmitting}
               className="w-full bg-indigo-600 text-white font-bold text-sm py-3.5 mt-2 rounded-lg uppercase tracking-wider hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-md shadow-indigo-200"
             >
-              {isSubmitting ? 'Authenticating…' : 'Secure Login'}
+              {isSubmitting ? 'Creating Account…' : 'Sign Up'}
             </button>
             
             <div className="text-center mt-4">
-              <Link href="/signup" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
-                Don't have an account? Sign up here
+              <Link href="/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+                Already have an account? Login here
               </Link>
             </div>
           </form>
