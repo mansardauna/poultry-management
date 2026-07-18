@@ -2,16 +2,18 @@
 import { supabase } from "@/lib/supabase";
 import { StaffClient } from "@/components/features/staff/StaffClient";
 import type { Staff, StaffTask } from "@/data/types";
-import { cookies } from 'next/headers';
+import { getAuthUser } from '@/lib/auth';
+import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function StaffPage() {
-  const cookieStore = await cookies();
-  const role = cookieStore.get('pfms_auth')?.value || 'Staff';
+  const user = await getAuthUser();
+  const role = user?.role || 'Staff';
+  const workspaceId = await getWorkspaceId();
 
   const [staffRaw, tasksRaw] = await Promise.all([
-    supabase.from('staff').select('*'),
-    supabase.from('tasks').select('*')
+    supabase.from('staff').select('*').eq('workspaceId', workspaceId),
+    supabase.from('tasks').select('*').eq('workspaceId', workspaceId)
   ]);
   const staff = (staffRaw.data || []) as Staff[];
   const tasks = (tasksRaw.data || []) as StaffTask[];

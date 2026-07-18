@@ -1,12 +1,13 @@
 'use strict';
 import { ContactsClient } from "@/components/features/contacts/ContactsClient";
-import { cookies } from "next/headers";
+import { getAuthUser } from '@/lib/auth';
+import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function ContactsPage() {
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get('pfms_auth');
-  const role = authCookie?.value || 'Staff';
+  const user = await getAuthUser();
+  const role = user?.role || 'Staff';
+  const workspaceId = await getWorkspaceId();
 
   return <ContactsClient role={role} />;
 }

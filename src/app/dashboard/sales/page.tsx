@@ -2,17 +2,19 @@
 import { supabase } from "@/lib/supabase";
 import { SalesClient } from "@/components/features/sales/SalesClient";
 import type { Sale, Invoice, ChickenBatch } from "@/data/types";
-import { cookies } from 'next/headers';
+import { getAuthUser } from '@/lib/auth';
+import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function SalesPage() {
-  const cookieStore = await cookies();
-  const role = cookieStore.get('pfms_auth')?.value || 'Staff';
+  const user = await getAuthUser();
+  const role = user?.role || 'Staff';
+  const workspaceId = await getWorkspaceId();
 
   const [salesRaw, invoicesRaw, batchesRaw] = await Promise.all([
-    supabase.from('sales').select('*'),
-    supabase.from('invoices').select('*'),
-    supabase.from('batches').select('*')
+    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
+    supabase.from('invoices').select('*').eq('workspaceId', workspaceId),
+    supabase.from('batches').select('*').eq('workspaceId', workspaceId)
   ]);
   const sales = (salesRaw.data || []) as Sale[];
   const invoices = (invoicesRaw.data || []) as Invoice[];

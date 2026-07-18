@@ -54,6 +54,8 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
   const [salary, setSalary] = useState('');
   const [contact, setContact] = useState('');
   const [assignedBranches, setAssignedBranches] = useState<string[]>([]);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const { workspaces } = useWorkspace();
 
   // Assign Task Form
@@ -87,6 +89,8 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
     setSalary('');
     setContact('');
     setAssignedBranches([]);
+    setUsername('');
+    setPassword('');
   };
 
   const handleOpenTaskModal = () => {
@@ -111,7 +115,9 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
           salary: Number(salary),
           contact,
           attendanceDays: 0,
-          assignedBranches
+          assignedBranches,
+          username,
+          password
         })
       });
 
@@ -483,6 +489,25 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
             onChange={(e) => setContact(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
+          <TextField
+            label="Staff Login Username"
+            fullWidth
+            variant="outlined"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
+            helperText="Staff member will log in with this username"
+          />
+          <TextField
+            label="Staff Login Password"
+            type="password"
+            fullWidth
+            variant="outlined"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
+            helperText="Set a password for their login"
+          />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Assigned Branches</InputLabel>
             <Select
@@ -512,7 +537,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
           <MuiButton 
             onClick={handleAddStaff} 
             variant="contained" 
-            disabled={!name || !staffRole || !salary}
+            disabled={!name || !staffRole || !salary || !username || !password}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
             Add Staff

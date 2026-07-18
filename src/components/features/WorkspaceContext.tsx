@@ -52,14 +52,33 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await fetch('/api/workspaces');
         const data = res.ok ? await res.json() : [];
-        const loadedWorkspaces = Array.isArray(data) && data.length > 0 ? data : [DEFAULT_WORKSPACE];
+
+        // Decode role from pfms_auth cookie client-side
+        const token = Cookies.get('pfms_auth');
+        let role = 'Staff';
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            role = payload.role || 'Staff';
+          } catch (e) {
+            console.error('Failed to decode cookie role client-side', e);
+          }
+        }
+
+        const loadedWorkspaces = Array.isArray(data) && data.length > 0 
+          ? data 
+          : (role === 'Admin' ? [] : [DEFAULT_WORKSPACE]);
 
         setWorkspaces(loadedWorkspaces);
 
-        const cookieWorkspaceId = Cookies.get('pfms_workspace');
-        const found = loadedWorkspaces.find((workspace) => workspace.id === cookieWorkspaceId) ?? loadedWorkspaces[0];
-        setActiveWorkspaceState(found);
-        Cookies.set('pfms_workspace', found.id, { path: '/' });
+        if (loadedWorkspaces.length > 0) {
+          const cookieWorkspaceId = Cookies.get('pfms_workspace');
+          const found = loadedWorkspaces.find((workspace) => workspace.id === cookieWorkspaceId) ?? loadedWorkspaces[0];
+          setActiveWorkspaceState(found);
+          Cookies.set('pfms_workspace', found.id, { path: '/' });
+        } else {
+          setActiveWorkspaceState(null);
+        }
       } catch (error) {
         console.error('Failed to load workspaces', error);
         setWorkspaces([DEFAULT_WORKSPACE]);

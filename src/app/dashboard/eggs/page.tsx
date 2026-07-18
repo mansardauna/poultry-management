@@ -3,19 +3,20 @@ import { supabase } from "@/lib/supabase";
 import { EggsClient } from "@/components/features/eggs/EggsClient";
 import type { EggRecord, ChickenBatch, CushionAudit, MaturationLog } from "@/data/types";
 
-import { cookies } from 'next/headers';
+import { getAuthUser } from '@/lib/auth';
+import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function EggsPage() {
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get('pfms_auth');
-  const role = authCookie?.value || 'Staff';
+  const user = await getAuthUser();
+  const role = user?.role || 'Staff';
+  const workspaceId = await getWorkspaceId();
 
   const [eggsRaw, batchesRaw, cushionAuditsRaw, maturationLogsRaw] = await Promise.all([
-    supabase.from('eggs').select('*'),
-    supabase.from('batches').select('*'),
-    supabase.from('cushionAudits').select('*'),
-    supabase.from('maturationLogs').select('*')
+    supabase.from('eggs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('batches').select('*').eq('workspaceId', workspaceId),
+    supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId),
+    supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId)
   ]);
   const eggs = (eggsRaw.data || []) as EggRecord[];
   const batches = (batchesRaw.data || []) as ChickenBatch[];

@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSidebar } from './SidebarContext';
 import {
   Box,
@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
-import { WorkspaceOnboarding } from '../features/WorkspaceOnboarding';
+import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { useLanguage } from '../features/LanguageContext';
 import toast from 'react-hot-toast';
 
@@ -163,6 +163,12 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
 
   const isAdmin = role === 'Admin';
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
+
+  useEffect(() => {
+    if (role === 'Admin' && workspaces.length === 0) {
+      setShowOnboarding(true);
+    }
+  }, [workspaces, role]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -375,7 +381,7 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
       )}
 
       {showOnboarding && (
-        <WorkspaceOnboarding onClose={() => setShowOnboarding(false)} />
+        <OnboardingWizard onClose={() => setShowOnboarding(false)} />
       )}
 
       {editingWorkspace && (

@@ -1,5 +1,6 @@
 'use strict';
 import { supabase } from "@/lib/supabase";
+import { getWorkspaceId } from "@/lib/workspace";
 import { DashboardClient } from "@/components/features/dashboard/DashboardClient";
 import type {
   DatabaseSchema,
@@ -29,6 +30,7 @@ import type {
 
 /** Exported function default */
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const workspaceId = await getWorkspaceId();
   const searchParams = await props.searchParams;
   const page = parseInt((searchParams?.page as string) || '1');
   const offset = (page - 1) * 50;
@@ -38,28 +40,28 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     procurePipelineRaw, cctvLogsRaw, invoicesRaw, tasksRaw, alertSettingsRaw, alertLogsRaw, mortalityLogsRaw,
     medicationTemplatesRaw, medicationSchedulesRaw, payrollLogsRaw, equipmentRaw, contactsRaw, farmPensRaw
   ] = await Promise.all([
-    supabase.from('batches').select('*').range(offset, offset + 49),
-    supabase.from('eggs').select('*').range(offset, offset + 49),
-    supabase.from('feeds').select('*').range(offset, offset + 49),
-    supabase.from('feedLogs').select('*').range(offset, offset + 49),
-    supabase.from('staff').select('*').range(offset, offset + 49),
-    supabase.from('sales').select('*').range(offset, offset + 49),
-    supabase.from('expenses').select('*').range(offset, offset + 49),
-    supabase.from('cushionAudits').select('*').range(offset, offset + 49),
-    supabase.from('maturationLogs').select('*').range(offset, offset + 49),
-    supabase.from('procurePipeline').select('*').range(offset, offset + 49),
-    supabase.from('cctvLogs').select('*').range(offset, offset + 49),
-    supabase.from('invoices').select('*').range(offset, offset + 49),
-    supabase.from('tasks').select('*').range(offset, offset + 49),
-    supabase.from('alertSettings').select('*').limit(1),
-    supabase.from('alertLogs').select('*').range(offset, offset + 49),
-    supabase.from('mortalityLogs').select('*').range(offset, offset + 49),
-    supabase.from('medicationTemplates').select('*').range(offset, offset + 49),
-    supabase.from('medicationSchedules').select('*').range(offset, offset + 49),
-    supabase.from('payrollLogs').select('*').range(offset, offset + 49),
-    supabase.from('equipment').select('*').range(offset, offset + 49),
-    supabase.from('contacts').select('*').range(offset, offset + 49),
-    supabase.from('farmPens').select('*').range(offset, offset + 49)
+    supabase.from('batches').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('eggs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('feeds').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('feedLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('staff').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('sales').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('expenses').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('procurePipeline').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('cctvLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('invoices').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('tasks').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId).limit(1),
+    supabase.from('alertLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('mortalityLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('medicationTemplates').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('medicationSchedules').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('payrollLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('equipment').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('contacts').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
+    supabase.from('farmPens').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49)
   ]);
 
   const batches = batchesRaw.data || [];

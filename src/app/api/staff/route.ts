@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
+import { getAuthUser } from '@/lib/auth';
+import bcrypt from 'bcryptjs';
 
 /** Exported function GET */
 export async function GET() {
@@ -69,6 +71,9 @@ export async function POST(request: Request) {
     }
 
     // Default: Add new staff member
+    const user = await getAuthUser();
+    const adminUsername = user?.username || 'admin';
+
     const newStaff = {
       id: 's' + Date.now().toString().slice(-8),
       workspaceId,
@@ -82,6 +87,20 @@ export async function POST(request: Request) {
     
     await supabase.from('staff').insert([newStaff]);
     
+    // Create user login credential
+    if (body.username && body.password) {
+      const salt = bcrypt.genSaltSync(10);
+      const passwordHash = bcrypt.hashSync(body.password, salt);
+      await supabase.from('users').insert([{
+        id: `usr_${Date.now()}`,
+        username: body.username.trim(),
+        passwordHash: passwordHash,
+        role: body.role === 'Manager' ? 'Manager' : 'Staff',
+        createdBy: adminUsername,
+        createdAt: new Date().toISOString()
+      }]);
+    }
+    
     await supabase.from('alertLogs').insert([{
       id: 'al' + Date.now().toString().slice(-8),
       workspaceId,
@@ -92,8 +111,9 @@ export async function POST(request: Request) {
     }]);
 
     return NextResponse.json(newStaff, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to manage staff operations' }, { status: 500 });
+  } catch (err: any) {
+    console.error('Staff creation failed:', err);
+    return NextResponse.json({ error: 'Failed to manage staff operations: ' + err.message }, { status: 500 });
   }
 }
 

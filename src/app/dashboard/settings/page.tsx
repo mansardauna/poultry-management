@@ -2,15 +2,14 @@
 import { supabase } from "@/lib/supabase";
 import { SettingsClient } from "@/components/features/settings/SettingsClient";
 import { getWorkspaceId } from "@/lib/workspace";
-import { cookies } from "next/headers";
+import { getAuthUser } from "@/lib/auth";
 
 /** Exported function default */
 export default async function SettingsPage() {
   const workspaceId = await getWorkspaceId();
   
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get('pfms_auth');
-  const role = authCookie?.value || 'Staff';
+  const user = await getAuthUser();
+  const role = user?.role || 'Staff';
 
   const alertSettings = (await supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId).limit(1)).data?.[0] ?? {
     feedThresholdKg: 50,
@@ -40,7 +39,7 @@ export default async function SettingsPage() {
 
   const workspaces = (await supabase.from('workspaces').select('*')).data || [];
   
-  const allStaff = (await supabase.from('staff').select('*')).data || [];
+  const allStaff = (await supabase.from('staff').select('*').eq('workspaceId', workspaceId)).data || [];
 
   return <SettingsClient 
     initialSettings={alertSettings} 

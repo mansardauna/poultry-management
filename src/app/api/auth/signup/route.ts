@@ -9,18 +9,11 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const username = typeof body?.username === 'string' ? body.username.trim() : '';
   const password = typeof body?.password === 'string' ? body.password : '';
-  const role = typeof body?.role === 'string' ? body.role : '';
+  const role = 'Admin';
 
-  if (!username || !password || !role) {
+  if (!username || !password) {
     return NextResponse.json(
-      { error: 'Username, password, and role are required' },
-      { status: 400 },
-    );
-  }
-
-  if (!['Admin', 'Manager', 'Staff'].includes(role)) {
-    return NextResponse.json(
-      { error: 'Invalid role selected' },
+      { error: 'Username and password are required' },
       { status: 400 },
     );
   }

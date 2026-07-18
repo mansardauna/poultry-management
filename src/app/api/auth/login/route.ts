@@ -30,7 +30,11 @@ export async function POST(request: Request) {
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-please-change');
-    const token = await new SignJWT({ role: user.role, username: user.username })
+    const token = await new SignJWT({ 
+      role: user.role, 
+      username: user.username,
+      createdBy: user.createdBy || null 
+    })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('24h')

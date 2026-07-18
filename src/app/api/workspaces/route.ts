@@ -3,38 +3,46 @@
 
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getAuthUser } from '@/lib/auth';
 
 /** Exported function GET */
 export async function GET() {
-  const { data: workspaces } = await supabase.from('workspaces').select('*');
-
-  if (!workspaces || workspaces.length === 0) {
-    const defaultWorkspace = {
-      id: 'main',
-      name: 'Main Farm',
-      type: 'Main',
-      createdAt: new Date().toISOString(),
-    };
-    await supabase.from('workspaces').insert([defaultWorkspace]);
-    return NextResponse.json([defaultWorkspace]);
+  const user = await getAuthUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  return NextResponse.json(workspaces);
+  const owner = user.role === 'Admin' ? user.username : (user.createdBy || 'admin');
+
+  const { data: workspaces } = await supabase
+    .from('workspaces')
+    .select('*')
+    .eq('ownerUsername', owner);
+
+  return NextResponse.json(workspaces || []);
 }
 
 /** Exported function POST */
 export async function POST(request: Request) {
+  const user = await getAuthUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await request.json();
 
   if (!body?.id || !body?.name || !body?.type) {
     return NextResponse.json({ error: 'Missing workspace id, name, or type' }, { status: 400 });
   }
 
+  const owner = user.role === 'Admin' ? user.username : (user.createdBy || 'admin');
+
   const createdWorkspace = {
     id: body.id,
     name: body.name,
     type: body.type,
     createdAt: new Date().toISOString(),
+    ownerUsername: owner,
   };
 
   await supabase.from('workspaces').insert([createdWorkspace]);

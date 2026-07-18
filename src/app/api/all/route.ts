@@ -2,35 +2,38 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+import { getWorkspaceId } from '@/lib/workspace';
+
 /** Exported function GET */
 export async function GET() {
+  const workspaceId = await getWorkspaceId();
   const [
     batches, eggs, feeds, feedLogs, staff, sales, expenses, cushionAudits, maturationLogs,
     procurePipeline, cctvLogs, invoices, tasks, alertSettingsRecords, alertLogs, mortalityLogs,
     medicationTemplates, medicationSchedules, payrollLogs, equipment, contacts, farmPens
   ] = await Promise.all([
-    supabase.from('batches').select('*'),
-    supabase.from('eggs').select('*'),
-    supabase.from('feeds').select('*'),
-    supabase.from('feedLogs').select('*'),
-    supabase.from('staff').select('*'),
-    supabase.from('sales').select('*'),
-    supabase.from('expenses').select('*'),
-    supabase.from('cushionAudits').select('*'),
-    supabase.from('maturationLogs').select('*'),
-    supabase.from('procurePipeline').select('*'),
-    supabase.from('cctvLogs').select('*'),
-    supabase.from('invoices').select('*'),
-    supabase.from('tasks').select('*'),
-    supabase.from('alertSettings').select('*'),
-    supabase.from('alertLogs').select('*'),
-    supabase.from('mortalityLogs').select('*'),
-    supabase.from('medicationTemplates').select('*'),
-    supabase.from('medicationSchedules').select('*'),
-    supabase.from('payrollLogs').select('*'),
-    supabase.from('equipment').select('*'),
-    supabase.from('contacts').select('*'),
-    supabase.from('farmPens').select('*')
+    supabase.from('batches').select('*').eq('workspaceId', workspaceId),
+    supabase.from('eggs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('feeds').select('*').eq('workspaceId', workspaceId),
+    supabase.from('feedLogs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('staff').select('*').eq('workspaceId', workspaceId),
+    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
+    supabase.from('expenses').select('*').eq('workspaceId', workspaceId),
+    supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId),
+    supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('procurePipeline').select('*').eq('workspaceId', workspaceId),
+    supabase.from('cctvLogs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('invoices').select('*').eq('workspaceId', workspaceId),
+    supabase.from('tasks').select('*').eq('workspaceId', workspaceId),
+    supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId),
+    supabase.from('alertLogs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('mortalityLogs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('medicationTemplates').select('*').eq('workspaceId', workspaceId),
+    supabase.from('medicationSchedules').select('*').eq('workspaceId', workspaceId),
+    supabase.from('payrollLogs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('equipment').select('*').eq('workspaceId', workspaceId),
+    supabase.from('contacts').select('*').eq('workspaceId', workspaceId),
+    supabase.from('farmPens').select('*').eq('workspaceId', workspaceId)
   ]);
 
   const alertSettings = alertSettingsRecords.data?.[0] || {

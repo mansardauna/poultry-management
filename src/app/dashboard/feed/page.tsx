@@ -3,19 +3,20 @@ import { supabase } from "@/lib/supabase";
 import { FeedClient } from "@/components/features/feed/FeedClient";
 import type { FeedInventory, DailyFeedLog, ChickenBatch, ProcurePipeline } from "@/data/types";
 
-import { cookies } from 'next/headers';
+import { getAuthUser } from '@/lib/auth';
+import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function FeedPage() {
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get('pfms_auth');
-  const role = authCookie?.value || 'Staff';
+  const user = await getAuthUser();
+  const role = user?.role || 'Staff';
+  const workspaceId = await getWorkspaceId();
 
   const [feedsRaw, feedLogsRaw, batchesRaw, procurePipelineRaw] = await Promise.all([
-    supabase.from('feeds').select('*'),
-    supabase.from('feedLogs').select('*'),
-    supabase.from('batches').select('*'),
-    supabase.from('procurePipeline').select('*')
+    supabase.from('feeds').select('*').eq('workspaceId', workspaceId),
+    supabase.from('feedLogs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('batches').select('*').eq('workspaceId', workspaceId),
+    supabase.from('procurePipeline').select('*').eq('workspaceId', workspaceId)
   ]);
   
   const feeds = (feedsRaw.data || []) as FeedInventory[];

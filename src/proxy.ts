@@ -23,6 +23,8 @@ export async function proxy(request: NextRequest) {
     
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-user-role', payload.role as string);
+    requestHeaders.set('x-user-username', payload.username as string);
+    requestHeaders.set('x-user-created-by', (payload.createdBy as string) || '');
     
     return NextResponse.next({
       request: {
