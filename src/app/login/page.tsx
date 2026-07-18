@@ -111,12 +111,13 @@ export default function LoginPage() {
               {isSubmitting ? 'Authenticating…' : 'Secure Login'}
             </button>
             
-            <div className="text-center mt-4">
-              <Link href="/signup" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
-                Don't have an account? Sign up here
-              </Link>
-            </div>
           </form>
+          
+          <div className="text-center mt-6 relative z-10">
+            <Link href="/signup" className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer block p-2">
+              Don't have an account? Sign up here
+            </Link>
+          </div>
           
           <div className="mt-8 text-center text-xs text-slate-400 font-medium">
             <p>&copy; 2026 Gaa Saka Farms. All rights reserved.</p>

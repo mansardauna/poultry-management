@@ -38,13 +38,21 @@ export async function POST(request: Request) {
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(password, salt);
     
-    await supabase.from('users').insert([{
+    const { error: insertError } = await supabase.from('users').insert([{
       id: `usr_${Date.now()}`,
       username: username,
       passwordHash: passwordHash,
       role: role,
       createdAt: new Date().toISOString(),
     }]);
+
+    if (insertError) {
+      console.error('Insert Error:', insertError);
+      return NextResponse.json(
+        { error: `Database blocked signup. Ensure RLS is disabled on the users table. Details: ${insertError.message}` },
+        { status: 500 }
+      );
+    }
 
     // Auto-login after signup
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-please-change');
