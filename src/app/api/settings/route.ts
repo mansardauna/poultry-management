@@ -1,20 +1,20 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   
-  const [alertSettings] = await db.select().from(schema.alertSettings).where(eq(schema.alertSettings.workspaceId, workspaceId)).limit(1);
-  const [systemSettings] = await db.select().from(schema.systemSettings).where(eq(schema.systemSettings.workspaceId, workspaceId)).limit(1);
+  const [alertSettingsRes, systemSettingsRes] = await Promise.all([
+    supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId).limit(1),
+    supabase.from('systemSettings').select('*').eq('workspaceId', workspaceId).limit(1)
+  ]);
 
   return NextResponse.json({
-    alertSettings: alertSettings || {},
-    systemSettings: systemSettings || {}
+    alertSettings: alertSettingsRes.data?.[0] || {},
+    systemSettings: systemSettingsRes.data?.[0] || {}
   });
 }
 
@@ -34,10 +34,8 @@ export async function POST(request: Request) {
         adminPhone: body.adminPhone || '+2340000000000'
       };
 
-      await db.transaction(async (tx) => {
-        await tx.delete(schema.systemSettings).where(eq(schema.systemSettings.workspaceId, workspaceId));
-        await tx.insert(schema.systemSettings).values(newSystemSettings);
-      });
+      await supabase.from('systemSettings').delete().eq('workspaceId', workspaceId);
+      await supabase.from('systemSettings').insert([newSystemSettings]);
 
       return NextResponse.json({ success: true, systemSettings: newSystemSettings });
     }
@@ -52,19 +50,17 @@ export async function POST(request: Request) {
       notifyWhatsapp: !!body.notifyWhatsapp
     };
 
-    await db.transaction(async (tx) => {
-      await tx.delete(schema.alertSettings).where(eq(schema.alertSettings.workspaceId, workspaceId));
-      await tx.insert(schema.alertSettings).values(newSettings);
-      
-      await tx.insert(schema.alertLogs).values({
-        id: 'al' + Date.now().toString().slice(-8),
-        workspaceId,
-        date: new Date().toISOString().split('T')[0],
-        message: `SETTINGS UPDATED: Feed critical alert set to ${newSettings.feedThresholdKg}kg.`,
-        severity: 'Info',
-        read: false
-      });
-    });
+    await supabase.from('alertSettings').delete().eq('workspaceId', workspaceId);
+    await supabase.from('alertSettings').insert([newSettings]);
+    
+    await supabase.from('alertLogs').insert([{
+      id: 'al' + Date.now().toString().slice(-8),
+      workspaceId,
+      date: new Date().toISOString().split('T')[0],
+      message: `SETTINGS UPDATED: Feed critical alert set to ${newSettings.feedThresholdKg}kg.`,
+      severity: 'Info',
+      read: false
+    }]);
 
     return NextResponse.json({ success: true, alertSettings: newSettings });
   } catch {

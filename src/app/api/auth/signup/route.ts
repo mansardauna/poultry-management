@@ -2,9 +2,7 @@
 import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
-import { db } from '@/lib/drizzle';
-import { schema } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -29,8 +27,8 @@ export async function POST(request: Request) {
 
   try {
     // Check if user already exists
-    const existingUser = await db.select().from(schema.users).where(eq(schema.users.username, username)).limit(1);
-    if (existingUser.length > 0) {
+    const { data: existingUser } = await supabase.from('users').select('*').eq('username', username).limit(1);
+    if (existingUser && existingUser.length > 0) {
       return NextResponse.json(
         { error: 'Username already exists' },
         { status: 409 },
@@ -40,13 +38,13 @@ export async function POST(request: Request) {
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(password, salt);
     
-    await db.insert(schema.users).values({
+    await supabase.from('users').insert([{
       id: `usr_${Date.now()}`,
       username: username,
       passwordHash: passwordHash,
       role: role,
       createdAt: new Date().toISOString(),
-    });
+    }]);
 
     // Auto-login after signup
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-please-change');
@@ -71,7 +69,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Signup Database Error:', error);
     return NextResponse.json(
-      { error: `Internal server error: ${error.message} | Code: ${error.code} | Detail: ${error.detail} | Hint: ${error.hint}` },
+      { error: `Internal server error: ${error.message}` },
       { status: 500 }
     );
   }

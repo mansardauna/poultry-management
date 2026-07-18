@@ -1,21 +1,21 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { and, eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const sales = await db.select().from(schema.sales).where(eq(schema.sales.workspaceId, workspaceId));
-  const invoices = await db.select().from(schema.invoices).where(eq(schema.invoices.workspaceId, workspaceId));
-  const batches = await db.select().from(schema.batches).where(eq(schema.batches.workspaceId, workspaceId));
+  const [salesRes, invoicesRes, batchesRes] = await Promise.all([
+    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
+    supabase.from('invoices').select('*').eq('workspaceId', workspaceId),
+    supabase.from('batches').select('*').eq('workspaceId', workspaceId)
+  ]);
   
   return NextResponse.json({
-    sales,
-    invoices,
-    batches
+    sales: salesRes.data || [],
+    invoices: invoicesRes.data || [],
+    batches: batchesRes.data || []
   });
 }
 
@@ -40,57 +40,56 @@ export async function POST(request: Request) {
       status: body.status || 'Paid'
     };
     
-    await db.transaction(async (tx) => {
-      await tx.insert(schema.sales).values(newSale);
+    await supabase.from('sales').insert([newSale]);
       
-      if (newSale.type === 'Chickens') {
-        const batchId = body.batchId || 'b3'; // Default to broilers b3
-        const [batch] = await tx.select().from(schema.batches).where(and(eq(schema.batches.id, batchId), eq(schema.batches.workspaceId, workspaceId)));
-        if (batch) {
-          const qtyToSubtract = Math.min(batch.quantity, newSale.quantity);
-          await tx.update(schema.batches)
-            .set({ quantity: batch.quantity - qtyToSubtract })
-            .where(and(eq(schema.batches.id, batchId), eq(schema.batches.workspaceId, workspaceId)));
-          
-          await tx.insert(schema.alertLogs).values({
-            id: 'al' + Date.now().toString().slice(-8),
-            workspaceId,
-            date,
-            message: `STOCK DEDUCTION: Sold ${qtyToSubtract} birds from Batch ${batch.id} (${batch.breed}). New flock size: ${batch.quantity - qtyToSubtract} birds.`,
-            severity: 'Info',
-            read: false
-          });
-        }
-      } else if (newSale.type === 'Eggs') {
-        await tx.insert(schema.alertLogs).values({
+    if (newSale.type === 'Chickens') {
+      const batchId = body.batchId || 'b3'; // Default to broilers b3
+      const { data: batches } = await supabase.from('batches').select('*').eq('id', batchId).eq('workspaceId', workspaceId);
+      const batch = batches?.[0];
+      if (batch) {
+        const qtyToSubtract = Math.min(batch.quantity, newSale.quantity);
+        await supabase.from('batches')
+          .update({ quantity: batch.quantity - qtyToSubtract })
+          .eq('id', batchId).eq('workspaceId', workspaceId);
+        
+        await supabase.from('alertLogs').insert([{
           id: 'al' + Date.now().toString().slice(-8),
           workspaceId,
           date,
-          message: `SALES OUTFLOW: Transferred ${newSale.quantity} eggs to ${newSale.customerName} for ₦${newSale.totalAmount.toLocaleString()}`,
+          message: `STOCK DEDUCTION: Sold ${qtyToSubtract} birds from Batch ${batch.id} (${batch.breed}). New flock size: ${batch.quantity - qtyToSubtract} birds.`,
           severity: 'Info',
           read: false
-        });
+        }]);
       }
-
-      const newInvoice = {
-        id: 'inv' + Date.now().toString().slice(-8),
+    } else if (newSale.type === 'Eggs') {
+      await supabase.from('alertLogs').insert([{
+        id: 'al' + Date.now().toString().slice(-8),
         workspaceId,
-        date: newSale.date,
-        saleId: newSaleId,
-        customerName: newSale.customerName,
-        items: `${newSale.type} Crate / Batch Sale`,
-        quantity: newSale.quantity,
-        unitPrice: Math.round(newSale.totalAmount / newSale.quantity),
-        totalAmount: newSale.totalAmount,
-        status: newSale.status === 'Paid' ? 'Paid' : 'Pending'
-      };
-      
-      await tx.insert(schema.invoices).values(newInvoice);
-    });
+        date,
+        message: `SALES OUTFLOW: Transferred ${newSale.quantity} eggs to ${newSale.customerName} for ₦${newSale.totalAmount.toLocaleString()}`,
+        severity: 'Info',
+        read: false
+      }]);
+    }
+
+    const newInvoice = {
+      id: 'inv' + Date.now().toString().slice(-8),
+      workspaceId,
+      date: newSale.date,
+      saleId: newSaleId,
+      customerName: newSale.customerName,
+      items: `${newSale.type} Crate / Batch Sale`,
+      quantity: newSale.quantity,
+      unitPrice: Math.round(newSale.totalAmount / newSale.quantity),
+      totalAmount: newSale.totalAmount,
+      status: newSale.status === 'Paid' ? 'Paid' : 'Pending'
+    };
+    
+    await supabase.from('invoices').insert([newInvoice]);
 
     // Re-construct exactly as intended for response
     const invoiceRecord = {
-        id: 'inv' + Date.now().toString().slice(-8),
+        id: newInvoice.id,
         date: newSale.date,
         saleId: newSaleId,
         customerName: newSale.customerName,
@@ -114,7 +113,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.update(schema.sales).set(fields).where(and(eq(schema.sales.id, id), eq(schema.sales.workspaceId, workspaceId)));
+    await supabase.from('sales').update(fields).eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update sale' }, { status: 500 });
@@ -128,7 +127,7 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.delete(schema.sales).where(and(eq(schema.sales.id, id), eq(schema.sales.workspaceId, workspaceId)));
+    await supabase.from('sales').delete().eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete sale' }, { status: 500 });

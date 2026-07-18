@@ -1,21 +1,21 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { and, eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const staff = await db.select().from(schema.staff).where(eq(schema.staff.workspaceId, workspaceId));
-  const tasks = await db.select().from(schema.tasks).where(eq(schema.tasks.workspaceId, workspaceId));
-  const payrollLogs = await db.select().from(schema.payrollLogs).where(eq(schema.payrollLogs.workspaceId, workspaceId));
+  const [staffRes, tasksRes, payrollLogsRes] = await Promise.all([
+    supabase.from('staff').select('*').eq('workspaceId', workspaceId),
+    supabase.from('tasks').select('*').eq('workspaceId', workspaceId),
+    supabase.from('payrollLogs').select('*').eq('workspaceId', workspaceId)
+  ]);
   
   return NextResponse.json({
-    staff,
-    tasks,
-    payrollLogs: payrollLogs || []
+    staff: staffRes.data || [],
+    tasks: tasksRes.data || [],
+    payrollLogs: payrollLogsRes.data || []
   });
 }
 
@@ -26,10 +26,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     if (body.action === 'attendance') {
-      const [member] = await db.select().from(schema.staff).where(and(eq(schema.staff.id, body.staffId), eq(schema.staff.workspaceId, workspaceId)));
+      const { data: members } = await supabase.from('staff').select('*').eq('id', body.staffId).eq('workspaceId', workspaceId);
+      const member = members?.[0];
       if (member) {
         const updatedAttendance = (member.attendanceDays || 0) + 1;
-        await db.update(schema.staff).set({ attendanceDays: updatedAttendance }).where(and(eq(schema.staff.id, body.staffId), eq(schema.staff.workspaceId, workspaceId)));
+        await supabase.from('staff').update({ attendanceDays: updatedAttendance }).eq('id', body.staffId).eq('workspaceId', workspaceId);
         return NextResponse.json({ success: true, member: { ...member, attendanceDays: updatedAttendance } });
       }
       return NextResponse.json({ error: 'Staff member not found' }, { status: 440 });
@@ -44,25 +45,24 @@ export async function POST(request: Request) {
         status: 'Pending',
         date: body.date || new Date().toISOString().split('T')[0]
       };
-      await db.insert(schema.tasks).values(newTask);
+      await supabase.from('tasks').insert([newTask]);
       return NextResponse.json(newTask, { status: 201 });
     }
 
     if (body.action === 'completeTask') {
-      const [task] = await db.select().from(schema.tasks).where(and(eq(schema.tasks.id, body.taskId), eq(schema.tasks.workspaceId, workspaceId)));
+      const { data: tasks } = await supabase.from('tasks').select('*').eq('id', body.taskId).eq('workspaceId', workspaceId);
+      const task = tasks?.[0];
       if (task) {
-        await db.transaction(async (tx) => {
-          await tx.update(schema.tasks).set({ status: 'Completed' }).where(and(eq(schema.tasks.id, body.taskId), eq(schema.tasks.workspaceId, workspaceId)));
-          
-          await tx.insert(schema.alertLogs).values({
-            id: 'al' + Date.now().toString().slice(-8),
-            workspaceId,
-            date: new Date().toISOString().split('T')[0],
-            message: `INFO: Task "${task.taskName}" completed by ${task.assignedTo}.`,
-            severity: 'Info',
-            read: false
-          });
-        });
+        await supabase.from('tasks').update({ status: 'Completed' }).eq('id', body.taskId).eq('workspaceId', workspaceId);
+        
+        await supabase.from('alertLogs').insert([{
+          id: 'al' + Date.now().toString().slice(-8),
+          workspaceId,
+          date: new Date().toISOString().split('T')[0],
+          message: `INFO: Task "${task.taskName}" completed by ${task.assignedTo}.`,
+          severity: 'Info',
+          read: false
+        }]);
         return NextResponse.json({ success: true, task: { ...task, status: 'Completed' } });
       }
       return NextResponse.json({ error: 'Task not found' }, { status: 440 });
@@ -80,18 +80,16 @@ export async function POST(request: Request) {
       assignedBranches: body.assignedBranches || []
     };
     
-    await db.transaction(async (tx) => {
-      await tx.insert(schema.staff).values(newStaff);
-      
-      await tx.insert(schema.alertLogs).values({
-        id: 'al' + Date.now().toString().slice(-8),
-        workspaceId,
-        date: new Date().toISOString().split('T')[0],
-        message: `INFO: Added new staff member ${newStaff.name} as ${newStaff.role}.`,
-        severity: 'Info',
-        read: false
-      });
-    });
+    await supabase.from('staff').insert([newStaff]);
+    
+    await supabase.from('alertLogs').insert([{
+      id: 'al' + Date.now().toString().slice(-8),
+      workspaceId,
+      date: new Date().toISOString().split('T')[0],
+      message: `INFO: Added new staff member ${newStaff.name} as ${newStaff.role}.`,
+      severity: 'Info',
+      read: false
+    }]);
 
     return NextResponse.json(newStaff, { status: 201 });
   } catch {
@@ -106,7 +104,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.update(schema.staff).set(fields).where(and(eq(schema.staff.id, id), eq(schema.staff.workspaceId, workspaceId)));
+    await supabase.from('staff').update(fields).eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update staff' }, { status: 500 });
@@ -120,7 +118,7 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.delete(schema.staff).where(and(eq(schema.staff.id, id), eq(schema.staff.workspaceId, workspaceId)));
+    await supabase.from('staff').delete().eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete staff' }, { status: 500 });

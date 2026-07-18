@@ -1,20 +1,18 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { and, eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const [templates, schedules] = await Promise.all([
-    db.select().from(schema.medicationTemplates).where(eq(schema.medicationTemplates.workspaceId, workspaceId)),
-    db.select().from(schema.medicationSchedules).where(eq(schema.medicationSchedules.workspaceId, workspaceId))
+  const [templatesRes, schedulesRes] = await Promise.all([
+    supabase.from('medicationTemplates').select('*').eq('workspaceId', workspaceId),
+    supabase.from('medicationSchedules').select('*').eq('workspaceId', workspaceId)
   ]);
   return NextResponse.json({
-    templates,
-    schedules
+    templates: templatesRes.data || [],
+    schedules: schedulesRes.data || []
   });
 }
 
@@ -33,20 +31,20 @@ export async function POST(req: Request) {
         targetType: body.targetType,
         stages: body.stages
       };
-      await db.insert(schema.medicationTemplates).values(newTemplate);
+      await supabase.from('medicationTemplates').insert([newTemplate]);
       return NextResponse.json({ success: true, template: newTemplate });
     }
 
     if (action === 'completeSchedule') {
       const { id } = body;
-      await db.update(schema.medicationSchedules).set({ status: 'Completed' }).where(and(eq(schema.medicationSchedules.id, id), eq(schema.medicationSchedules.workspaceId, workspaceId)));
+      await supabase.from('medicationSchedules').update({ status: 'Completed' }).eq('id', id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
     if (action === 'applyTemplate') {
       const { templateId, batchId, startDate } = body;
-      const templates = await db.select().from(schema.medicationTemplates).where(and(eq(schema.medicationTemplates.id, templateId), eq(schema.medicationTemplates.workspaceId, workspaceId)));
-      const template = templates.length > 0 ? templates[0] : null;
+      const { data: templates } = await supabase.from('medicationTemplates').select('*').eq('id', templateId).eq('workspaceId', workspaceId);
+      const template = templates && templates.length > 0 ? templates[0] : null;
 
       if (!template) {
         return NextResponse.json({ error: 'Template not found' }, { status: 404 });
@@ -67,7 +65,7 @@ export async function POST(req: Request) {
         };
       });
 
-      await db.insert(schema.medicationSchedules).values(newSchedules);
+      await supabase.from('medicationSchedules').insert(newSchedules);
       return NextResponse.json({ success: true, schedules: newSchedules });
     }
 
@@ -83,13 +81,13 @@ export async function PUT(request: Request) {
     const workspaceId = await getWorkspaceId();
     const body = await request.json();
     if (body.action === 'updateTemplate') {
-      await db.update(schema.medicationTemplates)
-        .set({ name: body.name, targetType: body.targetType })
-        .where(and(eq(schema.medicationTemplates.id, body.id), eq(schema.medicationTemplates.workspaceId, workspaceId)));
+      await supabase.from('medicationTemplates')
+        .update({ name: body.name, targetType: body.targetType })
+        .eq('id', body.id).eq('workspaceId', workspaceId);
     } else {
-      await db.update(schema.medicationSchedules)
-        .set({ medicationName: body.medicationName, scheduledDate: body.scheduledDate, status: body.status })
-        .where(and(eq(schema.medicationSchedules.id, body.id), eq(schema.medicationSchedules.workspaceId, workspaceId)));
+      await supabase.from('medicationSchedules')
+        .update({ medicationName: body.medicationName, scheduledDate: body.scheduledDate, status: body.status })
+        .eq('id', body.id).eq('workspaceId', workspaceId);
     }
     return NextResponse.json({ success: true });
   } catch {
@@ -106,9 +104,9 @@ export async function DELETE(request: Request) {
     const type = searchParams.get('type');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
     if (type === 'template') {
-      await db.delete(schema.medicationTemplates).where(and(eq(schema.medicationTemplates.id, id), eq(schema.medicationTemplates.workspaceId, workspaceId)));
+      await supabase.from('medicationTemplates').delete().eq('id', id).eq('workspaceId', workspaceId);
     } else {
-      await db.delete(schema.medicationSchedules).where(and(eq(schema.medicationSchedules.id, id), eq(schema.medicationSchedules.workspaceId, workspaceId)));
+      await supabase.from('medicationSchedules').delete().eq('id', id).eq('workspaceId', workspaceId);
     }
     return NextResponse.json({ success: true });
   } catch {

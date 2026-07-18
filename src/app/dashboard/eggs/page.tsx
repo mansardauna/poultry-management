@@ -1,6 +1,5 @@
 'use strict';
-import { db } from "@/lib/drizzle";
-import * as schema from "@/lib/schema";
+import { supabase } from "@/lib/supabase";
 import { EggsClient } from "@/components/features/eggs/EggsClient";
 import type { EggRecord, ChickenBatch, CushionAudit, MaturationLog } from "@/data/types";
 
@@ -13,15 +12,15 @@ export default async function EggsPage() {
   const role = authCookie?.value || 'Staff';
 
   const [eggsRaw, batchesRaw, cushionAuditsRaw, maturationLogsRaw] = await Promise.all([
-    db.select().from(schema.eggs),
-    db.select().from(schema.batches),
-    db.select().from(schema.cushionAudits),
-    db.select().from(schema.maturationLogs)
+    supabase.from('eggs').select('*'),
+    supabase.from('batches').select('*'),
+    supabase.from('cushionAudits').select('*'),
+    supabase.from('maturationLogs').select('*')
   ]);
-  const eggs = eggsRaw as EggRecord[];
-  const batches = batchesRaw as ChickenBatch[];
-  const cushionAudits = cushionAuditsRaw as CushionAudit[];
-  const maturationLogs = maturationLogsRaw as MaturationLog[];
+  const eggs = (eggsRaw.data || []) as EggRecord[];
+  const batches = (batchesRaw.data || []) as ChickenBatch[];
+  const cushionAudits = (cushionAuditsRaw.data || []) as CushionAudit[];
+  const maturationLogs = (maturationLogsRaw.data || []) as MaturationLog[];
 
   return (
     <EggsClient 

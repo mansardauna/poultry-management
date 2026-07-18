@@ -1,23 +1,25 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { and, eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const [eggs, cushionAudits, maturationLogs] = await Promise.all([
-    db.select().from(schema.eggs).where(eq(schema.eggs.workspaceId, workspaceId)),
-    db.select().from(schema.cushionAudits).where(eq(schema.cushionAudits.workspaceId, workspaceId)),
-    db.select().from(schema.maturationLogs).where(eq(schema.maturationLogs.workspaceId, workspaceId))
+  const [
+    { data: eggs },
+    { data: cushionAudits },
+    { data: maturationLogs }
+  ] = await Promise.all([
+    supabase.from('eggs').select('*').eq('workspaceId', workspaceId),
+    supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId),
+    supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId)
   ]);
   
   return NextResponse.json({
-    eggs,
-    cushionAudits,
-    maturationLogs
+    eggs: eggs || [],
+    cushionAudits: cushionAudits || [],
+    maturationLogs: maturationLogs || []
   });
 }
 
@@ -37,27 +39,25 @@ export async function POST(request: Request) {
         actionTaken: body.actionTaken || 'No action recorded'
       };
       
-      await db.transaction(async (tx) => {
-        await tx.insert(schema.cushionAudits).values(newAudit);
-        
-        if (body.status === 'Optimal Cushioning') {
-          await tx.insert(schema.alertLogs).values({
-            id: 'al-' + Date.now(),
-            workspaceId,
-            date: new Date().toISOString().split('T')[0],
-            message: `INFO: Cushion audit complete. Nesting box ${body.boxName} cushion is optimal.`,
-            severity: 'Info'
-          });
-        } else {
-          await tx.insert(schema.alertLogs).values({
-            id: 'al-' + Date.now(),
-            workspaceId,
-            date: new Date().toISOString().split('T')[0],
-            message: `WARNING: Cushion audit on ${body.boxName} found status "${body.status}". Action taken: ${body.actionTaken}`,
-            severity: 'Warning'
-          });
-        }
-      });
+      await supabase.from('cushionAudits').insert([newAudit]);
+      
+      if (body.status === 'Optimal Cushioning') {
+        await supabase.from('alertLogs').insert([{
+          id: 'al-' + Date.now(),
+          workspaceId,
+          date: new Date().toISOString().split('T')[0],
+          message: `INFO: Cushion audit complete. Nesting box ${body.boxName} cushion is optimal.`,
+          severity: 'Info'
+        }]);
+      } else {
+        await supabase.from('alertLogs').insert([{
+          id: 'al-' + Date.now(),
+          workspaceId,
+          date: new Date().toISOString().split('T')[0],
+          message: `WARNING: Cushion audit on ${body.boxName} found status "${body.status}". Action taken: ${body.actionTaken}`,
+          severity: 'Warning'
+        }]);
+      }
       return NextResponse.json(newAudit, { status: 201 });
     }
 
@@ -73,16 +73,14 @@ export async function POST(request: Request) {
         notes: body.notes || 'Maturing normally'
       };
       
-      await db.transaction(async (tx) => {
-        await tx.insert(schema.maturationLogs).values(newMatLog);
-        await tx.insert(schema.alertLogs).values({
-          id: 'al-' + Date.now(),
-          workspaceId,
-          date: new Date().toISOString().split('T')[0],
-          message: `INFO: Maturation record logged for bird ${body.birdId}. Eggs count: ${body.eggsCount}, Avg Weight: ${body.avgWeightGrams}g.`,
-          severity: 'Info'
-        });
-      });
+      await supabase.from('maturationLogs').insert([newMatLog]);
+      await supabase.from('alertLogs').insert([{
+        id: 'al-' + Date.now(),
+        workspaceId,
+        date: new Date().toISOString().split('T')[0],
+        message: `INFO: Maturation record logged for bird ${body.birdId}. Eggs count: ${body.eggsCount}, Avg Weight: ${body.avgWeightGrams}g.`,
+        severity: 'Info'
+      }]);
       return NextResponse.json(newMatLog, { status: 201 });
     }
 
@@ -96,28 +94,26 @@ export async function POST(request: Request) {
       batchId: body.batchId || 'b1'
     };
     
-    await db.transaction(async (tx) => {
-      await tx.insert(schema.eggs).values(newRecord);
+    await supabase.from('eggs').insert([newRecord]);
+    
+    if (newRecord.brokenEggs > 0) {
+      await supabase.from('alertLogs').insert([{
+        id: 'al-' + Date.now(),
+        workspaceId,
+        date: new Date().toISOString().split('T')[0],
+        message: `WARNING: ${newRecord.brokenEggs} cracked/broken eggs logged from Batch ${newRecord.batchId}. Cushioning audit suggested.`,
+        severity: 'Warning'
+      }]);
       
-      if (newRecord.brokenEggs > 0) {
-        await tx.insert(schema.alertLogs).values({
-          id: 'al-' + Date.now(),
-          workspaceId,
-          date: new Date().toISOString().split('T')[0],
-          message: `WARNING: ${newRecord.brokenEggs} cracked/broken eggs logged from Batch ${newRecord.batchId}. Cushioning audit suggested.`,
-          severity: 'Warning'
-        });
-        
-        await tx.insert(schema.tasks).values({
-          id: 't-' + Date.now(),
-          workspaceId,
-          assignedTo: 'Abdulrahman Monsur',
-          taskName: `Audit laying box cushioning due to cracked eggs in Batch ${newRecord.batchId}`,
-          status: 'Pending',
-          date: new Date().toISOString().split('T')[0]
-        });
-      }
-    });
+      await supabase.from('tasks').insert([{
+        id: 't-' + Date.now(),
+        workspaceId,
+        assignedTo: 'Abdulrahman Monsur',
+        taskName: `Audit laying box cushioning due to cracked eggs in Batch ${newRecord.batchId}`,
+        status: 'Pending',
+        date: new Date().toISOString().split('T')[0]
+      }]);
+    }
     
     return NextResponse.json(newRecord, { status: 201 });
   } catch {
@@ -132,35 +128,35 @@ export async function PUT(request: Request) {
     const body = await request.json();
 
     if (body.action === 'updateAudit') {
-      await db.update(schema.cushionAudits)
-        .set({
+      await supabase.from('cushionAudits')
+        .update({
           boxName: body.boxName,
           status: body.status,
           actionTaken: body.actionTaken
         })
-        .where(and(eq(schema.cushionAudits.id, body.id), eq(schema.cushionAudits.workspaceId, workspaceId)));
+        .eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
     if (body.action === 'updateMaturation') {
-      await db.update(schema.maturationLogs)
-        .set({
+      await supabase.from('maturationLogs')
+        .update({
           birdId: body.birdId,
           eggsCount: body.eggsCount,
           avgWeightGrams: body.avgWeightGrams,
           notes: body.notes
         })
-        .where(and(eq(schema.maturationLogs.id, body.id), eq(schema.maturationLogs.workspaceId, workspaceId)));
+        .eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
-    await db.update(schema.eggs)
-      .set({
+    await supabase.from('eggs')
+      .update({
         goodEggs: body.goodEggs,
         brokenEggs: body.brokenEggs,
         spoiltEggs: body.spoiltEggs
       })
-      .where(and(eq(schema.eggs.id, body.id), eq(schema.eggs.workspaceId, workspaceId)));
+      .eq('id', body.id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update record' }, { status: 500 });
@@ -174,16 +170,16 @@ export async function DELETE(request: Request) {
     const body = await request.json();
 
     if (body.action === 'deleteAudit') {
-      await db.delete(schema.cushionAudits).where(and(eq(schema.cushionAudits.id, body.id), eq(schema.cushionAudits.workspaceId, workspaceId)));
+      await supabase.from('cushionAudits').delete().eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
     if (body.action === 'deleteMaturation') {
-      await db.delete(schema.maturationLogs).where(and(eq(schema.maturationLogs.id, body.id), eq(schema.maturationLogs.workspaceId, workspaceId)));
+      await supabase.from('maturationLogs').delete().eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
-    await db.delete(schema.eggs).where(and(eq(schema.eggs.id, body.id), eq(schema.eggs.workspaceId, workspaceId)));
+    await supabase.from('eggs').delete().eq('id', body.id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });

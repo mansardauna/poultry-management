@@ -1,6 +1,5 @@
 'use strict';
-import { db } from "@/lib/drizzle";
-import * as schema from "@/lib/schema";
+import { supabase } from "@/lib/supabase";
 import { StaffClient } from "@/components/features/staff/StaffClient";
 import type { Staff, StaffTask } from "@/data/types";
 import { cookies } from 'next/headers';
@@ -11,11 +10,11 @@ export default async function StaffPage() {
   const role = cookieStore.get('pfms_auth')?.value || 'Staff';
 
   const [staffRaw, tasksRaw] = await Promise.all([
-    db.select().from(schema.staff),
-    db.select().from(schema.tasks)
+    supabase.from('staff').select('*'),
+    supabase.from('tasks').select('*')
   ]);
-  const staff = staffRaw as Staff[];
-  const tasks = tasksRaw as StaffTask[];
+  const staff = (staffRaw.data || []) as Staff[];
+  const tasks = (tasksRaw.data || []) as StaffTask[];
 
   return (
     <StaffClient 

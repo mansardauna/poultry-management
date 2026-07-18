@@ -1,9 +1,7 @@
 'use strict';
-import { db } from "@/lib/drizzle";
-import * as schema from "@/lib/schema";
+import { supabase } from "@/lib/supabase";
 import { SettingsClient } from "@/components/features/settings/SettingsClient";
 import { getWorkspaceId } from "@/lib/workspace";
-import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 
 /** Exported function default */
@@ -14,7 +12,7 @@ export default async function SettingsPage() {
   const authCookie = cookieStore.get('pfms_auth');
   const role = authCookie?.value || 'Staff';
 
-  const alertSettings = (await db.select().from(schema.alertSettings).where(eq(schema.alertSettings.workspaceId, workspaceId)).limit(1))[0] ?? {
+  const alertSettings = (await supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId).limit(1)).data?.[0] ?? {
     feedThresholdKg: 50,
     eggDropPercentage: 15,
     notifySms: true,
@@ -22,7 +20,7 @@ export default async function SettingsPage() {
     notifyWhatsapp: true,
   };
 
-  const rawSystemSettings = (await db.select().from(schema.systemSettings).where(eq(schema.systemSettings.workspaceId, workspaceId)).limit(1))[0];
+  const rawSystemSettings = (await supabase.from('systemSettings').select('*').eq('workspaceId', workspaceId).limit(1)).data?.[0];
   const systemSettings = rawSystemSettings ? {
     ...rawSystemSettings,
     eggCratePriceSmall: rawSystemSettings.eggCratePriceSmall ?? undefined,
@@ -40,9 +38,9 @@ export default async function SettingsPage() {
     adminPhone: '+2340000000000'
   };
 
-  const workspaces = await db.select().from(schema.workspaces);
+  const workspaces = (await supabase.from('workspaces').select('*')).data || [];
   
-  const allStaff = await db.select().from(schema.staff);
+  const allStaff = (await supabase.from('staff').select('*')).data || [];
 
   return <SettingsClient 
     initialSettings={alertSettings} 

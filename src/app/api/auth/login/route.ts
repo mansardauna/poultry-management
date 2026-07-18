@@ -2,9 +2,7 @@
 import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
-import { db } from '@/lib/drizzle';
-import { schema } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -21,8 +19,8 @@ export async function POST(request: Request) {
 
   try {
     // Authenticate user
-    const foundUsers = await db.select().from(schema.users).where(eq(schema.users.username, username)).limit(1);
-    const user = foundUsers[0];
+    const { data: foundUsers } = await supabase.from('users').select('*').eq('username', username).limit(1);
+    const user = foundUsers?.[0];
 
     if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
       return NextResponse.json(

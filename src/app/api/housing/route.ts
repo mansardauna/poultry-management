@@ -1,20 +1,18 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { and, eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const [farmPens, batches] = await Promise.all([
-    db.select().from(schema.farmPens).where(eq(schema.farmPens.workspaceId, workspaceId)),
-    db.select().from(schema.batches).where(eq(schema.batches.workspaceId, workspaceId))
+  const [farmPensRes, batchesRes] = await Promise.all([
+    supabase.from('farmPens').select('*').eq('workspaceId', workspaceId),
+    supabase.from('batches').select('*').eq('workspaceId', workspaceId)
   ]);
   return NextResponse.json({
-    farmPens,
-    batches
+    farmPens: farmPensRes.data || [],
+    batches: batchesRes.data || []
   });
 }
 
@@ -35,7 +33,7 @@ export async function POST(request: Request) {
       temperatureLogs: body.temperatureLogs || []
     };
     
-    await db.insert(schema.farmPens).values(newPen);
+    await supabase.from('farmPens').insert([newPen]);
     
     return NextResponse.json(newPen, { status: 201 });
   } catch {
@@ -50,7 +48,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.update(schema.farmPens).set(fields).where(and(eq(schema.farmPens.id, id), eq(schema.farmPens.workspaceId, workspaceId)));
+    await supabase.from('farmPens').update(fields).eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update pen' }, { status: 500 });
@@ -64,7 +62,7 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.delete(schema.farmPens).where(and(eq(schema.farmPens.id, id), eq(schema.farmPens.workspaceId, workspaceId)));
+    await supabase.from('farmPens').delete().eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete pen' }, { status: 500 });

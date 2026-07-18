@@ -1,16 +1,14 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   try {
     const workspaceId = await getWorkspaceId();
-    const notifications = await db.select().from(schema.alertLogs).where(eq(schema.alertLogs.workspaceId, workspaceId)).orderBy(desc(schema.alertLogs.date));
-    const formatted = notifications.map((log) => ({
+    const { data: notifications } = await supabase.from('alertLogs').select('*').eq('workspaceId', workspaceId).order('date', { ascending: false });
+    const formatted = (notifications || []).map((log: any) => ({
       ...log,
       read: log.read ?? false,
     }));
@@ -27,9 +25,9 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     if (body.action === 'markAllRead') {
-      await db.update(schema.alertLogs).set({ read: true }).where(eq(schema.alertLogs.workspaceId, workspaceId));
+      await supabase.from('alertLogs').update({ read: true }).eq('workspaceId', workspaceId);
     } else if (body.id) {
-      await db.update(schema.alertLogs).set({ read: true }).where(and(eq(schema.alertLogs.id, body.id), eq(schema.alertLogs.workspaceId, workspaceId)));
+      await supabase.from('alertLogs').update({ read: true }).eq('id', body.id).eq('workspaceId', workspaceId);
     }
 
     return NextResponse.json({ success: true });

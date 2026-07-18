@@ -2,22 +2,20 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import { schema } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 
 /** Exported function GET */
 export async function GET() {
-  const workspaces = await db.select().from(schema.workspaces);
+  const { data: workspaces } = await supabase.from('workspaces').select('*');
 
-  if (workspaces.length === 0) {
+  if (!workspaces || workspaces.length === 0) {
     const defaultWorkspace = {
       id: 'main',
       name: 'Main Farm',
       type: 'Main',
       createdAt: new Date().toISOString(),
     };
-    await db.insert(schema.workspaces).values(defaultWorkspace);
+    await supabase.from('workspaces').insert([defaultWorkspace]);
     return NextResponse.json([defaultWorkspace]);
   }
 
@@ -39,7 +37,7 @@ export async function POST(request: Request) {
     createdAt: new Date().toISOString(),
   };
 
-  await db.insert(schema.workspaces).values(createdWorkspace);
+  await supabase.from('workspaces').insert([createdWorkspace]);
   return NextResponse.json(createdWorkspace, { status: 201 });
 }
 
@@ -52,9 +50,9 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Missing id, name, or type' }, { status: 400 });
   }
 
-  await db.update(schema.workspaces)
-    .set({ name, type })
-    .where(eq(schema.workspaces.id, id));
+  await supabase.from('workspaces')
+    .update({ name, type })
+    .eq('id', id);
 
   return NextResponse.json({ success: true });
 }
@@ -72,6 +70,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Cannot delete the main workspace' }, { status: 400 });
   }
 
-  await db.delete(schema.workspaces).where(eq(schema.workspaces.id, id));
+  await supabase.from('workspaces').delete().eq('id', id);
   return NextResponse.json({ success: true });
 }

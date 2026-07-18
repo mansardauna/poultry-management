@@ -1,14 +1,12 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/drizzle';
-import * as schema from '@/lib/schema';
-import { and, eq } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const equipment = await db.select().from(schema.equipment).where(eq(schema.equipment.workspaceId, workspaceId));
+  const { data: equipment } = await supabase.from('equipment').select('*').eq('workspaceId', workspaceId);
   return NextResponse.json({
     equipment: equipment || []
   });
@@ -22,7 +20,7 @@ export async function POST(request: Request) {
     
     const newId = 'eq' + Date.now().toString().slice(-8);
 
-    const [newEquipment] = await db.insert(schema.equipment).values({
+    const { data } = await supabase.from('equipment').insert([{
       id: newId,
       workspaceId,
       name: body.name,
@@ -30,7 +28,9 @@ export async function POST(request: Request) {
       quantity: Number(body.quantity) || 1,
       status: body.status || 'Good',
       lastMaintenance: body.lastMaintenance || new Date().toISOString().split('T')[0]
-    }).returning();
+    }]).select();
+    
+    const newEquipment = data?.[0];
     
     return NextResponse.json(newEquipment, { status: 201 });
   } catch {
@@ -45,7 +45,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.update(schema.equipment).set(fields).where(and(eq(schema.equipment.id, id), eq(schema.equipment.workspaceId, workspaceId)));
+    await supabase.from('equipment').update(fields).eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update equipment' }, { status: 500 });
@@ -59,7 +59,7 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await db.delete(schema.equipment).where(and(eq(schema.equipment.id, id), eq(schema.equipment.workspaceId, workspaceId)));
+    await supabase.from('equipment').delete().eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete equipment' }, { status: 500 });

@@ -1,6 +1,5 @@
 'use strict';
-import { db } from "@/lib/drizzle";
-import * as schema from "@/lib/schema";
+import { supabase } from "@/lib/supabase";
 import { DashboardClient } from "@/components/features/dashboard/DashboardClient";
 import type {
   DatabaseSchema,
@@ -35,35 +34,57 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const offset = (page - 1) * 50;
 
   const [
-    batches, eggs, feeds, feedLogs, staff, sales, expenses, cushionAudits, maturationLogs,
-    procurePipeline, cctvLogs, invoices, tasks, alertSettingsRaw, alertLogs, mortalityLogs,
-    medicationTemplates, medicationSchedules, payrollLogs, equipment, contacts, farmPens
+    batchesRaw, eggsRaw, feedsRaw, feedLogsRaw, staffRaw, salesRaw, expensesRaw, cushionAuditsRaw, maturationLogsRaw,
+    procurePipelineRaw, cctvLogsRaw, invoicesRaw, tasksRaw, alertSettingsRaw, alertLogsRaw, mortalityLogsRaw,
+    medicationTemplatesRaw, medicationSchedulesRaw, payrollLogsRaw, equipmentRaw, contactsRaw, farmPensRaw
   ] = await Promise.all([
-    db.select().from(schema.batches).limit(50).offset(offset),
-    db.select().from(schema.eggs).limit(50).offset(offset),
-    db.select().from(schema.feeds).limit(50).offset(offset),
-    db.select().from(schema.feedLogs).limit(50).offset(offset),
-    db.select().from(schema.staff).limit(50).offset(offset),
-    db.select().from(schema.sales).limit(50).offset(offset),
-    db.select().from(schema.expenses).limit(50).offset(offset),
-    db.select().from(schema.cushionAudits).limit(50).offset(offset),
-    db.select().from(schema.maturationLogs).limit(50).offset(offset),
-    db.select().from(schema.procurePipeline).limit(50).offset(offset),
-    db.select().from(schema.cctvLogs).limit(50).offset(offset),
-    db.select().from(schema.invoices).limit(50).offset(offset),
-    db.select().from(schema.tasks).limit(50).offset(offset),
-    db.select().from(schema.alertSettings).limit(1),
-    db.select().from(schema.alertLogs).limit(50).offset(offset),
-    db.select().from(schema.mortalityLogs).limit(50).offset(offset),
-    db.select().from(schema.medicationTemplates).limit(50).offset(offset),
-    db.select().from(schema.medicationSchedules).limit(50).offset(offset),
-    db.select().from(schema.payrollLogs).limit(50).offset(offset),
-    db.select().from(schema.equipment).limit(50).offset(offset),
-    db.select().from(schema.contacts).limit(50).offset(offset),
-    db.select().from(schema.farmPens).limit(50).offset(offset)
+    supabase.from('batches').select('*').range(offset, offset + 49),
+    supabase.from('eggs').select('*').range(offset, offset + 49),
+    supabase.from('feeds').select('*').range(offset, offset + 49),
+    supabase.from('feedLogs').select('*').range(offset, offset + 49),
+    supabase.from('staff').select('*').range(offset, offset + 49),
+    supabase.from('sales').select('*').range(offset, offset + 49),
+    supabase.from('expenses').select('*').range(offset, offset + 49),
+    supabase.from('cushionAudits').select('*').range(offset, offset + 49),
+    supabase.from('maturationLogs').select('*').range(offset, offset + 49),
+    supabase.from('procurePipeline').select('*').range(offset, offset + 49),
+    supabase.from('cctvLogs').select('*').range(offset, offset + 49),
+    supabase.from('invoices').select('*').range(offset, offset + 49),
+    supabase.from('tasks').select('*').range(offset, offset + 49),
+    supabase.from('alertSettings').select('*').limit(1),
+    supabase.from('alertLogs').select('*').range(offset, offset + 49),
+    supabase.from('mortalityLogs').select('*').range(offset, offset + 49),
+    supabase.from('medicationTemplates').select('*').range(offset, offset + 49),
+    supabase.from('medicationSchedules').select('*').range(offset, offset + 49),
+    supabase.from('payrollLogs').select('*').range(offset, offset + 49),
+    supabase.from('equipment').select('*').range(offset, offset + 49),
+    supabase.from('contacts').select('*').range(offset, offset + 49),
+    supabase.from('farmPens').select('*').range(offset, offset + 49)
   ]);
 
-  const alertSettings = alertSettingsRaw[0] as AlertSettings | undefined;
+  const batches = batchesRaw.data || [];
+  const eggs = eggsRaw.data || [];
+  const feeds = feedsRaw.data || [];
+  const feedLogs = feedLogsRaw.data || [];
+  const staff = staffRaw.data || [];
+  const sales = salesRaw.data || [];
+  const expenses = expensesRaw.data || [];
+  const cushionAudits = cushionAuditsRaw.data || [];
+  const maturationLogs = maturationLogsRaw.data || [];
+  const procurePipeline = procurePipelineRaw.data || [];
+  const cctvLogs = cctvLogsRaw.data || [];
+  const invoices = invoicesRaw.data || [];
+  const tasks = tasksRaw.data || [];
+  const alertLogs = alertLogsRaw.data || [];
+  const mortalityLogs = mortalityLogsRaw.data || [];
+  const medicationTemplates = medicationTemplatesRaw.data || [];
+  const medicationSchedules = medicationSchedulesRaw.data || [];
+  const payrollLogs = payrollLogsRaw.data || [];
+  const equipment = equipmentRaw.data || [];
+  const contacts = contactsRaw.data || [];
+  const farmPens = farmPensRaw.data || [];
+
+  const alertSettings = (alertSettingsRaw.data || [])[0] as AlertSettings | undefined;
   const alertSettingsData: AlertSettings = alertSettings ?? {
     feedThresholdKg: 50,
     eggDropPercentage: 15,
