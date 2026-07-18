@@ -20,6 +20,7 @@ export interface Workspace {
 interface WorkspaceContextType {
   workspaces: Workspace[];
   activeWorkspace: Workspace | null;
+  isLoading: boolean;
   setActiveWorkspace: (workspace: Workspace) => void;
   addWorkspace: (workspace: Workspace) => Promise<void>;
   updateWorkspace: (id: string, name: string, type: string) => Promise<void>;
@@ -43,6 +44,7 @@ const DEFAULT_WORKSPACE: Workspace = {
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspaceState] = useState<Workspace | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -84,6 +86,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         setWorkspaces([DEFAULT_WORKSPACE]);
         setActiveWorkspaceState(DEFAULT_WORKSPACE);
         Cookies.set('pfms_workspace', DEFAULT_WORKSPACE.id, { path: '/' });
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -161,7 +165,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <WorkspaceContext.Provider value={{ workspaces, activeWorkspace, setActiveWorkspace, addWorkspace, updateWorkspace, deleteWorkspace }}>
+    <WorkspaceContext.Provider value={{ workspaces, activeWorkspace, isLoading, setActiveWorkspace, addWorkspace, updateWorkspace, deleteWorkspace }}>
       {children}
     </WorkspaceContext.Provider>
   );

@@ -158,17 +158,19 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
   const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const { workspaces, activeWorkspace, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
+  const { workspaces, activeWorkspace, isLoading, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
   const { texts } = useLanguage();
 
   const isAdmin = role === 'Admin';
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
 
   useEffect(() => {
-    if (role === 'Admin' && workspaces.length === 0) {
+    if (!isLoading && role === 'Admin' && workspaces.length === 0) {
       setShowOnboarding(true);
+    } else if (workspaces.length > 0) {
+      setShowOnboarding(false);
     }
-  }, [workspaces, role]);
+  }, [workspaces, role, isLoading]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
