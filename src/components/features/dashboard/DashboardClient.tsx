@@ -415,8 +415,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                       labelClassName=" text-slate-800 text-xs uppercase"
                     />
                     <Legend />
-                    <Bar dataKey="Eggs" fill="#4f46e5" name="Good Eggs Collected" />
-                    <Bar dataKey="CrackedSpoilt" fill="#ef4444" name="Cracked / Spoilt" />
+                    <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name="Good Eggs Collected" />
+                    <Bar dataKey="CrackedSpoilt" stackId="a" fill="#ef4444" name="Cracked / Spoilt" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
