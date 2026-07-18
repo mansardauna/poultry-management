@@ -53,6 +53,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   const [quantity, setQuantity] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Bank transfer');
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || 'b3');
 
   const refreshData = async () => {
@@ -82,6 +83,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
     setQuantity('');
     setTotalAmount('');
     setPaymentMethod('Bank transfer');
+    setSaleDate(new Date().toISOString().split('T')[0]);
     setSelectedBatchId(activeBatches[0]?.id || 'b3');
   };
 
@@ -113,6 +115,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           quantity: Number(quantity),
           totalAmount: Number(totalAmount),
           paymentMethod,
+          date: saleDate,
           batchId: selectedBatchId,
           status: 'Paid'
         })
@@ -420,6 +423,15 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             </div>
           </div>
 
+          <TextField
+            label="Sale Date"
+            type="date"
+            fullWidth
+            variant="outlined"
+            value={saleDate}
+            onChange={(e) => setSaleDate(e.target.value)}
+            slotProps={{ htmlInput: { sx: { borderRadius: 2 } }, inputLabel: { shrink: true } }}
+          />
           <TextField
             label="Customer / Buyer Details"
             fullWidth

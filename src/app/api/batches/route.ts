@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         await supabase.from('mortalityLogs').insert([{
           id: `MORT-${Date.now()}`,
           workspaceId,
-          date: new Date().toISOString().split('T')[0],
+          date: body.date || new Date().toISOString().split('T')[0],
           batchId: batch.id,
           count: count,
           cause: body.reason || 'Unknown'

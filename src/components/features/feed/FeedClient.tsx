@@ -64,6 +64,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   // Usage form
   const [useFeedId, setUseFeedId] = useState(feeds[0]?.id || 'f1');
   const [useBatchId, setUseBatchId] = useState(batches[0]?.id || 'b1');
+  const [useDate, setUseDate] = useState(new Date().toISOString().split('T')[0]);
   const [useQty, setUseQty] = useState('');
 
   // Restock form
@@ -102,6 +103,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
     setOpenUsage(false);
     setUseFeedId(feeds[0]?.id || 'f1');
     setUseBatchId(batches[0]?.id || 'b1');
+    setUseDate(new Date().toISOString().split('T')[0]);
     setUseQty('');
   };
 
@@ -134,6 +136,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           action: 'usage',
           feedId: useFeedId,
           batchId: useBatchId,
+          date: useDate,
           quantityKg: Number(useQty)
         })
       });

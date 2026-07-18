@@ -61,6 +61,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
   const [mortalityBatchId, setMortalityBatchId] = useState('');
   const [mortalityCount, setMortalityCount] = useState('');
   const [mortalityReason, setMortalityReason] = useState('');
+  const [mortalityDate, setMortalityDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Vaccination Form
   const [vaccineBatchId, setVaccineBatchId] = useState('');
@@ -163,6 +164,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
 
   const handleOpenMortality = () => {
     setMortalityBatchId(batches[0]?.id || '');
+    setMortalityDate(new Date().toISOString().split('T')[0]);
     setOpenMortality(true);
   };
   const handleCloseMortality = () => {
@@ -230,6 +232,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
         body: JSON.stringify({
           action: 'mortality',
           batchId: mortalityBatchId,
+          date: mortalityDate,
           mortalityCount: Number(mortalityCount),
           reason: mortalityReason
         })
@@ -492,6 +495,15 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={setMortalityBatchId}
             items={batches.map(b => ({ id: b.id, label: `${b.id} (${b.breed} - ${b.quantity} birds)` }))}
             addPath="/chickens"
+          />
+          <TextField
+            label="Mortality Date"
+            type="date"
+            fullWidth
+            variant="outlined"
+            value={mortalityDate}
+            onChange={(e) => setMortalityDate(e.target.value)}
+            slotProps={{ htmlInput: { sx: { borderRadius: 2 } }, inputLabel: { shrink: true } }}
           />
           <TextField
             label="Mortality count"

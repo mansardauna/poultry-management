@@ -41,7 +41,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   const [eggs, setEggs] = useState<EggRecord[]>(initialEggs);
   const { texts } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
-  const canEdit = role === 'Admin' || role === 'Manager';
+  const canEdit = true; // Allow all staff to correct their logs
   const [cushionAudits, setCushionAudits] = useState<CushionAudit[]>(initialCushionAudits);
   const [maturationLogs, setMaturationLogs] = useState<MaturationLog[]>(initialMaturationLogs);
   
@@ -70,6 +70,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
 
   // New Collection Form
   const [collectBatchId, setCollectBatchId] = useState(batches[0]?.id || 'b1');
+  const [collectDate, setCollectDate] = useState(new Date().toISOString().split('T')[0]);
   const [goodEggs, setGoodEggs] = useState('');
   const [brokenEggs, setBrokenEggs] = useState('');
   const [spoiltEggs, setSpoiltEggs] = useState('');
@@ -108,6 +109,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   const handleCloseCollect = () => {
     setOpenCollect(false);
     setCollectBatchId(batches[0]?.id || 'b1');
+    setCollectDate(new Date().toISOString().split('T')[0]);
     setGoodEggs('');
     setBrokenEggs('');
     setSpoiltEggs('');
@@ -139,6 +141,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           batchId: collectBatchId,
+          date: collectDate,
           goodEggs: Number(goodEggs),
           brokenEggs: Number(brokenEggs) || 0,
           spoiltEggs: Number(spoiltEggs) || 0
@@ -690,6 +693,15 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Egg Collection</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
+          <TextField
+            label="Collection Date"
+            type="date"
+            fullWidth
+            variant="outlined"
+            value={collectDate}
+            onChange={(e) => setCollectDate(e.target.value)}
+            slotProps={{ htmlInput: { sx: { borderRadius: 2 } }, inputLabel: { shrink: true } }}
+          />
           <SelectWithAdd
             label="Chicken Batch"
             value={collectBatchId}

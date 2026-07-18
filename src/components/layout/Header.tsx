@@ -132,12 +132,12 @@ export function Header({ role = 'Admin' }: { role?: string }) {
       </button>
 
       <div className="flex flex-1 md:ml-0 ml-2">
-        <form onSubmit={handleSearch} className="w-full max-w-md relative">
+        <form onSubmit={handleSearch} className="w-full max-w-[150px] focus-within:max-w-full md:max-w-md transition-all duration-300 relative group z-20">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={20} className="text-slate-400" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
+            className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
             placeholder={texts.common.search + "..."}
             type="search"
             value={searchQuery}
@@ -162,19 +162,25 @@ export function Header({ role = 'Admin' }: { role?: string }) {
         </div>
 
         {/* Language Selection Dropdown */}
-        <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
-          <Globe size={14} className="text-indigo-500 mr-2 ml-1" />
+        <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
+          <Globe size={16} className="text-indigo-500 mr-1" />
           <select 
             value={language} 
             onChange={(e) => setLanguage(e.target.value as Language)}
-            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-6 pl-0"
+            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-4 pl-0 appearance-none w-8 sm:w-auto"
           >
-            <option value="en">English (EN)</option>
-            <option value="es">Español (ES)</option>
-            <option value="ar">العربية (AR)</option>
-            <option value="de">Deutsch (DE)</option>
-            <option value="fr">Français (FR)</option>
-            <option value="zh">中文 (ZH)</option>
+            <option value="en" className="sm:hidden">EN</option>
+            <option value="en" className="hidden sm:block">English (EN)</option>
+            <option value="es" className="sm:hidden">ES</option>
+            <option value="es" className="hidden sm:block">Español (ES)</option>
+            <option value="ar" className="sm:hidden">AR</option>
+            <option value="ar" className="hidden sm:block">العربية (AR)</option>
+            <option value="de" className="sm:hidden">DE</option>
+            <option value="de" className="hidden sm:block">Deutsch (DE)</option>
+            <option value="fr" className="sm:hidden">FR</option>
+            <option value="fr" className="hidden sm:block">Français (FR)</option>
+            <option value="zh" className="sm:hidden">ZH</option>
+            <option value="zh" className="hidden sm:block">中文 (ZH)</option>
           </select>
         </div>
 
