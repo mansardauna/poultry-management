@@ -90,12 +90,12 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   // Quick Load Sales Preset Templates
   const handleApplyPreset = (preset: 'small' | 'large') => {
     if (preset === 'small') {
-      setCustomerName('Gaa Saka Wholesale Buyer');
+      setCustomerName('Wholesale Buyer');
       setType('Eggs');
       setQuantity('90'); // 3 crates * 30 eggs
       setTotalAmount('12600'); // 3 * 4200
     } else {
-      setCustomerName('Gaa Saka Wholesale Buyer');
+      setCustomerName('Wholesale Buyer');
       setType('Eggs');
       setQuantity('60'); // 2 crates * 30 eggs
       setTotalAmount('8800'); // 2 * 4400
@@ -166,7 +166,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   };
 
   const handleShareWhatsApp = (inv: Invoice) => {
-    const text = `Gaa Saka Farm Invoice ${inv.id}\nCustomer: ${inv.customerName}\nItem: ${inv.items}\nQty: ${inv.quantity}\nTotal: ₦${inv.totalAmount.toLocaleString()}\nStatus: ${inv.status}\nThank you for your patronage!`;
+    const text = `Farm Invoice ${inv.id}\nCustomer: ${inv.customerName}\nItem: ${inv.items}\nQty: ${inv.quantity}\nTotal: ₦${inv.totalAmount.toLocaleString()}\nStatus: ${inv.status}\nThank you for your patronage!`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -404,7 +404,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           
           {/* Quick Presets */}
           <div className="p-3 bg-slate-50 border border-slate-200 flex flex-col gap-2">
-            <p className="text-[10px] font-semibold uppercase text-slate-500">Apply Gaa Saka Crate Presets:</p>
+            <p className="text-[10px] font-semibold uppercase text-slate-500">Apply Crate Presets:</p>
             <div className="flex gap-2">
               <button 
                 type="button"
@@ -519,8 +519,8 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       <Dialog open={openInvoiceView} onClose={handleCloseInvoiceView} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogContent className="p-8 space-y-6 font-mono text-xs" id="printable-invoice">
           <div className="text-center border-b-2 border-dashed border-slate-300 pb-4">
-            <h2 className="text-lg font-semibold tracking-wider uppercase text-slate-800">GAA SAKA POULTRY FARM</h2>
-            <p className="text-[10px] text-slate-500">Maitama / Gaa Saka Layout, Abuja</p>
+            <h2 className="text-lg font-semibold tracking-wider uppercase text-slate-800">POULTRY FARM</h2>
+            <p className="text-[10px] text-slate-500">Maitama, Abuja</p>
             <p className="text-[10px] text-slate-400">Tel: +234 803 123 4567</p>
           </div>
           

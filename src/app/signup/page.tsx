@@ -61,7 +61,7 @@ export default function SignupPage() {
             <h1 className="text-3xl font-bold uppercase tracking-wider text-slate-800 mb-2">
               Create Account
             </h1>
-            <p className="text-sm font-medium text-indigo-600">Join Gaa Saka Poultry Farm</p>
+            <p className="text-sm font-medium text-indigo-600">Join Poultry Farm Management</p>
           </div>
           
           <form onSubmit={handleSignup} className="space-y-5">
@@ -119,7 +119,7 @@ export default function SignupPage() {
           </form>
           
           <div className="mt-8 text-center text-xs text-slate-400 font-medium">
-            <p>&copy; 2026 Gaa Saka Farms. All rights reserved.</p>
+            <p>&copy; 2026 Poultry Farms. All rights reserved.</p>
           </div>
         </div>
       </div>

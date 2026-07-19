@@ -139,7 +139,7 @@ export default function CCTVPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 uppercase">Surveillance CCTV Connectivity</h1>
-          <p className="text-sm text-slate-500 mt-1">Real-time Gaa Saka Farm security monitoring & system health</p>
+          <p className="text-sm text-slate-500 mt-1">Real-time security monitoring & system health</p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -331,7 +331,7 @@ export default function CCTVPage() {
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <p className="text-xs text-slate-500">
-            This will dispatch a field technician to inspect and fix Gaa Saka Farm&apos;s security camera wiring, network drops, or hardware malfunctions.
+            This will dispatch a field technician to inspect and fix the security camera wiring, network drops, or hardware malfunctions.
           </p>
           <TextField
             label="Service Ticket Notes & Details"
@@ -363,7 +363,7 @@ export default function CCTVPage() {
         <DialogContent className="flex flex-col gap-6 pt-4 items-center text-center">
           <div className="h-2" />
           <p className="text-xs text-slate-500">
-            Scan this QR code using the Gaa Saka Camera App, or manually enter the Camera ID below to pair it to the central NVR system.
+            Scan this QR code using the Farm Camera App, or manually enter the Camera ID below to pair it to the central NVR system.
           </p>
           <div className="bg-slate-50 p-6 rounded-lg border-2 border-dashed border-indigo-200 flex flex-col items-center justify-center gap-3 w-48 h-48">
             <QrCode size={96} className="text-indigo-600" />

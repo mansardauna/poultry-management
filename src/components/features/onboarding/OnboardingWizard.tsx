@@ -43,7 +43,7 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
         type: 'Mixed Use',
         createdAt: new Date().toISOString(),
       });
-      toast.success('Default farm initialized! Welcome to Gaa Saka.');
+      toast.success('Default farm initialized! Welcome to Poultry Farm Management.');
       onClose();
     } catch (err) {
       console.error(err);
@@ -154,7 +154,7 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
           <div>
             <div className="flex items-center gap-2 mb-8">
               <Box className="text-indigo-400" size={24} />
-              <span className="font-bold tracking-wider uppercase text-xs">Gaa Saka Onboarding</span>
+              <span className="font-bold tracking-wider uppercase text-xs">Farm Onboarding</span>
             </div>
             <ul className="space-y-6">
               {[
@@ -213,7 +213,7 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
                     type="text" 
                     value={branchName}
                     onChange={(e) => setBranchName(e.target.value)}
-                    placeholder="e.g. Gaa Saka East Branch"
+                    placeholder="e.g. East Branch"
                     className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
                   />
                 </div>

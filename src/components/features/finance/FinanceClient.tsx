@@ -51,7 +51,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
 
-  // Fixed Gaa Saka Farm Balances
+  // Fixed Farm Balances
   const openingFund = 16800; // ₦16,800
   const cashPortion = 5800;  // ₦5,800
   const bankPortion = 11000; // ₦11,000
@@ -167,7 +167,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   const handleExportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(20);
-    doc.text('Financial Statement - Gaa Saka Farm', 14, 22);
+    doc.text('Financial Statement - Poultry Farm', 14, 22);
     doc.setFontSize(12);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 32);
     
@@ -186,7 +186,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   const totalRevenue = filteredSales.reduce((sum, s) => sum + s.totalAmount, 0);
   const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
   
-  // Gaa Saka Formula Reconciliation
+  // Formula Reconciliation
   const netInflowPool = openingFund + totalRevenue;
   const netBalance = netInflowPool - totalExpenses; 
   const netProfit = totalRevenue - totalExpenses;   
@@ -289,7 +289,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
       <Card>
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
-            Gaa Saka Farm Cash Flow Reconciliation Sheet
+            Farm Cash Flow Reconciliation Sheet
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
