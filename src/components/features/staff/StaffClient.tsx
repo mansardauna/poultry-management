@@ -2,6 +2,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, User, CheckSquare, Fingerprint, CheckCircle, Trash2 } from 'lucide-react';
@@ -43,6 +47,18 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
   const [staff, setStaff] = useState<Staff[]>(initialStaff);
   const [tasks, setTasks] = useState<StaffTask[]>(initialTasks);
   const [payrollLogs, setPayrollLogs] = useState<PayrollLog[]>([]);
+
+  const staffTable = useTableLogic({
+    data: staff,
+    searchFields: ['name', 'role', 'contact'],
+    initialPageSize: 20
+  });
+
+  const payrollTable = useTableLogic({
+    data: payrollLogs,
+    searchFields: ['id', 'period', 'staffId'],
+    initialPageSize: 20
+  });
   
   // Modals state
   const [open, setOpen] = useState(false);
@@ -297,22 +313,23 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
             <CardTitle>{TEXTS.staff.staffRoster}</CardTitle>
           </CardHeader>
           <CardContent>
+            <TableControls searchTerm={staffTable.searchTerm} setSearchTerm={staffTable.setSearchTerm} placeholder="Search staff..." />
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Branches</th>
-                    <th className="px-4 py-3">Contact</th>
-                    <th className="px-4 py-3 text-center">Attendance</th>
-                    <th className="px-4 py-3">Monthly Salary</th>
+                    <TableSortHeader label="Name" sortKey="name" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label="Role" sortKey="role" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label="Branches" sortKey="assignedBranches" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label="Contact" sortKey="contact" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label="Attendance" sortKey="attendanceDays" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label="Monthly Salary" sortKey="salary" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
                     <th className="px-4 py-3 text-right">Attendance Action</th>
                     {canEdit && <th className="px-4 py-3 text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {staff.map((employee) => (
+                  {staffTable.data.map((employee) => (
                     <tr key={employee.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-semibold text-slate-900">{employee.name}</td>
                       <td className="px-4 py-3 text-slate-600">{employee.role}</td>
@@ -344,6 +361,14 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
                 </tbody>
               </table>
             </div>
+            <TablePagination 
+              currentPage={staffTable.currentPage}
+              totalPages={staffTable.totalPages}
+              totalItems={staffTable.totalItems}
+              pageSize={staffTable.pageSize}
+              onPageChange={staffTable.setCurrentPage}
+              onPageSizeChange={staffTable.setPageSize}
+            />
           </CardContent>
         </Card>
 
@@ -405,27 +430,28 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          <TableControls searchTerm={payrollTable.searchTerm} setSearchTerm={payrollTable.setSearchTerm} placeholder="Search payroll logs..." />
           <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Log ID</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Date</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Staff Member</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Period</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase text-right">Amount Paid</th>
+                  <TableSortHeader label="Log ID" sortKey="id" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label="Date" sortKey="date" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label="Staff Member" sortKey="staffId" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label="Period" sortKey="period" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label="Amount Paid" sortKey="amount" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
                   {canEdit && <th className="px-4 py-3 text-slate-500 uppercase text-right">Del</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
-                {payrollLogs.length === 0 ? (
+                {payrollTable.data.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-4 text-slate-400 font-sans italic">
                       No payroll disbursements recorded yet. Use the Finance module to process payroll.
                     </td>
                   </tr>
                 ) : (
-                  payrollLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(log => {
+                  payrollTable.data.map(log => {
                     const member = staff.find(s => s.id === log.staffId);
                     return (
                       <tr key={log.id} className="hover:bg-slate-50">
@@ -448,6 +474,14 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
               </tbody>
             </table>
           </div>
+          <TablePagination 
+            currentPage={payrollTable.currentPage}
+            totalPages={payrollTable.totalPages}
+            totalItems={payrollTable.totalItems}
+            pageSize={payrollTable.pageSize}
+            onPageChange={payrollTable.setCurrentPage}
+            onPageSizeChange={payrollTable.setPageSize}
+          />
         </CardContent>
       </Card>
 

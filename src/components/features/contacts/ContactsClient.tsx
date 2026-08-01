@@ -6,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, Users, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ContactRecord } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -18,6 +22,11 @@ import {
  */
 export function ContactsClient({ role }: { role: string }) {
   const [contacts, setContacts] = useState<ContactRecord[]>([]);
+  const contactsLogic = useTableLogic({
+    data: contacts,
+    searchFields: ['name', 'type', 'contactDetails', 'notes'],
+    initialPageSize: 20
+  });
   const [open, setOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<ContactRecord | null>(null);
   const canEdit = role === 'Admin' || role === 'Manager';
@@ -99,19 +108,20 @@ export function ContactsClient({ role }: { role: string }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          <TableControls searchTerm={contactsLogic.searchTerm} setSearchTerm={contactsLogic.setSearchTerm} placeholder="Search contacts..." />
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Name</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Type</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Contact Details</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Notes</th>
+                  <TableSortHeader label="Name" sortKey="name" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
+                  <TableSortHeader label="Type" sortKey="type" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
+                  <TableSortHeader label="Contact Details" sortKey="contactDetails" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
+                  <TableSortHeader label="Notes" sortKey="notes" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
-                {contacts.map(c => (
+                {contactsLogic.data.map(c => (
                   <tr key={c.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-800">{c.name}</td>
                     <td className="px-4 py-3">
@@ -129,7 +139,7 @@ export function ContactsClient({ role }: { role: string }) {
                     )}
                   </tr>
                 ))}
-                {contacts.length === 0 && (
+                {contactsLogic.data.length === 0 && (
                   <tr>
                     <td colSpan={4} className="text-center py-4 text-slate-500 font-sans">No contacts recorded.</td>
                   </tr>
@@ -137,6 +147,14 @@ export function ContactsClient({ role }: { role: string }) {
               </tbody>
             </table>
           </div>
+          <TablePagination 
+            currentPage={contactsLogic.currentPage}
+            totalPages={contactsLogic.totalPages}
+            totalItems={contactsLogic.totalItems}
+            pageSize={contactsLogic.pageSize}
+            onPageChange={contactsLogic.setCurrentPage}
+            onPageSizeChange={contactsLogic.setPageSize}
+          />
         </CardContent>
       </Card>
 

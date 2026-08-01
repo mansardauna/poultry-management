@@ -6,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, Calendar, Settings, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DatabaseSchema, MedicationTemplate, MedicationSchedule, ChickenBatch } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { 
   Dialog, 
   DialogTitle, 
@@ -41,6 +45,12 @@ export function HealthClient({ role }: { role: string }) {
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [selectedBatchId, setSelectedBatchId] = useState('');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const schedulesLogic = useTableLogic({
+    data: schedules,
+    searchFields: ['scheduledDate', 'batchId', 'medicationName', 'type', 'status'],
+    initialPageSize: 20
+  });
 
   const refreshData = async () => {
     try {
@@ -179,19 +189,22 @@ export function HealthClient({ role }: { role: string }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
+            <div className="p-4 border-b border-slate-100">
+              <TableControls searchTerm={schedulesLogic.searchTerm} setSearchTerm={schedulesLogic.setSearchTerm} placeholder="Search schedules..." />
+            </div>
             <div className="max-h-[400px] overflow-x-auto overflow-y-auto">
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3 text-slate-500 uppercase">Date</th>
-                    <th className="px-4 py-3 text-slate-500 uppercase">Batch</th>
-                    <th className="px-4 py-3 text-slate-500 uppercase">Medication</th>
-                    <th className="px-4 py-3 text-slate-500 uppercase">Status</th>
+                    <TableSortHeader label="Date" sortKey="scheduledDate" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
+                    <TableSortHeader label="Batch" sortKey="batchId" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
+                    <TableSortHeader label="Medication" sortKey="medicationName" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
+                    <TableSortHeader label="Status" sortKey="status" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
                     {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Del</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono">
-                  {schedules.sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()).map(s => {
+                  {schedulesLogic.data.map(s => {
                     const batch = batches.find(b => b.id === s.batchId);
                     return (
                       <tr key={s.id} className="hover:bg-slate-50">
@@ -230,6 +243,16 @@ export function HealthClient({ role }: { role: string }) {
                   )}
                 </tbody>
               </table>
+            </div>
+            <div className="p-4 border-t border-slate-100">
+              <TablePagination 
+                currentPage={schedulesLogic.currentPage}
+                totalPages={schedulesLogic.totalPages}
+                totalItems={schedulesLogic.totalItems}
+                pageSize={schedulesLogic.pageSize}
+                onPageChange={schedulesLogic.setCurrentPage}
+                onPageSizeChange={schedulesLogic.setPageSize}
+              />
             </div>
           </CardContent>
         </Card>

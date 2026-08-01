@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 import { Toaster } from 'react-hot-toast';
+import { AiLogger } from "@/components/features/ai/AiLogger";
 
 /**
  * DashboardLayout wraps all pages inside the `(dashboard)` route group.
@@ -49,6 +50,7 @@ export default async function DashboardLayout({
             {children}
           </main>
         </div>
+        <AiLogger />
       </div>
     </SidebarProvider>
   );

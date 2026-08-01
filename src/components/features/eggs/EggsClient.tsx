@@ -9,6 +9,10 @@ import { Plus, BarChart2, AlertTriangle, CheckSquare, Edit2, Trash2 } from 'luci
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { EggRecord, ChickenBatch, CushionAudit, MaturationLog } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { 
   Dialog, 
   DialogTitle, 
@@ -44,7 +48,24 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   const canEdit = true; // Allow all staff to correct their logs
   const [cushionAudits, setCushionAudits] = useState<CushionAudit[]>(initialCushionAudits);
   const [maturationLogs, setMaturationLogs] = useState<MaturationLog[]>(initialMaturationLogs);
-  
+
+  const cushionAuditsLogic = useTableLogic({
+    data: filterByTimeRange(cushionAudits),
+    searchFields: ['boxName', 'status', 'actionTaken', 'date'],
+    initialPageSize: 20
+  });
+
+  const maturationLogsLogic = useTableLogic({
+    data: filterByTimeRange(maturationLogs),
+    searchFields: ['birdId', 'notes', 'date'],
+    initialPageSize: 20
+  });
+
+  const eggsLogic = useTableLogic({
+    data: filterByTimeRange(eggs),
+    searchFields: ['batchId', 'date'],
+    initialPageSize: 20
+  });
   // Modals state
   const [openCollect, setOpenCollect] = useState(false);
   const [openAudit, setOpenAudit] = useState(false);
@@ -528,19 +549,20 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <p className="text-[11px] text-slate-500 mb-4">
               Regular checks of nesting box padding and straw status to aggressively decrease cracked shell incidences:
             </p>
+            <TableControls searchTerm={cushionAuditsLogic.searchTerm} setSearchTerm={cushionAuditsLogic.setSearchTerm} placeholder="Search audits..." />
             <div className="overflow-x-auto overflow-y-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">{texts.common.date}</th>
-                    <th className="px-4 py-3">Nesting Box</th>
-                    <th className="px-4 py-3">{texts.common.status}</th>
-                    <th className="px-4 py-3">Action Completed</th>
+                    <TableSortHeader label={texts.common.date} sortKey="date" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
+                    <TableSortHeader label="Nesting Box" sortKey="boxName" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
+                    <TableSortHeader label={texts.common.status} sortKey="status" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
+                    <TableSortHeader label="Action Completed" sortKey="actionTaken" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
                     {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {filterByTimeRange(cushionAudits).map((log) => (
+                  {cushionAuditsLogic.data.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-400">{log.date}</td>
                       <td className="px-4 py-3 font-semibold text-slate-900">{log.boxName}</td>
@@ -573,6 +595,14 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                 </tbody>
               </table>
             </div>
+            <TablePagination 
+              currentPage={cushionAuditsLogic.currentPage}
+              totalPages={cushionAuditsLogic.totalPages}
+              totalItems={cushionAuditsLogic.totalItems}
+              pageSize={cushionAuditsLogic.pageSize}
+              onPageChange={cushionAuditsLogic.setCurrentPage}
+              onPageSizeChange={cushionAuditsLogic.setPageSize}
+            />
           </CardContent>
         </Card>
 
@@ -587,20 +617,21 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <p className="text-[11px] text-slate-500 mb-4">
               Maturation metrics for the 3 newly laying birds to track structural weight bounds and size progressions:
             </p>
+            <TableControls searchTerm={maturationLogsLogic.searchTerm} setSearchTerm={maturationLogsLogic.setSearchTerm} placeholder="Search metrics..." />
             <div className="overflow-x-auto overflow-y-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">{texts.common.date}</th>
-                    <th className="px-4 py-3">Bird ID</th>
-                    <th className="px-4 py-3">Eggs Count</th>
-                    <th className="px-4 py-3">Avg Egg Weight (g)</th>
-                    <th className="px-4 py-3">{texts.common.notes}</th>
+                    <TableSortHeader label={texts.common.date} sortKey="date" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
+                    <TableSortHeader label="Bird ID" sortKey="birdId" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
+                    <TableSortHeader label="Eggs Count" sortKey="eggsCount" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
+                    <TableSortHeader label="Avg Egg Weight (g)" sortKey="avgWeightGrams" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
+                    <TableSortHeader label={texts.common.notes} sortKey="notes" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
                     {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {filterByTimeRange(maturationLogs).map((log) => (
+                  {maturationLogsLogic.data.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-400">{log.date}</td>
                       <td className="px-4 py-3 font-semibold text-slate-900">{log.birdId}</td>
@@ -630,6 +661,14 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                 </tbody>
               </table>
             </div>
+            <TablePagination 
+              currentPage={maturationLogsLogic.currentPage}
+              totalPages={maturationLogsLogic.totalPages}
+              totalItems={maturationLogsLogic.totalItems}
+              pageSize={maturationLogsLogic.pageSize}
+              onPageChange={maturationLogsLogic.setCurrentPage}
+              onPageSizeChange={maturationLogsLogic.setPageSize}
+            />
           </CardContent>
         </Card>
       </div>
@@ -642,20 +681,21 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <TableControls searchTerm={eggsLogic.searchTerm} setSearchTerm={eggsLogic.setSearchTerm} placeholder="Search collections..." />
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3">{texts.common.date}</th>
-                  <th className="px-4 py-3">Batch ID</th>
-                  <th className="px-4 py-3">Good Eggs</th>
-                  <th className="px-4 py-3">Broken / Cracked</th>
-                  <th className="px-4 py-3">Spoilt</th>
+                  <TableSortHeader label={texts.common.date} sortKey="date" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label="Batch ID" sortKey="batchId" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label="Good Eggs" sortKey="goodEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label="Broken / Cracked" sortKey="brokenEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label="Spoilt" sortKey="spoiltEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filterByTimeRange(eggs).map((egg) => (
+                {eggsLogic.data.map((egg) => (
                   <tr key={egg.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-950">{egg.date}</td>
                     <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{egg.batchId}</td>
@@ -685,6 +725,14 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               </tbody>
             </table>
           </div>
+          <TablePagination 
+            currentPage={eggsLogic.currentPage}
+            totalPages={eggsLogic.totalPages}
+            totalItems={eggsLogic.totalItems}
+            pageSize={eggsLogic.pageSize}
+            onPageChange={eggsLogic.setCurrentPage}
+            onPageSizeChange={eggsLogic.setPageSize}
+          />
         </CardContent>
       </Card>
 

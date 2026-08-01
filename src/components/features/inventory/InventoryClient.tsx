@@ -2,6 +2,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, Wrench, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -21,6 +25,11 @@ export function InventoryClient({ role }: { role: string }) {
   const [open, setOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentInventory | null>(null);
   const canEdit = role === 'Admin' || role === 'Manager';
+  const tableLogic = useTableLogic({ 
+    data: equipment, 
+    searchFields: ['name', 'type', 'status'], 
+    initialPageSize: 20 
+  });
   const [formData, setFormData] = useState({
     name: '',
     type: 'Feeder',
@@ -100,20 +109,21 @@ export function InventoryClient({ role }: { role: string }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          <TableControls searchTerm={tableLogic.searchTerm} setSearchTerm={tableLogic.setSearchTerm} placeholder="Search equipment..." />
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Item Name</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Type</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Quantity</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Last Maintenance</th>
+                  <TableSortHeader label="Item Name" sortKey="name" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label="Type" sortKey="type" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label="Quantity" sortKey="quantity" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label="Status" sortKey="status" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label="Last Maintenance" sortKey="lastMaintenance" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
-                {equipment.map(eq => (
+                {tableLogic.data.map(eq => (
                   <tr key={eq.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-800">{eq.name}</td>
                     <td className="px-4 py-3 text-slate-600">{eq.type}</td>
@@ -140,6 +150,14 @@ export function InventoryClient({ role }: { role: string }) {
               </tbody>
             </table>
           </div>
+          <TablePagination 
+            currentPage={tableLogic.currentPage}
+            totalPages={tableLogic.totalPages}
+            totalItems={tableLogic.totalItems}
+            pageSize={tableLogic.pageSize}
+            onPageChange={tableLogic.setCurrentPage}
+            onPageSizeChange={tableLogic.setPageSize}
+          />
         </CardContent>
       </Card>
 

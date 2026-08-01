@@ -2,6 +2,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, ShoppingCart, Coins, BarChart2, FileText, MessageSquare, Printer, Trash2 } from 'lucide-react';
@@ -42,6 +46,19 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   
   // Tabs for Sales vs Invoices
   const [activeTab, setActiveTab] = useState<'sales' | 'invoices' | 'unpaid-invoices'>('sales');
+
+  const salesTable = useTableLogic({ 
+    data: sales, 
+    searchFields: ['customerName', 'type', 'paymentMethod', 'status'], 
+    initialPageSize: 20 
+  });
+
+  const filteredInvoices = invoices.filter(inv => activeTab === 'unpaid-invoices' ? inv.status !== 'Paid' : inv.status === 'Paid');
+  const invoicesTable = useTableLogic({ 
+    data: filteredInvoices, 
+    searchFields: ['customerName', 'id', 'status'], 
+    initialPageSize: 20 
+  });
 
   const [open, setOpen] = useState(false);
   const [openInvoiceView, setOpenInvoiceView] = useState(false);
@@ -281,22 +298,23 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               <CardTitle>{TEXTS.sales.salesHistory}</CardTitle>
             </CardHeader>
             <CardContent>
+              <TableControls searchTerm={salesTable.searchTerm} setSearchTerm={salesTable.setSearchTerm} placeholder="Search sales..." />
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
                   <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3">Sale ID</th>
-                      <th className="px-4 py-3">Date</th>
-                      <th className="px-4 py-3">Customer</th>
-                      <th className="px-4 py-3">Product Type</th>
-                      <th className="px-4 py-3">Amount</th>
-                      <th className="px-4 py-3">Payment Method</th>
-                      <th className="px-4 py-3">Status</th>
+                      <TableSortHeader label="Sale ID" sortKey="id" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                      <TableSortHeader label="Date" sortKey="date" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                      <TableSortHeader label="Customer" sortKey="customerName" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                      <TableSortHeader label="Product Type" sortKey="type" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                      <TableSortHeader label="Amount" sortKey="totalAmount" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                      <TableSortHeader label="Payment Method" sortKey="paymentMethod" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                      <TableSortHeader label="Status" sortKey="status" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
                       {canEdit && <th className="px-4 py-3">Del</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {sales.map((sale) => (
+                    {salesTable.data.map((sale) => (
                       <tr key={sale.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 font-semibold text-slate-900">{sale.id}</td>
                         <td className="px-4 py-3 text-slate-500 font-mono">{sale.date}</td>
@@ -327,6 +345,14 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                   </tbody>
                 </table>
               </div>
+              <TablePagination 
+                currentPage={salesTable.currentPage}
+                totalPages={salesTable.totalPages}
+                totalItems={salesTable.totalItems}
+                pageSize={salesTable.pageSize}
+                onPageChange={salesTable.setCurrentPage}
+                onPageSizeChange={salesTable.setPageSize}
+              />
             </CardContent>
           </Card>
         </>
@@ -337,24 +363,23 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             <CardTitle>{activeTab === 'unpaid-invoices' ? 'Unpaid Customer Invoices' : 'Paid Customer Invoices'}</CardTitle>
           </CardHeader>
           <CardContent>
+            <TableControls searchTerm={invoicesTable.searchTerm} setSearchTerm={invoicesTable.setSearchTerm} placeholder="Search invoices..." />
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">Invoice ID</th>
-                    <th className="px-4 py-3">Date</th>
-                    <th className="px-4 py-3">Customer</th>
-                    <th className="px-4 py-3">Items Sold</th>
-                    <th className="px-4 py-3">Total Amount</th>
-                    <th className="px-4 py-3">Status</th>
+                    <TableSortHeader label="Invoice ID" sortKey="id" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label="Date" sortKey="date" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label="Customer" sortKey="customerName" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label="Items Sold" sortKey="items" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label="Total Amount" sortKey="totalAmount" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label="Status" sortKey="status" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
                     <th className="px-4 py-3 text-right">Actions</th>
                     {canEdit && <th className="px-4 py-3 text-right">Del</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {invoices
-                    .filter(inv => activeTab === 'unpaid-invoices' ? inv.status !== 'Paid' : inv.status === 'Paid')
-                    .map((inv) => (
+                  {invoicesTable.data.map((inv) => (
                     <tr key={inv.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-semibold text-slate-900">{inv.id}</td>
                       <td className="px-4 py-3 text-slate-400">{inv.date}</td>
@@ -392,6 +417,14 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 </tbody>
               </table>
             </div>
+            <TablePagination 
+              currentPage={invoicesTable.currentPage}
+              totalPages={invoicesTable.totalPages}
+              totalItems={invoicesTable.totalItems}
+              pageSize={invoicesTable.pageSize}
+              onPageChange={invoicesTable.setCurrentPage}
+              onPageSizeChange={invoicesTable.setPageSize}
+            />
           </CardContent>
         </Card>
       )}

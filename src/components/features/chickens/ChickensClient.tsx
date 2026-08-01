@@ -9,6 +9,10 @@ import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { Plus, AlertTriangle, MapPin, Shield, Edit2, Trash2 } from 'lucide-react';
 import { ChickenBatch } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { 
   Dialog, 
   DialogTitle, 
@@ -39,6 +43,11 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
   const { texts } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
   
+  const batchesLogic = useTableLogic({
+    data: filterByTimeRange(batches),
+    searchFields: ['id', 'breed', 'type', 'farmSection', 'vaccinationStatus'],
+    initialPageSize: 20
+  });
   const canEdit = role === 'Admin' || role === 'Manager';
   
   // Modals state
@@ -346,23 +355,24 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
           <CardTitle>{texts.chickens.activeBatches}</CardTitle>
         </CardHeader>
         <CardContent>
+          <TableControls searchTerm={batchesLogic.searchTerm} setSearchTerm={batchesLogic.setSearchTerm} placeholder="Search batches..." />
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3">Batch ID</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Breed</th>
-                  <th className="px-4 py-3">Remaining birds</th>
-                  <th className="px-4 py-3">Age (Weeks)</th>
-                  <th className="px-4 py-3">Mortality</th>
-                  <th className="px-4 py-3">Section</th>
-                  <th className="px-4 py-3">Vaccination</th>
+                  <TableSortHeader label="Batch ID" sortKey="id" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label="Type" sortKey="type" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label="Breed" sortKey="breed" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label="Remaining birds" sortKey="quantity" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label="Age (Weeks)" sortKey="ageInWeeks" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label="Mortality" sortKey="mortalityCount" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label="Section" sortKey="farmSection" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label="Vaccination" sortKey="vaccinationStatus" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3">Actions</th>}
                 </tr>
               </thead>
               <tbody>
-                {filterByTimeRange(batches).map((batch) => (
+                {batchesLogic.data.map((batch) => (
                   <tr key={batch.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-900">{batch.id}</td>
                     <td className="px-4 py-3">
@@ -401,6 +411,14 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
               </tbody>
             </table>
           </div>
+          <TablePagination 
+            currentPage={batchesLogic.currentPage}
+            totalPages={batchesLogic.totalPages}
+            totalItems={batchesLogic.totalItems}
+            pageSize={batchesLogic.pageSize}
+            onPageChange={batchesLogic.setCurrentPage}
+            onPageSizeChange={batchesLogic.setPageSize}
+          />
         </CardContent>
       </Card>
 

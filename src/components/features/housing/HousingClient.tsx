@@ -6,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, Home, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FarmPen, ChickenBatch } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -27,6 +31,12 @@ export function HousingClient({ role }: { role: string }) {
     capacity: 1000,
     status: 'Active',
     currentBatchId: ''
+  });
+
+  const pensLogic = useTableLogic({
+    data: pens,
+    searchFields: ['name', 'currentBatchId', 'status'],
+    initialPageSize: 20
   });
 
   const refreshData = async () => {
@@ -103,19 +113,22 @@ export function HousingClient({ role }: { role: string }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          <div className="p-4 border-b border-slate-100">
+            <TableControls searchTerm={pensLogic.searchTerm} setSearchTerm={pensLogic.setSearchTerm} placeholder="Search pens..." />
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Pen Name</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Capacity</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Current Batch</th>
-                  <th className="px-4 py-3 text-slate-500 uppercase">Status</th>
+                  <TableSortHeader label="Pen Name" sortKey="name" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
+                  <TableSortHeader label="Capacity" sortKey="capacity" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
+                  <TableSortHeader label="Current Batch" sortKey="currentBatchId" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
+                  <TableSortHeader label="Status" sortKey="status" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
-                {pens.map(p => (
+                {pensLogic.data.map(p => (
                   <tr key={p.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-800">{p.name}</td>
                     <td className="px-4 py-3 text-slate-600">{p.capacity.toLocaleString()} birds</td>
@@ -140,6 +153,16 @@ export function HousingClient({ role }: { role: string }) {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="p-4 border-t border-slate-100">
+            <TablePagination 
+              currentPage={pensLogic.currentPage}
+              totalPages={pensLogic.totalPages}
+              totalItems={pensLogic.totalItems}
+              pageSize={pensLogic.pageSize}
+              onPageChange={pensLogic.setCurrentPage}
+              onPageSizeChange={pensLogic.setPageSize}
+            />
           </div>
         </CardContent>
       </Card>

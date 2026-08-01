@@ -38,7 +38,7 @@ Return a JSON object with this exact structure (use empty arrays if no data of t
   "medications": [ { "date": "YYYY-MM-DD", "name": "string", "notes": "string" } ],
   "feedUsedKg": number,
   "mortalityCount": number,
-  "salesAmount": number
+  "sales": [ { "date": "YYYY-MM-DD", "type": "string", "quantity": number, "totalAmount": number, "customerName": "string" } ]
 }`;
 
     const response = await ai.models.generateContent({
@@ -98,6 +98,22 @@ Return a JSON object with this exact structure (use empty arrays if no data of t
         description: ex.description || ''
       }));
       await supabase.from('expenses').insert(expenseInsert);
+    }
+
+    // Handle Sales
+    if (parsed.sales?.length > 0) {
+      const salesInsert = parsed.sales.map((s: any) => ({
+        id: crypto.randomUUID(),
+        workspaceId: 'main',
+        date: s.date || today,
+        type: s.type || 'Eggs',
+        quantity: s.quantity || 0,
+        totalAmount: s.totalAmount || 0,
+        customerName: s.customerName || 'Walk-in Customer',
+        paymentMethod: 'Cash',
+        status: 'Paid'
+      }));
+      await supabase.from('sales').insert(salesInsert);
     }
 
     return NextResponse.json({ success: true, parsed });

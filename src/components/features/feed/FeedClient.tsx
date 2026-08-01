@@ -9,6 +9,10 @@ import { Plus, BarChart2, AlertTriangle, MapPin, Truck, Edit2, Trash2 } from 'lu
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { FeedInventory, DailyFeedLog, ChickenBatch, ProcurePipeline } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { 
   Dialog, 
   DialogTitle, 
@@ -78,6 +82,24 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   const [pipelineSupplier, setPipelineSupplier] = useState('Supreme Feed Mills Ltd.');
   const [pipelineStatus, setPipelineStatus] = useState('Under Contract');
   const [pipelineEta, setPipelineEta] = useState('');
+
+  const inventoryLogic = useTableLogic({
+    data: feeds,
+    searchFields: ['type', 'supplier'],
+    initialPageSize: 20
+  });
+
+  const pipelineLogic = useTableLogic({
+    data: filterByTimeRange(procurePipeline),
+    searchFields: ['milestone', 'supplier', 'status'],
+    initialPageSize: 20
+  });
+
+  const logsLogic = useTableLogic({
+    data: filterByTimeRange(logs),
+    searchFields: ['date', 'batchId'],
+    initialPageSize: 20
+  });
 
   const refreshData = async () => {
     try {
@@ -503,19 +525,22 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
+            <div className="mb-4">
+              <TableControls searchTerm={inventoryLogic.searchTerm} setSearchTerm={inventoryLogic.setSearchTerm} placeholder="Search inventory..." />
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">Type</th>
-                    <th className="px-4 py-3">Quantity (kg)</th>
-                    <th className="px-4 py-3">Supplier</th>
-                    <th className="px-4 py-3">Last Restock</th>
+                    <TableSortHeader label="Type" sortKey="type" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
+                    <TableSortHeader label="Quantity (kg)" sortKey="quantityKg" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
+                    <TableSortHeader label="Supplier" sortKey="supplier" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
+                    <TableSortHeader label="Last Restock" sortKey="lastRestock" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
                     <th className="px-4 py-3">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {feeds.map((feed) => {
+                  {inventoryLogic.data.map((feed) => {
                     const isCritical = feed.quantityKg <= 50;
                     return (
                       <tr key={feed.id} className="hover:bg-slate-50">
@@ -538,6 +563,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                 </tbody>
               </table>
             </div>
+            <div className="mt-4">
+              <TablePagination 
+                currentPage={inventoryLogic.currentPage}
+                totalPages={inventoryLogic.totalPages}
+                totalItems={inventoryLogic.totalItems}
+                pageSize={inventoryLogic.pageSize}
+                onPageChange={inventoryLogic.setCurrentPage}
+                onPageSizeChange={inventoryLogic.setPageSize}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -552,20 +587,23 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             <p className="text-[11px] text-slate-500 mb-4">
               Restructured supply chains to securely lock down layer bird feed logistics and prevent future stock depletion.
             </p>
+            <div className="mb-4">
+              <TableControls searchTerm={pipelineLogic.searchTerm} setSearchTerm={pipelineLogic.setSearchTerm} placeholder="Search pipeline..." />
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">{texts.common.date}</th>
-                    <th className="px-4 py-3">Milestone Action</th>
-                    <th className="px-4 py-3">New Supplier</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">ETA</th>
+                    <TableSortHeader label={texts.common.date} sortKey="date" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label="Milestone Action" sortKey="milestone" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label="New Supplier" sortKey="supplier" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label="Status" sortKey="status" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label="ETA" sortKey="eta" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
                     {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {filterByTimeRange(procurePipeline).map((pipe) => (
+                  {pipelineLogic.data.map((pipe) => (
                     <tr key={pipe.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-500">{pipe.date}</td>
                       <td className="px-4 py-3 text-slate-900 font-semibold">{pipe.milestone}</td>
@@ -599,6 +637,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                 </tbody>
               </table>
             </div>
+            <div className="mt-4">
+              <TablePagination 
+                currentPage={pipelineLogic.currentPage}
+                totalPages={pipelineLogic.totalPages}
+                totalItems={pipelineLogic.totalItems}
+                pageSize={pipelineLogic.pageSize}
+                onPageChange={pipelineLogic.setCurrentPage}
+                onPageSizeChange={pipelineLogic.setPageSize}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -611,19 +659,22 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
+          <div className="mb-4">
+            <TableControls searchTerm={logsLogic.searchTerm} setSearchTerm={logsLogic.setSearchTerm} placeholder="Search logs..." />
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3">{texts.common.date}</th>
+                  <TableSortHeader label={texts.common.date} sortKey="date" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
                   <th className="px-4 py-3">Feed Type</th>
-                  <th className="px-4 py-3">Batch ID</th>
-                  <th className="px-4 py-3">Amount (kg)</th>
+                  <TableSortHeader label="Batch ID" sortKey="batchId" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
+                  <TableSortHeader label="Amount (kg)" sortKey="quantityConsumedKg" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filterByTimeRange(logs).map((log) => {
+                {logsLogic.data.map((log) => {
                   const feed = feeds.find(f => f.id === log.feedId);
                   return (
                     <tr key={log.id} className="hover:bg-slate-50">
@@ -654,6 +705,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                 })}
               </tbody>
             </table>
+          </div>
+          <div className="mt-4">
+            <TablePagination 
+              currentPage={logsLogic.currentPage}
+              totalPages={logsLogic.totalPages}
+              totalItems={logsLogic.totalItems}
+              pageSize={logsLogic.pageSize}
+              onPageChange={logsLogic.setCurrentPage}
+              onPageSizeChange={logsLogic.setPageSize}
+            />
           </div>
         </CardContent>
       </Card>

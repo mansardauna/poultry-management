@@ -8,6 +8,10 @@ import { Plus, Wallet, ArrowDown, ArrowUp, Coins, Percent, User, Edit2, Trash2 }
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { Expense, Sale } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { 
@@ -55,6 +59,12 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   const openingFund = 16800; // ₦16,800
   const cashPortion = 5800;  // ₦5,800
   const bankPortion = 11000; // ₦11,000
+
+  const expensesLogic = useTableLogic({
+    data: filterByTimeRange(expenses),
+    searchFields: ['id', 'date', 'category', 'description'],
+    initialPageSize: 20
+  });
 
   const refreshData = async () => {
     try {
@@ -373,20 +383,23 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <CardTitle>{texts.finance.expenseLedger}</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <TableControls searchTerm={expensesLogic.searchTerm} setSearchTerm={expensesLogic.setSearchTerm} placeholder="Search expenses..." />
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3">Expense ID</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Amount</th>
+                  <TableSortHeader label="Expense ID" sortKey="id" currentSort={expensesLogic.sortConfig} onSort={expensesLogic.handleSort} />
+                  <TableSortHeader label="Date" sortKey="date" currentSort={expensesLogic.sortConfig} onSort={expensesLogic.handleSort} />
+                  <TableSortHeader label="Category" sortKey="category" currentSort={expensesLogic.sortConfig} onSort={expensesLogic.handleSort} />
+                  <TableSortHeader label="Description" sortKey="description" currentSort={expensesLogic.sortConfig} onSort={expensesLogic.handleSort} />
+                  <TableSortHeader label="Amount" sortKey="amount" currentSort={expensesLogic.sortConfig} onSort={expensesLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                {expenses.map((expense) => (
+                {expensesLogic.data.map((expense) => (
                   <tr key={expense.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-950">{expense.id}</td>
                     <td className="px-4 py-3 text-slate-400">{expense.date}</td>
@@ -415,6 +428,16 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="mt-4">
+            <TablePagination 
+              currentPage={expensesLogic.currentPage}
+              totalPages={expensesLogic.totalPages}
+              totalItems={expensesLogic.totalItems}
+              pageSize={expensesLogic.pageSize}
+              onPageChange={expensesLogic.setCurrentPage}
+              onPageSizeChange={expensesLogic.setPageSize}
+            />
           </div>
         </CardContent>
       </Card>

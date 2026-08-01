@@ -18,6 +18,10 @@ import {
 } from 'lucide-react';
 import { AiLogModal } from "@/components/ui/AiLogModal";
 import { DatabaseSchema, StaffTask, AlertLog } from "@/data/types";
+import { useTableLogic } from '@/hooks/useTableLogic';
+import { TableControls } from '@/components/ui/TableControls';
+import { TablePagination } from '@/components/ui/TablePagination';
+import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useWorkspace } from "../WorkspaceContext";
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
@@ -50,6 +54,12 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const { activeWorkspace, workspaces } = useWorkspace();
   const { texts, language } = useLanguage();
   const { timeRange, filterByTimeRange } = useTimeFilter();
+
+  const alertLogsLogic = useTableLogic({
+    data: filterByTimeRange(data.alertLogs || []),
+    searchFields: ['message', 'severity', 'date'],
+    initialPageSize: 20
+  });
   
   const refreshData = async () => {
     try {
@@ -274,7 +284,6 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   };
 
   const activeTasks = filterByTimeRange(data.tasks || []).filter(t => t.status === 'Pending');
-  const alertLogs = filterByTimeRange(data.alertLogs || []);
 
   return (
     <div className="space-y-6">
@@ -544,24 +553,25 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
+            <TableControls searchTerm={alertLogsLogic.searchTerm} setSearchTerm={alertLogsLogic.setSearchTerm} placeholder="Search alerts..." />
             <div className="overflow-x-auto max-h-[340px] overflow-y-auto font-mono text-xs">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-4 py-3">{texts.common.date}</th>
-                    <th className="px-4 py-3">Alert Incident Msg</th>
-                    <th className="px-4 py-3">{texts.common.severity}</th>
+                    <TableSortHeader label={texts.common.date} sortKey="date" currentSort={alertLogsLogic.sortConfig} onSort={alertLogsLogic.handleSort} />
+                    <TableSortHeader label="Alert Incident Msg" sortKey="message" currentSort={alertLogsLogic.sortConfig} onSort={alertLogsLogic.handleSort} />
+                    <TableSortHeader label={texts.common.severity} sortKey="severity" currentSort={alertLogsLogic.sortConfig} onSort={alertLogsLogic.handleSort} />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {alertLogs.length === 0 ? (
+                  {alertLogsLogic.data.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="px-4 py-6 text-center text-slate-400 italic">
                         {texts.dashboard.allCaughtUpAlerts}
                       </td>
                     </tr>
                   ) : (
-                    alertLogs.map((log) => (
+                    alertLogsLogic.data.map((log) => (
                       <tr key={log.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 text-slate-400">{log.date}</td>
                         <td className="px-4 py-3 text-slate-800">{log.message}</td>
@@ -578,6 +588,14 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                 </tbody>
               </table>
             </div>
+            <TablePagination 
+              currentPage={alertLogsLogic.currentPage}
+              totalPages={alertLogsLogic.totalPages}
+              totalItems={alertLogsLogic.totalItems}
+              pageSize={alertLogsLogic.pageSize}
+              onPageChange={alertLogsLogic.setCurrentPage}
+              onPageSizeChange={alertLogsLogic.setPageSize}
+            />
           </CardContent>
         </Card>
 
