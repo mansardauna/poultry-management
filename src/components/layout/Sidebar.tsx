@@ -349,7 +349,7 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
         </div>
         <div className="p-4 border-t border-indigo-900 flex flex-col gap-2">
           <Link
-            href="/settings"
+            href="/dashboard/settings"
             onClick={() => setIsMobileOpen(false)}
             className={clsx(
               "group flex items-center px-3 py-3 text-sm font-semibold rounded-md hover:bg-indigo-900 hover:text-white transition-colors",

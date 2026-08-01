@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { AlertSettings } from "@/data/types";
@@ -50,6 +51,7 @@ interface SettingsClientProps {
  * @param props - Component properties.
  */
 export function SettingsClient({ initialSettings, systemSettings, workspaceId }: SettingsClientProps) {
+  const router = useRouter();
   
   // Alert Settings
   const [feedThresholdKg, setFeedThresholdKg] = useState(String(initialSettings?.feedThresholdKg || 50));
@@ -80,7 +82,10 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
           notifyWhatsapp
         })
       });
-      if (res.ok) toast.success('Alert settings saved successfully!');
+      if (res.ok) {
+        toast.success('Alert settings saved successfully!');
+        router.refresh();
+      }
       else toast.error('Failed to save alert settings');
     } catch (_err) {
       toast.error('Error saving settings');
@@ -102,7 +107,10 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
           adminPhone
         })
       });
-      if (res.ok) toast.success('System settings saved successfully!');
+      if (res.ok) {
+        toast.success('System settings saved successfully!');
+        router.refresh();
+      }
       else toast.error('Failed to save system settings');
     } catch (_err) {
       toast.error('Error saving system settings');
