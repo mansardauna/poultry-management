@@ -1,4 +1,5 @@
 'use strict';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { GoogleGenAI } from '@google/genai';
@@ -6,6 +7,13 @@ import crypto from 'crypto';
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const workspaceId = cookieStore.get('pfms_workspace')?.value;
+    
+    if (!workspaceId) {
+      return NextResponse.json({ error: 'No active workspace found' }, { status: 400 });
+    }
+
     const { text } = await request.json();
     if (!text) {
       return NextResponse.json({ error: 'Text report is required' }, { status: 400 });
@@ -58,53 +66,77 @@ Return a JSON object with this exact structure (use empty arrays if no data of t
 
     // Handle staff changes
     if (parsed.staffChanges?.removeAll) {
-      await supabase.from('staff').delete().neq('id', '0'); // Delete all basically
+      await supabase.from('staff').delete().eq('workspaceId', workspaceId);
     }
     if (parsed.staffChanges?.add?.length > 0) {
       const staffInsert = parsed.staffChanges.add.map((s: any) => ({
         id: crypto.randomUUID(),
-        workspaceId: 'main',
+        workspaceId,
         name: s.name,
         role: s.role || 'Staff',
         contact: s.contactInfo || '',
         salary: s.salary || 0,
         attendanceDays: 0
       }));
-      await supabase.from('staff').insert(staffInsert);
+      const { error } = await supabase.from('staff').insert(staffInsert);
+      if (error) console.error("Staff Insert Error:", error);
     }
 
     // Handle Eggs
     if (parsed.eggs?.length > 0) {
+      const { data: batches } = await supabase
+        .from('batches')
+        .select('id')
+        .eq('workspaceId', workspaceId)
+        .limit(1);
+        
+      let batchId = batches?.[0]?.id;
+      
+      if (!batchId) {
+         batchId = crypto.randomUUID();
+         await supabase.from('batches').insert({
+            id: batchId,
+            workspaceId,
+            name: 'AI Generated Batch',
+            type: 'Layers',
+            quantity: 100,
+            startDate: today,
+            status: 'Active'
+         });
+      }
+
       const eggInsert = parsed.eggs.map((e: any) => ({
         id: crypto.randomUUID(),
-        workspaceId: 'main',
-        batchId: 'batch-1',
+        workspaceId,
+        batchId,
         date: e.date || today,
         goodEggs: e.goodEggs || 0,
         brokenEggs: e.crackedEggs || 0,
         spoiltEggs: 0,
       }));
-      await supabase.from('eggs').insert(eggInsert);
+      const { error } = await supabase.from('eggs').insert(eggInsert);
+      if (error) console.error("Eggs Insert Error:", error);
     }
 
     // Handle Expenses
     if (parsed.expenses?.length > 0) {
       const expenseInsert = parsed.expenses.map((ex: any) => ({
         id: crypto.randomUUID(),
-        workspaceId: 'main',
+        workspaceId,
         date: ex.date || today,
         category: ex.category || 'Maintenance',
         amount: ex.amount || 0,
         description: ex.description || ''
       }));
-      await supabase.from('expenses').insert(expenseInsert);
+      const { error } = await supabase.from('expenses').insert(expenseInsert);
+      if (error) console.error("Expenses Insert Error:", error);
     }
 
     // Handle Sales
     if (parsed.sales?.length > 0) {
       const salesInsert = parsed.sales.map((s: any) => ({
         id: crypto.randomUUID(),
-        workspaceId: 'main',
+        workspaceId,
         date: s.date || today,
         type: s.type || 'Eggs',
         quantity: s.quantity || 0,
@@ -113,12 +145,13 @@ Return a JSON object with this exact structure (use empty arrays if no data of t
         paymentMethod: 'Cash',
         status: 'Paid'
       }));
-      await supabase.from('sales').insert(salesInsert);
+      const { error } = await supabase.from('sales').insert(salesInsert);
+      if (error) console.error("Sales Insert Error:", error);
     }
 
     return NextResponse.json({ success: true, parsed });
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Parse Error:', error);
-    return NextResponse.json({ error: 'Failed to process AI parsing' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to process AI parsing' }, { status: 500 });
   }
 }
