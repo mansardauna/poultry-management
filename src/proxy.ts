@@ -41,6 +41,12 @@ export async function proxy(request: NextRequest) {
   if (user) {
     supabaseResponse.headers.set('x-user-role', user.user_metadata?.role || 'Admin')
     supabaseResponse.headers.set('x-user-email', user.email || '')
+    
+    // Read organization details from cookies (set during login/signup)
+    const tier = request.cookies.get('pfms_tier')?.value || 'free'
+    const orgId = request.cookies.get('pfms_org_id')?.value || ''
+    supabaseResponse.headers.set('x-user-tier', tier)
+    supabaseResponse.headers.set('x-org-id', orgId)
   }
 
   return supabaseResponse

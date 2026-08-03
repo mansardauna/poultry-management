@@ -6,5 +6,6 @@ import { cookies } from 'next/headers';
  */
 export async function getWorkspaceId() {
   const cookieStore = await cookies();
-  return cookieStore.get('pfms_workspace')?.value || 'main';
+  const orgId = cookieStore.get('pfms_org_id')?.value;
+  return cookieStore.get('pfms_workspace')?.value || (orgId ? `main-${orgId}` : 'main');
 }

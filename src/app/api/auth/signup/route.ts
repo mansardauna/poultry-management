@@ -69,13 +69,21 @@ export async function POST(request: Request) {
        }]);
 
        // Create default workspace (branch) linked to this org. 
-       // For now, workspaceId string will just be the ID. In the future, workspaces should reference orgId.
+       const defaultWorkspaceId = `main-${orgId}`;
        await serviceRoleClient.from('workspaces').insert([{
-          id: `main-${orgId}`,
+          id: defaultWorkspaceId,
           name: 'Main Branch',
           type: 'Layer Farm',
           createdAt: new Date().toISOString()
        }]);
+
+       const response = NextResponse.json({ ok: true, role: role });
+       // Set SaaS specific cookies
+       response.cookies.set('pfms_workspace', defaultWorkspaceId, { path: '/' });
+       response.cookies.set('pfms_org_id', orgId, { path: '/' });
+       response.cookies.set('pfms_tier', 'free', { path: '/' });
+       
+       return response;
     }
 
     return NextResponse.json({ ok: true, role: role });

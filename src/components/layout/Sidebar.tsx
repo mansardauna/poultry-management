@@ -38,6 +38,7 @@ import toast from 'react-hot-toast';
  */
 interface SidebarProps {
   role?: string;
+  tier?: string;
 }
 
 const menuItems = [
@@ -148,7 +149,7 @@ function EditBranchModal({ workspace, onClose, onSave }: EditModalProps) {
  * Main sidebar navigation component.
  * @param {SidebarProps} props
  */
-export function Sidebar({ role = 'Admin' }: SidebarProps) {
+export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -281,6 +282,11 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
                       <button
                         onClick={() => {
                           setIsDropdownOpen(false);
+                          if (tier === 'free' && workspaces.length >= 1) {
+                             toast.error('Free tier is limited to 1 branch. Upgrade to Pro for unlimited branches!');
+                             router.push('/dashboard/settings');
+                             return;
+                          }
                           setShowOnboarding(true);
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-2 font-medium"
@@ -316,13 +322,25 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
               const isActive = item.href === '/dashboard' 
                 ? pathname === '/dashboard' 
                 : (pathname === item.href || pathname.startsWith(item.href + '/'));
+                
+              const isLocked = item.name === 'CCTV Monitoring' && tier === 'free';
+                
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
-                  onClick={() => setIsMobileOpen(false)}
+                  href={isLocked ? '/dashboard/settings' : item.href}
+                  onClick={(e) => {
+                     if (isLocked) {
+                        e.preventDefault();
+                        toast.error('CCTV Monitoring is a Pro feature. Upgrade to unlock!');
+                        router.push('/dashboard/settings');
+                        return;
+                     }
+                     setIsMobileOpen(false);
+                  }}
                   className={clsx(
                     isActive ? 'bg-indigo-800 text-white' : 'hover:bg-indigo-900 hover:text-white',
+                    isLocked && 'opacity-60 grayscale',
                     'group flex items-center px-3 py-3 text-sm font-semibold rounded-md transition-colors relative',
                     isCollapsed ? 'justify-center' : ''
                   )}
@@ -336,10 +354,18 @@ export function Sidebar({ role = 'Admin' }: SidebarProps) {
                       isCollapsed ? 'mr-0' : 'mr-3'
                     )}
                   />
-                  {!isCollapsed && <span className="truncate">{texts.menu[item.name] || item.name}</span>}
+                  {!isCollapsed && (
+                     <span className="truncate flex-1">
+                        {texts.menu[item.name] || item.name}
+                     </span>
+                  )}
+                  
+                  {!isCollapsed && isLocked && (
+                    <span className="text-[10px] uppercase font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">PRO</span>
+                  )}
                   
                   {/* Active Indicator */}
-                  {isActive && (
+                  {isActive && !isLocked && (
                     <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
                   )}
                 </Link>

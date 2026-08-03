@@ -47,7 +47,26 @@ export async function POST(request: Request) {
     }
 
     // Next.js response + Supabase cookies are handled automatically by createServerClient
-    return NextResponse.json({ ok: true, role: data.user.user_metadata?.role || 'Admin' });
+    const userId = data.user?.id;
+    if (userId) {
+       const { supabase: adminClient } = await import('@/lib/supabase');
+       const { data: memberData } = await adminClient.from('organization_members').select('orgId').eq('userId', userId).single();
+       if (memberData?.orgId) {
+          const orgId = memberData.orgId;
+          const { data: orgData } = await adminClient.from('organizations').select('subscriptionTier').eq('id', orgId).single();
+          const tier = orgData?.subscriptionTier || 'free';
+          const { data: workspaces } = await adminClient.from('workspaces').select('id').like('id', `%${orgId}%`).limit(1);
+          const defaultWorkspaceId = workspaces?.[0]?.id || `main-${orgId}`;
+          
+          const response = NextResponse.json({ ok: true, role: data.user.user_metadata?.role || 'Admin' });
+          response.cookies.set('pfms_workspace', defaultWorkspaceId, { path: '/' });
+          response.cookies.set('pfms_org_id', orgId, { path: '/' });
+          response.cookies.set('pfms_tier', tier, { path: '/' });
+          return response;
+       }
+    }
+
+    return NextResponse.json({ ok: true, role: data.user?.user_metadata?.role || 'Admin' });
   } catch (error) {
     console.error('Login Error:', error);
     return NextResponse.json(
