@@ -31,7 +31,9 @@ export async function POST(request: Request) {
         eggCratePriceLarge: Number(body.eggCratePriceLarge) || 4400,
         adminName: body.adminName || 'Farm Admin',
         adminEmail: body.adminEmail || 'admin@example.com',
-        adminPhone: body.adminPhone || '+2340000000000'
+        adminPhone: body.adminPhone || '+2340000000000',
+        ...(body.paystackPublicKey ? { paystackPublicKey: body.paystackPublicKey } : {}),
+        ...(body.paystackSecretKey ? { paystackSecretKey: body.paystackSecretKey } : {})
       };
 
       await supabase.from('systemSettings').delete().eq('workspaceId', workspaceId);

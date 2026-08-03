@@ -188,6 +188,12 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
     window.open(url, '_blank');
   };
 
+  const handleCopyPaymentLink = (inv: Invoice) => {
+    const url = `${window.location.origin}/pay-invoice/${inv.id}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Payment link copied to clipboard!');
+  };
+
   const totalSales = sales.reduce((sum, s) => sum + s.totalAmount, 0);
   const avgSale = sales.length > 0 ? Math.round(totalSales / sales.length) : 0;
   const paidSales = sales.filter(s => s.status === 'Paid').length;
@@ -400,10 +406,18 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                         </button>
                         <button 
                           onClick={() => handleShareWhatsApp(inv)}
-                          className="bg-emerald-50 text-emerald-700 hover:bg-emerald-105 text-[10px] font-semibold uppercase px-2 py-1 inline-flex items-center gap-1"
+                          className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-semibold uppercase px-2 py-1 inline-flex items-center gap-1"
                         >
                           <MessageSquare size={12} /> Share
                         </button>
+                        {inv.status !== 'Paid' && (
+                          <button 
+                            onClick={() => handleCopyPaymentLink(inv)}
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 text-[10px] font-semibold uppercase px-2 py-1 inline-flex items-center gap-1"
+                          >
+                            <Coins size={12} /> Pay Link
+                          </button>
+                        )}
                       </td>
                       {canEdit && (
                         <td className="px-4 py-3 text-right">

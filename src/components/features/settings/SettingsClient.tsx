@@ -33,6 +33,8 @@ interface SystemSettings {
   adminName?: string;
   adminEmail?: string;
   adminPhone?: string;
+  paystackPublicKey?: string;
+  paystackSecretKey?: string;
 }
 
 /**
@@ -66,6 +68,8 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
   const [adminName, setAdminName] = useState(systemSettings?.adminName || 'Farm Admin');
   const [adminEmail, setAdminEmail] = useState(systemSettings?.adminEmail || 'admin@example.com');
   const [adminPhone, setAdminPhone] = useState(systemSettings?.adminPhone || '+2340000000000');
+  const [paystackPublicKey, setPaystackPublicKey] = useState(systemSettings?.paystackPublicKey || '');
+  const [paystackSecretKey, setPaystackSecretKey] = useState(systemSettings?.paystackSecretKey || '');
 
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -104,7 +108,9 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
           eggCratePriceLarge: Number(eggCratePriceLarge),
           adminName,
           adminEmail,
-          adminPhone
+          adminPhone,
+          paystackPublicKey,
+          paystackSecretKey
         })
       });
       if (res.ok) {
@@ -211,6 +217,41 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
           <div className="pt-6 flex justify-end">
             <MuiButton onClick={handleSaveAlertSettings} variant="contained" sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
               Save Alert Configuration
+            </MuiButton>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment Integrations */}
+      <Card>
+        <CardHeader className="border-b border-slate-100">
+          <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+            <DollarSign size={18} className="text-emerald-500" /> Payment Gateway Integration (Paystack)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TextField 
+              label="Paystack Public Key" 
+              fullWidth 
+              variant="outlined" 
+              value={paystackPublicKey} 
+              onChange={(e) => setPaystackPublicKey(e.target.value)} 
+              helperText="e.g. pk_test_xxxx or pk_live_xxxx" 
+            />
+            <TextField 
+              label="Paystack Secret Key" 
+              type="password"
+              fullWidth 
+              variant="outlined" 
+              value={paystackSecretKey} 
+              onChange={(e) => setPaystackSecretKey(e.target.value)} 
+              helperText="Used for secure server-side verification" 
+            />
+          </div>
+          <div className="pt-6 flex justify-end">
+            <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
+              Save Payment Keys
             </MuiButton>
           </div>
         </CardContent>

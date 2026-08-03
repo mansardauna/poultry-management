@@ -27,6 +27,8 @@ export default async function SettingsPage() {
     adminName: rawSystemSettings.adminName ?? undefined,
     adminEmail: rawSystemSettings.adminEmail ?? undefined,
     adminPhone: rawSystemSettings.adminPhone ?? undefined,
+    paystackPublicKey: rawSystemSettings.paystackPublicKey ?? undefined,
+    paystackSecretKey: rawSystemSettings.paystackSecretKey ?? undefined,
   } : {
     id: 'default',
     workspaceId,
