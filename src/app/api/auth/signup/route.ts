@@ -6,18 +6,16 @@ import { supabase as serviceRoleClient } from '@/lib/supabase';
 /** Exported function POST */
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
-  const username = typeof body?.username === 'string' ? body.username.trim() : '';
+  const email = typeof body?.email === 'string' ? body.email.trim() : '';
   const password = typeof body?.password === 'string' ? body.password : '';
   const role = 'Admin';
 
-  if (!username || !password) {
+  if (!email || !password) {
     return NextResponse.json(
-      { error: 'Username and password are required' },
+      { error: 'Email and password are required' },
       { status: 400 },
     );
   }
-
-  const email = username.includes('@') ? username : `${username}@poultry.local`;
 
   try {
     const supabase = await createClient();
@@ -41,10 +39,12 @@ export async function POST(request: Request) {
     if (userId) {
        const orgId = `org_${Date.now()}`;
        
+       const displayName = email.split('@')[0];
+
        // Use service role client to bypass any RLS for initial setup
        await serviceRoleClient.from('organizations').insert([{
           id: orgId,
-          name: `${username}'s Farm`,
+          name: `${displayName}'s Farm`,
           ownerId: userId,
           subscriptionTier: 'free',
           subscriptionStatus: 'active'
