@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 import { Toaster } from 'react-hot-toast';
 import { AiLogger } from "@/components/features/ai/AiLogger";
+import { Suspense } from 'react';
 
 /**
  * DashboardLayout wraps all pages inside the `(dashboard)` route group.
@@ -44,7 +45,9 @@ export default async function DashboardLayout({
             },
           }}
         />
-        <Sidebar role={role} tier={tier} />
+        <Suspense fallback={<div className="w-64 bg-indigo-950 hidden md:block" />}>
+          <Sidebar role={role} tier={tier} />
+        </Suspense>
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <Header role={role} />
           <main className="flex-1 overflow-y-auto p-4 md:p-8">

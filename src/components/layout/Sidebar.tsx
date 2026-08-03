@@ -2,8 +2,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
 import { useSidebar } from './SidebarContext';
 import {
   Box,
@@ -165,13 +165,40 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const isAdmin = role === 'Admin';
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
 
+  const searchParams = useSearchParams();
+  const isOnboarding = searchParams.get('onboarding') === 'true';
+  const planParam = searchParams.get('plan');
+
   useEffect(() => {
-    if (!isLoading && role === 'Admin' && workspaces.length === 0) {
+    if (isOnboarding) {
       setShowOnboarding(true);
-    } else if (workspaces.length > 0) {
+    } else if (!isLoading && role === 'Admin' && workspaces.length === 0) {
+      setShowOnboarding(true);
+    } else if (workspaces.length > 0 && !isOnboarding) {
       setShowOnboarding(false);
     }
-  }, [workspaces, role, isLoading]);
+  }, [workspaces, role, isLoading, isOnboarding]);
+
+  useEffect(() => {
+    if (planParam === 'pro' && !isLoading) {
+      const initiateCheckout = async () => {
+        try {
+          const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planId: 'pro', isAnnual: false })
+          });
+          const data = await res.json();
+          if (data.url) {
+            window.location.href = data.url;
+          }
+        } catch (e) {
+          toast.error('Failed to redirect to checkout');
+        }
+      };
+      initiateCheckout();
+    }
+  }, [planParam, isLoading]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
