@@ -73,7 +73,7 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
       toast.error('This farm has not configured online payments yet.');
       return;
     }
-    initializePayment(onSuccess, onClose);
+    initializePayment({ onSuccess, onClose });
   };
 
   if (status === 'Paid') {
