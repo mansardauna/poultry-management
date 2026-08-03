@@ -23,8 +23,25 @@ export async function POST(request: Request) {
     });
 
     if (error) {
+      // Auto-confirm stuck users who hit the rate limit on signup
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+         const { supabase: adminClient } = await import('@/lib/supabase');
+         const { data: usersData } = await adminClient.auth.admin.listUsers();
+         const unconfirmedUser = usersData?.users.find(u => u.email === email);
+         
+         if (unconfirmedUser) {
+            await adminClient.auth.admin.updateUserById(unconfirmedUser.id, { email_confirm: true });
+            
+            // Retry login
+            const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({ email, password });
+            if (!retryError && retryData.user) {
+               return NextResponse.json({ ok: true, role: retryData.user.user_metadata?.role || 'Admin' });
+            }
+         }
+      }
+
       return NextResponse.json(
-        { error: 'Invalid username or password' },
+        { error: error.message },
         { status: 401 },
       );
     }

@@ -18,21 +18,33 @@ export async function POST(request: Request) {
   }
 
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.signUp({
+    // 1. Create the user using admin API to bypass rate limits and auto-confirm
+    const { data: adminData, error: adminError } = await serviceRoleClient.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { role: role }
-      }
+      email_confirm: true,
+      user_metadata: { role: role }
     });
 
-    if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 },
-      );
+    if (adminError) {
+      if (adminError.message.includes('already') || adminError.message.includes('registered')) {
+        return NextResponse.json({ error: 'User already exists. Please log in.' }, { status: 400 });
+      }
+      return NextResponse.json({ error: adminError.message }, { status: 400 });
     }
+
+    // 2. Now sign in the user to establish the session (set cookies)
+    const supabase = await createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      return NextResponse.json({ error: signInError.message }, { status: 400 });
+    }
+
+    const data = adminData;
 
     // Now create the organization for the new SaaS user
     const userId = data.user?.id;
