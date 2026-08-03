@@ -1,8 +1,7 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { SignJWT } from 'jose';
-import bcrypt from 'bcryptjs';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabaseServer';
+import { supabase as serviceRoleClient } from '@/lib/supabase';
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -18,57 +17,58 @@ export async function POST(request: Request) {
     );
   }
 
+  const email = username.includes('@') ? username : `${username}@poultry.local`;
+
   try {
-    // Check if user already exists
-    const { data: existingUser } = await supabase.from('users').select('*').eq('username', username).limit(1);
-    if (existingUser && existingUser.length > 0) {
-      return NextResponse.json(
-        { error: 'Username already exists' },
-        { status: 409 },
-      );
-    }
-
-    const salt = bcrypt.genSaltSync(10);
-    const passwordHash = bcrypt.hashSync(password, salt);
-    
-    const { error: insertError } = await supabase.from('users').insert([{
-      id: `usr_${Date.now()}`,
-      username: username,
-      passwordHash: passwordHash,
-      role: role,
-      createdAt: new Date().toISOString(),
-    }]);
-
-    if (insertError) {
-      console.error('Insert Error:', insertError);
-      return NextResponse.json(
-        { error: `Database blocked signup. Ensure RLS is disabled on the users table. Details: ${insertError.message}` },
-        { status: 500 }
-      );
-    }
-
-    // Auto-login after signup
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-please-change');
-    const token = await new SignJWT({ role: role, username: username })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('24h')
-      .sign(secret);
-
-    const response = NextResponse.json({ ok: true, role: role });
-    response.cookies.set({
-      name: 'pfms_auth',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24,
-      path: '/',
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { role: role }
+      }
     });
 
-    return response;
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 },
+      );
+    }
+
+    // Now create the organization for the new SaaS user
+    const userId = data.user?.id;
+    if (userId) {
+       const orgId = `org_${Date.now()}`;
+       
+       // Use service role client to bypass any RLS for initial setup
+       await serviceRoleClient.from('organizations').insert([{
+          id: orgId,
+          name: `${username}'s Farm`,
+          ownerId: userId,
+          subscriptionTier: 'free',
+          subscriptionStatus: 'active'
+       }]);
+       
+       await serviceRoleClient.from('organization_members').insert([{
+          orgId,
+          userId,
+          role: 'Admin'
+       }]);
+
+       // Create default workspace (branch) linked to this org. 
+       // For now, workspaceId string will just be the ID. In the future, workspaces should reference orgId.
+       await serviceRoleClient.from('workspaces').insert([{
+          id: `main-${orgId}`,
+          name: 'Main Branch',
+          type: 'Layer Farm',
+          createdAt: new Date().toISOString()
+       }]);
+    }
+
+    return NextResponse.json({ ok: true, role: role });
   } catch (error: any) {
-    console.error('Signup Database Error:', error);
+    console.error('Signup Error:', error);
     return NextResponse.json(
       { error: `Internal server error: ${error.message}` },
       { status: 500 }

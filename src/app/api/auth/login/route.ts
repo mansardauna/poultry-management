@@ -1,8 +1,6 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { SignJWT } from 'jose';
-import bcrypt from 'bcryptjs';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabaseServer';
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -17,43 +15,26 @@ export async function POST(request: Request) {
     );
   }
 
-  try {
-    // Authenticate user
-    const { data: foundUsers } = await supabase.from('users').select('*').eq('username', username).limit(1);
-    const user = foundUsers?.[0];
+  const email = username.includes('@') ? username : `${username}@poultry.local`;
 
-    if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 },
       );
     }
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-please-change');
-    const token = await new SignJWT({ 
-      role: user.role, 
-      username: user.username,
-      createdBy: user.createdBy || null 
-    })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('24h')
-      .sign(secret);
-
-    const response = NextResponse.json({ ok: true, role: user.role });
-    response.cookies.set({
-      name: 'pfms_auth',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24,
-      path: '/',
-    });
-
-    return response;
+    // Next.js response + Supabase cookies are handled automatically by createServerClient
+    return NextResponse.json({ ok: true, role: data.user.user_metadata?.role || 'Admin' });
   } catch (error) {
-    console.error('Login Database Error:', error);
+    console.error('Login Error:', error);
     return NextResponse.json(
       { error: 'Internal server error while communicating with the database.' },
       { status: 500 }

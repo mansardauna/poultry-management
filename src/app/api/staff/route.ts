@@ -72,7 +72,7 @@ export async function POST(request: Request) {
 
     // Default: Add new staff member
     const user = await getAuthUser();
-    const adminUsername = user?.username || 'admin';
+    const adminUsername = user?.email?.split('@')[0] || 'admin';
 
     const newStaff = {
       id: 's' + Date.now().toString().slice(-8),

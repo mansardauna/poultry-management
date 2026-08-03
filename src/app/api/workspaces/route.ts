@@ -12,7 +12,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const owner = (user.role === 'Admin' ? user.username : (user.createdBy || 'admin')).toLowerCase();
+  const owner = (user.email?.split('@')[0] || 'admin').toLowerCase();
 
   const { data: workspaces } = await supabase
     .from('workspaces')
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing workspace id, name, or type' }, { status: 400 });
   }
 
-  const owner = (user.role === 'Admin' ? user.username : (user.createdBy || 'admin')).toLowerCase();
+  const owner = (user.email?.split('@')[0] || 'admin').toLowerCase();
 
   const createdWorkspace = {
     id: body.id,

@@ -216,6 +216,30 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
         </CardContent>
       </Card>
 
+      {/* Billing & Subscription */}
+      <Card>
+        <CardHeader className="border-b border-slate-100">
+          <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+            <DollarSign size={18} className="text-indigo-600" /> Subscription & Billing
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-medium text-slate-900">Current Plan: Free Starter</h3>
+              <p className="text-sm text-slate-500 mt-1">Upgrade to Commercial Pro to unlock unlimited branches, CCTV, and Voice AI.</p>
+            </div>
+            <MuiButton 
+              onClick={() => router.push('/pricing')} 
+              variant="contained" 
+              sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}
+            >
+              Upgrade Plan
+            </MuiButton>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Danger Zone */}
       <Card className="border-red-100">
         <CardHeader className="border-b border-red-50 bg-red-50/50">

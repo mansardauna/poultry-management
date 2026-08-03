@@ -1,33 +1,30 @@
 'use strict';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
-
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-development-only-please-change');
+import { createClient } from './supabaseServer';
 
 export interface AuthUser {
-  username: string;
+  id: string;
+  email: string;
   role: string;
-  createdBy?: string | null;
 }
 
 /**
- * Get the authenticated user from the pfms_auth cookie.
+ * Get the authenticated user using Supabase Auth.
  */
 export async function getAuthUser(): Promise<AuthUser | null> {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('pfms_auth')?.value;
+    const supabase = await createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
 
-    if (!token) return null;
+    if (error || !user) return null;
 
-    const { payload } = await jwtVerify(token, secret);
     return {
-      username: payload.username as string,
-      role: payload.role as string,
-      createdBy: (payload.createdBy as string) || null,
+      id: user.id,
+      email: user.email || '',
+      role: user.user_metadata?.role || 'Admin', // Default to Admin for now
     };
   } catch (err) {
-    console.error('JWT Verification Error:', err);
+    console.error('Supabase Auth Error:', err);
     return null;
   }
 }
+
