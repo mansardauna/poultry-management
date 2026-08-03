@@ -563,64 +563,160 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       </Dialog>
 
       {/* Invoice Viewer Modal */}
-      <Dialog open={openInvoiceView} onClose={handleCloseInvoiceView} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogContent className="p-8 space-y-6 font-mono text-xs" id="printable-invoice">
-          <div className="text-center border-b-2 border-dashed border-slate-300 pb-4">
-            <h2 className="text-lg font-semibold tracking-wider uppercase text-slate-800">POULTRY FARM</h2>
-            <p className="text-[10px] text-slate-500">Maitama, Abuja</p>
-            <p className="text-[10px] text-slate-400">Tel: +234 803 123 4567</p>
-          </div>
-          
-          <div className="flex justify-between text-[11px]">
-            <div>
-              <p className="text-slate-400">INVOICE TO:</p>
-              <p className="font-semibold text-slate-900">{selectedInvoice?.customerName}</p>
+      <Dialog open={openInvoiceView} onClose={handleCloseInvoiceView} fullWidth maxWidth="md" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}>
+        <DialogContent className="p-0 overflow-y-auto bg-slate-50" id="printable-invoice">
+          {/* Top Bar with Status and Quick Actions */}
+          <div className="bg-slate-900 text-white p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
+                <FileText size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  Invoice {selectedInvoice?.id}
+                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${
+                    selectedInvoice?.status === 'Paid' 
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                      : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  }`}>
+                    {selectedInvoice?.status}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">Issued on {selectedInvoice?.date}</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="font-semibold text-slate-900">INVOICE: {selectedInvoice?.id}</p>
-              <p className="text-slate-400">DATE: {selectedInvoice?.date}</p>
+
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              {selectedInvoice?.status !== 'Paid' && (
+                <>
+                  <button 
+                    onClick={() => selectedInvoice && handleCopyPaymentLink(selectedInvoice)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
+                  >
+                    <Coins size={14} /> Paystack Online Link
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if (!selectedInvoice) return;
+                      try {
+                        const res = await fetch('/api/sales', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ id: selectedInvoice.id, status: 'Paid', type: 'invoice' })
+                        });
+                        if (res.ok) {
+                          toast.success('Invoice marked as Paid!');
+                          setSelectedInvoice({ ...selectedInvoice, status: 'Paid' });
+                          refreshData();
+                        }
+                      } catch (_e) { toast.error('Failed to update status'); }
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
+                  >
+                    Mark as Paid (Offline)
+                  </button>
+                </>
+              )}
+              <button onClick={handlePrint} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg transition-all flex items-center gap-1.5">
+                <Printer size={14} /> Print / PDF
+              </button>
+              <button onClick={() => selectedInvoice && handleShareWhatsApp(selectedInvoice)} className="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-medium px-3 py-2 rounded-lg transition-all flex items-center gap-1.5">
+                <MessageSquare size={14} /> WhatsApp
+              </button>
             </div>
           </div>
 
-          <table className="w-full border-t border-b border-slate-200 py-2">
-            <thead>
-              <tr className="text-left font-semibold text-slate-700">
-                <th className="py-2">Description</th>
-                <th className="py-2 text-center">Qty</th>
-                <th className="py-2 text-right">Unit (₦)</th>
-                <th className="py-2 text-right">Amount (₦)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="py-2">{selectedInvoice?.items}</td>
-                <td className="py-2 text-center">{selectedInvoice?.quantity}</td>
-                <td className="py-2 text-right">₦{selectedInvoice?.unitPrice.toLocaleString()}</td>
-                <td className="py-2 text-right font-semibold">₦{selectedInvoice?.totalAmount.toLocaleString()}</td>
-              </tr>
-            </tbody>
-          </table>
+          {/* Printable Professional Invoice Body */}
+          <div className="p-8 sm:p-12 bg-white text-slate-800 space-y-8 font-sans">
+            {/* Header / Farm Branding */}
+            <div className="flex justify-between items-start border-b border-slate-200 pb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-base">
+                    P
+                  </div>
+                  <h2 className="text-2xl font-bold tracking-tight text-slate-900">POULTRY FARM ENTERPRISE</h2>
+                </div>
+                <p className="text-xs text-slate-500">Maitama Agriculture Hub, Abuja, FCT</p>
+                <p className="text-xs text-slate-500">Phone: +234 803 123 4567 | Email: billing@poultryfarm.com</p>
+              </div>
 
-          <div className="flex justify-between items-start pt-4 border-t border-dashed border-slate-200">
-            <div>
-              <p className="text-[10px] text-slate-500">PAYMENT STATUS: <span className="font-semibold text-emerald-600">{selectedInvoice?.status}</span></p>
-              <p className="text-[9px] text-slate-450 mt-1">Generated by Abdulrahman Monsur</p>
+              <div className="text-right">
+                <h1 className="text-3xl font-extrabold uppercase tracking-widest text-slate-300">INVOICE</h1>
+                <p className="text-sm font-mono font-bold text-slate-800 mt-1">#{selectedInvoice?.id}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Date: {selectedInvoice?.date}</p>
+              </div>
             </div>
-            <div className="text-right font-semibold text-sm text-indigo-650">
-              Total Due: ₦{selectedInvoice?.totalAmount.toLocaleString()}
-            </div>
-          </div>
 
-          <div className="text-center text-[9px] text-slate-400 border-t border-slate-100 pt-4 flex gap-4 justify-center print:hidden">
-            <button onClick={handlePrint} className="bg-slate-100 text-slate-750 px-3 py-1 flex items-center gap-1 font-semibold uppercase hover:bg-slate-200">
-              <Printer size="12" /> Print PDF
-            </button>
-            <button onClick={() => selectedInvoice && handleShareWhatsApp(selectedInvoice)} className="bg-emerald-100 text-emerald-800 px-3 py-1 flex items-center gap-1 font-semibold uppercase hover:bg-emerald-200">
-              <MessageSquare size={12} /> WhatsApp Share
-            </button>
-            <button onClick={handleCloseInvoiceView} className="bg-slate-200 text-slate-800 px-3 py-1 font-semibold uppercase hover:bg-slate-300">
-              Close
-            </button>
+            {/* Billed To / Details Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">BILLED TO</span>
+                <p className="font-semibold text-slate-900 text-sm">{selectedInvoice?.customerName}</p>
+                <p className="text-slate-500">Verified Customer</p>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">PAYMENT STATUS</span>
+                <span className={`inline-flex items-center gap-1 font-bold text-xs ${selectedInvoice?.status === 'Paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  ● {selectedInvoice?.status}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">PAYMENT METHOD</span>
+                <p className="font-medium text-slate-700">Bank Transfer / Paystack</p>
+              </div>
+            </div>
+
+            {/* Itemized Table */}
+            <div className="overflow-hidden rounded-xl border border-slate-200">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-100 text-slate-600 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-4">Item Description</th>
+                    <th className="py-3 px-4 text-center">Quantity</th>
+                    <th className="py-3 px-4 text-right">Unit Price (₦)</th>
+                    <th className="py-3 px-4 text-right">Total Amount (₦)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  <tr>
+                    <td className="py-4 px-4 font-semibold text-slate-900">{selectedInvoice?.items}</td>
+                    <td className="py-4 px-4 text-center font-mono">{selectedInvoice?.quantity}</td>
+                    <td className="py-4 px-4 text-right font-mono">₦{selectedInvoice?.unitPrice.toLocaleString()}</td>
+                    <td className="py-4 px-4 text-right font-mono font-bold text-slate-900">₦{selectedInvoice?.totalAmount.toLocaleString()}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Financial Totals */}
+            <div className="flex justify-between items-end pt-4">
+              <div className="max-w-xs text-xs text-slate-400 space-y-1">
+                <p className="font-semibold text-slate-600">Terms & Conditions:</p>
+                <p>Payment is due within 7 days. Thank you for doing business with us!</p>
+              </div>
+
+              <div className="w-64 space-y-2 text-xs">
+                <div className="flex justify-between text-slate-500">
+                  <span>Subtotal:</span>
+                  <span className="font-mono">₦{selectedInvoice?.totalAmount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-slate-500 border-b border-slate-100 pb-2">
+                  <span>Tax / VAT (0%):</span>
+                  <span className="font-mono">₦0.00</span>
+                </div>
+                <div className="flex justify-between text-base font-bold text-slate-900 pt-1">
+                  <span>Total Due:</span>
+                  <span className="font-mono text-indigo-600">₦{selectedInvoice?.totalAmount.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer / Sign-off */}
+            <div className="border-t border-dashed border-slate-200 pt-6 text-center text-[10px] text-slate-400 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <p>© {new Date().getFullYear()} Poultry Farm Management System. All rights reserved.</p>
+              <p className="font-mono">Ref: {selectedInvoice?.id}-VERIFIED</p>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
