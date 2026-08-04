@@ -19,6 +19,12 @@ export default function PricingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId, isAnnual })
       });
+      if (res.status === 401) {
+        toast.error('Please sign up or log in to upgrade');
+        router.push('/signup?plan=pro');
+        return;
+      }
+
       const data = await res.json();
       
       if (data.url) {
