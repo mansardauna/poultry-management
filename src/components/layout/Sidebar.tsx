@@ -168,6 +168,13 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get('onboarding') === 'true';
   const planParam = searchParams.get('plan');
+  const isUpgraded = searchParams.get('upgraded') === 'true';
+
+  useEffect(() => {
+    if (isUpgraded) {
+      toast.success('Welcome to Commercial Pro! Your account is now active.', { id: 'upgrade-success' });
+    }
+  }, [isUpgraded]);
 
   useEffect(() => {
     if (isOnboarding) {

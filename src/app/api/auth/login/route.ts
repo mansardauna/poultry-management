@@ -53,8 +53,17 @@ export async function POST(request: Request) {
        const { data: memberData } = await adminClient.from('organization_members').select('orgId').eq('userId', userId).single();
        if (memberData?.orgId) {
           const orgId = memberData.orgId;
-          const { data: orgData } = await adminClient.from('organizations').select('subscriptionTier').eq('id', orgId).single();
-          const tier = orgData?.subscriptionTier || 'free';
+          const { data: orgData } = await adminClient.from('organizations').select('subscriptionTier, subscriptionEndsAt').eq('id', orgId).single();
+          
+          const endsAt = orgData?.subscriptionEndsAt ? new Date(orgData.subscriptionEndsAt) : null;
+          const isExpired = endsAt ? new Date() > endsAt : false;
+          let tier = orgData?.subscriptionTier || 'free';
+
+          if (tier === 'pro' && isExpired) {
+            tier = 'free';
+            await adminClient.from('organizations').update({ subscriptionTier: 'free', subscriptionStatus: 'expired' }).eq('id', orgId);
+          }
+
           const { data: workspaces } = await adminClient.from('workspaces').select('id').like('id', `%${orgId}%`).limit(1);
           const defaultWorkspaceId = workspaces?.[0]?.id || `main-${orgId}`;
           

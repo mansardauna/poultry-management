@@ -267,16 +267,68 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
-              <h3 className="text-base font-medium text-slate-900">Current Plan: Free Starter</h3>
-              <p className="text-sm text-slate-500 mt-1">Upgrade to Commercial Pro to unlock unlimited branches, CCTV, and Voice AI.</p>
+              <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                Current Plan: Commercial Pro 
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                  Active
+                </span>
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">Unlock unlimited branches, CCTV monitoring, and Voice AI daily reporting.</p>
             </div>
-            <MuiButton 
-              onClick={() => router.push('/pricing')} 
-              variant="contained" 
-              sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}
-            >
-              Upgrade Plan
-            </MuiButton>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <MuiButton 
+                onClick={async () => {
+                  try {
+                    toast.loading('Initiating checkout...', { id: 'chk-toast' });
+                    const res = await fetch('/api/checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ planId: 'pro', isAnnual: false })
+                    });
+                    const data = await res.json();
+                    toast.dismiss('chk-toast');
+                    if (data.url) {
+                      window.location.href = data.url;
+                    } else {
+                      toast.error(data.error || 'Failed to start checkout');
+                    }
+                  } catch (_e) {
+                    toast.dismiss('chk-toast');
+                    toast.error('An error occurred');
+                  }
+                }} 
+                variant="contained" 
+                sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, px: 3, py: 1.2, boxShadow: 'none', textTransform: 'none', fontWeight: 600 }}
+              >
+                Upgrade / Renew Pro (Monthly)
+              </MuiButton>
+              <MuiButton 
+                onClick={async () => {
+                  try {
+                    toast.loading('Initiating annual checkout...', { id: 'chk-toast' });
+                    const res = await fetch('/api/checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ planId: 'pro', isAnnual: true })
+                    });
+                    const data = await res.json();
+                    toast.dismiss('chk-toast');
+                    if (data.url) {
+                      window.location.href = data.url;
+                    } else {
+                      toast.error(data.error || 'Failed to start checkout');
+                    }
+                  } catch (_e) {
+                    toast.dismiss('chk-toast');
+                    toast.error('An error occurred');
+                  }
+                }} 
+                variant="outlined" 
+                sx={{ borderRadius: 2, px: 3, py: 1.2, textTransform: 'none', fontWeight: 600 }}
+              >
+                Upgrade Annual (365 Days)
+              </MuiButton>
+            </div>
           </div>
         </CardContent>
       </Card>
