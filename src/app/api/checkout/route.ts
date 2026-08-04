@@ -92,11 +92,27 @@ export async function POST(request: Request) {
         .eq('id', orgId);
     }
 
-    const priceId = isAnnual ? PRO_ANNUAL_PRICE_ID : PRO_MONTHLY_PRICE_ID;
+    // Inline price_data fallback if specific price IDs are not created in Stripe dashboard
+    const envPriceId = isAnnual ? process.env.STRIPE_PRO_ANNUAL_PRICE_ID : process.env.STRIPE_PRO_MONTHLY_PRICE_ID;
+    
+    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = envPriceId ? { price: envPriceId, quantity: 1 } : {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: isAnnual ? 'Commercial Pro (Annual Subscription)' : 'Commercial Pro (Monthly Subscription)',
+          description: 'Includes Unlimited Branches, CCTV Feed Monitoring, Voice AI, and 24/7 Priority Support.',
+        },
+        unit_amount: isAnnual ? 12000 : 1500, // $120/yr or $15/mo
+        recurring: {
+          interval: isAnnual ? 'year' : 'month',
+        },
+      },
+      quantity: 1,
+    };
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [lineItem],
       mode: 'subscription',
       success_url: `${siteUrl}/dashboard?upgraded=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/pricing`,
