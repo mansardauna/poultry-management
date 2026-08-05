@@ -5,7 +5,9 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
-import { Plus, BarChart2, AlertTriangle, CheckSquare, Edit2, Trash2 } from 'lucide-react';
+import { Plus, BarChart2, AlertTriangle, CheckSquare, Edit2, Trash2, Download, Printer } from 'lucide-react';
+import { downloadCSV, printBrandedReport } from '@/lib/exportReports';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { EggRecord, ChickenBatch, CushionAudit, MaturationLog } from "@/data/types";
@@ -45,6 +47,37 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   const [eggs, setEggs] = useState<EggRecord[]>(initialEggs);
   const { texts } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
+  const router = useRouter();
+  const [tier, setTier] = useState('free');
+  useEffect(() => {
+    const match = document.cookie.match(/pfms_tier=([^;]+)/);
+    if (match) setTier(match[1]);
+  }, []);
+
+  const handleExportReports = (format: 'csv' | 'pdf') => {
+    if (tier === 'free') {
+      toast.error('Exporting PDF and CSV reports is a Pro feature. Upgrade to unlock!');
+      router.push('/dashboard/settings?tab=subscription');
+      return;
+    }
+
+    const columns = [
+      { header: 'ID', key: 'id' },
+      { header: 'Date', key: 'date' },
+      { header: 'Batch ID', key: 'batchId' },
+      { header: 'Good Eggs', key: 'goodEggs' },
+      { header: 'Broken Eggs', key: 'brokenEggs' },
+      { header: 'Spoilt Eggs', key: 'spoiltEggs' },
+    ];
+
+    if (format === 'csv') {
+      downloadCSV(filteredEggs, columns, 'egg_production_report.csv');
+      toast.success('Egg production CSV report downloaded!');
+    } else {
+      printBrandedReport('Daily Egg Production & Quality Audit', filteredEggs, columns);
+    }
+  };
+
   const canEdit = true; // Allow all staff to correct their logs
   const [cushionAudits, setCushionAudits] = useState<CushionAudit[]>(initialCushionAudits);
   const [maturationLogs, setMaturationLogs] = useState<MaturationLog[]>(initialMaturationLogs);
@@ -442,7 +475,19 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           <h1 className="text-2xl font-semibold text-slate-900">{texts.eggs.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{texts.eggs.subtitle}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button 
+            onClick={() => handleExportReports('csv')}
+            className="bg-slate-100 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Download size={16} /> Export CSV
+          </button>
+          <button 
+            onClick={() => handleExportReports('pdf')}
+            className="bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <Printer size={16} /> Print Report
+          </button>
           <button 
             onClick={handleOpenAudit}
             className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors"
