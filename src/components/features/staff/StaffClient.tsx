@@ -28,6 +28,8 @@ import {
 } from '@mui/material';
 import { useWorkspace } from '../WorkspaceContext';
 
+import { useRouter } from 'next/navigation';
+
 /**
  * Props for the StaffClient component.
  */
@@ -35,6 +37,7 @@ interface StaffClientProps {
   initialStaff: Staff[];
   initialTasks: StaffTask[];
   role?: string;
+  tier?: string;
 }
 
 /**
@@ -42,11 +45,21 @@ interface StaffClientProps {
  *
  * @param props - Component properties.
  */
-export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: StaffClientProps) {
+export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier = 'free' }: StaffClientProps) {
+  const router = useRouter();
   const canEdit = role === 'Admin';
   const [staff, setStaff] = useState<Staff[]>(initialStaff);
   const [tasks, setTasks] = useState<StaffTask[]>(initialTasks);
   const [payrollLogs, setPayrollLogs] = useState<PayrollLog[]>([]);
+
+  const handleOpen = () => {
+    if (tier === 'free' && staff.length >= 2) {
+      toast.error('Free plan is limited to 2 staff members. Upgrade to Commercial Pro for unlimited staff!');
+      router.push('/dashboard/settings');
+      return;
+    }
+    setOpen(true);
+  };
 
   const staffTable = useTableLogic({
     data: staff,
@@ -97,7 +110,6 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
     refreshData();
   }, []);
 
-  const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
     setName('');
@@ -273,6 +285,25 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff' }: Staf
           </button>
         </div>
       </div>
+
+      {/* Free Plan Staff Limit Warning Banner */}
+      {tier === 'free' && (
+        <div className="bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-amber-500/10 border-2 border-amber-400 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">⚡</span>
+            <div>
+              <h4 className="text-sm font-bold text-slate-900">Free Starter Plan Limit ({staff.length}/2 Staff Members Registered)</h4>
+              <p className="text-xs text-slate-600">Upgrade to Commercial Pro to add unlimited farm workers, managers, and biometric tracking.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push('/dashboard/settings')}
+            className="bg-gradient-to-r from-amber-500 to-indigo-600 text-white font-extrabold text-xs px-4 py-2 rounded-lg shadow hover:opacity-90 transition-opacity whitespace-nowrap"
+          >
+            Upgrade to Commercial Pro (₦15,000/mo)
+          </button>
+        </div>
+      )}
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

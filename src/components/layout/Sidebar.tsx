@@ -407,6 +407,36 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             })}
           </nav>
         </div>
+        {/* Plan Upgrade Banner in Sidebar */}
+        {!isCollapsed && tier === 'free' && (
+          <div className="mx-3 mb-2 p-3 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 rounded-xl text-center">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">FREE STARTER</span>
+              <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded">1 Branch Limit</span>
+            </div>
+            <p className="text-[11px] text-indigo-200 mb-2 leading-tight">Unlock CCTV, Voice AI & Unlimited Branches!</p>
+            <button
+              onClick={() => {
+                setIsMobileOpen(false);
+                router.push('/dashboard/settings');
+              }}
+              className="w-full bg-gradient-to-r from-amber-400 to-indigo-500 text-slate-950 font-extrabold text-xs py-1.5 rounded-lg shadow hover:opacity-90 transition-opacity"
+            >
+              ⚡ Upgrade to Pro (₦15k)
+            </button>
+          </div>
+        )}
+
+        {!isCollapsed && tier === 'pro' && (
+          <div className="mx-3 mb-2 p-2.5 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-emerald-300 uppercase truncate">Commercial Pro Active</p>
+              <p className="text-[9px] text-emerald-400/80 truncate">Unlimited Branches & CCTV</p>
+            </div>
+          </div>
+        )}
+
         <div className="p-4 border-t border-indigo-900 flex flex-col gap-2">
           <Link
             href="/dashboard/settings"

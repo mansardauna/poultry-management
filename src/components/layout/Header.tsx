@@ -310,8 +310,22 @@ export function Header({ role = 'Admin' }: { role?: string }) {
           )}
         </div>
 
+        {/* Plan Status Badge & Upgrade CTA */}
+        <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Current Plan</span>
+            <span className="text-xs font-bold text-slate-800">Commercial Pro</span>
+          </div>
+          <button
+            onClick={() => router.push('/dashboard/settings')}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-indigo-600 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:opacity-90 transition-opacity"
+          >
+            <span>⚡ Upgrade</span>
+          </button>
+        </div>
+
         {/* User profile */}
-        <div className="flex items-center gap-3 border-l border-slate-200 pl-4 ml-2">
+        <div className="flex items-center gap-3 border-l border-slate-200 pl-3">
           <div className="h-9 w-9 bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100 rounded-md">
             <User size={20} />
           </div>

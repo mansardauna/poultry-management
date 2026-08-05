@@ -14,6 +14,8 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+import { useRouter } from 'next/navigation';
+
 interface DiagnosticsLog {
   id: string;
   date: string;
@@ -22,14 +24,20 @@ interface DiagnosticsLog {
   status: string;
 }
 
-/** Exported function default */
 export default function CCTVPage() {
+  const router = useRouter();
   const [openRepairModal, setOpenRepairModal] = useState(false);
   const [openConnectModal, setOpenConnectModal] = useState(false);
   const [cameraId, setCameraId] = useState('');
   const [technicianNote, setTechnicianNote] = useState('');
   const [diagnosticsLogs, setDiagnosticsLogs] = useState<DiagnosticsLog[]>([]);
   const [isCameraBRebooting, setIsCameraBRebooting] = useState(false);
+  const [tier, setTier] = useState('free');
+
+  useEffect(() => {
+    const match = document.cookie.match(/pfms_tier=([^;]+)/);
+    if (match) setTier(match[1]);
+  }, []);
 
   const refreshLogs = async () => {
     try {
@@ -132,6 +140,46 @@ export default function CCTVPage() {
       console.error(err);
     }
   };
+
+  if (tier === 'free') {
+    return (
+      <div className="space-y-6 max-w-4xl mx-auto py-8">
+        <div className="bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-8 text-center shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black uppercase px-4 py-1.5 rounded-bl-xl shadow">
+            COMMERCIAL PRO FEATURE
+          </div>
+          
+          <div className="w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/30 animate-pulse">
+            <Video size={42} />
+          </div>
+
+          <h2 className="text-3xl font-extrabold text-white mb-3">Live CCTV Monitoring & AI Motion Alerts</h2>
+          <p className="text-slate-300 text-base max-w-xl mx-auto mb-8 leading-relaxed">
+            Continuous HD security surveillance, automated predator & intruder motion detection, multi-camera grid streaming, and remote technician dispatch.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-2xl mx-auto mb-8 text-xs font-semibold text-slate-200">
+            <div className="bg-slate-800/90 p-4 rounded-xl border border-slate-700/80 flex items-center gap-2">
+              <span className="text-emerald-400 font-bold">✓</span> Multi-Coop Live Streams
+            </div>
+            <div className="bg-slate-800/90 p-4 rounded-xl border border-slate-700/80 flex items-center gap-2">
+              <span className="text-emerald-400 font-bold">✓</span> AI Predator Alerts
+            </div>
+            <div className="bg-slate-800/90 p-4 rounded-xl border border-slate-700/80 flex items-center gap-2">
+              <span className="text-emerald-400 font-bold">✓</span> Remote Dispatch Controls
+            </div>
+          </div>
+
+          <button
+            onClick={() => router.push('/dashboard/settings')}
+            className="bg-gradient-to-r from-amber-400 via-indigo-500 to-amber-400 text-slate-950 font-black text-base px-8 py-4 rounded-xl shadow-2xl hover:scale-105 transition-transform"
+          >
+            ⚡ Unlock CCTV Monitoring for ₦15,000/mo
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
