@@ -31,6 +31,31 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isUpgraded = searchParams.get('upgraded') === 'true';
+  const queryTier = searchParams.get('tier') || 'pro';
+  const [currentTier, setCurrentTier] = useState(tier);
+
+  useEffect(() => {
+    setCurrentTier(tier);
+  }, [tier]);
+
+  useEffect(() => {
+    if (isUpgraded) {
+      fetch('/api/checkout/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planTier: queryTier, demo: true })
+      }).then(res => res.json()).then(data => {
+        if (data.tier) {
+          setCurrentTier(data.tier);
+          toast.success(`Account upgraded to ${data.tier === 'enterprise' ? 'Enterprise & Cooperative' : 'Commercial Pro'}!`, { id: 'tier-upgrade-toast' });
+          router.refresh();
+        }
+      });
+    }
+  }, [isUpgraded, queryTier, router]);
+
   const { setIsMobileOpen } = useSidebar();
   const { language, setLanguage, texts } = useLanguage();
   const { timeRange, setTimeRange } = useTimeFilter();
@@ -315,21 +340,21 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
           <div className="hidden sm:flex flex-col items-end">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Current Plan</span>
-            <span className={`text-xs font-bold ${tier === 'pro' ? 'text-emerald-600' : 'text-slate-700'}`}>
-              {tier === 'pro' ? 'Commercial Pro' : 'Free Starter'}
+            <span className={`text-xs font-bold ${currentTier !== 'free' ? 'text-emerald-600' : 'text-slate-700'}`}>
+              {currentTier === 'enterprise' ? 'Enterprise & Coop' : currentTier === 'pro' ? 'Commercial Pro' : 'Free Starter'}
             </span>
           </div>
 
-          {tier === 'free' ? (
+          {currentTier === 'free' ? (
             <button
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
             >
-              <span>Upgrade Plan</span>
+              <span>Upgrade</span>
             </button>
           ) : (
             <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active Pro
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active {currentTier === 'enterprise' ? 'Enterprise' : 'Pro'}
             </span>
           )}
         </div>

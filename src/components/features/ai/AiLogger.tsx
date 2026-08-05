@@ -18,7 +18,7 @@ export function AiLogger() {
   React.useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setTier(match[1]);
-  }, []);
+  }, [isOpen]);
 
   // Define SpeechRecognition dynamically to avoid SSR issues
   const startListening = () => {

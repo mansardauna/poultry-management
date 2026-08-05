@@ -171,12 +171,26 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const isOnboarding = searchParams.get('onboarding') === 'true';
   const planParam = searchParams.get('plan');
   const isUpgraded = searchParams.get('upgraded') === 'true';
+  const [currentTier, setCurrentTier] = useState(tier);
+
+  useEffect(() => {
+    setCurrentTier(tier);
+  }, [tier]);
 
   useEffect(() => {
     if (isUpgraded) {
-      toast.success('Welcome to Commercial Pro! Your account is now active.', { id: 'upgrade-success' });
+      const qTier = searchParams.get('tier') || 'pro';
+      fetch('/api/checkout/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planTier: qTier, demo: true })
+      }).then(res => res.json()).then(data => {
+        if (data.tier) {
+          setCurrentTier(data.tier);
+        }
+      });
     }
-  }, [isUpgraded]);
+  }, [isUpgraded, searchParams]);
 
   useEffect(() => {
     const hasDismissed = typeof window !== 'undefined' && localStorage.getItem('pfms_onboarded_dismissed') === 'true';
@@ -366,7 +380,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 ? pathname === '/dashboard' 
                 : (pathname === item.href || pathname.startsWith(item.href + '/'));
                 
-              const isLocked = (item.name === 'CCTV Monitoring' && tier === 'free') || (item.name === 'Enterprise Hub' && tier !== 'enterprise');
+              const isLocked = (item.name === 'CCTV Monitoring' && currentTier === 'free') || (item.name === 'Enterprise Hub' && currentTier !== 'enterprise');
                 
               return (
                 <Link

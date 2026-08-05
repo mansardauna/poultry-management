@@ -92,10 +92,27 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [cardExpYear, setCardExpYear] = useState('2028');
   const [cardIsDefault, setCardIsDefault] = useState(true);
 
+  const isUpgraded = searchParams.get('upgraded') === 'true';
+  const queryTier = searchParams.get('tier') || 'pro';
+
   useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setCurrentTier(match[1]);
-  }, []);
+
+    if (isUpgraded) {
+      fetch('/api/checkout/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planTier: queryTier, demo: true })
+      }).then(res => res.json()).then(data => {
+        if (data.tier) {
+          setCurrentTier(data.tier);
+          toast.success(`Subscription active! Upgraded to ${data.tier === 'enterprise' ? 'Enterprise & Cooperative' : 'Commercial Pro'}.`, { id: 'settings-upgrade-toast' });
+          router.refresh();
+        }
+      });
+    }
+  }, [isUpgraded, queryTier, router]);
   const [feedThresholdKg, setFeedThresholdKg] = useState(String(initialSettings?.feedThresholdKg || 50));
   const [eggDropPercentage, setEggDropPercentage] = useState(String(initialSettings?.eggDropPercentage || 15));
   const [notifySms, setNotifySms] = useState(initialSettings?.notifySms || false);
@@ -110,7 +127,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [adminPhone, setAdminPhone] = useState(systemSettings?.adminPhone || '+2340000000000');
   const [paystackPublicKey, setPaystackPublicKey] = useState(systemSettings?.paystackPublicKey || '');
   const [paystackSecretKey, setPaystackSecretKey] = useState(systemSettings?.paystackSecretKey || '');
-  const [stripePublicKey, setStripePublicKey] = useState(systemSettings?.stripePublicKey || '');
+  const [stripePublicKey, setStripePublicKey] = useState(systemSettings?.stripePublicKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
   const [stripeSecretKey, setStripeSecretKey] = useState(systemSettings?.stripeSecretKey || '');
   const [flutterwavePublicKey, setFlutterwavePublicKey] = useState(systemSettings?.flutterwavePublicKey || '');
   const [flutterwaveSecretKey, setFlutterwaveSecretKey] = useState(systemSettings?.flutterwaveSecretKey || '');
@@ -409,7 +426,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                     onClick={() => setShowUpgradeModal(true)}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl shadow-md transition-colors cursor-pointer whitespace-nowrap"
                   >
-                    Upgrade Plan
+                    {currentTier === 'free' ? 'Upgrade Plan' : 'Manage / Change Tier'}
                   </button>
                   {currentTier !== 'free' && (
                     <button

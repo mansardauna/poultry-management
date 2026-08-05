@@ -1,5 +1,4 @@
 'use strict';
-'use server';
 
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
@@ -12,25 +11,49 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Extract orgId from cookies, fallback to the old behavior if missing
   const orgIdMatch = request.headers.get('cookie')?.match(/pfms_org_id=([^;]+)/);
-  const orgId = orgIdMatch ? orgIdMatch[1] : '';
+  let orgId = orgIdMatch ? orgIdMatch[1] : '';
+
+  if (!orgId) {
+    const { data: memberData } = await supabase
+      .from('organization_members')
+      .select('orgId')
+      .eq('userId', user.id)
+      .limit(1)
+      .single();
+    if (memberData?.orgId) {
+      orgId = memberData.orgId;
+    }
+  }
+
+  const owner = (user.email?.split('@')[0] || 'admin').toLowerCase();
+
+  let query = supabase.from('workspaces').select('*');
 
   if (orgId) {
-    const { data: workspaces } = await supabase
-      .from('workspaces')
-      .select('*')
-      .like('id', `%${orgId}%`);
-    return NextResponse.json(workspaces || []);
+    query = query.like('id', `%${orgId}%`);
   } else {
-    // Fallback for older sessions without the cookie
-    const owner = (user.email?.split('@')[0] || 'admin').toLowerCase();
-    const { data: workspaces } = await supabase
-      .from('workspaces')
-      .select('*')
-      .eq('ownerUsername', owner);
-    return NextResponse.json(workspaces || []);
+    query = query.eq('ownerUsername', owner);
   }
+
+  const { data: workspaces } = await query;
+
+  if (!workspaces || workspaces.length === 0) {
+    // Automatically initialize a clean, isolated branch for this user
+    const isolatedId = orgId ? `main-${orgId}` : `ws_${user.id.replace(/-/g, '')}`;
+    const defaultBranch = {
+      id: isolatedId,
+      name: `${owner.toUpperCase()} Farm Branch`,
+      type: 'Main',
+      createdAt: new Date().toISOString(),
+      ownerUsername: owner
+    };
+
+    await supabase.from('workspaces').insert([defaultBranch]);
+    return NextResponse.json([defaultBranch]);
+  }
+
+  return NextResponse.json(workspaces);
 }
 
 /** Exported function POST */
@@ -47,11 +70,21 @@ export async function POST(request: Request) {
   }
 
   const orgIdMatch = request.headers.get('cookie')?.match(/pfms_org_id=([^;]+)/);
-  const orgId = orgIdMatch ? orgIdMatch[1] : '';
+  let orgId = orgIdMatch ? orgIdMatch[1] : '';
+
+  if (!orgId) {
+    const { data: memberData } = await supabase
+      .from('organization_members')
+      .select('orgId')
+      .eq('userId', user.id)
+      .limit(1)
+      .single();
+    if (memberData?.orgId) {
+      orgId = memberData.orgId;
+    }
+  }
 
   const owner = (user.email?.split('@')[0] || 'admin').toLowerCase();
-
-  // If orgId exists, ensure the workspace ID contains it for isolation
   const finalId = orgId && !body.id.includes(orgId) ? `${body.id}-${orgId}` : body.id;
 
   const createdWorkspace = {
@@ -59,7 +92,7 @@ export async function POST(request: Request) {
     name: body.name,
     type: body.type,
     createdAt: new Date().toISOString(),
-    ownerUsername: owner, // Keeping for backward compatibility
+    ownerUsername: owner,
   };
 
   await supabase.from('workspaces').insert([createdWorkspace]);
@@ -89,10 +122,6 @@ export async function DELETE(request: Request) {
 
   if (!id) {
     return NextResponse.json({ error: 'Missing workspace id' }, { status: 400 });
-  }
-
-  if (id === 'main') {
-    return NextResponse.json({ error: 'Cannot delete the main workspace' }, { status: 400 });
   }
 
   await supabase.from('workspaces').delete().eq('id', id);
