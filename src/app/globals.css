@@ -41,6 +41,10 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading uppercase;
   }
+
+  button, a, input[type="button"], input[type="submit"], [role="button"], select {
+    cursor: pointer !important;
+  }
 }
 
 /* Custom Sidebar Scrollbar */

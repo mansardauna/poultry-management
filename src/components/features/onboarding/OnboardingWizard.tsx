@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, User, Clipboard, GraduationCap, ChevronRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Box, User, Clipboard, GraduationCap, ChevronRight, CheckCircle2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspace } from '../WorkspaceContext';
 
@@ -147,38 +147,48 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] relative border border-slate-200">
+        
+        {/* Close Button Top Right */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+          title="Close Setup Wizard"
+        >
+          <X size={18} />
+        </button>
+
         {/* Sidebar Steps Progress */}
-        <div className="md:w-1/3 bg-slate-900 text-slate-100 p-6 flex flex-col justify-between">
+        <div className="md:w-1/3 bg-slate-900 text-slate-100 p-6 flex flex-col justify-between flex-shrink-0">
           <div>
-            <div className="flex items-center gap-2 mb-8">
-              <Box className="text-indigo-400" size={24} />
-              <span className="font-bold tracking-wider uppercase text-xs">Farm Onboarding</span>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">P</div>
+              <span className="font-bold tracking-wider uppercase text-xs text-indigo-300">Farm Onboarding</span>
             </div>
-            <ul className="space-y-6">
+            <ul className="space-y-4 md:space-y-6">
               {[
                 { s: 1, label: 'Farm Branch', icon: Box },
                 { s: 2, label: 'Flock Setup', icon: Clipboard },
-                { s: 3, label: 'Staff Registration', icon: User },
-                { s: 4, label: 'Starter Pack', icon: GraduationCap },
+                { s: 3, label: 'Staff Member', icon: User },
+                { s: 4, label: 'Starter Guide', icon: GraduationCap },
               ].map((item) => (
                 <li key={item.s} className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg transition-colors ${
+                  <div className={`p-2 rounded-xl transition-colors ${
                     step === item.s 
-                      ? 'bg-indigo-600 text-white' 
+                      ? 'bg-indigo-600 text-white shadow-md' 
                       : step > item.s 
-                        ? 'bg-indigo-900/50 text-indigo-400' 
+                        ? 'bg-indigo-950 text-indigo-400 border border-indigo-800' 
                         : 'bg-slate-800 text-slate-500'
                   }`}>
                     <item.icon size={16} />
                   </div>
                   <div>
-                    <p className={`text-xs uppercase tracking-wider font-semibold ${
-                      step === item.s ? 'text-white' : 'text-slate-400'
+                    <p className={`text-[10px] uppercase tracking-wider font-extrabold ${
+                      step === item.s ? 'text-indigo-400' : 'text-slate-500'
                     }`}>Step {item.s}</p>
-                    <p className={`text-sm font-medium ${
-                      step === item.s ? 'text-indigo-300' : 'text-slate-500'
+                    <p className={`text-xs font-semibold ${
+                      step === item.s ? 'text-white' : 'text-slate-400'
                     }`}>{item.label}</p>
                   </div>
                 </li>
@@ -190,52 +200,58 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
             <button 
               onClick={handleSkipAll}
               disabled={isSaving}
-              className="text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-white transition-colors text-left"
+              className="mt-6 text-xs font-semibold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors text-left cursor-pointer flex items-center gap-1"
             >
-              Skip All Setup & Start
+              ⚡ Skip Setup & Start
             </button>
           )}
         </div>
 
-        {/* Content Panel */}
-        <div className="flex-1 p-8 flex flex-col justify-between bg-white">
+        {/* Scrollable Content Panel */}
+        <div className="flex-1 p-6 md:p-8 flex flex-col justify-between bg-white overflow-y-auto max-h-[80vh]">
+          
           {/* Step 1: Farm Branch */}
           {step === 1 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-850 uppercase tracking-wide">Create your first Farm Branch</h2>
-                <p className="text-sm text-slate-500 mt-1">Branches help you segregate data across different physical farms or locations.</p>
-              </div>
+            <div className="space-y-6 flex-1 flex flex-col justify-between">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Branch Name</label>
-                  <input 
-                    type="text" 
-                    value={branchName}
-                    onChange={(e) => setBranchName(e.target.value)}
-                    placeholder="e.g. East Branch"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
+                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Create your first Farm Branch</h2>
+                  <p className="text-xs text-slate-500 mt-1">Branches help you segregate inventory, financial logs, and staff across physical farm locations.</p>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Branch Type</label>
-                  <select 
-                    value={branchType}
-                    onChange={(e) => setBranchType(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  >
-                    <option value="Layer Farm">Layer Farm</option>
-                    <option value="Broiler Farm">Broiler Farm</option>
-                    <option value="Hatchery">Hatchery</option>
-                    <option value="Mixed Use">Mixed Use</option>
-                  </select>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Branch Name</label>
+                    <input 
+                      type="text" 
+                      value={branchName}
+                      onChange={(e) => setBranchName(e.target.value)}
+                      placeholder="e.g. Main Farm - Abuja Branch"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Branch Farm Type</label>
+                    <select 
+                      value={branchType}
+                      onChange={(e) => setBranchType(e.target.value)}
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium cursor-pointer"
+                    >
+                      <option value="Layer Farm">Layer Farm (Egg Production)</option>
+                      <option value="Broiler Farm">Broiler Farm (Meat Production)</option>
+                      <option value="Hatchery">Hatchery & Breeding</option>
+                      <option value="Mixed Use">Mixed Commercial Farm</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-              <div className="pt-6 flex justify-end">
+
+              {/* Action Bar */}
+              <div className="pt-6 border-t border-slate-100 flex justify-end sticky bottom-0 bg-white z-10">
                 <button 
                   onClick={handleCreateBranch}
-                  disabled={isSaving || !branchName}
-                  className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-lg flex items-center gap-1 shadow-md shadow-indigo-100 disabled:bg-indigo-400"
+                  disabled={isSaving || !branchName.trim()}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
                   Create Branch <ChevronRight size={16} />
                 </button>
@@ -245,66 +261,71 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
 
           {/* Step 2: First Flock */}
           {step === 2 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-850 uppercase tracking-wide">Register your first flock</h2>
-                <p className="text-sm text-slate-500 mt-1">Add initial chicken batches to monitor mortality rates, vaccination routines, and yield metrics.</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Breed / Hybrid</label>
-                  <input 
-                    type="text" 
-                    value={breed}
-                    onChange={(e) => setBreed(e.target.value)}
-                    placeholder="e.g. Isa Brown"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
-                </div>
+            <div className="space-y-6 flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Quantity</label>
-                  <input 
-                    type="number" 
-                    value={flockQty}
-                    onChange={(e) => setFlockQty(e.target.value)}
-                    placeholder="e.g. 500"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
+                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first flock batch</h2>
+                  <p className="text-xs text-slate-500 mt-1">Add initial chicken batches to monitor mortality rates, vaccination routines, and yield metrics.</p>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Age (Weeks)</label>
-                  <input 
-                    type="number" 
-                    value={flockAge}
-                    onChange={(e) => setFlockAge(e.target.value)}
-                    placeholder="e.g. 18"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Bird Type</label>
-                  <select 
-                    value={flockType}
-                    onChange={(e) => setFlockType(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  >
-                    <option value="Layers">Layers (Egg Production)</option>
-                    <option value="Broilers">Broilers (Meat Production)</option>
-                    <option value="Cockerels">Cockerels</option>
-                  </select>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Breed / Hybrid</label>
+                    <input 
+                      type="text" 
+                      value={breed}
+                      onChange={(e) => setBreed(e.target.value)}
+                      placeholder="e.g. Isa Brown / Cobb 500"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Bird Count (Qty)</label>
+                    <input 
+                      type="number" 
+                      value={flockQty}
+                      onChange={(e) => setFlockQty(e.target.value)}
+                      placeholder="e.g. 500"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Age (Weeks)</label>
+                    <input 
+                      type="number" 
+                      value={flockAge}
+                      onChange={(e) => setFlockAge(e.target.value)}
+                      placeholder="e.g. 18"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Bird Category</label>
+                    <select 
+                      value={flockType}
+                      onChange={(e) => setFlockType(e.target.value)}
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium cursor-pointer"
+                    >
+                      <option value="Layers">Layers (Egg Production)</option>
+                      <option value="Broilers">Broilers (Meat Production)</option>
+                      <option value="Cockerels">Cockerels</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-              <div className="pt-6 flex justify-between items-center">
+
+              {/* Action Bar */}
+              <div className="pt-6 border-t border-slate-100 flex justify-between items-center sticky bottom-0 bg-white z-10">
                 <button 
                   onClick={() => setStep(3)}
-                  className="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-colors"
+                  className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                 >
                   Skip Step
                 </button>
                 <button 
                   onClick={handleSaveFlock}
                   disabled={isSaving || !breed || !flockQty}
-                  className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-lg flex items-center gap-1 shadow-md shadow-indigo-100 disabled:bg-indigo-400"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
                   Register Flock <ChevronRight size={16} />
                 </button>
@@ -314,75 +335,80 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
 
           {/* Step 3: First Staff */}
           {step === 3 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-850 uppercase tracking-wide">Register your first staff member</h2>
-                <p className="text-sm text-slate-500 mt-1">Create login credentials for a staff member or farm attendant to begin logging work.</p>
+            <div className="space-y-6 flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first staff member</h2>
+                  <p className="text-xs text-slate-500 mt-1">Create staff login credentials to begin delegating daily tasks and logging work.</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Full Name</label>
+                    <input 
+                      type="text" 
+                      value={staffName}
+                      onChange={(e) => setStaffName(e.target.value)}
+                      placeholder="e.g. John Attendant"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Access Role</label>
+                    <select 
+                      value={staffRole}
+                      onChange={(e) => setStaffRole(e.target.value)}
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium cursor-pointer"
+                    >
+                      <option value="Staff">Attendant (Staff)</option>
+                      <option value="Manager">Manager</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Monthly Salary (₦)</label>
+                    <input 
+                      type="number" 
+                      value={staffSalary}
+                      onChange={(e) => setStaffSalary(e.target.value)}
+                      placeholder="e.g. 45000"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Username</label>
+                    <input 
+                      type="text" 
+                      value={staffUsername}
+                      onChange={(e) => setStaffUsername(e.target.value)}
+                      placeholder="john_attendant"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Password</label>
+                    <input 
+                      type="password" 
+                      value={staffPassword}
+                      onChange={(e) => setStaffPassword(e.target.value)}
+                      placeholder="Set password"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Staff Name</label>
-                  <input 
-                    type="text" 
-                    value={staffName}
-                    onChange={(e) => setStaffName(e.target.value)}
-                    placeholder="e.g. John Attendant"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Role</label>
-                  <select 
-                    value={staffRole}
-                    onChange={(e) => setStaffRole(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  >
-                    <option value="Staff">Attendant (Staff)</option>
-                    <option value="Manager">Manager</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Monthly Salary (₦)</label>
-                  <input 
-                    type="number" 
-                    value={staffSalary}
-                    onChange={(e) => setStaffSalary(e.target.value)}
-                    placeholder="e.g. 45000"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Login Username</label>
-                  <input 
-                    type="text" 
-                    value={staffUsername}
-                    onChange={(e) => setStaffUsername(e.target.value)}
-                    placeholder="john_attendant"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Login Password</label>
-                  <input 
-                    type="password" 
-                    value={staffPassword}
-                    onChange={(e) => setStaffPassword(e.target.value)}
-                    placeholder="Set a password"
-                    className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  />
-                </div>
-              </div>
-              <div className="pt-6 flex justify-between items-center">
+
+              {/* Action Bar */}
+              <div className="pt-6 border-t border-slate-100 flex justify-between items-center sticky bottom-0 bg-white z-10">
                 <button 
                   onClick={() => setStep(4)}
-                  className="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-colors"
+                  className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                 >
                   Skip Step
                 </button>
                 <button 
                   onClick={handleSaveStaff}
                   disabled={isSaving || !staffName || !staffUsername || !staffPassword}
-                  className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-lg flex items-center gap-1 shadow-md shadow-indigo-100 disabled:bg-indigo-400"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
                   Save Staff <ChevronRight size={16} />
                 </button>
@@ -392,39 +418,42 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
 
           {/* Step 4: Starter Pack */}
           {step === 4 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-850 uppercase tracking-wide flex items-center gap-2">
-                  <CheckCircle2 className="text-emerald-500" size={28} /> Starter Pack Guide
-                </h2>
-                <p className="text-sm text-slate-500 mt-1">Quick operational breakdown of your poultry management workspace.</p>
-              </div>
-              
-              <div className="space-y-4 max-h-[300px] overflow-y-auto bg-slate-50 p-4 border border-slate-200 text-xs">
-                <div className="space-y-1">
-                  <p className="font-bold text-slate-800">🥚 Egg Yield & broken tracking</p>
-                  <p className="text-slate-600 leading-relaxed">
-                    Log egg yields daily under the **Eggs** dashboard. Keep an eye on Broken eggs. If egg breakage is high, the system automatically creates tasks to audit nesting cushioning padding.
-                  </p>
+            <div className="space-y-6 flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide flex items-center gap-2">
+                    <CheckCircle2 className="text-emerald-500" size={24} /> Farm Setup Complete!
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">Quick operational breakdown of your poultry management workspace.</p>
                 </div>
-                <div className="space-y-1 border-t border-slate-200 pt-3">
-                  <p className="font-bold text-slate-800">🌾 Feed Logistics & safety thresholds</p>
-                  <p className="text-slate-600 leading-relaxed">
-                    Under the **Feed** page, log restocks and daily usage. When feed stocks drop below your threshold (default 50kg), critical alerts are logged, and restock tasks are automatically assigned.
-                  </p>
-                </div>
-                <div className="space-y-1 border-t border-slate-200 pt-3">
-                  <p className="font-bold text-slate-800">💳 Finance break-even tracking</p>
-                  <p className="text-slate-600 leading-relaxed">
-                    Egg sales automatically generate invoices and record revenue. Expenses (like feed buys) are logged under the **Finance** page. The main dashboard uses this to calculate real-time break-even percentages and profit projections.
-                  </p>
+                
+                <div className="space-y-3 max-h-[220px] overflow-y-auto bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                  <div className="space-y-1">
+                    <p className="font-bold text-slate-900">🥚 Daily Egg Yield & Mortality Logs</p>
+                    <p className="text-slate-600 leading-relaxed">
+                      Log egg production and broken eggs under the **Eggs** dashboard. Automated alerts warn you if breakage or mortality spikes.
+                    </p>
+                  </div>
+                  <div className="space-y-1 border-t border-slate-200 pt-3">
+                    <p className="font-bold text-slate-900">🌾 Feed Stock Thresholds</p>
+                    <p className="text-slate-600 leading-relaxed">
+                      Track feed bags and daily consumption under **Feed**. Critical alerts notify management whenever feed falls below safety thresholds.
+                    </p>
+                  </div>
+                  <div className="space-y-1 border-t border-slate-200 pt-3">
+                    <p className="font-bold text-slate-900">💳 Financial Ledger & Invoicing</p>
+                    <p className="text-slate-600 leading-relaxed">
+                      Customer invoices automatically convert to confirmed revenue upon payment. Track feed buys and operational costs under **Finance**.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-6 flex justify-end">
+              {/* Final Launch Button */}
+              <div className="pt-6 border-t border-slate-100 sticky bottom-0 bg-white z-10">
                 <button 
                   onClick={onClose}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm uppercase tracking-wider w-full py-4 rounded-lg flex items-center justify-center gap-2 shadow-md shadow-indigo-100"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider w-full py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 cursor-pointer transition-all"
                 >
                   Launch My Dashboard <ChevronRight size={18} />
                 </button>

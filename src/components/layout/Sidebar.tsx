@@ -177,9 +177,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   }, [isUpgraded]);
 
   useEffect(() => {
-    if (isOnboarding) {
+    const hasDismissed = typeof window !== 'undefined' && localStorage.getItem('pfms_onboarded_dismissed') === 'true';
+    if (isOnboarding && !hasDismissed) {
       setShowOnboarding(true);
-    } else if (!isLoading && role === 'Admin' && workspaces.length === 0) {
+    } else if (!isLoading && role === 'Admin' && workspaces.length === 0 && !hasDismissed) {
       setShowOnboarding(true);
     } else if (workspaces.length > 0 && !isOnboarding) {
       setShowOnboarding(false);
@@ -473,7 +474,11 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
       )}
 
       {showOnboarding && (
-        <OnboardingWizard onClose={() => setShowOnboarding(false)} />
+        <OnboardingWizard onClose={() => {
+          if (typeof window !== 'undefined') localStorage.setItem('pfms_onboarded_dismissed', 'true');
+          setShowOnboarding(false);
+          router.replace('/dashboard');
+        }} />
       )}
 
       {editingWorkspace && (
