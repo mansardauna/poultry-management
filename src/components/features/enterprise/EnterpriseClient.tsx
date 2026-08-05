@@ -10,33 +10,80 @@ import { useRouter } from 'next/navigation';
 interface EnterpriseClientProps {
   tier: string;
   workspaces: any[];
+  cooperative?: any;
+  apiKeys?: any[];
+  consultants?: any[];
 }
 
-export function EnterpriseClient({ tier, workspaces }: EnterpriseClientProps) {
+export function EnterpriseClient({ tier, workspaces, cooperative, apiKeys = [], consultants = [] }: EnterpriseClientProps) {
   const router = useRouter();
   const isEnterprise = tier === 'enterprise';
 
   // State for White-label branding
-  const [coopName, setCoopName] = useState('National Poultry Farmers Cooperative');
-  const [subdomain, setSubdomain] = useState('maitama-coop');
-  const [accentColor, setAccentColor] = useState('#4f46e5');
+  const [coopName, setCoopName] = useState(cooperative?.coopName || 'National Poultry Farmers Cooperative');
+  const [subdomain, setSubdomain] = useState(cooperative?.subdomain || 'maitama-coop');
 
   // State for API Keys
-  const [apiKey, setApiKey] = useState('pfms_live_key_984920491823');
+  const [activeKey, setActiveKey] = useState(apiKeys[0]?.secretKey || 'pfms_live_key_984920491823');
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyKey = () => {
-    navigator.clipboard.writeText(apiKey);
+    navigator.clipboard.writeText(activeKey);
     setIsCopied(true);
     toast.success('API Key copied to clipboard');
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleGenerateNewKey = () => {
+  const handleGenerateNewKey = async () => {
     const newK = 'pfms_live_key_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    setApiKey(newK);
+    setActiveKey(newK);
     toast.success('Generated new Enterprise API Key');
   };
+
+  if (!isEnterprise) {
+    return (
+      <div className="space-y-6 max-w-4xl pb-16">
+        <div className="bg-slate-900 text-white p-8 md:p-12 rounded-3xl text-center space-y-6 shadow-2xl relative overflow-hidden border border-slate-800">
+          <div className="w-20 h-20 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto border border-purple-500/30 animate-pulse">
+            <Building2 size={40} />
+          </div>
+          <div className="space-y-2 max-w-lg mx-auto">
+            <span className="bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-3 py-1 rounded-full">
+              ENTERPRISE TIER REQUIRED
+            </span>
+            <h2 className="text-3xl font-extrabold text-white">Enterprise Hub is Locked</h2>
+            <p className="text-sm text-slate-300 leading-relaxed">
+              Multi-farm matrix management, cooperative white-label branding, 24/7 priority veterinarian hotline, and custom REST API keys are exclusively available on the Enterprise & Cooperative Plan.
+            </p>
+          </div>
+
+          <div className="pt-4 max-w-md mx-auto">
+            <button
+              onClick={() => router.push('/dashboard/settings?tab=subscription')}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-4 rounded-2xl shadow-xl transition-all cursor-pointer"
+            >
+              ⚡ Upgrade to Enterprise & Cooperative (₦45,000/mo)
+            </button>
+          </div>
+
+          <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left border-t border-slate-800 text-xs text-slate-300">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-indigo-400 flex-shrink-0" />
+              <span>Multi-Farm Central Hub</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-purple-400 flex-shrink-0" />
+              <span>White-Label Cooperative Portal</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
+              <span>24/7 Priority Vet Hotline</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-6xl pb-16">
@@ -227,7 +274,7 @@ export function EnterpriseClient({ tier, workspaces }: EnterpriseClientProps) {
                 <input 
                   type="text" 
                   readOnly 
-                  value={apiKey} 
+                  value={activeKey} 
                   className="w-full bg-slate-100 font-mono text-xs p-2.5 rounded-xl border border-slate-200 text-slate-800"
                 />
                 <button 

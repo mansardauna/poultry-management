@@ -368,17 +368,21 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 ? pathname === '/dashboard' 
                 : (pathname === item.href || pathname.startsWith(item.href + '/'));
                 
-              const isLocked = item.name === 'CCTV Monitoring' && tier === 'free';
+              const isLocked = (item.name === 'CCTV Monitoring' && tier === 'free') || (item.name === 'Enterprise Hub' && tier !== 'enterprise');
                 
               return (
                 <Link
                   key={item.name}
-                  href={isLocked ? '/dashboard/settings' : item.href}
+                  href={isLocked ? '/dashboard/settings?tab=subscription' : item.href}
                   onClick={(e) => {
                      if (isLocked) {
                         e.preventDefault();
-                        toast.error('CCTV Monitoring is a Pro feature. Upgrade to unlock!');
-                        router.push('/dashboard/settings');
+                        toast.error(
+                          item.name === 'Enterprise Hub' 
+                            ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
+                            : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
+                        );
+                        router.push('/dashboard/settings?tab=subscription');
                         return;
                      }
                      setIsMobileOpen(false);

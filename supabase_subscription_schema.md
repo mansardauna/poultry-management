@@ -103,7 +103,48 @@ ALTER TABLE public."alertSettings" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow authenticated read/write on alertSettings" ON public."alertSettings" FOR ALL USING (true);
 ```
 
+-- 5. Create `enterprise_cooperatives` Table
+CREATE TABLE IF NOT EXISTS public.enterprise_cooperatives (
+    id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    "workspaceId" VARCHAR(255) NOT NULL UNIQUE,
+    "coopName" VARCHAR(255) NOT NULL DEFAULT 'National Poultry Farmers Cooperative',
+    subdomain VARCHAR(100) NOT NULL DEFAULT 'maitama-coop',
+    "accentColor" VARCHAR(50) DEFAULT '#4f46e5',
+    "logoUrl" TEXT,
+    "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.enterprise_cooperatives ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read/write on enterprise_cooperatives" ON public.enterprise_cooperatives FOR ALL USING (true);
+
+-- 6. Create `enterprise_api_keys` Table
+CREATE TABLE IF NOT EXISTS public.enterprise_api_keys (
+    id VARCHAR(255) PRIMARY KEY,
+    "workspaceId" VARCHAR(255) NOT NULL,
+    "keyName" VARCHAR(100) NOT NULL DEFAULT 'Production ERP Key',
+    "secretKey" VARCHAR(255) NOT NULL,
+    "isActive" BOOLEAN DEFAULT true,
+    "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.enterprise_api_keys ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read/write on enterprise_api_keys" ON public.enterprise_api_keys FOR ALL USING (true);
+
+-- 7. Create `enterprise_consultants` Table
+CREATE TABLE IF NOT EXISTS public.enterprise_consultants (
+    id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    "workspaceId" VARCHAR(255) NOT NULL,
+    "consultantName" VARCHAR(255) NOT NULL DEFAULT 'Dr. Samuel Okafor',
+    "phoneNumber" VARCHAR(100) NOT NULL DEFAULT '+2348000000000',
+    specialty VARCHAR(255) DEFAULT 'Poultry Vet Specialist',
+    "isAvailable" BOOLEAN DEFAULT true,
+    "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.enterprise_consultants ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read/write on enterprise_consultants" ON public.enterprise_consultants FOR ALL USING (true);
+
 ---
 
-## 5. Verify Setup
-After running the SQL query above in Supabase, your tables are fully prepared for live credit card tokens, Paystack gateway keys, and subscription billing receipts!
+## 8. Verify Setup
+After running the SQL queries above in Supabase, your settings, multi-payment gateways, saved card methods, subscription history, and Enterprise multi-farm tables will be fully active!
