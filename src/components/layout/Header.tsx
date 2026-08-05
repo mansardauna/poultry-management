@@ -3,10 +3,11 @@
 
 import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar } from 'lucide-react';
 import { useState, useEffect, useRef, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSidebar } from './SidebarContext';
 import { useLanguage, Language } from '@/components/features/LanguageContext';
 import { useTimeFilter, TimeRange } from '@/components/features/TimeFilterContext';
+import toast from 'react-hot-toast';
 
 /**
  * Represents a single notification or alert log.
