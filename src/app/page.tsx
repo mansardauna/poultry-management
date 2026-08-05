@@ -23,11 +23,11 @@ export default function LandingPage() {
             </div>
             
             <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors hidden sm:block">
-                Demo
+              <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition-colors hidden sm:block">
+                Log In
               </Link>
-              <Link href="#" className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md shadow-slate-900/10 active:scale-95">
-                Purchase
+              <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md shadow-indigo-600/20 active:scale-95">
+                Sign Up Free
               </Link>
             </div>
           </div>
@@ -49,12 +49,11 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-            <Link href="#" className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-full text-base font-medium transition-all shadow-xl shadow-slate-900/20 active:scale-95 w-full sm:w-auto">
-              Purchase Now
+            <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95 w-full sm:w-auto">
+              Get Started Free
             </Link>
-            <Link href="/login" className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-8 py-4 rounded-full text-base font-medium transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2">
-              <PlayCircle size={20} className="text-slate-400" />
-              Request a demo
+            <Link href="/login" className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 px-8 py-4 rounded-full text-base font-semibold transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2">
+              Log In to Account
             </Link>
           </div>
 
@@ -246,8 +245,8 @@ export default function LandingPage() {
           <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-8">
             Supercharge your farm<br/>with AI today!
           </h2>
-          <Link href="#" className="inline-block bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-full text-base font-medium transition-all shadow-xl shadow-slate-900/20 active:scale-95">
-            Purchase Now
+          <Link href="/signup" className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95">
+            Create Free Account
           </Link>
         </div>
       </section>
