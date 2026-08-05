@@ -121,7 +121,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   };
 
   return (
-    <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 relative z-50">
+    <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 relative z-20">
       {/* Mobile hamburger */}
       <button
         className="md:hidden p-2 -ml-1 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-md transition-colors"
@@ -138,15 +138,16 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           </div>
           <input
             className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
-            placeholder={texts.common.search + "..."}
+            placeholder={`${texts.common.search || 'Search'}...`}
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </form>
       </div>
-      <div className="flex items-center gap-4">
-        {/* Time Filter Dropdown */}
+
+      <div className="flex items-center space-x-2 sm:space-x-4">
+        {/* Time Range Filter */}
         <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
           <Calendar size={14} className="text-indigo-500 mr-2 ml-1" />
           <select 

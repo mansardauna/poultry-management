@@ -229,10 +229,18 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile Backdrop */}
+      {isMobileOpen && (
+        <div 
+          onClick={() => setIsMobileOpen(false)} 
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity cursor-pointer" 
+        />
+      )}
+
       {/* Sidebar Container */}
       <div 
         className={clsx(
-          "fixed inset-y-0 left-0 z-40 flex flex-col bg-indigo-950 text-indigo-100 transition-all duration-300 md:relative md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-indigo-950 text-indigo-100 transition-all duration-300 md:relative md:translate-x-0 md:z-auto",
           isCollapsed ? "w-20" : "w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
