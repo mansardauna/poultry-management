@@ -33,7 +33,14 @@ export async function POST(request: Request) {
         adminEmail: body.adminEmail || 'admin@example.com',
         adminPhone: body.adminPhone || '+2340000000000',
         ...(body.paystackPublicKey ? { paystackPublicKey: body.paystackPublicKey } : {}),
-        ...(body.paystackSecretKey ? { paystackSecretKey: body.paystackSecretKey } : {})
+        ...(body.paystackSecretKey ? { paystackSecretKey: body.paystackSecretKey } : {}),
+        ...(body.stripePublicKey ? { stripePublicKey: body.stripePublicKey } : {}),
+        ...(body.stripeSecretKey ? { stripeSecretKey: body.stripeSecretKey } : {}),
+        ...(body.flutterwavePublicKey ? { flutterwavePublicKey: body.flutterwavePublicKey } : {}),
+        ...(body.flutterwaveSecretKey ? { flutterwaveSecretKey: body.flutterwaveSecretKey } : {}),
+        ...(body.bankName ? { bankName: body.bankName } : {}),
+        ...(body.accountNumber ? { accountNumber: body.accountNumber } : {}),
+        ...(body.accountName ? { accountName: body.accountName } : {})
       };
 
       await supabase.from('systemSettings').delete().eq('workspaceId', workspaceId);

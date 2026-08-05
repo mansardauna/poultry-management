@@ -35,6 +35,13 @@ interface SystemSettings {
   adminPhone?: string;
   paystackPublicKey?: string;
   paystackSecretKey?: string;
+  stripePublicKey?: string;
+  stripeSecretKey?: string;
+  flutterwavePublicKey?: string;
+  flutterwaveSecretKey?: string;
+  bankName?: string;
+  accountNumber?: string;
+  accountName?: string;
 }
 
 /**
@@ -70,6 +77,13 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
   const [adminPhone, setAdminPhone] = useState(systemSettings?.adminPhone || '+2340000000000');
   const [paystackPublicKey, setPaystackPublicKey] = useState(systemSettings?.paystackPublicKey || '');
   const [paystackSecretKey, setPaystackSecretKey] = useState(systemSettings?.paystackSecretKey || '');
+  const [stripePublicKey, setStripePublicKey] = useState(systemSettings?.stripePublicKey || '');
+  const [stripeSecretKey, setStripeSecretKey] = useState(systemSettings?.stripeSecretKey || '');
+  const [flutterwavePublicKey, setFlutterwavePublicKey] = useState(systemSettings?.flutterwavePublicKey || '');
+  const [flutterwaveSecretKey, setFlutterwaveSecretKey] = useState(systemSettings?.flutterwaveSecretKey || '');
+  const [bankName, setBankName] = useState(systemSettings?.bankName || '');
+  const [accountNumber, setAccountNumber] = useState(systemSettings?.accountNumber || '');
+  const [accountName, setAccountName] = useState(systemSettings?.accountName || '');
 
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -110,11 +124,18 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
           adminEmail,
           adminPhone,
           paystackPublicKey,
-          paystackSecretKey
+          paystackSecretKey,
+          stripePublicKey,
+          stripeSecretKey,
+          flutterwavePublicKey,
+          flutterwaveSecretKey,
+          bankName,
+          accountNumber,
+          accountName
         })
       });
       if (res.ok) {
-        toast.success('System settings saved successfully!');
+        toast.success('System & payment gateway settings saved!');
         router.refresh();
       }
       else toast.error('Failed to save system settings');
@@ -226,32 +247,128 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
       <Card>
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
-            <DollarSign size={18} className="text-emerald-500" /> Payment Gateway Integration (Paystack)
+            <DollarSign size={18} className="text-emerald-500" /> Multi-Payment Gateway & Billing Keys
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TextField 
-              label="Paystack Public Key" 
-              fullWidth 
-              variant="outlined" 
-              value={paystackPublicKey} 
-              onChange={(e) => setPaystackPublicKey(e.target.value)} 
-              helperText="e.g. pk_test_xxxx or pk_live_xxxx" 
-            />
-            <TextField 
-              label="Paystack Secret Key" 
-              type="password"
-              fullWidth 
-              variant="outlined" 
-              value={paystackSecretKey} 
-              onChange={(e) => setPaystackSecretKey(e.target.value)} 
-              helperText="Used for secure server-side verification" 
-            />
+        <CardContent className="p-6 space-y-8">
+          {/* 1. Paystack Integration */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">Nigeria & Africa</span>
+              <h4 className="text-sm font-semibold text-slate-800">Paystack Integration</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TextField 
+                label="Paystack Public Key" 
+                fullWidth 
+                variant="outlined" 
+                value={paystackPublicKey} 
+                onChange={(e) => setPaystackPublicKey(e.target.value)} 
+                helperText="e.g. pk_test_xxxx or pk_live_xxxx" 
+              />
+              <TextField 
+                label="Paystack Secret Key" 
+                type="password"
+                fullWidth 
+                variant="outlined" 
+                value={paystackSecretKey} 
+                onChange={(e) => setPaystackSecretKey(e.target.value)} 
+                helperText="Used for server-side transaction verification" 
+              />
+            </div>
           </div>
+
+          {/* 2. Stripe Integration */}
+          <div className="pt-6 border-t border-slate-100">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-0.5 rounded">Global SaaS</span>
+              <h4 className="text-sm font-semibold text-slate-800">Stripe Integration</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TextField 
+                label="Stripe Publishable Key" 
+                fullWidth 
+                variant="outlined" 
+                value={stripePublicKey} 
+                onChange={(e) => setStripePublicKey(e.target.value)} 
+                helperText="e.g. pk_test_xxxx or pk_live_xxxx" 
+              />
+              <TextField 
+                label="Stripe Secret Key" 
+                type="password"
+                fullWidth 
+                variant="outlined" 
+                value={stripeSecretKey} 
+                onChange={(e) => setStripeSecretKey(e.target.value)} 
+                helperText="Used for Stripe subscription checkout" 
+              />
+            </div>
+          </div>
+
+          {/* 3. Flutterwave Integration */}
+          <div className="pt-6 border-t border-slate-100">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">Pan-African</span>
+              <h4 className="text-sm font-semibold text-slate-800">Flutterwave Integration</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TextField 
+                label="Flutterwave Public Key" 
+                fullWidth 
+                variant="outlined" 
+                value={flutterwavePublicKey} 
+                onChange={(e) => setFlutterwavePublicKey(e.target.value)} 
+                helperText="e.g. FLWPUBK_TEST-xxxx" 
+              />
+              <TextField 
+                label="Flutterwave Secret Key" 
+                type="password"
+                fullWidth 
+                variant="outlined" 
+                value={flutterwaveSecretKey} 
+                onChange={(e) => setFlutterwaveSecretKey(e.target.value)} 
+                helperText="Used for Flutterwave checkout verification" 
+              />
+            </div>
+          </div>
+
+          {/* 4. Direct Bank Transfer Details */}
+          <div className="pt-6 border-t border-slate-100">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-slate-100 text-slate-800 text-xs font-bold px-2 py-0.5 rounded">Offline Wire Transfer</span>
+              <h4 className="text-sm font-semibold text-slate-800">Farm Direct Bank Account (For Invoice Transfers)</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TextField 
+                label="Bank Name" 
+                fullWidth 
+                variant="outlined" 
+                value={bankName} 
+                onChange={(e) => setBankName(e.target.value)} 
+                placeholder="e.g. GTBank / Zenith Bank" 
+              />
+              <TextField 
+                label="Account Number" 
+                fullWidth 
+                variant="outlined" 
+                value={accountNumber} 
+                onChange={(e) => setAccountNumber(e.target.value)} 
+                placeholder="e.g. 0123456789" 
+              />
+              <TextField 
+                label="Account Name" 
+                fullWidth 
+                variant="outlined" 
+                value={accountName} 
+                onChange={(e) => setAccountName(e.target.value)} 
+                placeholder="e.g. Acme Farms Ltd" 
+              />
+            </div>
+          </div>
+
           <div className="pt-6 flex justify-end">
             <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
-              Save Payment Keys
+              Save Payment Gateway Keys
             </MuiButton>
           </div>
         </CardContent>
