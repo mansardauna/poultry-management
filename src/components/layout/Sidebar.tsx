@@ -184,10 +184,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
       setShowOnboarding(true);
     } else if (!isLoading && role === 'Admin' && workspaces.length === 0 && !hasDismissed) {
       setShowOnboarding(true);
-    } else if (workspaces.length > 0 && !isOnboarding) {
-      setShowOnboarding(false);
     }
-  }, [workspaces, role, isLoading, isOnboarding]);
+  }, [workspaces.length, role, isLoading, isOnboarding]);
 
   useEffect(() => {
     if (planParam === 'pro' && !isLoading) {

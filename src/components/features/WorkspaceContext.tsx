@@ -21,8 +21,8 @@ interface WorkspaceContextType {
   workspaces: Workspace[];
   activeWorkspace: Workspace | null;
   isLoading: boolean;
-  setActiveWorkspace: (workspace: Workspace) => void;
-  addWorkspace: (workspace: Workspace) => Promise<void>;
+  setActiveWorkspace: (workspace: Workspace, shouldReload?: boolean) => void;
+  addWorkspace: (workspace: Workspace, shouldReload?: boolean) => Promise<void>;
   updateWorkspace: (id: string, name: string, type: string) => Promise<void>;
   deleteWorkspace: (id: string) => Promise<void>;
 }
@@ -94,13 +94,15 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     loadWorkspaces();
   }, []);
 
-  const setActiveWorkspace = (workspace: Workspace) => {
+  const setActiveWorkspace = (workspace: Workspace, shouldReload = true) => {
     setActiveWorkspaceState(workspace);
     Cookies.set('pfms_workspace', workspace.id, { path: '/' });
-    window.location.reload();
+    if (shouldReload) {
+      window.location.reload();
+    }
   };
 
-  const addWorkspace = async (workspace: Workspace) => {
+  const addWorkspace = async (workspace: Workspace, shouldReload = false) => {
     const response = await fetch('/api/workspaces', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -115,7 +117,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     const createdWorkspace = await response.json();
     const newWorkspaces = [...workspaces, createdWorkspace];
     setWorkspaces(newWorkspaces);
-    setActiveWorkspace(createdWorkspace);
+    setActiveWorkspace(createdWorkspace, shouldReload);
   };
 
   const updateWorkspace = async (id: string, name: string, type: string) => {

@@ -33,6 +33,13 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
   const [staffUsername, setStaffUsername] = useState('');
   const [staffPassword, setStaffPassword] = useState('');
 
+  const handleClose = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pfms_onboarded_dismissed', 'true');
+    }
+    onClose();
+  };
+
   const handleSkipAll = async () => {
     setIsSaving(true);
     try {
@@ -44,7 +51,7 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
         createdAt: new Date().toISOString(),
       });
       toast.success('Default farm initialized! Welcome to Poultry Farm Management.');
-      onClose();
+      handleClose();
     } catch (err) {
       console.error(err);
       toast.error('Initialization failed.');
@@ -152,7 +159,7 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
         
         {/* Close Button Top Right */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
           title="Close Setup Wizard"
         >
@@ -452,7 +459,7 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
               {/* Final Launch Button */}
               <div className="pt-6 border-t border-slate-100 sticky bottom-0 bg-white z-10">
                 <button 
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider w-full py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 cursor-pointer transition-all"
                 >
                   Launch My Dashboard <ChevronRight size={18} />
