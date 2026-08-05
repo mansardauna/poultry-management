@@ -4,12 +4,21 @@ import React, { useState } from 'react';
 import { Sparkles, X, Send, Loader2, CheckCircle, Mic, MicOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+import { useRouter } from 'next/navigation';
+
 export function AiLogger() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [isListening, setIsListening] = useState(false);
+  const [tier, setTier] = useState('free');
+
+  React.useEffect(() => {
+    const match = document.cookie.match(/pfms_tier=([^;]+)/);
+    if (match) setTier(match[1]);
+  }, []);
 
   // Define SpeechRecognition dynamically to avoid SSR issues
   const startListening = () => {
@@ -128,7 +137,28 @@ export function AiLogger() {
 
             {/* Content */}
             <div className="p-6 overflow-y-auto max-h-[70vh]">
-              {!result ? (
+              {tier === 'free' ? (
+                <div className="text-center py-6 space-y-4">
+                  <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-200 animate-pulse">
+                    <Sparkles size={32} />
+                  </div>
+                  <h4 className="text-xl font-extrabold text-slate-900">AI Voice & Text Auto-Logger is Locked</h4>
+                  <p className="text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
+                    Automatically parse voice recordings and raw notes into farm logs, sales, and feed records with Commercial Pro.
+                  </p>
+                  <div className="pt-2">
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        router.push('/dashboard/settings?tab=subscription');
+                      }}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition-all"
+                    >
+                      ⚡ Upgrade to Commercial Pro (₦15,000/mo)
+                    </button>
+                  </div>
+                </div>
+              ) : !result ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Type or speak your daily logs. For example: <br/>

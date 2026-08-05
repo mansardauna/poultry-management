@@ -72,21 +72,22 @@ export function PricingSection() {
 
           {/* Enterprise Plan */}
           <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 text-left">
-            <h3 className="text-xl font-bold text-slate-800 mb-2">Enterprise</h3>
-            <p className="text-slate-500 text-sm mb-6">Custom solutions for massive operations.</p>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Enterprise & Coop</h3>
+            <p className="text-slate-500 text-sm mb-6">Multi-farm enterprises & agricultural cooperatives.</p>
             <div className="mb-6">
-              <span className="text-2xl font-extrabold text-slate-900">Custom</span>
+              <span className="text-4xl font-extrabold text-slate-900">₦45,000</span>
+              <span className="text-slate-500">/mo</span>
             </div>
             <button 
-              onClick={() => window.location.href = 'mailto:sales@poultryfarm.com'}
-              className="w-full bg-white border border-slate-300 text-slate-700 py-3 rounded-full font-medium hover:bg-slate-50 transition-colors mb-8"
+              onClick={() => handlePurchase('enterprise')}
+              className="w-full bg-slate-900 text-white py-3 rounded-full font-bold hover:bg-slate-800 transition-colors mb-8 shadow-md"
             >
-              Contact Sales
+              Get Enterprise
             </button>
-            <ul className="space-y-4 text-sm text-slate-600">
-              <li className="flex gap-3"><CheckCircle2 className="text-indigo-500" size={20} /> On-premise deployment</li>
-              <li className="flex gap-3"><CheckCircle2 className="text-indigo-500" size={20} /> Custom AI models</li>
-              <li className="flex gap-3"><CheckCircle2 className="text-indigo-500" size={20} /> Dedicated account manager</li>
+            <ul className="space-y-4 text-sm text-slate-700 font-medium">
+              <li className="flex gap-3"><CheckCircle2 className="text-indigo-600 flex-shrink-0" size={20} /> Multi-Farm Enterprise Management Hub</li>
+              <li className="flex gap-3"><CheckCircle2 className="text-indigo-600 flex-shrink-0" size={20} /> Cooperative White-Label Portal & Custom Branding</li>
+              <li className="flex gap-3"><CheckCircle2 className="text-indigo-600 flex-shrink-0" size={20} /> 24/7 Priority Consultant Hotline & Custom API Access</li>
             </ul>
           </div>
         </div>

@@ -419,9 +419,9 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             <button
               onClick={() => {
                 setIsMobileOpen(false);
-                router.push('/dashboard/settings');
+                router.push('/dashboard/settings?tab=subscription');
               }}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 rounded-md transition-colors shadow-sm"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 rounded-md transition-colors shadow-sm cursor-pointer"
             >
               Upgrade to Pro (₦15,000/mo)
             </button>

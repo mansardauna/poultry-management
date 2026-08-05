@@ -18,9 +18,7 @@ export async function POST(request: Request) {
     const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
     const { planId, isAnnual } = await request.json();
-    if (planId !== 'pro') {
-      return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
-    }
+    const targetTier = planId === 'enterprise' ? 'enterprise' : 'pro';
 
     let orgId: string | null = null;
     let userEmail = 'admin@example.com';
@@ -85,18 +83,18 @@ export async function POST(request: Request) {
       await serviceRoleClient
         .from('organizations')
         .update({
-          subscriptionTier: 'pro',
+          subscriptionTier: targetTier,
           subscriptionStatus: 'active',
           subscriptionEndsAt: endsAt,
         })
         .eq('id', orgId);
 
       const response = NextResponse.json({ 
-        url: `${siteUrl}/dashboard?upgraded=true&duration=${durationDays}`,
+        url: `${siteUrl}/dashboard?upgraded=true&tier=${targetTier}&duration=${durationDays}`,
         demo: true 
       });
 
-      response.cookies.set('pfms_tier', 'pro', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+      response.cookies.set('pfms_tier', targetTier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
       return response;
     }
 

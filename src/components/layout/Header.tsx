@@ -321,8 +321,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
 
           {tier === 'free' ? (
             <button
-              onClick={() => router.push('/dashboard/settings')}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors"
+              onClick={() => router.push('/dashboard/settings?tab=subscription')}
+              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
             >
               <span>Upgrade Plan</span>
             </button>
