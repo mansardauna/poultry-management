@@ -7,14 +7,18 @@ import { getWorkspaceId } from '@/lib/workspace';
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   
-  const [alertSettingsRes, systemSettingsRes] = await Promise.all([
+  const [alertSettingsRes, systemSettingsRes, paymentMethodsRes, subscriptionHistoryRes] = await Promise.all([
     supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId).limit(1),
-    supabase.from('systemSettings').select('*').eq('workspaceId', workspaceId).limit(1)
+    supabase.from('systemSettings').select('*').eq('workspaceId', workspaceId).limit(1),
+    supabase.from('payment_methods').select('*').eq('workspaceId', workspaceId),
+    supabase.from('subscription_history').select('*').eq('workspaceId', workspaceId).order('createdAt', { ascending: false })
   ]);
 
   return NextResponse.json({
     alertSettings: alertSettingsRes.data?.[0] || {},
-    systemSettings: systemSettingsRes.data?.[0] || {}
+    systemSettings: systemSettingsRes.data?.[0] || {},
+    paymentMethods: paymentMethodsRes.data || [],
+    subscriptionHistory: subscriptionHistoryRes.data || []
   });
 }
 
@@ -49,6 +53,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, systemSettings: newSystemSettings });
     }
 
+    if (body.action === 'addPaymentMethod') {
+      const newMethod = {
+        id: 'pm_' + Date.now(),
+        workspaceId,
+        brand: body.brand || 'Visa',
+        last4: body.last4 || '4242',
+        expMonth: Number(body.expMonth) || 12,
+        expYear: Number(body.expYear) || 2028,
+        isDefault: !!body.isDefault,
+        createdAt: new Date().toISOString()
+      };
+
+      if (body.isDefault) {
+        await supabase.from('payment_methods').update({ isDefault: false }).eq('workspaceId', workspaceId);
+      }
+
+      const { data, error } = await supabase.from('payment_methods').insert([newMethod]).select();
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, paymentMethod: data?.[0] || newMethod });
+    }
+
     // Default: Alert Settings
     const newSettings = {
       workspaceId,
@@ -74,5 +99,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, alertSettings: newSettings });
   } catch {
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const type = searchParams.get('type');
+    const workspaceId = await getWorkspaceId();
+
+    if (type === 'paymentMethod' && id) {
+      await supabase.from('payment_methods').delete().eq('id', id).eq('workspaceId', workspaceId);
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }

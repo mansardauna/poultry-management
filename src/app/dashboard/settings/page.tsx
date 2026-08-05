@@ -40,12 +40,14 @@ export default async function SettingsPage() {
   };
 
   const workspaces = (await supabase.from('workspaces').select('*')).data || [];
-  
-  const allStaff = (await supabase.from('staff').select('*').eq('workspaceId', workspaceId)).data || [];
+  const paymentMethods = (await supabase.from('payment_methods').select('*').eq('workspaceId', workspaceId)).data || [];
+  const subscriptionHistory = (await supabase.from('subscription_history').select('*').eq('workspaceId', workspaceId).order('createdAt', { ascending: false })).data || [];
 
   return <SettingsClient 
     initialSettings={alertSettings} 
     systemSettings={systemSettings} 
+    initialPaymentMethods={paymentMethods}
+    initialSubscriptionHistory={subscriptionHistory}
     workspaces={workspaces} 
     workspaceId={workspaceId} 
   />;

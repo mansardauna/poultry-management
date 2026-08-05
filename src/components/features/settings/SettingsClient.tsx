@@ -12,10 +12,14 @@ import {
   Checkbox, 
   Button as MuiButton,
   Dialog,
-  DialogContent
+  DialogContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star } from 'lucide-react';
+import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus } from 'lucide-react';
 
 /**
  * Represents a workspace.
@@ -53,6 +57,8 @@ interface SystemSettings {
 interface SettingsClientProps {
   initialSettings: AlertSettings | undefined;
   systemSettings: SystemSettings | undefined;
+  initialPaymentMethods?: any[];
+  initialSubscriptionHistory?: any[];
   workspaces: Workspace[];
   workspaceId: string;
 }
@@ -62,7 +68,7 @@ interface SettingsClientProps {
  *
  * @param props - Component properties.
  */
-export function SettingsClient({ initialSettings, systemSettings, workspaceId }: SettingsClientProps) {
+export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId }: SettingsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -73,6 +79,18 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
   const [currentTier, setCurrentTier] = useState('free');
+  
+  // Real Dynamic Payment Methods & Subscription History
+  const [paymentMethods, setPaymentMethods] = useState<any[]>(initialPaymentMethods);
+  const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>(initialSubscriptionHistory);
+
+  // Add Card Modal State
+  const [openAddCardModal, setOpenAddCardModal] = useState(false);
+  const [cardBrand, setCardBrand] = useState('Visa');
+  const [cardLast4, setCardLast4] = useState('');
+  const [cardExpMonth, setCardExpMonth] = useState('12');
+  const [cardExpYear, setCardExpYear] = useState('2028');
+  const [cardIsDefault, setCardIsDefault] = useState(true);
 
   useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
@@ -184,6 +202,53 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
       toast.error('An error occurred');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleAddPaymentMethod = async () => {
+    if (!cardLast4 || cardLast4.length < 4) {
+      toast.error('Please enter the last 4 digits of your card');
+      return;
+    }
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'addPaymentMethod',
+          brand: cardBrand,
+          last4: cardLast4,
+          expMonth: Number(cardExpMonth),
+          expYear: Number(cardExpYear),
+          isDefault: cardIsDefault
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.paymentMethod) {
+        toast.success('Payment method saved successfully!');
+        setPaymentMethods(prev => cardIsDefault ? [data.paymentMethod, ...prev.map(p => ({ ...p, isDefault: false }))] : [...prev, data.paymentMethod]);
+        setOpenAddCardModal(false);
+        setCardLast4('');
+      } else {
+        toast.error(data.error || 'Failed to save payment method');
+      }
+    } catch {
+      toast.error('An error occurred');
+    }
+  };
+
+  const handleDeletePaymentMethod = async (id: string) => {
+    if (!confirm('Remove this payment method?')) return;
+    try {
+      const res = await fetch(`/api/settings?id=${id}&type=paymentMethod`, { method: 'DELETE' });
+      if (res.ok) {
+        toast.success('Payment method removed.');
+        setPaymentMethods(prev => prev.filter(p => p.id !== id));
+      } else {
+        toast.error('Failed to remove payment method');
+      }
+    } catch {
+      toast.error('An error occurred');
     }
   };
 
@@ -365,95 +430,142 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
             </CardContent>
           </Card>
 
-          {/* Saved Payment Details Card (Inspired by Screenshot 2/3) */}
+          {/* Real Dynamic Payment Methods Card */}
           <Card>
-            <CardHeader className="border-b border-slate-100">
+            <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
                 <CreditCard size={18} className="text-indigo-600" /> Payment Methods
               </CardTitle>
+              <button
+                onClick={() => setOpenAddCardModal(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus size={14} /> Add Payment Method
+              </button>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="border border-indigo-200 bg-indigo-50/20 p-4 rounded-xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-7 bg-indigo-900 text-white rounded font-bold text-[10px] flex items-center justify-center">
-                    VISA
+            <CardContent className="p-6">
+              {paymentMethods.length === 0 ? (
+                <div className="text-center py-8 bg-slate-50/70 border border-dashed border-slate-200 rounded-2xl p-6">
+                  <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CreditCard size={24} />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-900">Visa Card ending in •••• 987</p>
-                    <p className="text-[10px] text-slate-500">Expires 12/28 | Default Card</p>
-                  </div>
+                  <h4 className="text-sm font-bold text-slate-800">No Saved Payment Methods</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4 leading-relaxed">
+                    You have not saved any credit card or payment methods yet. Add a payment method to enable seamless plan renewals.
+                  </p>
+                  <button 
+                    onClick={() => setOpenAddCardModal(true)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <Plus size={16} /> Add Payment Method
+                  </button>
                 </div>
-                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Default</span>
-              </div>
-
-              <div className="border border-slate-200 p-4 rounded-xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-7 bg-slate-800 text-white rounded font-bold text-[10px] flex items-center justify-center">
-                    MC
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-900">Mastercard ending in •••• 234</p>
-                    <p className="text-[10px] text-slate-500">Expires 08/27</p>
-                  </div>
+              ) : (
+                <div className="space-y-3">
+                  {paymentMethods.map((pm) => (
+                    <div key={pm.id} className={`border p-4 rounded-xl flex items-center justify-between ${
+                      pm.isDefault ? 'border-indigo-200 bg-indigo-50/20' : 'border-slate-200'
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-7 bg-slate-900 text-white rounded font-bold text-[10px] flex items-center justify-center uppercase">
+                          {pm.brand || 'Card'}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">
+                            {pm.brand || 'Card'} ending in •••• {pm.last4}
+                          </p>
+                          <p className="text-[10px] text-slate-500">
+                            Expires {String(pm.expMonth).padStart(2, '0')}/{String(pm.expYear).slice(-2)} {pm.isDefault ? '| Default Card' : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {pm.isDefault ? (
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Default</span>
+                        ) : (
+                          <button 
+                            onClick={async () => {
+                              await fetch('/api/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'addPaymentMethod', brand: pm.brand, last4: pm.last4, expMonth: pm.expMonth, expYear: pm.expYear, isDefault: true })
+                              });
+                              setPaymentMethods(prev => prev.map(p => ({ ...p, isDefault: p.id === pm.id })));
+                              toast.success('Set as default card');
+                            }}
+                            className="text-[10px] text-indigo-600 font-bold hover:underline cursor-pointer"
+                          >
+                            Set as Default
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => handleDeletePaymentMethod(pm.id)}
+                          className="p-1 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                          title="Remove payment method"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <button onClick={() => toast.success('Set as default card')} className="text-[10px] text-indigo-600 font-bold hover:underline cursor-pointer">
-                  Set as Default
-                </button>
-              </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Payment History Table (Inspired by Screenshot 2/3) */}
+          {/* Real Dynamic Subscription History Table */}
           <Card>
             <CardHeader className="border-b border-slate-100">
               <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
-                <Download size={18} className="text-slate-600" /> Payment History & Receipts
+                <Download size={18} className="text-slate-600" /> Subscription History & Receipts
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase font-bold text-slate-500">
-                      <th className="p-4">Date</th>
-                      <th className="p-4">Plan Tier</th>
-                      <th className="p-4">Amount</th>
-                      <th className="p-4">Receipt</th>
-                      <th className="p-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                    <tr>
-                      <td className="p-4">01/08/2026</td>
-                      <td className="p-4 font-bold text-indigo-600">Commercial Pro</td>
-                      <td className="p-4 font-mono font-bold text-slate-900">₦15,000</td>
-                      <td className="p-4 font-mono text-slate-500">#REC-84920</td>
-                      <td className="p-4 text-right">
-                        <button 
-                          onClick={() => toast.success('Downloading Receipt PDF...')}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 inline-flex cursor-pointer"
-                        >
-                          <Download size={12} /> PDF Receipt
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="p-4">01/07/2026</td>
-                      <td className="p-4 font-bold text-indigo-600">Commercial Pro</td>
-                      <td className="p-4 font-mono font-bold text-slate-900">₦15,000</td>
-                      <td className="p-4 font-mono text-slate-500">#REC-84919</td>
-                      <td className="p-4 text-right">
-                        <button 
-                          onClick={() => toast.success('Downloading Receipt PDF...')}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 inline-flex cursor-pointer"
-                        >
-                          <Download size={12} /> PDF Receipt
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <CardContent className={subscriptionHistory.length === 0 ? "p-6" : "p-0"}>
+              {subscriptionHistory.length === 0 ? (
+                <div className="text-center py-8 bg-slate-50/70 border border-dashed border-slate-200 rounded-2xl p-6">
+                  <div className="w-12 h-12 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Download size={24} />
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-800">No Subscription History Found</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 leading-relaxed">
+                    You have no recorded plan transactions yet. Billing receipts and renewal invoices will appear here after your first plan upgrade.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase font-bold text-slate-500">
+                        <th className="p-4">Date</th>
+                        <th className="p-4">Plan Tier</th>
+                        <th className="p-4">Amount</th>
+                        <th className="p-4">Receipt</th>
+                        <th className="p-4 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                      {subscriptionHistory.map((item) => (
+                        <tr key={item.id}>
+                          <td className="p-4">{new Date(item.createdAt || Date.now()).toLocaleDateString()}</td>
+                          <td className="p-4 font-bold text-indigo-600">{item.planName || item.planId}</td>
+                          <td className="p-4 font-mono font-bold text-slate-900">
+                            {item.currency === 'USD' ? '$' : '₦'}{Number(item.amount || 0).toLocaleString()}
+                          </td>
+                          <td className="p-4 font-mono text-slate-500">#{item.id.slice(-8)}</td>
+                          <td className="p-4 text-right">
+                            <button 
+                              onClick={() => toast.success('Downloading Official Receipt PDF...')}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 inline-flex cursor-pointer"
+                            >
+                              <Download size={12} /> PDF Receipt
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -787,6 +899,87 @@ export function SettingsClient({ initialSettings, systemSettings, workspaceId }:
               </button>
             </div>
 
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Payment Method Modal */}
+      <Dialog 
+        open={openAddCardModal} 
+        onClose={() => setOpenAddCardModal(false)}
+        fullWidth 
+        maxWidth="sm"
+        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}
+      >
+        <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+          <h3 className="font-bold text-base flex items-center gap-2">
+            <CreditCard size={18} className="text-indigo-400" /> Save New Payment Method
+          </h3>
+          <button onClick={() => setOpenAddCardModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
+            <X size={18} />
+          </button>
+        </div>
+
+        <DialogContent className="p-6 space-y-4">
+          <p className="text-xs text-slate-500 mb-2">
+            Enter your card details below to save a payment method for plan billing and automated renewals.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormControl fullWidth size="small">
+              <InputLabel>Card Network</InputLabel>
+              <Select value={cardBrand} label="Card Network" onChange={(e) => setCardBrand(e.target.value)}>
+                <MenuItem value="Visa">Visa</MenuItem>
+                <MenuItem value="Mastercard">Mastercard</MenuItem>
+                <MenuItem value="Verve">Verve</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField 
+              label="Last 4 Digits" 
+              placeholder="e.g. 4242" 
+              size="small" 
+              slotProps={{ htmlInput: { maxLength: 4 } }}
+              value={cardLast4} 
+              onChange={(e) => setCardLast4(e.target.value)} 
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <TextField 
+              label="Expiry Month (MM)" 
+              placeholder="12" 
+              size="small" 
+              value={cardExpMonth} 
+              onChange={(e) => setCardExpMonth(e.target.value)} 
+            />
+            <TextField 
+              label="Expiry Year (YYYY)" 
+              placeholder="2028" 
+              size="small" 
+              value={cardExpYear} 
+              onChange={(e) => setCardExpYear(e.target.value)} 
+            />
+          </div>
+
+          <FormControlLabel 
+            control={<Checkbox checked={cardIsDefault} onChange={(e) => setCardIsDefault(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} 
+            label={<span className="text-xs font-semibold text-slate-700">Set as Primary Default Card</span>} 
+          />
+
+          <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+            <button
+              onClick={() => setOpenAddCardModal(false)}
+              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddPaymentMethod}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg shadow cursor-pointer"
+            >
+              Save Payment Method
+            </button>
           </div>
         </DialogContent>
       </Dialog>
