@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { ArrowRight, ChevronDown, Shield, BarChart3, Zap, MessageSquare, PlayCircle, CheckCircle2, Star, Plus, Egg, Wheat, TrendingUp } from 'lucide-react';
 import { PricingSection } from '@/components/features/marketing/PricingSection';
+import { FAQSection } from '@/components/features/marketing/FAQSection';
 
 export default function LandingPage() {
   return (
@@ -215,28 +216,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FAQs */}
-      <section className="py-24 bg-slate-50 border-t border-slate-200">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">FAQs</h2>
-          </div>
-          
-          <div className="space-y-4">
-            {[
-              "How does the AI prediction model work for egg yields?",
-              "Can I integrate this with my current CCTV cameras?",
-              "What kind of support do you offer?",
-              "Is there a free trial available?"
-            ].map((question, i) => (
-              <div key={i} className="bg-white border border-slate-200 rounded-2xl p-6 cursor-pointer hover:border-indigo-300 transition-colors flex justify-between items-center">
-                <span className="font-bold text-slate-800">{question}</span>
-                <Plus className="text-slate-400" size={20} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Interactive FAQs Section */}
+      <FAQSection />
 
       {/* Footer CTA */}
       <section className="relative py-32 overflow-hidden">
