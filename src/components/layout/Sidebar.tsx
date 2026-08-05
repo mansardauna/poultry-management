@@ -420,9 +420,9 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 setIsMobileOpen(false);
                 router.push('/dashboard/settings');
               }}
-              className="w-full bg-gradient-to-r from-amber-400 to-indigo-500 text-slate-950 font-extrabold text-xs py-1.5 rounded-lg shadow hover:opacity-90 transition-opacity"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 rounded-md transition-colors shadow-sm"
             >
-              ⚡ Upgrade to Pro (₦15k)
+              Upgrade to Pro (₦15,000/mo)
             </button>
           </div>
         )}

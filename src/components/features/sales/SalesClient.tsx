@@ -194,6 +194,30 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
     toast.success('Payment link copied to clipboard!');
   };
 
+  const handleUpdateInvoiceStatus = async (invId: string, newStatus: string) => {
+    try {
+      toast.loading('Updating invoice status...', { id: 'status-toast' });
+      const res = await fetch('/api/sales', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateInvoiceStatus', id: invId, status: newStatus })
+      });
+      toast.dismiss('status-toast');
+      if (res.ok) {
+        toast.success(newStatus === 'Paid' ? 'Invoice marked as Paid! Automatically added to Completed Sales.' : 'Invoice status updated.');
+        refreshData();
+        if (selectedInvoice && selectedInvoice.id === invId) {
+          setSelectedInvoice({ ...selectedInvoice, status: newStatus });
+        }
+      } else {
+        toast.error('Failed to update invoice status');
+      }
+    } catch (_e) {
+      toast.dismiss('status-toast');
+      toast.error('Error updating invoice status');
+    }
+  };
+
   const totalSales = sales.reduce((sum, s) => sum + s.totalAmount, 0);
   const avgSale = sales.length > 0 ? Math.round(totalSales / sales.length) : 0;
   const paidSales = sales.filter(s => s.status === 'Paid').length;
@@ -411,12 +435,20 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                           <MessageSquare size={12} /> Share
                         </button>
                         {inv.status !== 'Paid' && (
-                          <button 
-                            onClick={() => handleCopyPaymentLink(inv)}
-                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 text-[10px] font-semibold uppercase px-2 py-1 inline-flex items-center gap-1"
-                          >
-                            <Coins size={12} /> Pay Link
-                          </button>
+                          <>
+                            <button 
+                              onClick={() => handleCopyPaymentLink(inv)}
+                              className="bg-blue-50 text-blue-700 hover:bg-blue-100 text-[10px] font-semibold uppercase px-2 py-1 inline-flex items-center gap-1"
+                            >
+                              <Coins size={12} /> Pay Link
+                            </button>
+                            <button 
+                              onClick={() => handleUpdateInvoiceStatus(inv.id, 'Paid')}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold uppercase px-2 py-1 inline-flex items-center gap-1 shadow-sm"
+                            >
+                              ✓ Mark as Paid
+                            </button>
+                          </>
                         )}
                       </td>
                       {canEdit && (

@@ -111,6 +111,40 @@ export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
     const body = await request.json();
+
+    if (body.action === 'updateInvoiceStatus') {
+      const { id, status } = body;
+      if (!id || !status) return NextResponse.json({ error: 'Invoice ID and status required' }, { status: 400 });
+
+      await supabase.from('invoices').update({ status }).eq('id', id).eq('workspaceId', workspaceId);
+
+      if (status === 'Paid') {
+        const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).single();
+        if (invData) {
+          const targetSaleId = invData.saleId || ('sa' + Date.now().toString().slice(-8));
+          const { data: existingSale } = await supabase.from('sales').select('id').eq('id', targetSaleId).single();
+          
+          if (!existingSale) {
+            await supabase.from('sales').insert([{
+              id: targetSaleId,
+              workspaceId,
+              date: invData.date || new Date().toISOString().split('T')[0],
+              type: invData.items?.includes('Chicken') ? 'Chickens' : 'Eggs',
+              quantity: invData.quantity || 1,
+              totalAmount: invData.totalAmount || 0,
+              customerName: invData.customerName || 'Customer',
+              paymentMethod: 'Paystack / Transfer',
+              status: 'Paid'
+            }]);
+          } else {
+            await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId);
+          }
+        }
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
     await supabase.from('sales').update(fields).eq('id', id).eq('workspaceId', workspaceId);
