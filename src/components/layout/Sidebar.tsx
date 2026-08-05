@@ -25,7 +25,8 @@ import {
   Plus,
   X,
   Pencil,
-  Trash2
+  Trash2,
+  Building2
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
@@ -53,6 +54,7 @@ const menuItems = [
   { name: 'Finance', href: '/dashboard/finance', icon: CircleDollarSign, roles: ['Admin'] },
   { name: 'Sales & Invoices', href: '/dashboard/sales', icon: ShoppingCart, roles: ['Admin', 'Manager'] },
   { name: 'Staff Management', href: '/dashboard/staff', icon: Users, roles: ['Admin', 'Manager'] },
+  { name: 'Enterprise Hub', href: '/dashboard/enterprise', icon: Building2, roles: ['Admin', 'Manager'] },
   { name: 'CCTV Monitoring', href: '/dashboard/cctv', icon: Video, roles: ['Admin'] },
 ];
 

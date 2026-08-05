@@ -8,7 +8,7 @@ import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, ShoppingCart, Coins, BarChart2, FileText, MessageSquare, Printer, Trash2 } from 'lucide-react';
+import { Plus, ShoppingCart, Coins, BarChart2, FileText, MessageSquare, Printer, Trash2, X } from 'lucide-react';
 import { TEXTS } from "@/lib/constants/texts";
 import { Sale, Invoice, ChickenBatch } from "@/data/types";
 import { 
@@ -61,6 +61,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   });
 
   const [open, setOpen] = useState(false);
+  const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
   const [openInvoiceView, setOpenInvoiceView] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
@@ -72,6 +73,13 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   const [paymentMethod, setPaymentMethod] = useState('Bank transfer');
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || 'b3');
+
+  // Dedicated Create Invoice Form
+  const [invCustomerName, setInvCustomerName] = useState('');
+  const [invItems, setInvItems] = useState('10 Crates of Large Eggs');
+  const [invQuantity, setInvQuantity] = useState('10');
+  const [invUnitPrice, setInvUnitPrice] = useState('4400');
+  const [invStatus, setInvStatus] = useState('Unpaid');
 
   const refreshData = async () => {
     try {
@@ -218,6 +226,46 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
     }
   };
 
+  const handleCreateInvoice = async () => {
+    if (!invCustomerName.trim()) {
+      toast.error('Customer name is required');
+      return;
+    }
+    const qty = Number(invQuantity) || 1;
+    const price = Number(invUnitPrice) || 0;
+    const total = qty * price;
+
+    try {
+      toast.loading('Generating invoice...', { id: 'inv-toast' });
+      const res = await fetch('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'createInvoice',
+          customerName: invCustomerName.trim(),
+          items: invItems,
+          quantity: qty,
+          unitPrice: price,
+          totalAmount: total,
+          status: invStatus
+        })
+      });
+
+      toast.dismiss('inv-toast');
+      if (res.ok) {
+        toast.success('Customer Invoice generated successfully!');
+        setOpenInvoiceModal(false);
+        setInvCustomerName('');
+        refreshData();
+      } else {
+        toast.error('Failed to create invoice');
+      }
+    } catch {
+      toast.dismiss('inv-toast');
+      toast.error('An error occurred');
+    }
+  };
+
   const totalSales = sales.reduce((sum, s) => sum + s.totalAmount, 0);
   const avgSale = sales.length > 0 ? Math.round(totalSales / sales.length) : 0;
   const paidSales = sales.filter(s => s.status === 'Paid').length;
@@ -225,17 +273,25 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   return (
     <div className="space-y-6">
       {/* Header and Action Controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">{TEXTS.sales.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{TEXTS.sales.subtitle}</p>
         </div>
-        <button 
-          onClick={handleOpen}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
-        >
-          <Plus size={20} /> {TEXTS.sales.newSale}
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setOpenInvoiceModal(true)}
+            className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+          >
+            <FileText size={16} /> + Create New Invoice
+          </button>
+          <button 
+            onClick={handleOpen}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+          >
+            <Plus size={18} /> {TEXTS.sales.newSale}
+          </button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
@@ -751,6 +807,93 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             </div>
           </div>
         </DialogContent>
+      </Dialog>
+
+      {/* Dedicated Create Invoice Dialog */}
+      <Dialog 
+        open={openInvoiceModal} 
+        onClose={() => setOpenInvoiceModal(false)}
+        fullWidth 
+        maxWidth="sm"
+        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}
+      >
+        <DialogTitle className="bg-slate-900 text-white font-bold text-base flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <FileText size={18} className="text-indigo-400" /> Create Customer Invoice
+          </span>
+          <button onClick={() => setOpenInvoiceModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
+            <X size={18} />
+          </button>
+        </DialogTitle>
+
+        <DialogContent className="p-6 space-y-4">
+          <p className="text-xs text-slate-500 mb-2">
+            Generate an official invoice for egg, bird, or manure orders. Unpaid invoices generate Paystack payment links.
+          </p>
+
+          <TextField 
+            label="Customer Name / Business" 
+            placeholder="e.g. Maitama Supermarket Ltd" 
+            fullWidth 
+            size="small"
+            value={invCustomerName}
+            onChange={(e) => setInvCustomerName(e.target.value)}
+          />
+
+          <TextField 
+            label="Invoice Items / Description" 
+            placeholder="e.g. 50 Crates of Large Eggs" 
+            fullWidth 
+            size="small"
+            value={invItems}
+            onChange={(e) => setInvItems(e.target.value)}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <TextField 
+              label="Quantity" 
+              type="number"
+              placeholder="10" 
+              size="small"
+              value={invQuantity}
+              onChange={(e) => setInvQuantity(e.target.value)}
+            />
+
+            <TextField 
+              label="Unit Price (₦)" 
+              type="number"
+              placeholder="4400" 
+              size="small"
+              value={invUnitPrice}
+              onChange={(e) => setInvUnitPrice(e.target.value)}
+            />
+          </div>
+
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-600">Calculated Invoice Total:</span>
+            <span className="text-lg font-mono font-extrabold text-indigo-600">
+              ₦{(Number(invQuantity || 1) * Number(invUnitPrice || 0)).toLocaleString()}
+            </span>
+          </div>
+
+          <FormControl fullWidth size="small">
+            <InputLabel>Initial Invoice Status</InputLabel>
+            <Select value={invStatus} label="Initial Invoice Status" onChange={(e) => setInvStatus(e.target.value)}>
+              <MenuItem value="Unpaid">Unpaid (Awaiting Payment)</MenuItem>
+              <MenuItem value="Sent">Sent (Link Shared)</MenuItem>
+              <MenuItem value="Paid">Paid (Already Settled)</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+
+        <DialogActions className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+          <MuiButton onClick={() => setOpenInvoiceModal(false)} variant="text" sx={{ textTransform: 'none', color: '#64748b' }}>
+            Cancel
+          </MuiButton>
+          <MuiButton onClick={handleCreateInvoice} variant="contained" sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, textTransform: 'none', fontWeight: 600, px: 3, py: 1, borderRadius: 2 }}>
+            Generate & Save Invoice
+          </MuiButton>
+        </DialogActions>
       </Dialog>
     </div>
   );

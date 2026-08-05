@@ -25,6 +25,30 @@ export async function POST(request: Request) {
     const workspaceId = await getWorkspaceId();
     const body = await request.json();
     
+    if (body.action === 'createInvoice') {
+      const invId = 'inv' + Date.now().toString().slice(-8);
+      const date = body.date || new Date().toISOString().split('T')[0];
+      const quantity = Number(body.quantity) || 1;
+      const unitPrice = Number(body.unitPrice) || 0;
+      const totalAmount = Number(body.totalAmount) || (quantity * unitPrice);
+
+      const newInvoice = {
+        id: invId,
+        workspaceId,
+        date,
+        saleId: null,
+        customerName: body.customerName || 'Customer Invoice',
+        items: body.items || 'Poultry Products Invoice',
+        quantity,
+        unitPrice,
+        totalAmount,
+        status: body.status || 'Unpaid'
+      };
+
+      await supabase.from('invoices').insert([newInvoice]);
+      return NextResponse.json({ invoice: newInvoice }, { status: 201 });
+    }
+
     const newSaleId = 'sa' + Date.now().toString().slice(-8);
     const date = body.date || new Date().toISOString().split('T')[0];
     
