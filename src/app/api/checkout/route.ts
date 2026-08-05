@@ -3,9 +3,7 @@ import Stripe from 'stripe';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2026-07-29.dahlia',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 
 // For demonstration, use a fallback price ID if not provided in env.
 // In reality, these should be created in the Stripe Dashboard.
@@ -122,6 +120,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: session.url });
   } catch (err: any) {
     console.error('Checkout Route Error:', err);
-    return NextResponse.json({ error: 'Failed to initiate checkout' }, { status: 500 });
+    return NextResponse.json({ error: err?.message || 'Failed to initiate checkout' }, { status: 500 });
   }
 }
