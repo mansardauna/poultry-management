@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 
@@ -13,28 +14,35 @@ const PRO_ANNUAL_PRICE_ID = process.env.STRIPE_PRO_ANNUAL_PRICE_ID || 'price_ann
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const cookieStore = await cookies();
+    const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
     const { planId, isAnnual } = await request.json();
     if (planId !== 'pro') {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-    // Get the user's organization
-    const { data: memberData } = await serviceRoleClient
-      .from('organization_members')
-      .select('orgId')
-      .eq('userId', user.id)
-      .limit(1)
-      .single();
+    let orgId: string | null = null;
+    let userEmail = 'admin@example.com';
 
-    if (!memberData) {
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    if (user) {
+      userEmail = user.email || userEmail;
+      const { data: memberData } = await serviceRoleClient
+        .from('organization_members')
+        .select('orgId')
+        .eq('userId', user.id)
+        .limit(1)
+        .single();
+      orgId = memberData?.orgId || null;
     }
 
-    const orgId = memberData.orgId;
+    if (!orgId && cookieOrgId) {
+      orgId = cookieOrgId;
+    }
+
+    if (!orgId) {
+      return NextResponse.json({ error: 'Organization not found. Please log in.' }, { status: 401 });
+    }
 
     // Check if valid Stripe key is configured
     const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -79,7 +87,7 @@ export async function POST(request: Request) {
 
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: user.email,
+        email: userEmail,
         metadata: { orgId },
       });
       customerId = customer.id;
