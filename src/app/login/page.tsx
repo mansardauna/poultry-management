@@ -1,7 +1,7 @@
 'use strict';
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, KeyRound, X, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
@@ -15,6 +15,12 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (document.cookie.includes('pfms_workspace') || document.cookie.includes('pfms_org_id')) {
+      router.push('/dashboard');
+    }
+  }, [router]);
 
   // Forgot Password State
   const [showResetModal, setShowResetModal] = useState(false);

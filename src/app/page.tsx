@@ -1,4 +1,6 @@
 'use strict';
+'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronDown, Shield, BarChart3, Zap, MessageSquare, PlayCircle, CheckCircle2, Star, Plus, Egg, Wheat, TrendingUp } from 'lucide-react';
 import { PricingSection } from '@/components/features/marketing/PricingSection';
@@ -7,6 +9,15 @@ import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 
 export default function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const hasSession = document.cookie.includes('pfms_workspace') || document.cookie.includes('pfms_org_id');
+    if (hasSession) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
       
@@ -28,12 +39,20 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-            <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95 w-full sm:w-auto">
-              Get Started Free
-            </Link>
-            <Link href="/login" className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 px-8 py-4 rounded-full text-base font-semibold transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2">
-              Log In to Account
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2">
+                Go to Dashboard <ArrowRight size={18} />
+              </Link>
+            ) : (
+              <>
+                <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95 w-full sm:w-auto">
+                  Get Started Free
+                </Link>
+                <Link href="/login" className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 px-8 py-4 rounded-full text-base font-semibold transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2">
+                  Log In to Account
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Interactive UI Graphic (CSS Only) */}
@@ -204,9 +223,15 @@ export default function LandingPage() {
           <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-8">
             Supercharge your farm<br/>with AI today!
           </h2>
-          <Link href="/signup" className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95">
-            Create Free Account
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard" className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <Link href="/signup" className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95">
+              Create Free Account
+            </Link>
+          )}
         </div>
       </section>
 

@@ -1,7 +1,7 @@
 'use strict';
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
@@ -16,6 +16,12 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plan = searchParams.get('plan');
+
+  useEffect(() => {
+    if (document.cookie.includes('pfms_workspace') || document.cookie.includes('pfms_org_id')) {
+      router.push('/dashboard');
+    }
+  }, [router]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
