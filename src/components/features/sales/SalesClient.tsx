@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, ShoppingCart, Coins, BarChart2, FileText, MessageSquare, Printer, Trash2, X } from 'lucide-react';
 import { TEXTS } from "@/lib/constants/texts";
 import { Sale, Invoice, ChickenBatch } from "@/data/types";
+import { downloadCSV, printBrandedReport } from '@/lib/exportReports';
 import { 
   Dialog, 
   DialogTitle, 
@@ -279,6 +280,24 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           <p className="text-sm text-slate-500 mt-1">{TEXTS.sales.subtitle}</p>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => {
+              const columns = [
+                { header: 'Sale ID', key: 'id' },
+                { header: 'Date', key: 'date' },
+                { header: 'Customer Name', key: 'customerName' },
+                { header: 'Product Type', key: 'type' },
+                { header: 'Quantity', key: 'quantity' },
+                { header: 'Total Amount', key: 'totalAmount' },
+                { header: 'Payment Method', key: 'paymentMethod' },
+                { header: 'Status', key: 'status' }
+              ];
+              printBrandedReport('Sales & Revenue Operations Audit', sales, columns);
+            }}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+          >
+            <Printer size={16} /> Print Report
+          </button>
           <button 
             onClick={() => setOpenInvoiceModal(true)}
             className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
