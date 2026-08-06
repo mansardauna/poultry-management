@@ -142,33 +142,43 @@ export async function PUT(request: Request) {
     const workspaceId = await getWorkspaceId();
     const body = await request.json();
 
-    if (body.action === 'updateInvoiceStatus') {
+    if (body.action === 'updateInvoiceStatus' || body.type === 'invoice') {
       const { id, status } = body;
       if (!id || !status) return NextResponse.json({ error: 'Invoice ID and status required' }, { status: 400 });
 
       await supabase.from('invoices').update({ status }).eq('id', id).eq('workspaceId', workspaceId);
 
       if (status === 'Paid') {
-        const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).single();
+        const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).eq('workspaceId', workspaceId).limit(1).maybeSingle();
         if (invData) {
           const targetSaleId = invData.saleId || ('sa' + Date.now().toString().slice(-8));
-          const { data: existingSale } = await supabase.from('sales').select('id').eq('id', targetSaleId).single();
+          const { data: existingSale } = await supabase.from('sales').select('id').eq('id', targetSaleId).eq('workspaceId', workspaceId).limit(1).maybeSingle();
           
           if (!existingSale) {
             await supabase.from('sales').insert([{
               id: targetSaleId,
               workspaceId,
               date: invData.date || new Date().toISOString().split('T')[0],
-              type: invData.items?.includes('Chicken') ? 'Chickens' : 'Eggs',
+              type: (invData.items || '').toLowerCase().includes('chicken') ? 'Chickens' : 'Eggs',
               quantity: invData.quantity || 1,
               totalAmount: invData.totalAmount || 0,
-              customerName: invData.customerName || 'Customer',
-              paymentMethod: 'Paystack / Transfer',
+              customerName: invData.customerName || 'Customer Invoice',
+              paymentMethod: 'Paystack / Online Gateway',
               status: 'Paid'
             }]);
           } else {
-            await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId);
+            await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId).eq('workspaceId', workspaceId);
           }
+
+          // Log alert
+          await supabase.from('alertLogs').insert([{
+            id: 'al' + Date.now().toString().slice(-8),
+            workspaceId,
+            date: invData.date || new Date().toISOString().split('T')[0],
+            message: `INVOICE SETTLED: Invoice #${invData.id} for ${invData.customerName} (₦${Number(invData.totalAmount).toLocaleString()}) marked as Paid and added to Completed Sales.`,
+            severity: 'Info',
+            read: false
+          }]);
         }
       }
 

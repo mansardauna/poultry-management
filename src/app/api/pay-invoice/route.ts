@@ -64,13 +64,35 @@ export async function POST(request: Request) {
       .update({ status: 'Paid' })
       .eq('id', invoiceId);
       
-    // 6. Also mark the underlying sale as paid if necessary
-    if (invoice.saleId) {
-      await supabase
-        .from('sales')
-        .update({ status: 'Paid' })
-        .eq('id', invoice.saleId);
+    // 6. Ensure completed sale record exists in sales table
+    const targetSaleId = invoice.saleId || ('sa' + Date.now().toString().slice(-8));
+    const { data: existingSales } = await supabase.from('sales').select('id').eq('id', targetSaleId).eq('workspaceId', invoice.workspaceId);
+
+    if (!existingSales || existingSales.length === 0) {
+      await supabase.from('sales').insert([{
+        id: targetSaleId,
+        workspaceId: invoice.workspaceId,
+        date: invoice.date || new Date().toISOString().split('T')[0],
+        type: (invoice.items || '').toLowerCase().includes('chicken') ? 'Chickens' : 'Eggs',
+        quantity: invoice.quantity || 1,
+        totalAmount: invoice.totalAmount || 0,
+        customerName: invoice.customerName || 'Invoice Customer',
+        paymentMethod: 'Paystack / Online Gateway',
+        status: 'Paid'
+      }]);
+    } else {
+      await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId).eq('workspaceId', invoice.workspaceId);
     }
+
+    // 7. Log settlement alert
+    await supabase.from('alertLogs').insert([{
+      id: 'al' + Date.now().toString().slice(-8),
+      workspaceId: invoice.workspaceId,
+      date: invoice.date || new Date().toISOString().split('T')[0],
+      message: `AUTOMATIC SETTLEMENT: Customer ${invoice.customerName} paid ₦${Number(invoice.totalAmount).toLocaleString()} for Invoice #${invoice.id}. Added to Completed Sales.`,
+      severity: 'Info',
+      read: false
+    }]);
 
     return NextResponse.json({ success: true });
   } catch (error) {
