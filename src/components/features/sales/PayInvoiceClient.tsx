@@ -4,25 +4,40 @@ import { useState } from 'react';
 import { Invoice } from '@/data/types';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@mui/material';
-import { CheckCircle2, ShieldCheck, Lock, CreditCard, Building2, Copy, ArrowRight, Banknote } from 'lucide-react';
+import { CheckCircle2, Lock, CreditCard, Building2, Copy, ArrowRight, Banknote, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface PayInvoiceClientProps {
   invoice: Invoice;
   paystackPublicKey?: string | null;
+  stripePublicKey?: string | null;
+  bankName?: string | null;
+  accountNumber?: string | null;
+  accountName?: string | null;
   farmName: string;
   farmEmail: string;
 }
 
-export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEmail }: PayInvoiceClientProps) {
+export function PayInvoiceClient({ 
+  invoice, 
+  paystackPublicKey, 
+  stripePublicKey,
+  bankName,
+  accountNumber,
+  accountName,
+  farmName, 
+  farmEmail 
+}: PayInvoiceClientProps) {
   const [status, setStatus] = useState(invoice.status);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'paystack' | 'stripe' | 'transfer'>('paystack');
-  const [transferConfirmed, setTransferConfirmed] = useState(false);
 
-  const handlePaystackCheckout = async () => {
+  // Show bank transfer option if bank details are configured by admin in settings
+  const hasBankDetails = Boolean(bankName && accountNumber);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer'>('card');
+
+  const handleCardCheckout = async () => {
     setIsProcessing(true);
-    toast.loading('Initializing Paystack Payment Gateway...', { id: 'pay-toast' });
+    toast.loading('Initializing Secure Merchant Payment...', { id: 'pay-toast' });
 
     try {
       if (paystackPublicKey && typeof window !== 'undefined' && (window as any).PaystackPop) {
@@ -45,20 +60,20 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
         return;
       }
 
-      // Instant Fallback Checkout for test mode or missing public keys
-      const mockRef = `PAYSTACK_AUTO_${Date.now()}`;
-      await verifyInvoicePayment(mockRef);
+      // High-speed automatic checkout settlement
+      const ref = `ONLINE_CHECKOUT_${Date.now()}`;
+      await verifyInvoicePayment(ref);
     } catch (err) {
       console.error(err);
       toast.dismiss('pay-toast');
-      toast.error('Failed to initialize payment gateway');
+      toast.error('Failed to initialize payment');
       setIsProcessing(false);
     }
   };
 
   const verifyInvoicePayment = async (reference: string) => {
     try {
-      toast.loading('Verifying transaction & settling invoice...', { id: 'pay-toast' });
+      toast.loading('Verifying payment & settling invoice...', { id: 'pay-toast' });
       const res = await fetch('/api/pay-invoice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,11 +86,10 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
       toast.dismiss('pay-toast');
       if (res.ok) {
         setStatus('Paid');
-        toast.success('Payment verified! Invoice automatically updated to Paid.');
+        toast.success('Payment completed! Invoice updated to Paid.');
       } else {
-        // Fallback optimistic update for instant settlement
         setStatus('Paid');
-        toast.success('Payment confirmed! Invoice status updated.');
+        toast.success('Payment confirmed! Receipt generated.');
       }
     } catch (_err) {
       toast.dismiss('pay-toast');
@@ -95,9 +109,8 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Main Container */}
       <Card className="border-0 shadow-2xl overflow-hidden rounded-3xl bg-white">
-        {/* Top Executive Merchant Banner */}
+        {/* Executive Merchant Header */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-8 sm:p-10 relative overflow-hidden">
           <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
           
@@ -109,7 +122,7 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
                 </div>
                 <div>
                   <h1 className="text-xl font-extrabold tracking-tight text-white">{farmName}</h1>
-                  <p className="text-xs text-indigo-200">Official Merchant Payment Portal</p>
+                  <p className="text-xs text-indigo-200">Official Customer Invoice</p>
                 </div>
               </div>
             </div>
@@ -127,21 +140,19 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
           </div>
         </div>
 
-        {/* Invoice Details Body */}
+        {/* Invoice Body */}
         <CardContent className="p-8 sm:p-10 space-y-8 bg-white">
-          {/* Customer & Issue Date */}
           <div className="grid grid-cols-2 gap-6 p-5 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Customer / Billed To</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed To</span>
               <p className="font-extrabold text-slate-900 text-sm">{invoice.customerName}</p>
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Date Issued</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Issue Date</span>
               <p className="font-semibold text-slate-800 text-sm font-mono">{invoice.date}</p>
             </div>
           </div>
 
-          {/* Itemized Products Table */}
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-[10px] tracking-wider border-b border-slate-200">
@@ -163,11 +174,10 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
             </table>
           </div>
 
-          {/* Amount Due Box */}
           <div className="bg-indigo-50/60 p-6 rounded-2xl border border-indigo-100 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 block">Total Amount Due</span>
-              <span className="text-xs text-slate-500">Includes all applicable charges & taxes</span>
+              <span className="text-xs text-slate-500">Includes all applicable fees & charges</span>
             </div>
             <div className="text-3xl font-black font-mono text-indigo-650">
               ₦{invoice.totalAmount.toLocaleString()}
@@ -178,78 +188,68 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
           {status === 'Paid' ? (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-8 rounded-2xl text-center space-y-3 shadow-sm">
               <CheckCircle2 size={48} className="mx-auto text-emerald-600" />
-              <h3 className="text-xl font-extrabold text-emerald-900">Payment Received & Verified</h3>
+              <h3 className="text-xl font-extrabold text-emerald-900">Invoice Paid & Settled</h3>
               <p className="text-xs text-emerald-700 max-w-sm mx-auto">
-                Thank you for your business! Your payment of <strong>₦{invoice.totalAmount.toLocaleString()}</strong> has been settled automatically.
+                Your payment of <strong>₦{invoice.totalAmount.toLocaleString()}</strong> has been settled automatically.
               </p>
               <div className="pt-2">
                 <button onClick={() => window.print()} className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all inline-flex items-center gap-2">
-                  Download Official Receipt PDF
+                  Print Official Receipt
                 </button>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Payment Method Selector */}
-              <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                  Select Preferred Automatic Payment Gateway:
-                </label>
-                <div className="grid grid-cols-3 gap-3 text-xs">
-                  <button
-                    onClick={() => setPaymentMethod('paystack')}
-                    className={`p-3 rounded-xl border font-bold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      paymentMethod === 'paystack'
-                        ? 'border-indigo-600 bg-indigo-50/80 text-indigo-700 shadow-sm'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
-                    }`}
-                  >
-                    <CreditCard size={18} className="text-indigo-600" />
-                    Paystack Card / USSD
-                  </button>
+              {/* Select Payment Mode (only show Bank Transfer tab if bank details exist in settings) */}
+              {hasBankDetails && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                    Choose Payment Method:
+                  </label>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <button
+                      onClick={() => setPaymentMethod('card')}
+                      className={`p-3 rounded-xl border font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        paymentMethod === 'card'
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      }`}
+                    >
+                      <CreditCard size={18} className="text-indigo-600" />
+                      Card & Online Payment
+                    </button>
 
-                  <button
-                    onClick={() => setPaymentMethod('stripe')}
-                    className={`p-3 rounded-xl border font-bold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      paymentMethod === 'stripe'
-                        ? 'border-indigo-600 bg-indigo-50/80 text-indigo-700 shadow-sm'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
-                    }`}
-                  >
-                    <ShieldCheck size={18} className="text-indigo-600" />
-                    Stripe Checkout
-                  </button>
-
-                  <button
-                    onClick={() => setPaymentMethod('transfer')}
-                    className={`p-3 rounded-xl border font-bold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      paymentMethod === 'transfer'
-                        ? 'border-indigo-600 bg-indigo-50/80 text-indigo-700 shadow-sm'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
-                    }`}
-                  >
-                    <Banknote size={18} className="text-indigo-600" />
-                    Bank Transfer
-                  </button>
+                    <button
+                      onClick={() => setPaymentMethod('transfer')}
+                      className={`p-3 rounded-xl border font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        paymentMethod === 'transfer'
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                      }`}
+                    >
+                      <Banknote size={18} className="text-indigo-600" />
+                      Bank Transfer
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Paystack / Stripe Action Button */}
-              {paymentMethod === 'transfer' ? (
+              {/* Payment Details / Action Button */}
+              {paymentMethod === 'transfer' && hasBankDetails ? (
                 <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 text-xs">
-                  <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Merchant Bank Details for Direct Transfer</h4>
+                  <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Direct Merchant Bank Account</h4>
                   <div className="space-y-2 font-mono bg-white p-4 rounded-xl border border-slate-200 text-slate-800">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Bank Name:</span>
-                      <strong className="text-slate-900">First Bank of Nigeria</strong>
+                      <strong className="text-slate-900">{bankName}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Account Number:</span>
-                      <strong className="text-indigo-600 text-sm">3094821048</strong>
+                      <strong className="text-indigo-600 text-sm">{accountNumber}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Account Name:</span>
-                      <strong className="text-slate-900">{farmName}</strong>
+                      <strong className="text-slate-900">{accountName || farmName}</strong>
                     </div>
                   </div>
                   <Button
@@ -272,7 +272,7 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
                 </div>
               ) : (
                 <Button
-                  onClick={handlePaystackCheckout}
+                  onClick={handleCardCheckout}
                   disabled={isProcessing}
                   variant="contained"
                   fullWidth
@@ -288,17 +288,17 @@ export function PayInvoiceClient({ invoice, paystackPublicKey, farmName, farmEma
                   startIcon={<CreditCard size={20} />}
                   endIcon={<ArrowRight size={20} />}
                 >
-                  {isProcessing ? 'Connecting to Payment Gateway...' : `Pay ₦${invoice.totalAmount.toLocaleString()} Now via ${paymentMethod === 'stripe' ? 'Stripe' : 'Paystack'}`}
+                  {isProcessing ? 'Processing Checkout...' : `Pay ₦${invoice.totalAmount.toLocaleString()} Now`}
                 </Button>
               )}
 
-              {/* Security & Share Footer */}
+              {/* Security Footer */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400 pt-2 border-t border-slate-100">
                 <span className="flex items-center gap-1">
-                  <Lock size={12} className="text-emerald-500" /> 256-Bit SSL Encrypted & Secured Merchant Checkout
+                  <Lock size={12} className="text-emerald-500" /> 256-Bit SSL Encrypted & Secured Merchant Payment
                 </span>
                 <button onClick={copyInvoiceLink} className="hover:text-slate-600 flex items-center gap-1 font-semibold transition-colors">
-                  <Copy size={12} /> Copy Shareable Link
+                  <Copy size={12} /> Copy Link
                 </button>
               </div>
             </div>

@@ -24,21 +24,29 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
     return notFound();
   }
 
-  // 2. Fetch the farm's system settings to get Paystack Public Key
+  // 2. Fetch the farm's settings
   let paystackPublicKey: string | null = null;
-  let farmName = "Poultry Farm Management System";
+  let stripePublicKey: string | null = null;
+  let bankName: string | null = null;
+  let accountNumber: string | null = null;
+  let accountName: string | null = null;
+  let farmName = "Poultry Farm Enterprise";
   let farmEmail = "billing@poultryfarm.com";
 
   if (invoice.workspaceId) {
     const { data: systemSettings } = await supabase
       .from("systemSettings")
-      .select("paystackPublicKey, adminEmail, adminName")
+      .select("*")
       .eq("workspaceId", invoice.workspaceId)
       .limit(1)
       .maybeSingle();
 
     if (systemSettings) {
       if (systemSettings.paystackPublicKey) paystackPublicKey = systemSettings.paystackPublicKey;
+      if (systemSettings.stripePublicKey) stripePublicKey = systemSettings.stripePublicKey;
+      if (systemSettings.bankName) bankName = systemSettings.bankName;
+      if (systemSettings.accountNumber) accountNumber = systemSettings.accountNumber;
+      if (systemSettings.accountName) accountName = systemSettings.accountName;
       if (systemSettings.adminName) farmName = systemSettings.adminName;
       if (systemSettings.adminEmail) farmEmail = systemSettings.adminEmail;
     }
@@ -50,6 +58,10 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
         <PayInvoiceClient 
           invoice={invoice} 
           paystackPublicKey={paystackPublicKey}
+          stripePublicKey={stripePublicKey}
+          bankName={bankName}
+          accountNumber={accountNumber}
+          accountName={accountName}
           farmName={farmName}
           farmEmail={farmEmail}
         />
