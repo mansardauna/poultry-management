@@ -49,6 +49,17 @@ export async function POST(req: Request) {
           subscriptionTier: 'pro',
           subscriptionStatus: subscription.status
         }).eq('id', orgId);
+
+        const workspaceId = `main-${orgId}`;
+        await serviceRoleClient.from('systemSettings').upsert([{
+          id: 'sys-' + Date.now().toString().slice(-6),
+          workspaceId,
+          subscriptionTier: 'pro',
+          plan: 'pro',
+          cctvEnabled: true,
+          aiLoggerEnabled: true,
+          exportReportsEnabled: true
+        }]);
       }
       break;
     }
@@ -56,14 +67,14 @@ export async function POST(req: Request) {
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
-      
       const subAny = subscription as any;
       
       const { data: dbSub } = await serviceRoleClient
         .from('subscriptions')
         .select('orgId')
         .eq('stripeSubscriptionId', subAny.id)
-        .single();
+        .limit(1)
+        .maybeSingle();
         
       if (dbSub?.orgId) {
         await serviceRoleClient.from('subscriptions').update({
@@ -78,6 +89,17 @@ export async function POST(req: Request) {
           subscriptionTier: newTier,
           subscriptionStatus: subscription.status
         }).eq('id', dbSub.orgId);
+
+        const workspaceId = `main-${dbSub.orgId}`;
+        await serviceRoleClient.from('systemSettings').upsert([{
+          id: 'sys-' + Date.now().toString().slice(-6),
+          workspaceId,
+          subscriptionTier: newTier,
+          plan: newTier,
+          cctvEnabled: newTier !== 'free',
+          aiLoggerEnabled: newTier !== 'free',
+          exportReportsEnabled: newTier !== 'free'
+        }]);
       }
       break;
     }

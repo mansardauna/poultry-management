@@ -84,6 +84,42 @@ export async function POST(request: Request) {
           })
           .eq('id', orgId);
 
+        // Also update systemSettings to sync tier across all devices
+        const workspaceId = `main-${orgId}`;
+        const { data: sysSet } = await serviceRoleClient
+          .from('systemSettings')
+          .select('id')
+          .eq('workspaceId', workspaceId)
+          .limit(1)
+          .maybeSingle();
+
+        if (sysSet) {
+          await serviceRoleClient
+            .from('systemSettings')
+            .update({
+              subscriptionTier: targetTier,
+              plan: targetTier,
+              cctvEnabled: true,
+              aiLoggerEnabled: true,
+              exportReportsEnabled: true,
+              enterpriseHubEnabled: targetTier === 'enterprise'
+            })
+            .eq('workspaceId', workspaceId);
+        } else {
+          await serviceRoleClient
+            .from('systemSettings')
+            .insert([{
+              id: 'sys-' + Date.now().toString().slice(-6),
+              workspaceId,
+              subscriptionTier: targetTier,
+              plan: targetTier,
+              cctvEnabled: true,
+              aiLoggerEnabled: true,
+              exportReportsEnabled: true,
+              enterpriseHubEnabled: targetTier === 'enterprise'
+            }]);
+        }
+
         const subId = `sub_${Date.now()}`;
         const planName = targetTier === 'enterprise'
           ? (isAnnual ? 'Enterprise & Coop (Annual)' : 'Enterprise & Coop (Monthly)')
