@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     
     if (body.action === 'createInvoice') {
       const invId = 'inv' + Date.now().toString().slice(-8);
+      const saleId = 'sa' + Date.now().toString().slice(-8);
       const date = body.date || new Date().toISOString().split('T')[0];
       const quantity = Number(body.quantity) || 1;
       const unitPrice = Number(body.unitPrice) || 0;
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
         id: invId,
         workspaceId,
         date,
-        saleId: null,
+        saleId,
         customerName: body.customerName || 'Customer Invoice',
         items: body.items || 'Poultry Products Invoice',
         quantity,
@@ -45,8 +46,13 @@ export async function POST(request: Request) {
         status: body.status || 'Unpaid'
       };
 
-      await supabase.from('invoices').insert([newInvoice]);
-      return NextResponse.json({ invoice: newInvoice }, { status: 201 });
+      const { data, error } = await supabase.from('invoices').insert([newInvoice]).select();
+      if (error) {
+        console.error("Create Invoice Error:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ invoice: data?.[0] || newInvoice }, { status: 201 });
     }
 
     const newSaleId = 'sa' + Date.now().toString().slice(-8);
