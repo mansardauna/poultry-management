@@ -73,7 +73,7 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
 
       if (res.ok) {
         const result = await res.json();
-        setExtractedData(result.extracted);
+        setExtractedData(result.extracted || result.parsed);
         setIsProcessing(false);
         setSuccess(true);
 

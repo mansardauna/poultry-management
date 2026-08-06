@@ -3,13 +3,11 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
-import { getAuthUser } from '@/lib/auth';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto';
 
 /**
- * Smart Poultry Natural Language Regex Fallback Parser
- * Parses natural language input into structured farm records if Gemini API is offline.
+ * Smart Poultry Natural Language Parser
  */
 function smartParsePoultryText(text: string, today: string) {
   const textLower = text.toLowerCase();
@@ -17,12 +15,14 @@ function smartParsePoultryText(text: string, today: string) {
     eggs: [],
     expenses: [],
     sales: [],
+    feedUsedKg: 0,
+    mortalityCount: 0,
     staffChanges: { add: [], removeAll: false }
   };
 
-  // 1. Detect Egg Collection (e.g., "30 crates of eggs", "collected 15 crates", "500 eggs")
-  const eggCrateMatch = textLower.match(/(\d+)\s*(crates|crate)\s*(of\s*eggs)?/);
-  const eggPiecesMatch = textLower.match(/(\d+)\s*(eggs|pieces)/);
+  // Egg Collection (e.g. "collected 4500 good eggs, but 12 were cracked", "30 crates")
+  const eggCrateMatch = textLower.match(/(\d+)\s*(crates|crate)/);
+  const eggPiecesMatch = textLower.match(/(\d+)\s*(good\s*)?(eggs|pieces)/);
   let totalEggs = 0;
   let crackedEggs = 0;
 
@@ -47,47 +47,58 @@ function smartParsePoultryText(text: string, today: string) {
     });
   }
 
-  // 2. Detect Sales (e.g., "sold 15 crates for 75000", "sold 5 birds for 25000 naira", "sales 50k")
-  const salesMatch = textLower.match(/(sold|sale|sales)\s*(\d+)?\s*(crates|birds|chickens|eggs)?\s*(for|at|of)?\s*(₦|\$|naira)?\s*(\d+[\d,]*)(k)?/i);
-  if (salesMatch) {
-    let qty = salesMatch[2] ? parseInt(salesMatch[2], 10) : 1;
-    let type = salesMatch[3] ? salesMatch[3].charAt(0).toUpperCase() + salesMatch[3].slice(1) : 'Eggs';
-    let rawAmt = salesMatch[6].replace(/,/g, '');
-    let amt = parseInt(rawAmt, 10);
-    if (salesMatch[7] && salesMatch[7].toLowerCase() === 'k') {
-      amt *= 1000;
-    }
-
-    result.sales.push({
-      date: today,
-      type: type,
-      quantity: qty,
-      totalAmount: amt || 0,
-      customerName: 'Walk-in Customer'
-    });
+  // Mortality (e.g., "3 birds died", "mortality 3")
+  const mortalityMatch = textLower.match(/(\d+)\s*(birds|chickens|hens)?\s*(died|mortality|dead)/);
+  if (mortalityMatch) {
+    result.mortalityCount = parseInt(mortalityMatch[1], 10);
   }
 
-  // 3. Detect Expenses & Feed Purchase (e.g., "bought feed for 45000", "bought 3 bags feed", "spent 20000 on vaccine")
-  const expenseMatch = textLower.match(/(bought|spent|paid|expense|purchased)\s*([a-z\s]+)?\s*(for|at|of)?\s*(₦|\$|naira)?\s*(\d+[\d,]*)(k)?/i);
-  if (expenseMatch) {
-    let rawCategory = expenseMatch[2] ? expenseMatch[2].trim() : 'Maintenance';
-    let category = 'Maintenance';
-    if (rawCategory.includes('feed')) category = 'Feed';
-    else if (rawCategory.includes('drug') || rawCategory.includes('vaccine') || rawCategory.includes('med')) category = 'Drugs';
-    else if (rawCategory.includes('salary') || rawCategory.includes('staff') || rawCategory.includes('pay')) category = 'Salaries';
-    else if (rawCategory.includes('fuel') || rawCategory.includes('light') || rawCategory.includes('power')) category = 'Utilities';
+  // Feed Used (e.g. "feed 200kg", "used 2 bags feed")
+  const feedMatch = textLower.match(/(\d+)\s*(kg|bags|bags of feed|kg feed)/);
+  if (feedMatch) {
+    let feedQty = parseInt(feedMatch[1], 10);
+    if (textLower.includes('bag')) feedQty *= 25;
+    result.feedUsedKg = feedQty;
+  }
 
-    let rawAmt = expenseMatch[5].replace(/,/g, '');
+  // Expenses (e.g. "spent 250000 on drugs")
+  const expenseMatch = textLower.match(/(spent|bought|paid|purchased|expense)\s*(₦|\$|naira)?\s*(\d+[\d,]*)(k)?\s*(on|for)?\s*([a-z\s]+)?/i);
+  if (expenseMatch) {
+    let rawAmt = expenseMatch[3].replace(/,/g, '');
     let amt = parseInt(rawAmt, 10);
-    if (expenseMatch[6] && expenseMatch[6].toLowerCase() === 'k') {
-      amt *= 1000;
-    }
+    if (expenseMatch[4] && expenseMatch[4].toLowerCase() === 'k') amt *= 1000;
+    
+    let desc = expenseMatch[6] ? expenseMatch[6].trim() : 'Farm Maintenance';
+    let cat = 'Maintenance';
+    if (desc.includes('drug') || desc.includes('med') || desc.includes('vaccine')) cat = 'Drugs';
+    else if (desc.includes('feed')) cat = 'Feed';
+    else if (desc.includes('salary') || desc.includes('staff')) cat = 'Salaries';
 
     result.expenses.push({
       date: today,
-      category: category,
+      category: cat,
       amount: amt || 0,
-      description: text
+      description: desc
+    });
+  }
+
+  // Sales (e.g. "sold eggs for 600000")
+  const salesMatch = textLower.match(/(sold|sales)\s*([a-z\s]+)?\s*(for|at|of)?\s*(₦|\$|naira)?\s*(\d+[\d,]*)(k)?/i);
+  if (salesMatch) {
+    let rawAmt = salesMatch[5].replace(/,/g, '');
+    let amt = parseInt(rawAmt, 10);
+    if (salesMatch[6] && salesMatch[6].toLowerCase() === 'k') amt *= 1000;
+
+    let productType = salesMatch[2] ? salesMatch[2].trim() : 'Eggs';
+    if (productType.includes('egg')) productType = 'Eggs';
+    else if (productType.includes('bird') || productType.includes('chicken')) productType = 'Birds';
+
+    result.sales.push({
+      date: today,
+      type: productType,
+      quantity: 1,
+      totalAmount: amt || 0,
+      customerName: 'Walk-in Customer'
     });
   }
 
@@ -117,17 +128,18 @@ export async function POST(request: Request) {
         const ai = new GoogleGenAI({ apiKey });
         const systemPrompt = `You are a Poultry Farm Management AI Assistant. Your job is to extract data from natural language daily reports and output them in strict JSON format. 
 Here are the farm rules:
-- 1 crate of eggs = 30 pieces. If the user says "3 crates and 12 pieces", that means (3 * 30) + 12 = 102 pieces. Always convert egg counts into total pieces.
+- 1 crate of eggs = 30 pieces.
 - If a date is not specified, use today's date: ${today}.
-- Interpret words like "yesterday", "sunday", "monday" into exact YYYY-MM-DD dates (assuming today is ${today}).
 - Expense categories must be one of: "Feed", "Drugs", "Salaries", "Maintenance", "Utilities".
 
-Return a JSON object with this exact structure (use empty arrays if no data of that type exists in the text):
+Return a JSON object with this exact structure:
 {
   "staffChanges": { "removeAll": false, "add": [] },
   "eggs": [ { "date": "YYYY-MM-DD", "goodEggs": number, "crackedEggs": number, "notes": "string" } ],
   "expenses": [ { "date": "YYYY-MM-DD", "category": "string", "amount": number, "description": "string" } ],
-  "sales": [ { "date": "YYYY-MM-DD", "type": "string", "quantity": number, "totalAmount": number, "customerName": "string" } ]
+  "sales": [ { "date": "YYYY-MM-DD", "type": "string", "quantity": number, "totalAmount": number, "customerName": "string" } ],
+  "feedUsedKg": number,
+  "mortalityCount": number
 }`;
 
         const response = await ai.models.generateContent({
@@ -151,7 +163,7 @@ Return a JSON object with this exact structure (use empty arrays if no data of t
       parsed = smartParsePoultryText(text, today);
     }
 
-    // Process and save records into Supabase tables under active workspaceId
+    // Insert parsed records into Supabase under workspaceId
 
     // 1. Handle Staff
     if (parsed.staffChanges?.removeAll) {
@@ -234,7 +246,46 @@ Return a JSON object with this exact structure (use empty arrays if no data of t
       await serviceRoleClient.from('sales').insert(salesInsert);
     }
 
-    return NextResponse.json({ success: true, parsed });
+    // 5. Handle Health / Mortality
+    if (parsed.mortalityCount > 0) {
+      const { data: batches } = await serviceRoleClient
+        .from('batches')
+        .select('id, quantity')
+        .eq('workspaceId', workspaceId)
+        .limit(1);
+      
+      if (batches?.[0]) {
+        const newQty = Math.max(0, (batches[0].quantity || 100) - parsed.mortalityCount);
+        await serviceRoleClient.from('batches').update({ quantity: newQty }).eq('id', batches[0].id);
+      }
+
+      await serviceRoleClient.from('health').insert({
+        id: crypto.randomUUID(),
+        workspaceId,
+        date: today,
+        batchId: batches?.[0]?.id || 'main',
+        mortalityCount: parsed.mortalityCount,
+        symptoms: 'AI Auto-Logged Mortality',
+        diagnosis: 'Routine Log',
+        treatment: 'None',
+        status: 'Resolved'
+      });
+    }
+
+    // 6. Handle Feed Used
+    if (parsed.feedUsedKg > 0) {
+      await serviceRoleClient.from('feeds').insert({
+        id: crypto.randomUUID(),
+        workspaceId,
+        date: today,
+        feedType: 'Layer Mash',
+        quantityKg: parsed.feedUsedKg,
+        cost: 0,
+        recordedBy: 'AI Auto-Logger'
+      });
+    }
+
+    return NextResponse.json({ success: true, parsed, extracted: parsed });
   } catch (error: any) {
     console.error('AI Parse Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to process AI parsing' }, { status: 500 });
