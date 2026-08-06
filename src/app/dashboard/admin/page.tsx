@@ -52,9 +52,17 @@ export default async function AdminCmsPage() {
 
   let plans: SaasPlanConfig[] = DEFAULT_PLANS;
   try {
-    const { data: dbPlans } = await serviceRoleClient.from('saas_plans').select('*');
-    if (dbPlans && dbPlans.length > 0) {
-      plans = dbPlans as SaasPlanConfig[];
+    const { data: configData } = await serviceRoleClient
+      .from('systemSettings')
+      .select('adminName')
+      .eq('id', 'saas_plans_config')
+      .single();
+
+    if (configData?.adminName) {
+      const parsed = JSON.parse(configData.adminName);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        plans = parsed as SaasPlanConfig[];
+      }
     }
   } catch (_e) {
     // Fallback to default

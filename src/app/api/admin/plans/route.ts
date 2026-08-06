@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 
-// Default dynamic plan configurations fallback
 const DEFAULT_PLANS = [
   {
     id: 'free',
@@ -49,9 +48,17 @@ const DEFAULT_PLANS = [
 
 export async function GET() {
   try {
-    const { data: plans } = await serviceRoleClient.from('saas_plans').select('*');
-    if (plans && plans.length > 0) {
-      return NextResponse.json(plans);
+    const { data } = await serviceRoleClient
+      .from('systemSettings')
+      .select('adminName')
+      .eq('id', 'saas_plans_config')
+      .single();
+
+    if (data?.adminName) {
+      const parsedPlans = JSON.parse(data.adminName);
+      if (Array.isArray(parsedPlans) && parsedPlans.length > 0) {
+        return NextResponse.json(parsedPlans);
+      }
     }
     return NextResponse.json(DEFAULT_PLANS);
   } catch (err: any) {
@@ -71,24 +78,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid plans array' }, { status: 400 });
     }
 
-    for (const plan of plans) {
-      await serviceRoleClient.from('saas_plans').upsert([{
-        id: plan.id,
-        name: plan.name,
-        description: plan.description,
-        priceMonthly: Number(plan.priceMonthly),
-        priceAnnual: Number(plan.priceAnnual),
-        maxBranches: Number(plan.maxBranches),
-        cctvEnabled: Boolean(plan.cctvEnabled),
-        aiLoggerEnabled: Boolean(plan.aiLoggerEnabled),
-        exportReportsEnabled: Boolean(plan.exportReportsEnabled),
-        enterpriseHubEnabled: Boolean(plan.enterpriseHubEnabled),
-        features: Array.isArray(plan.features) ? plan.features : [],
-        updatedAt: new Date().toISOString()
-      }]);
+    const { error: upsertErr } = await serviceRoleClient.from('systemSettings').upsert([{
+      id: 'saas_plans_config',
+      workspaceId: 'global',
+      adminName: JSON.stringify(plans)
+    }]);
+
+    if (upsertErr) {
+      return NextResponse.json({ error: upsertErr.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Super Admin: SaaS plan configurations updated successfully!' });
+    return NextResponse.json({ success: true, message: 'Super Admin: SaaS plan configurations saved to Supabase successfully!' });
   } catch (err: any) {
     console.error('Super Admin CMS Error:', err);
     return NextResponse.json({ error: err?.message || 'Failed to update plans' }, { status: 500 });
