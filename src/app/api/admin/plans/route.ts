@@ -1,0 +1,96 @@
+'use strict';
+
+import { NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/auth';
+import { supabase as serviceRoleClient } from '@/lib/supabase';
+
+// Default dynamic plan configurations fallback
+const DEFAULT_PLANS = [
+  {
+    id: 'free',
+    name: 'Free Starter',
+    description: 'Perfect for small farms getting started with digital log management.',
+    priceMonthly: 0,
+    priceAnnual: 0,
+    maxBranches: 1,
+    cctvEnabled: false,
+    aiLoggerEnabled: false,
+    exportReportsEnabled: false,
+    enterpriseHubEnabled: false,
+    features: ['1 Farm Branch Included', 'Basic Egg & Feed Logs', 'Community Forum Support', '2 Staff Accounts']
+  },
+  {
+    id: 'pro',
+    name: 'Commercial Pro',
+    description: 'For growing poultry farms requiring AI telemetry and automated reports.',
+    priceMonthly: 15000,
+    priceAnnual: 144000,
+    maxBranches: 5,
+    cctvEnabled: true,
+    aiLoggerEnabled: true,
+    exportReportsEnabled: true,
+    enterpriseHubEnabled: false,
+    features: ['Up to 5 Farm Branches', 'CCTV Live Surveillance', 'AI Voice Auto-Logger', 'PDF & Excel Export Reports', 'Unlimited Staff Accounts']
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise & Cooperative',
+    description: 'For multi-farm operations, cooperative white-label portals, and API access.',
+    priceMonthly: 45000,
+    priceAnnual: 432000,
+    maxBranches: 999,
+    cctvEnabled: true,
+    aiLoggerEnabled: true,
+    exportReportsEnabled: true,
+    enterpriseHubEnabled: true,
+    features: ['Unlimited Farm Branches', 'Cooperative White-Label Portal', '24/7 Priority Consultant Hotline', 'Custom REST API Keys', 'Multi-Farm Matrix Dashboard']
+  }
+];
+
+export async function GET() {
+  try {
+    const { data: plans } = await serviceRoleClient.from('saas_plans').select('*');
+    if (plans && plans.length > 0) {
+      return NextResponse.json(plans);
+    }
+    return NextResponse.json(DEFAULT_PLANS);
+  } catch (err: any) {
+    return NextResponse.json(DEFAULT_PLANS);
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const user = await getAuthUser();
+    if (!user || user.email !== 'owner@poultry.com') {
+      return NextResponse.json({ error: 'Unauthorized: Only Super Admin (owner@poultry.com) can update plan configurations' }, { status: 403 });
+    }
+
+    const { plans } = await request.json();
+    if (!Array.isArray(plans)) {
+      return NextResponse.json({ error: 'Invalid plans array' }, { status: 400 });
+    }
+
+    for (const plan of plans) {
+      await serviceRoleClient.from('saas_plans').upsert([{
+        id: plan.id,
+        name: plan.name,
+        description: plan.description,
+        priceMonthly: Number(plan.priceMonthly),
+        priceAnnual: Number(plan.priceAnnual),
+        maxBranches: Number(plan.maxBranches),
+        cctvEnabled: Boolean(plan.cctvEnabled),
+        aiLoggerEnabled: Boolean(plan.aiLoggerEnabled),
+        exportReportsEnabled: Boolean(plan.exportReportsEnabled),
+        enterpriseHubEnabled: Boolean(plan.enterpriseHubEnabled),
+        features: Array.isArray(plan.features) ? plan.features : [],
+        updatedAt: new Date().toISOString()
+      }]);
+    }
+
+    return NextResponse.json({ success: true, message: 'Super Admin: SaaS plan configurations updated successfully!' });
+  } catch (err: any) {
+    console.error('Super Admin CMS Error:', err);
+    return NextResponse.json({ error: err?.message || 'Failed to update plans' }, { status: 500 });
+  }
+}
