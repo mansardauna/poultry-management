@@ -94,6 +94,20 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
   const isUpgraded = searchParams.get('upgraded') === 'true';
   const queryTier = searchParams.get('tier') || 'pro';
+  const [saasPlans, setSaasPlans] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/plans')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setSaasPlans(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const activePlan = saasPlans.find(p => p.id === currentTier);
+  const proPlan = saasPlans.find(p => p.id === 'pro');
+  const enterprisePlan = saasPlans.find(p => p.id === 'enterprise');
 
   useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
@@ -408,7 +422,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-extrabold text-slate-900">
-                      {currentTier === 'enterprise' ? '₦45,000' : currentTier === 'pro' ? '₦15,000' : '₦0'}
+                      ₦{((activePlan ? (isAnnual ? Math.round(activePlan.priceAnnual / 12) : activePlan.priceMonthly) : (currentTier === 'enterprise' ? 45000 : currentTier === 'pro' ? 15000 : 0))).toLocaleString()}
                     </span>
                     <span className="text-xs text-slate-500 font-medium">/ month</span>
                   </div>
@@ -830,10 +844,10 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
                 <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 mb-6">
                   <div className="text-3xl font-extrabold text-white">
-                    {isAnnual ? '₦144,000' : '₦15,000'}
+                    ₦{((isAnnual ? (proPlan?.priceAnnual || 144000) : (proPlan?.priceMonthly || 15000))).toLocaleString()}
                   </div>
                   <div className="text-[10px] text-indigo-300 font-bold uppercase mt-0.5">
-                    {isAnnual ? 'Billed Annually (Save ₦36k)' : 'Billed Monthly'}
+                    {isAnnual ? 'Billed Annually' : 'Billed Monthly'}
                   </div>
                 </div>
 
@@ -877,10 +891,10 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
                   <div className="text-3xl font-extrabold text-slate-900">
-                    {isAnnual ? '₦432,000' : '₦45,000'}
+                    ₦{((isAnnual ? (enterprisePlan?.priceAnnual || 432000) : (enterprisePlan?.priceMonthly || 45000))).toLocaleString()}
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
-                    {isAnnual ? 'Billed Annually (Save ₦108k)' : 'Billed Monthly'}
+                    {isAnnual ? 'Billed Annually' : 'Billed Monthly'}
                   </div>
                 </div>
 

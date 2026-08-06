@@ -120,17 +120,27 @@ export async function POST(request: Request) {
         .eq('id', orgId);
     }
 
-    // Inline price_data fallback if specific price IDs are not created in Stripe dashboard
-    const envPriceId = isAnnual ? process.env.STRIPE_PRO_ANNUAL_PRICE_ID : process.env.STRIPE_PRO_MONTHLY_PRICE_ID;
-    
-    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = envPriceId ? { price: envPriceId, quantity: 1 } : {
+    const { data: dbPlan } = await serviceRoleClient
+      .from('saas_plans')
+      .select('*')
+      .eq('id', targetTier)
+      .single();
+
+    const planPriceNaira = isAnnual 
+      ? (dbPlan?.priceAnnual || (targetTier === 'enterprise' ? 432000 : 144000))
+      : (dbPlan?.priceMonthly || (targetTier === 'enterprise' ? 45000 : 15000));
+
+    // Convert Naira to USD cents equivalent (approx $1 = ₦1000) or use direct kobo/cent value
+    const unitAmountCents = Math.round((planPriceNaira / 1000) * 100);
+
+    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: isAnnual ? 'Commercial Pro (Annual Subscription)' : 'Commercial Pro (Monthly Subscription)',
-          description: 'Includes Unlimited Branches, CCTV Feed Monitoring, Voice AI, and 24/7 Priority Support.',
+          name: `${dbPlan?.name || (targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro')} (${isAnnual ? 'Annual' : 'Monthly'})`,
+          description: dbPlan?.description || 'Includes multi-farm telemetry, CCTV monitoring, and AI voice logging.',
         },
-        unit_amount: isAnnual ? 12000 : 1500, // $120/yr or $15/mo
+        unit_amount: unitAmountCents,
         recurring: {
           interval: isAnnual ? 'year' : 'month',
         },
