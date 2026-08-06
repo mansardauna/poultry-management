@@ -18,9 +18,9 @@ export default function LandingPage() {
             </div>
             
             <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-              <Link href="#about" className="hover:text-indigo-600 transition-colors">About</Link>
-              <Link href="#pricing" className="hover:text-indigo-600 transition-colors">Pricing</Link>
-              <Link href="#contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
+              <Link href="/about" className="hover:text-indigo-600 transition-colors">About</Link>
+              <Link href="/pricing" className="hover:text-indigo-600 transition-colors">Pricing</Link>
+              <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
             </div>
             
             <div className="flex items-center gap-4">
@@ -240,9 +240,9 @@ export default function LandingPage() {
             <span className="font-bold text-slate-800">PFMS</span>
           </div>
           <div className="flex gap-6 text-sm text-slate-500">
-            <Link href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
-            <Link href="#" className="hover:text-indigo-600 transition-colors">Contact Support</Link>
+            <Link href="/privacy" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
+            <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact Support</Link>
           </div>
           <div className="text-sm text-slate-400">
             © 2026 PFMS Inc. All rights reserved.
