@@ -167,13 +167,14 @@ export function HousingClient({ role }: { role: string }) {
         </CardContent>
       </Card>
 
-      <Dialog open={open} onClose={() => { setOpen(false); setEditingPen(null); setFormData({ name: '', capacity: 1000, status: 'Active', currentBatchId: '' }); }} fullWidth maxWidth="sm">
-        <DialogTitle>{editingPen ? 'Edit Farm Pen' : 'Add Farm Pen'}</DialogTitle>
+      <Dialog open={open} onClose={() => { setOpen(false); setEditingPen(null); setFormData({ name: '', capacity: 1000, status: 'Active', currentBatchId: '' }); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>{editingPen ? 'Edit Farm Pen' : 'Add Farm Pen'}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField
             label="Pen Name"
             fullWidth
+            variant="outlined"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
             placeholder="e.g. Broiler Pen A"
@@ -182,27 +183,30 @@ export function HousingClient({ role }: { role: string }) {
             label="Capacity (Birds)"
             type="number"
             fullWidth
+            variant="outlined"
             value={formData.capacity}
             onChange={e => setFormData({ ...formData, capacity: Number(e.target.value) })}
           />
-          <FormControl fullWidth>
+          <FormControl fullWidth variant="outlined">
             <InputLabel>Status</InputLabel>
             <Select
               value={formData.status}
               label="Status"
               onChange={e => setFormData({ ...formData, status: e.target.value })}
+              className="rounded-sm"
             >
               <MenuItem value="Active">Active</MenuItem>
               <MenuItem value="Cleaning">Cleaning</MenuItem>
               <MenuItem value="Empty">Empty</MenuItem>
             </Select>
           </FormControl>
-          <FormControl fullWidth>
+          <FormControl fullWidth variant="outlined">
             <InputLabel>Assign Batch (Optional)</InputLabel>
             <Select
               value={formData.currentBatchId}
               label="Assign Batch (Optional)"
               onChange={e => setFormData({ ...formData, currentBatchId: e.target.value })}
+              className="rounded-sm"
             >
               <MenuItem value=""><em>None</em></MenuItem>
               {batches.map(b => (
@@ -211,9 +215,9 @@ export function HousingClient({ role }: { role: string }) {
             </Select>
           </FormControl>
         </DialogContent>
-        <DialogActions>
-          <MuiButton onClick={() => { setOpen(false); setEditingPen(null); }}>Cancel</MuiButton>
-          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name}>{editingPen ? 'Save Changes' : 'Save'}</MuiButton>
+        <DialogActions sx={{ p: 2 }}>
+          <MuiButton onClick={() => { setOpen(false); setEditingPen(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingPen ? 'Save Changes' : 'Add Pen'}</MuiButton>
         </DialogActions>
       </Dialog>
     </div>

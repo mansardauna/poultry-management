@@ -158,22 +158,24 @@ export function ContactsClient({ role }: { role: string }) {
         </CardContent>
       </Card>
 
-      <Dialog open={open} onClose={() => { setOpen(false); setEditingContact(null); }} fullWidth maxWidth="sm">
-        <DialogTitle>{editingContact ? 'Edit Contact' : 'Add Contact'}</DialogTitle>
+      <Dialog open={open} onClose={() => { setOpen(false); setEditingContact(null); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>{editingContact ? 'Edit Contact' : 'Add Contact'}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField
             label="Name"
             fullWidth
+            variant="outlined"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
           />
-          <FormControl fullWidth>
+          <FormControl fullWidth variant="outlined">
             <InputLabel>Type</InputLabel>
             <Select
               value={formData.type}
               label="Type"
               onChange={e => setFormData({ ...formData, type: e.target.value })}
+              className="rounded-sm"
             >
               <MenuItem value="Customer">Customer</MenuItem>
               <MenuItem value="Supplier">Supplier</MenuItem>
@@ -182,21 +184,23 @@ export function ContactsClient({ role }: { role: string }) {
           <TextField
             label="Contact Details (Phone/Email)"
             fullWidth
+            variant="outlined"
             value={formData.contactDetails}
             onChange={e => setFormData({ ...formData, contactDetails: e.target.value })}
           />
           <TextField
             label="Notes"
             fullWidth
+            variant="outlined"
             multiline
             rows={3}
             value={formData.notes}
             onChange={e => setFormData({ ...formData, notes: e.target.value })}
           />
         </DialogContent>
-        <DialogActions>
-          <MuiButton onClick={() => { setOpen(false); setEditingContact(null); }}>Cancel</MuiButton>
-          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name}>{editingContact ? 'Save Changes' : 'Save'}</MuiButton>
+        <DialogActions sx={{ p: 2 }}>
+          <MuiButton onClick={() => { setOpen(false); setEditingContact(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingContact ? 'Save Changes' : 'Save Contact'}</MuiButton>
         </DialogActions>
       </Dialog>
     </div>

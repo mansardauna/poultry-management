@@ -161,23 +161,25 @@ export function InventoryClient({ role }: { role: string }) {
         </CardContent>
       </Card>
 
-      <Dialog open={open} onClose={() => { setOpen(false); setEditingItem(null); }} fullWidth maxWidth="sm">
-        <DialogTitle>{editingItem ? 'Edit Equipment' : 'Add Equipment'}</DialogTitle>
+      <Dialog open={open} onClose={() => { setOpen(false); setEditingItem(null); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>{editingItem ? 'Edit Equipment' : 'Add Equipment'}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField
             label="Equipment Name"
             fullWidth
+            variant="outlined"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
           />
           <div className="flex gap-4">
-            <FormControl fullWidth>
+            <FormControl fullWidth variant="outlined">
               <InputLabel>Type</InputLabel>
               <Select
                 value={formData.type}
                 label="Type"
                 onChange={e => setFormData({ ...formData, type: e.target.value })}
+                className="rounded-sm"
               >
                 <MenuItem value="Feeder">Feeder</MenuItem>
                 <MenuItem value="Drinker">Drinker</MenuItem>
@@ -191,17 +193,19 @@ export function InventoryClient({ role }: { role: string }) {
               label="Quantity"
               type="number"
               fullWidth
+              variant="outlined"
               value={formData.quantity}
               onChange={e => setFormData({ ...formData, quantity: Number(e.target.value) })}
             />
           </div>
           <div className="flex gap-4">
-            <FormControl fullWidth>
+            <FormControl fullWidth variant="outlined">
               <InputLabel>Status</InputLabel>
               <Select
                 value={formData.status}
                 label="Status"
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
+                className="rounded-sm"
               >
                 <MenuItem value="Good">Good</MenuItem>
                 <MenuItem value="Needs Repair">Needs Repair</MenuItem>
@@ -212,14 +216,15 @@ export function InventoryClient({ role }: { role: string }) {
               label="Last Maintenance"
               type="date"
               fullWidth
+              variant="outlined"
               value={formData.lastMaintenance}
               onChange={e => setFormData({ ...formData, lastMaintenance: e.target.value })}
             />
           </div>
         </DialogContent>
-        <DialogActions>
-          <MuiButton onClick={() => { setOpen(false); setEditingItem(null); }}>Cancel</MuiButton>
-          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name}>{editingItem ? 'Save Changes' : 'Save'}</MuiButton>
+        <DialogActions sx={{ p: 2 }}>
+          <MuiButton onClick={() => { setOpen(false); setEditingItem(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingItem ? 'Save Changes' : 'Add Item'}</MuiButton>
         </DialogActions>
       </Dialog>
     </div>
