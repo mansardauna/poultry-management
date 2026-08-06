@@ -21,6 +21,9 @@ export interface SaasPlan {
   features: string[];
 }
 
+import { LandingNav } from '@/components/layout/LandingNav';
+import { LandingFooter } from '@/components/layout/LandingFooter';
+
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,24 +73,9 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans pt-20">
       {/* Top Navbar */}
-      <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg text-indigo-600">
-            <span>🐓 Poultry Management System</span>
-          </Link>
-          <div className="flex items-center gap-6 text-sm font-medium text-slate-600">
-            <Link href="/" className="hover:text-indigo-600 transition-colors">Home</Link>
-            <Link href="/pricing" className="text-indigo-600 font-semibold">Pricing</Link>
-            <Link href="/about" className="hover:text-indigo-600 transition-colors">About</Link>
-            <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
-            <Link href="/login" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-colors">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <LandingNav activePath="/pricing" />
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8 py-16">
@@ -193,6 +181,7 @@ export default function PricingPage() {
           })}
         </div>
       </div>
+      <LandingFooter />
     </div>
   );
 }

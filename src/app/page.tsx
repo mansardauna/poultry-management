@@ -3,37 +3,15 @@ import Link from 'next/link';
 import { ArrowRight, ChevronDown, Shield, BarChart3, Zap, MessageSquare, PlayCircle, CheckCircle2, Star, Plus, Egg, Wheat, TrendingUp } from 'lucide-react';
 import { PricingSection } from '@/components/features/marketing/PricingSection';
 import { FAQSection } from '@/components/features/marketing/FAQSection';
+import { LandingNav } from '@/components/layout/LandingNav';
+import { LandingFooter } from '@/components/layout/LandingFooter';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">P</div>
-              <span className="font-bold text-xl tracking-tight text-slate-800">PFMS</span>
-            </div>
-            
-            <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-              <Link href="/about" className="hover:text-indigo-600 transition-colors">About</Link>
-              <Link href="/pricing" className="hover:text-indigo-600 transition-colors">Pricing</Link>
-              <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition-colors hidden sm:block">
-                Log In
-              </Link>
-              <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md shadow-indigo-600/20 active:scale-95">
-                Sign Up Free
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <LandingNav />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -233,22 +211,7 @@ export default function LandingPage() {
       </section>
 
       {/* Simple Footer */}
-      <footer className="bg-white border-t border-slate-200 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">P</div>
-            <span className="font-bold text-slate-800">PFMS</span>
-          </div>
-          <div className="flex gap-6 text-sm text-slate-500">
-            <Link href="/privacy" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
-            <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact Support</Link>
-          </div>
-          <div className="text-sm text-slate-400">
-            © 2026 PFMS Inc. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
 
     </div>
   );

@@ -5,6 +5,9 @@ import { DocSection } from './DocSection';
 import { BookOpen, LayoutDashboard, Bird, Egg, Wheat, DollarSign, Settings, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
+import { LandingNav } from '@/components/layout/LandingNav';
+import { LandingFooter } from '@/components/layout/LandingFooter';
+
 const NAV_ITEMS = [
   { id: 'overview', label: 'Platform Overview', icon: BookOpen },
   { id: 'dashboard', label: 'Dashboard Analytics', icon: LayoutDashboard },
@@ -46,7 +49,8 @@ export function DocumentationClient() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-slate-50/50 pt-20">
+      <LandingNav />
       {/* Hero Banner Area */}
       <div className="relative w-full h-[40vh] min-h-[300px] bg-slate-900 flex items-center justify-center overflow-hidden">
         <Image 
@@ -218,6 +222,7 @@ export function DocumentationClient() {
 
         </div>
       </div>
+      <LandingFooter />
     </div>
   );
 }
