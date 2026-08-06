@@ -1,4 +1,5 @@
 'use strict';
+
 import { cookies } from 'next/headers';
 import { getAuthUser } from './auth';
 import { supabase as serviceRoleClient } from './supabase';
@@ -9,17 +10,16 @@ import { supabase as serviceRoleClient } from './supabase';
 export async function getWorkspaceId(): Promise<string> {
   const cookieStore = await cookies();
   const workspaceCookie = cookieStore.get('pfms_workspace')?.value;
-  const orgIdCookie = cookieStore.get('pfms_org_id')?.value;
-
-  if (workspaceCookie && workspaceCookie !== 'main') {
-    return workspaceCookie;
-  }
-
-  if (orgIdCookie) {
-    return `main-${orgIdCookie}`;
-  }
 
   const user = await getAuthUser();
+
+  if (user?.email === 'owner@poultry.com') {
+    if (workspaceCookie && workspaceCookie.includes('org_owner_main')) {
+      return workspaceCookie;
+    }
+    return 'main-org_owner_main';
+  }
+
   if (user?.id) {
     // Retrieve authenticated user's organization from database
     const { data: memberData } = await serviceRoleClient
@@ -30,11 +30,14 @@ export async function getWorkspaceId(): Promise<string> {
       .single();
 
     if (memberData?.orgId) {
+      if (workspaceCookie && workspaceCookie.includes(memberData.orgId)) {
+        return workspaceCookie;
+      }
       return `main-${memberData.orgId}`;
     }
 
     return `ws_${user.id.replace(/-/g, '')}`;
   }
 
-  return 'ws_demo';
+  return workspaceCookie || 'ws_demo';
 }
