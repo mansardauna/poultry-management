@@ -22,21 +22,23 @@ export default async function SettingsPage() {
   const rawSystemSettings = (await supabase.from('systemSettings').select('*').eq('workspaceId', workspaceId).limit(1)).data?.[0];
   const systemSettings = rawSystemSettings ? {
     ...rawSystemSettings,
-    eggCratePriceSmall: rawSystemSettings.eggCratePriceSmall ?? undefined,
-    eggCratePriceLarge: rawSystemSettings.eggCratePriceLarge ?? undefined,
-    adminName: rawSystemSettings.adminName ?? undefined,
-    adminEmail: rawSystemSettings.adminEmail ?? undefined,
-    adminPhone: rawSystemSettings.adminPhone ?? undefined,
-    paystackPublicKey: rawSystemSettings.paystackPublicKey ?? undefined,
-    paystackSecretKey: rawSystemSettings.paystackSecretKey ?? undefined,
+    eggCratePriceSmall: rawSystemSettings.eggCratePriceSmall ?? 4200,
+    eggCratePriceLarge: rawSystemSettings.eggCratePriceLarge ?? 4400,
+    adminName: rawSystemSettings.adminName || (user?.email ? user.email.split('@')[0] : 'Farm Owner'),
+    adminEmail: rawSystemSettings.adminEmail || user?.email || '',
+    adminPhone: rawSystemSettings.adminPhone || '',
+    farmName: rawSystemSettings.farmName || '',
+    billingRegion: rawSystemSettings.billingRegion || 'Nigeria & West Africa (NGN)',
   } : {
     id: 'default',
     workspaceId,
     eggCratePriceSmall: 4200,
     eggCratePriceLarge: 4400,
-    adminName: 'Farm Admin',
-    adminEmail: 'admin@example.com',
-    adminPhone: '+2340000000000'
+    adminName: user?.email ? user.email.split('@')[0] : 'Farm Owner',
+    adminEmail: user?.email || '',
+    adminPhone: '',
+    farmName: '',
+    billingRegion: 'Nigeria & West Africa (NGN)'
   };
 
   const workspaces = (await supabase.from('workspaces').select('*')).data || [];

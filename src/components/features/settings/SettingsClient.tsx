@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus } from 'lucide-react';
+import { useWorkspace } from '../WorkspaceContext';
 
 /**
  * Represents a workspace.
@@ -35,6 +36,8 @@ interface Workspace {
  */
 interface SystemSettings {
   id?: string;
+  farmName?: string;
+  billingRegion?: string;
   eggCratePriceSmall?: number;
   eggCratePriceLarge?: number;
   adminName?: string;
@@ -82,6 +85,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   
   // Real Dynamic Payment Methods & Subscription History
   const [paymentMethods, setPaymentMethods] = useState<any[]>(initialPaymentMethods);
+  const { activeWorkspace } = useWorkspace();
   const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>(initialSubscriptionHistory);
 
   // Add Card Modal State
@@ -134,11 +138,17 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(initialSettings?.notifyWhatsapp || false);
 
   // System Settings
+  const computedFarmId = activeWorkspace?.id 
+    ? `PFMS-ORG-${activeWorkspace.id.replace(/[^a-zA-Z0-9]/g, '').slice(-5).toUpperCase()}` 
+    : 'PFMS-ORG-00001';
+
   const [eggCratePriceSmall, setEggCratePriceSmall] = useState(String(systemSettings?.eggCratePriceSmall || 4200));
   const [eggCratePriceLarge, setEggCratePriceLarge] = useState(String(systemSettings?.eggCratePriceLarge || 4400));
-  const [adminName, setAdminName] = useState(systemSettings?.adminName || 'Farm Admin');
-  const [adminEmail, setAdminEmail] = useState(systemSettings?.adminEmail || 'admin@example.com');
-  const [adminPhone, setAdminPhone] = useState(systemSettings?.adminPhone || '+2340000000000');
+  const [farmName, setFarmName] = useState(systemSettings?.farmName || activeWorkspace?.name || 'My Poultry Farm');
+  const [adminName, setAdminName] = useState(systemSettings?.adminName || '');
+  const [adminEmail, setAdminEmail] = useState(systemSettings?.adminEmail || '');
+  const [adminPhone, setAdminPhone] = useState(systemSettings?.adminPhone || '');
+  const [billingRegion, setBillingRegion] = useState(systemSettings?.billingRegion || 'Nigeria & West Africa (NGN)');
   const [paystackPublicKey, setPaystackPublicKey] = useState(systemSettings?.paystackPublicKey || '');
   const [paystackSecretKey, setPaystackSecretKey] = useState(systemSettings?.paystackSecretKey || '');
   const [stripePublicKey, setStripePublicKey] = useState(systemSettings?.stripePublicKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
@@ -182,11 +192,13 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         body: JSON.stringify({
           action: 'system',
           id: systemSettings?.id,
-          eggCratePriceSmall: Number(eggCratePriceSmall),
-          eggCratePriceLarge: Number(eggCratePriceLarge),
+          farmName,
           adminName,
           adminEmail,
           adminPhone,
+          billingRegion,
+          eggCratePriceSmall: Number(eggCratePriceSmall),
+          eggCratePriceLarge: Number(eggCratePriceLarge),
           paystackPublicKey,
           paystackSecretKey,
           stripePublicKey,
@@ -377,28 +389,28 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold text-slate-900">Maitama Poultry Enterprise</h2>
+                    <h2 className="text-xl font-bold text-slate-900">{farmName || activeWorkspace?.name || 'My Poultry Farm'}</h2>
                     <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                       Billed Monthly
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Farm ID: PFMS-ORG-98402 | Account Admin: {adminName}</p>
+                  <p className="text-xs text-slate-500 mt-1">Farm ID: {computedFarmId} | Account Admin: {adminName || 'Farm Owner'}</p>
                 </div>
               </div>
 
               <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-4 rounded-xl text-xs">
                 <div>
                   <p className="text-slate-400 font-bold uppercase tracking-wider">Account Admin</p>
-                  <p className="font-semibold text-slate-800 mt-0.5">{adminName}</p>
-                  <p className="text-slate-500">{adminEmail}</p>
+                  <p className="font-semibold text-slate-800 mt-0.5">{adminName || 'Farm Owner'}</p>
+                  <p className="text-slate-500">{adminEmail || 'Not Configured'}</p>
                 </div>
                 <div>
                   <p className="text-slate-400 font-bold uppercase tracking-wider">Phone Number</p>
-                  <p className="font-semibold text-slate-800 mt-0.5">{adminPhone}</p>
+                  <p className="font-semibold text-slate-800 mt-0.5">{adminPhone || 'Not Configured'}</p>
                 </div>
                 <div>
                   <p className="text-slate-400 font-bold uppercase tracking-wider">Billing Region</p>
-                  <p className="font-semibold text-slate-800 mt-0.5">Nigeria & West Africa (NGN)</p>
+                  <p className="font-semibold text-slate-800 mt-0.5">{billingRegion || 'Nigeria & West Africa (NGN)'}</p>
                 </div>
               </div>
             </CardContent>
@@ -624,9 +636,11 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TextField label="Admin Name" fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
-              <TextField label="Admin Email" type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
-              <TextField label="Admin Phone" fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
+              <TextField label="Farm / Organization Name" fullWidth variant="outlined" value={farmName} onChange={(e) => setFarmName(e.target.value)} helperText="Official farm name displayed on billing cards and invoices." />
+              <TextField label="Admin Full Name" fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
+              <TextField label="Admin Email Address" type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+              <TextField label="Admin Contact Phone" fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
+              <TextField label="Billing Region / Currency" fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText="e.g. Nigeria & West Africa (NGN)" />
               
               <div className="md:col-span-2 pt-4 border-t border-slate-100">
                 <p className="text-xs font-semibold uppercase text-slate-500 mb-3 flex items-center gap-1">
