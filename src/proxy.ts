@@ -27,10 +27,27 @@ export async function proxy(request: NextRequest) {
     }
   )
 
+  const path = request.nextUrl.pathname
   const { data: { user } } = await supabase.auth.getUser()
 
-  const path = request.nextUrl.pathname
-  const isPublicPath = path === '/' || path === '/login' || path === '/signup' || path.startsWith('/api/') || path.includes('.')
+  const publicPaths = [
+    '/', 
+    '/login', 
+    '/signup', 
+    '/pricing', 
+    '/about', 
+    '/contact', 
+    '/privacy', 
+    '/terms', 
+    '/documentation', 
+    '/reset-password'
+  ];
+
+  const isPublicPath = 
+    publicPaths.includes(path) || 
+    path.startsWith('/api/') || 
+    path.startsWith('/pay-invoice') || 
+    path.includes('.');
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone()
