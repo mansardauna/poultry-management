@@ -55,18 +55,31 @@ export async function POST(request: Request) {
          orgId = memberData?.orgId || `org_${userId.replace(/-/g, '').slice(0, 10)}`;
        }
 
-       const { data: orgData } = await adminClient.from('organizations').select('subscriptionTier, subscriptionEndsAt').eq('id', orgId).single();
-       
+       const defaultWorkspaceId = email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-${orgId}`;
+
+       const { data: orgData } = await adminClient
+         .from('organizations')
+         .select('subscriptionTier, subscriptionEndsAt')
+         .eq('id', orgId)
+         .maybeSingle();
+
        const endsAt = orgData?.subscriptionEndsAt ? new Date(orgData.subscriptionEndsAt) : null;
        const isExpired = endsAt ? new Date() > endsAt : false;
-       let tier = orgData?.subscriptionTier || (email === 'owner@poultry.com' ? 'pro' : 'free');
+
+       // Fetch tier from systemSettings DB record to persist subscription across devices
+       const { data: sysData } = await adminClient
+         .from('systemSettings')
+         .select('subscriptionTier, plan')
+         .or(`workspaceId.eq.${defaultWorkspaceId},workspaceId.eq.${orgId}`)
+         .limit(1)
+         .maybeSingle();
+
+       let tier = sysData?.subscriptionTier || sysData?.plan || orgData?.subscriptionTier || (email === 'owner@poultry.com' ? 'pro' : 'free');
 
        if (tier === 'pro' && isExpired) {
          tier = 'free';
          await adminClient.from('organizations').update({ subscriptionTier: 'free', subscriptionStatus: 'expired' }).eq('id', orgId);
        }
-
-       const defaultWorkspaceId = `main-${orgId}`;
        
        const response = NextResponse.json({ ok: true, role: data.user.user_metadata?.role || 'Admin' });
        response.cookies.set('pfms_workspace', defaultWorkspaceId, { path: '/' });

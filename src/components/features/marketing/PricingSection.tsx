@@ -65,7 +65,7 @@ export function PricingSection() {
   const [plans, setPlans] = useState<SaasPlan[]>(DEFAULT_PLANS);
 
   useEffect(() => {
-    fetch('/api/admin/plans')
+    fetch('/api/admin/plans', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {

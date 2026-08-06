@@ -120,25 +120,43 @@ export async function POST(request: Request) {
         .eq('id', orgId);
     }
 
-    const { data: dbPlan } = await serviceRoleClient
-      .from('saas_plans')
-      .select('*')
-      .eq('id', targetTier)
-      .single();
+    // Fetch Super Admin edited plans from systemSettings
+    let targetPlan: any = null;
+    const { data: plansSetting } = await serviceRoleClient
+      .from('systemSettings')
+      .select('adminName')
+      .eq('id', 'saas_plans_config')
+      .limit(1)
+      .maybeSingle();
+
+    if (plansSetting?.adminName) {
+      try {
+        const parsedPlans = JSON.parse(plansSetting.adminName);
+        if (Array.isArray(parsedPlans)) {
+          targetPlan = parsedPlans.find((p: any) => p.id === targetTier || p.id === planId);
+        }
+      } catch (_e) {}
+    }
+
+    const defaultPriceMonthly = targetTier === 'enterprise' ? 45000 : 15000;
+    const defaultPriceAnnual = targetTier === 'enterprise' ? 432000 : 144000;
 
     const planPriceNaira = isAnnual 
-      ? (dbPlan?.priceAnnual || (targetTier === 'enterprise' ? 432000 : 144000))
-      : (dbPlan?.priceMonthly || (targetTier === 'enterprise' ? 45000 : 15000));
+      ? (targetPlan?.priceAnnual ?? defaultPriceAnnual)
+      : (targetPlan?.priceMonthly ?? defaultPriceMonthly);
 
-    // Convert Naira to USD cents equivalent (approx $1 = ₦1000) or use direct kobo/cent value
-    const unitAmountCents = Math.round((planPriceNaira / 1000) * 100);
+    const planName = targetPlan?.name || (targetTier === 'enterprise' ? 'Enterprise & Cooperative' : 'Commercial Pro');
+    const planDesc = targetPlan?.description || 'Includes multi-farm telemetry, CCTV monitoring, and AI voice logging.';
+
+    // Convert Naira to USD cents equivalent (approx $1 = ₦1500 exchange rate)
+    const unitAmountCents = Math.max(50, Math.round((planPriceNaira / 1500) * 100));
 
     const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: `${dbPlan?.name || (targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro')} (${isAnnual ? 'Annual' : 'Monthly'})`,
-          description: dbPlan?.description || 'Includes multi-farm telemetry, CCTV monitoring, and AI voice logging.',
+          name: `${planName} (${isAnnual ? 'Annual' : 'Monthly'})`,
+          description: planDesc,
         },
         unit_amount: unitAmountCents,
         recurring: {

@@ -167,7 +167,12 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const { texts } = useLanguage();
 
   const isAdmin = role === 'Admin';
-  const visibleItems = menuItems.filter(item => item.roles.includes(role));
+  const visibleItems = menuItems.filter(item => {
+    if (item.name === 'Super Admin CMS') {
+      return role === 'SuperAdmin' || activeWorkspace?.id === 'main-org_owner_main';
+    }
+    return item.roles.includes(role);
+  });
 
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get('onboarding') === 'true';

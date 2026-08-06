@@ -113,18 +113,12 @@ export default function LoginPage() {
               <div className="relative">
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">Password</label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setResetEmail(email);
-                      setResetStatus('idle');
-                      setResetMsg('');
-                      setShowResetModal(true);
-                    }}
+                  <Link
+                    href={email ? `/reset-password?email=${encodeURIComponent(email)}` : '/reset-password'}
                     className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                   >
                     Forgot Password?
-                  </button>
+                  </Link>
                 </div>
                 <input 
                   type={showPassword ? "text" : "password"} 

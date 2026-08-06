@@ -11,7 +11,7 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
-  const { addWorkspace } = useWorkspace();
+  const { addWorkspace, updateWorkspace, workspaces, setActiveWorkspace } = useWorkspace();
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -67,19 +67,26 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
     }
     setIsSaving(true);
     try {
-      const workspaceId = `farm-${Date.now()}`;
-      await addWorkspace({
-        id: workspaceId,
-        name: branchName.trim(),
-        type: branchType,
-        createdAt: new Date().toISOString(),
-      });
-      setCreatedBranchId(workspaceId);
-      toast.success('Branch created successfully!');
+      if (workspaces.length > 0) {
+        const primaryWs = workspaces[0];
+        await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
+        setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType });
+        setCreatedBranchId(primaryWs.id);
+      } else {
+        const workspaceId = `farm-${Date.now()}`;
+        await addWorkspace({
+          id: workspaceId,
+          name: branchName.trim(),
+          type: branchType,
+          createdAt: new Date().toISOString(),
+        });
+        setCreatedBranchId(workspaceId);
+      }
+      toast.success('Primary branch configured successfully!');
       setStep(2);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to create branch');
+      toast.error('Failed to configure branch');
     } finally {
       setIsSaving(false);
     }
