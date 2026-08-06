@@ -444,11 +444,23 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   </button>
                   {currentTier !== 'free' && (
                     <button
-                      onClick={() => {
-                        if (confirm('Cancel your active subscription? Your plan will downgrade to Free Starter at the end of the billing period.')) {
-                          document.cookie = "pfms_tier=free; path=/; max-age=0";
-                          setCurrentTier('free');
-                          toast.success('Subscription cancelled.');
+                      onClick={async () => {
+                        if (confirm('Cancel your active subscription? Your account will downgrade to Free Starter.')) {
+                          try {
+                            toast.loading('Cancelling subscription...', { id: 'cancel-toast' });
+                            const res = await fetch('/api/subscription/cancel', { method: 'POST' });
+                            toast.dismiss('cancel-toast');
+                            if (res.ok) {
+                              document.cookie = "pfms_tier=free; path=/; max-age=86400";
+                              setCurrentTier('free');
+                              toast.success('Subscription cancelled successfully. Account downgraded to Free Starter.');
+                            } else {
+                              toast.error('Failed to cancel subscription');
+                            }
+                          } catch (_e) {
+                            toast.dismiss('cancel-toast');
+                            toast.error('Error cancelling subscription');
+                          }
                         }
                       }}
                       className="bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs uppercase px-4 py-3 rounded-xl transition-colors cursor-pointer border border-red-200 whitespace-nowrap"
