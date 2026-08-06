@@ -22,8 +22,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
       email: user.email || '',
       role: user.user_metadata?.role || 'Admin', // Default to Admin for now
     };
-  } catch (err) {
-    console.error('Supabase Auth Error:', err);
+  } catch (_err) {
     return null;
   }
 }
