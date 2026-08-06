@@ -190,10 +190,28 @@ export async function DELETE(request: Request) {
     const workspaceId = await getWorkspaceId();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const type = searchParams.get('type');
+
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await supabase.from('sales').delete().eq('id', id).eq('workspaceId', workspaceId);
-    return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete sale' }, { status: 500 });
+
+    if (type === 'invoice' || id.startsWith('inv')) {
+      const { error: invErr } = await supabase.from('invoices').delete().eq('id', id).eq('workspaceId', workspaceId);
+      if (invErr) {
+        console.error("Delete Invoice Error:", invErr);
+        return NextResponse.json({ error: invErr.message }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, message: 'Invoice deleted' });
+    }
+
+    // Delete sale and associated invoice if exists
+    await Promise.all([
+      supabase.from('sales').delete().eq('id', id).eq('workspaceId', workspaceId),
+      supabase.from('invoices').delete().eq('saleId', id).eq('workspaceId', workspaceId)
+    ]);
+
+    return NextResponse.json({ success: true, message: 'Sale deleted' });
+  } catch (err: any) {
+    console.error("DELETE Sales API Error:", err);
+    return NextResponse.json({ error: err?.message || 'Failed to delete record' }, { status: 500 });
   }
 }

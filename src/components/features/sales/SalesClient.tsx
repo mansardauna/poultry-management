@@ -157,9 +157,10 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   const handleDeleteInvoice = async (id: string) => {
     if (!confirm('Delete this customer invoice?')) return;
     try {
-      const res = await fetch(`/api/sales?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/sales?id=${id}&type=invoice`, { method: 'DELETE' });
       if (res.ok) {
-        toast.success('Invoice deleted');
+        toast.success('Customer Invoice deleted successfully!');
+        setInvoices(prev => prev.filter(i => i.id !== id));
         refreshData();
       } else toast.error('Failed to delete invoice');
     } catch (err) { console.error(err); }
