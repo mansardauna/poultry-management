@@ -16,7 +16,6 @@ import {
   Bell,
   MapPin
 } from 'lucide-react';
-import { AiLogModal } from "@/components/ui/AiLogModal";
 import { DatabaseSchema, StaffTask, AlertLog } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
@@ -302,8 +301,6 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           </p>
         </div>
           <div className="flex flex-wrap gap-2">
-            <AiLogModal onSuccess={refreshData} />
-           
             <button 
               onClick={() => window.print()}
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm  tracking-wider uppercase transition-colors"
