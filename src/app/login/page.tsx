@@ -17,9 +17,14 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (document.cookie.includes('pfms_workspace') || document.cookie.includes('pfms_org_id')) {
-      router.push('/dashboard');
-    }
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated) {
+          router.push('/dashboard');
+        }
+      })
+      .catch(() => {});
   }, [router]);
 
   // Forgot Password State

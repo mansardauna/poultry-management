@@ -7,5 +7,10 @@ export async function POST() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   
-  return NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set('pfms_workspace', '', { maxAge: 0, path: '/' });
+  response.cookies.set('pfms_org_id', '', { maxAge: 0, path: '/' });
+  response.cookies.set('pfms_tier', '', { maxAge: 0, path: '/' });
+  
+  return response;
 }

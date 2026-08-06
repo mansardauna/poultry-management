@@ -18,9 +18,14 @@ function SignupForm() {
   const plan = searchParams.get('plan');
 
   useEffect(() => {
-    if (document.cookie.includes('pfms_workspace') || document.cookie.includes('pfms_org_id')) {
-      router.push('/dashboard');
-    }
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated) {
+          router.push('/dashboard');
+        }
+      })
+      .catch(() => {});
   }, [router]);
 
   const handleSignup = async (e: React.FormEvent) => {

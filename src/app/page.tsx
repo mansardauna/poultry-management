@@ -12,10 +12,14 @@ export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const hasSession = document.cookie.includes('pfms_workspace') || document.cookie.includes('pfms_org_id');
-    if (hasSession) {
-      setIsLoggedIn(true);
-    }
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        setIsLoggedIn(!!data.authenticated);
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+      });
   }, []);
 
   return (
