@@ -30,34 +30,32 @@ export async function POST(request: Request) {
       .from('systemSettings')
       .select('paystackSecretKey')
       .eq('workspaceId', invoice.workspaceId)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     const secretKey = systemSettings?.paystackSecretKey;
 
     if (!secretKey) {
-      // If the farmer hasn't provided a secret key, we could optimistically mark it as paid,
-      // but for security, we should really verify it. 
-      // For this MVP, if they only provided a public key, we will trust the client-side callback.
-      // However, it is strongly recommended they add their secret key.
-      console.warn(`No secret key found for workspace ${invoice.workspaceId}. Optimistically marking invoice ${invoiceId} as Paid.`);
-    } else {
-      // 3. Verify the transaction with Paystack
-      const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-        headers: {
-          Authorization: `Bearer ${secretKey}`
-        }
-      });
-      const verifyData = await verifyRes.json();
+      return NextResponse.json({ 
+        error: 'Payment gateway secret key is not configured by farm admin in Settings.' 
+      }, { status: 400 });
+    }
 
-      if (!verifyData.status || verifyData.data.status !== 'success') {
-        return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
+    // 3. Verify the transaction with Paystack API
+    const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: {
+        Authorization: `Bearer ${secretKey}`
       }
+    });
+    const verifyData = await verifyRes.json();
 
-      // 4. (Optional) verify amount matches
-      // Paystack amount is in Kobo.
-      if (verifyData.data.amount < invoice.totalAmount * 100) {
-         return NextResponse.json({ error: 'Partial payment detected' }, { status: 400 });
-      }
+    if (!verifyData.status || verifyData.data?.status !== 'success') {
+      return NextResponse.json({ error: 'Official payment verification failed with gateway.' }, { status: 400 });
+    }
+
+    // 4. Verify total amount paid matches invoice amount
+    if (verifyData.data.amount < invoice.totalAmount * 100) {
+      return NextResponse.json({ error: 'Insufficient payment amount detected' }, { status: 400 });
     }
 
     // 5. Mark invoice as paid

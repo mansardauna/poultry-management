@@ -24,7 +24,7 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
     return notFound();
   }
 
-  // 2. Fetch the farm's settings
+  // 2. Fetch the farm's settings & plan tier
   let paystackPublicKey: string | null = null;
   let stripePublicKey: string | null = null;
   let bankName: string | null = null;
@@ -32,6 +32,7 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
   let accountName: string | null = null;
   let farmName = "Poultry Farm Enterprise";
   let farmEmail = "billing@poultryfarm.com";
+  let isPaidPlan = true;
 
   if (invoice.workspaceId) {
     const { data: systemSettings } = await supabase
@@ -49,6 +50,10 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
       if (systemSettings.accountName) accountName = systemSettings.accountName;
       if (systemSettings.adminName) farmName = systemSettings.adminName;
       if (systemSettings.adminEmail) farmEmail = systemSettings.adminEmail;
+
+      if (systemSettings.subscriptionTier === 'free' || systemSettings.plan === 'free') {
+        isPaidPlan = false;
+      }
     }
   }
 
@@ -64,6 +69,7 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
           accountName={accountName}
           farmName={farmName}
           farmEmail={farmEmail}
+          isPaidPlan={isPaidPlan}
         />
       </div>
     </div>
