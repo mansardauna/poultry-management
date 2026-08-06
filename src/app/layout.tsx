@@ -13,6 +13,11 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "PFMS | Poultry Farm Management System",
   description: "Enterprise multi-farm management, AI telemetry, and cooperative intelligence platform",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
+  },
 };
 
 import { WorkspaceProvider } from "@/components/features/WorkspaceContext";
