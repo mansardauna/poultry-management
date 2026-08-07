@@ -166,13 +166,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const { workspaces, activeWorkspace, isLoading, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
   const { texts } = useLanguage();
 
-  const isAdmin = role === 'Admin';
-  const visibleItems = menuItems.filter(item => {
-    if (item.name === 'Subscription') {
-      return role === 'SuperAdmin' || activeWorkspace?.id === 'main-org_owner_main';
-    }
-    return item.roles.includes(role);
-  });
+  const isAdmin = role === 'Admin' || role === 'SuperAdmin';
+  const visibleItems = menuItems.filter(item => item.roles.includes(role) || (role === 'Admin' && item.name === 'Subscription'));
 
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get('onboarding') === 'true';
