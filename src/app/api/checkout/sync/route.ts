@@ -10,8 +10,8 @@ export async function POST(request: Request) {
     const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
     const body = await request.json().catch(() => ({}));
-    const { planTier = 'pro', isAnnual = false, demo = true } = body;
-    const targetTier = planTier || 'pro';
+    const { isAnnual = false, demo = true } = body;
+    let targetTier = body.planTier;
 
     let orgId = cookieOrgId;
 
@@ -32,6 +32,15 @@ export async function POST(request: Request) {
         .limit(1)
         .single();
       orgId = firstOrg?.id || 'org-main';
+    }
+
+    if (!targetTier) {
+      const { data: orgData } = await serviceRoleClient
+        .from('organizations')
+        .select('subscriptionTier')
+        .eq('id', orgId)
+        .maybeSingle();
+      targetTier = orgData?.subscriptionTier || 'pro';
     }
 
     // Calculate subscription duration

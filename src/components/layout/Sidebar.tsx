@@ -194,16 +194,18 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
 
   useEffect(() => {
     if (isUpgraded) {
-      const qTier = searchParams.get('tier') || 'pro';
-      fetch('/api/checkout/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planTier: qTier, demo: true })
-      }).then(res => res.json()).then(data => {
-        if (data.tier) {
-          setCurrentTier(data.tier);
-        }
-      });
+      const qTier = searchParams.get('tier');
+      if (qTier) {
+        fetch('/api/checkout/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ planTier: qTier, demo: true })
+        }).then(res => res.json()).then(data => {
+          if (data.tier) {
+            setCurrentTier(data.tier);
+          }
+        });
+      }
     }
   }, [isUpgraded, searchParams]);
 

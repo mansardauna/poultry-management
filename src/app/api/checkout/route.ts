@@ -89,6 +89,47 @@ export async function POST(request: Request) {
         })
         .eq('id', orgId);
 
+      const workspaceId = `main-${orgId}`;
+      await serviceRoleClient
+        .from('systemSettings')
+        .upsert([{
+          workspaceId,
+          subscriptionTier: targetTier,
+          plan: targetTier,
+          cctvEnabled: true,
+          aiLoggerEnabled: true,
+          exportReportsEnabled: true,
+          enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
+        }], { onConflict: 'workspaceId' });
+
+      const subId = `sub_${Date.now()}`;
+      const isEnt = targetTier === 'enterprise' || targetTier === 'entrepreneur';
+      const amount = isEnt ? (isAnnual ? 432000 : 45000) : (isAnnual ? 144000 : 15000);
+      const displayTitle = targetTier === 'entrepreneur' ? 'Entrepreneur Plan' : targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro';
+
+      try {
+        await serviceRoleClient.from('subscriptions').upsert([{
+          id: subId,
+          orgId,
+          stripeSubscriptionId: subId,
+          status: 'active',
+          currentPeriodEnd: endsAt,
+          planId: targetTier
+        }]);
+
+        await serviceRoleClient.from('subscription_history').insert([{
+          id: subId,
+          workspaceId,
+          planName: `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`,
+          amount,
+          status: 'Paid',
+          receiptUrl: `https://pay.stripe.com/receipts/invoices/${subId}`,
+          createdAt: now.toISOString()
+        }]);
+      } catch (e) {
+        console.error('Failed to record subscription entry:', e);
+      }
+
       const response = NextResponse.json({ 
         url: `${siteUrl}/dashboard?upgraded=true&tier=${targetTier}&duration=${durationDays}`,
         demo: true 

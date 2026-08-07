@@ -34,7 +34,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const router = useRouter();
   const searchParams = useSearchParams();
   const isUpgraded = searchParams.get('upgraded') === 'true';
-  const queryTier = searchParams.get('tier') || 'pro';
+  const queryTier = searchParams.get('tier');
   const [currentTier, setCurrentTier] = useState(tier);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   }, [tier]);
 
   useEffect(() => {
-    if (isUpgraded) {
+    if (isUpgraded && queryTier) {
       fetch('/api/checkout/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,7 +50,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
       }).then(res => res.json()).then(data => {
         if (data.tier) {
           setCurrentTier(data.tier);
-          toast.success(`Account upgraded to ${data.tier === 'enterprise' ? 'Enterprise & Cooperative' : 'Commercial Pro'}!`, { id: 'tier-upgrade-toast' });
+          toast.success(`Account upgraded to ${data.tier === 'enterprise' || data.tier === 'entrepreneur' ? 'Enterprise & Cooperative' : 'Commercial Pro'}!`, { id: 'tier-upgrade-toast' });
           router.refresh();
         }
       });

@@ -9,6 +9,7 @@ const dmSans = DM_Sans({
   weight: ["400", "500", "600", "700"],
   variable: "--font-dm-sans",
   display: "swap",
+  adjustFontFallback: false,
   fallback: ["system-ui", "sans-serif"],
 });
 

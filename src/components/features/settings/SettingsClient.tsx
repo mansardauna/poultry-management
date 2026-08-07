@@ -97,7 +97,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [cardIsDefault, setCardIsDefault] = useState(true);
 
   const isUpgraded = searchParams.get('upgraded') === 'true';
-  const queryTier = searchParams.get('tier') || 'pro';
+  const queryTier = searchParams.get('tier');
   const [saasPlans, setSaasPlans] = useState<any[]>([]);
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setCurrentTier(match[1]);
 
-    if (isUpgraded) {
+    if (isUpgraded && queryTier) {
       fetch('/api/checkout/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,7 +125,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       }).then(res => res.json()).then(data => {
         if (data.tier) {
           setCurrentTier(data.tier);
-          toast.success(`Subscription active! Upgraded to ${data.tier === 'enterprise' ? 'Enterprise & Cooperative' : 'Commercial Pro'}.`, { id: 'settings-upgrade-toast' });
+          toast.success(`Subscription active! Upgraded to ${data.tier === 'enterprise' || data.tier === 'entrepreneur' ? 'Enterprise & Cooperative' : 'Commercial Pro'}.`, { id: 'settings-upgrade-toast' });
           router.refresh();
         }
       });
