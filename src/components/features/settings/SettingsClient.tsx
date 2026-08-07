@@ -19,7 +19,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus } from 'lucide-react';
+import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap } from 'lucide-react';
 import { useWorkspace } from '../WorkspaceContext';
 
 /**
@@ -249,8 +249,15 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   };
 
   const handleAddPaymentMethod = async () => {
-    if (!cardLast4 || cardLast4.length < 4) {
-      toast.error('Please enter the last 4 digits of your card');
+    if (paymentMethods.length >= 3) {
+      toast.error('Maximum 3 saved payment methods limit reached. Please remove an existing card to add a new one.');
+      return;
+    }
+    const isDigitalWallet = cardBrand === 'Apple Pay' || cardBrand === 'Google Pay';
+    const finalLast4 = isDigitalWallet && !cardLast4 ? (cardBrand === 'Apple Pay' ? 'APAY' : 'GPAY') : cardLast4;
+
+    if (!finalLast4 || finalLast4.length < 4) {
+      toast.error('Please enter card digits or select Apple/Google Pay');
       return;
     }
     try {
@@ -260,16 +267,16 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         body: JSON.stringify({
           action: 'addPaymentMethod',
           brand: cardBrand,
-          last4: cardLast4,
-          expMonth: Number(cardExpMonth),
-          expYear: Number(cardExpYear),
-          isDefault: cardIsDefault
+          last4: finalLast4,
+          expMonth: Number(cardExpMonth) || 12,
+          expYear: Number(cardExpYear) || 2028,
+          isDefault: cardIsDefault || paymentMethods.length === 0
         })
       });
       const data = await res.json();
       if (res.ok && data.paymentMethod) {
-        toast.success('Payment method saved successfully!');
-        setPaymentMethods(prev => cardIsDefault ? [data.paymentMethod, ...prev.map(p => ({ ...p, isDefault: false }))] : [...prev, data.paymentMethod]);
+        toast.success(`${cardBrand} saved as active payment method!`);
+        setPaymentMethods(prev => cardIsDefault || prev.length === 0 ? [data.paymentMethod, ...prev.map(p => ({ ...p, isDefault: false }))] : [...prev, data.paymentMethod]);
         setOpenAddCardModal(false);
         setCardLast4('');
       } else {
@@ -488,17 +495,44 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           {/* Real Dynamic Payment Methods Card */}
           <Card>
             <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
-                <CreditCard size={18} className="text-indigo-600" /> Payment Methods
-              </CardTitle>
-              <button
-                onClick={() => setOpenAddCardModal(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus size={14} /> Add Payment Method
-              </button>
+              <div>
+                <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+                  <CreditCard size={18} className="text-indigo-600" /> Saved Payment Methods (Auto-Billing)
+                </CardTitle>
+                <p className="text-[11px] text-slate-500 mt-0.5">Save up to 3 cards or digital wallets. Active default method is auto-billed monthly.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+                  {paymentMethods.length}/3 Saved
+                </span>
+                <button
+                  disabled={paymentMethods.length >= 3}
+                  onClick={() => setOpenAddCardModal(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus size={14} /> Add Payment Method
+                </button>
+              </div>
             </CardHeader>
             <CardContent className="p-6">
+              {/* Auto-Debit Active Status Banner */}
+              <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0">
+                    <Zap size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Automated Recurring Subscription Active</h4>
+                    <p className="text-[11px] text-slate-600">
+                      Your default active card is set to automatically renew your subscription monthly. No manual payments required.
+                    </p>
+                  </div>
+                </div>
+                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-emerald-300 flex-shrink-0">
+                  Auto-Renewal Active
+                </span>
+              </div>
+
               {paymentMethods.length === 0 ? (
                 <div className="text-center py-8 bg-slate-50/70 border border-dashed border-slate-200 rounded-2xl p-6">
                   <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -506,7 +540,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   </div>
                   <h4 className="text-sm font-bold text-slate-800">No Saved Payment Methods</h4>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4 leading-relaxed">
-                    You have not saved any credit card or payment methods yet. Add a payment method to enable seamless plan renewals.
+                    Save up to 3 credit cards, Apple Pay, or Google Pay. The active card will auto-bill your subscription monthly.
                   </p>
                   <button 
                     onClick={() => setOpenAddCardModal(true)}
@@ -519,24 +553,35 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <div className="space-y-3">
                   {paymentMethods.map((pm) => (
                     <div key={pm.id} className={`border p-4 rounded-xl flex items-center justify-between ${
-                      pm.isDefault ? 'border-indigo-200 bg-indigo-50/20' : 'border-slate-200'
+                      pm.isDefault ? 'border-emerald-300 bg-emerald-50/20 shadow-sm' : 'border-slate-200'
                     }`}>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-7 bg-slate-900 text-white rounded font-bold text-[10px] flex items-center justify-center uppercase">
+                        <div className={`w-12 h-8 rounded font-bold text-[10px] flex items-center justify-center uppercase text-white ${
+                          pm.brand === 'Apple Pay' ? 'bg-black' : pm.brand === 'Google Pay' ? 'bg-blue-600' : 'bg-slate-900'
+                        }`}>
                           {pm.brand || 'Card'}
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-900">
-                            {pm.brand || 'Card'} ending in •••• {pm.last4}
-                          </p>
-                          <p className="text-[10px] text-slate-500">
-                            Expires {String(pm.expMonth).padStart(2, '0')}/{String(pm.expYear).slice(-2)} {pm.isDefault ? '| Default Card' : ''}
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-bold text-slate-900">
+                              {pm.brand || 'Card'} {pm.last4?.length === 4 && !pm.last4?.includes('PAY') ? `ending in •••• ${pm.last4}` : pm.last4}
+                            </p>
+                            {pm.isDefault && (
+                              <span className="text-[9px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Active Auto-Debit Method
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-0.5">
+                            Expires {String(pm.expMonth).padStart(2, '0')}/{String(pm.expYear).slice(-2)}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {pm.isDefault ? (
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Default</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md border border-emerald-200">
+                            Active Default
+                          </span>
                         ) : (
                           <button 
                             onClick={async () => {
@@ -546,19 +591,19 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                                 body: JSON.stringify({ action: 'addPaymentMethod', brand: pm.brand, last4: pm.last4, expMonth: pm.expMonth, expYear: pm.expYear, isDefault: true })
                               });
                               setPaymentMethods(prev => prev.map(p => ({ ...p, isDefault: p.id === pm.id })));
-                              toast.success('Set as default card');
+                              toast.success(`Set ${pm.brand} as active auto-debit method`);
                             }}
-                            className="text-[10px] text-indigo-600 font-bold hover:underline cursor-pointer"
+                            className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-md transition-colors cursor-pointer"
                           >
-                            Set as Default
+                            Set as Active Method
                           </button>
                         )}
                         <button 
                           onClick={() => handleDeletePaymentMethod(pm.id)}
-                          className="p-1 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                           title="Remove payment method"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
@@ -984,11 +1029,13 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
           <div className="grid grid-cols-2 gap-4">
             <FormControl fullWidth size="small">
-              <InputLabel>Card Network</InputLabel>
-              <Select value={cardBrand} label="Card Network" onChange={(e) => setCardBrand(e.target.value)}>
+              <InputLabel>Payment Network</InputLabel>
+              <Select value={cardBrand} label="Payment Network" onChange={(e) => setCardBrand(e.target.value)}>
                 <MenuItem value="Visa">Visa</MenuItem>
                 <MenuItem value="Mastercard">Mastercard</MenuItem>
                 <MenuItem value="Verve">Verve</MenuItem>
+                <MenuItem value="Apple Pay">Apple Pay 🍎</MenuItem>
+                <MenuItem value="Google Pay">Google Pay G</MenuItem>
               </Select>
             </FormControl>
 

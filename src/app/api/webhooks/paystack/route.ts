@@ -125,6 +125,15 @@ export async function POST(request: Request) {
         const displayTitle = targetTier === 'entrepreneur' ? 'Entrepreneur Plan' : targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro';
         const planName = `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`;
 
+        await serviceRoleClient.from('subscriptions').upsert([{
+          id: subId,
+          orgId,
+          stripeSubscriptionId: subId,
+          status: 'active',
+          currentPeriodEnd: endsAt,
+          planId: targetTier
+        }]);
+
         await serviceRoleClient.from('subscription_history').insert([{
           id: subId,
           workspaceId: `main-${orgId}`,

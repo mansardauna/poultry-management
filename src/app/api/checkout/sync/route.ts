@@ -94,6 +94,15 @@ export async function POST(request: Request) {
     const planName = `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`;
 
     try {
+      await serviceRoleClient.from('subscriptions').upsert([{
+        id: subId,
+        orgId,
+        stripeSubscriptionId: subId,
+        status: 'active',
+        currentPeriodEnd: endsAt,
+        planId: targetTier
+      }]);
+
       await serviceRoleClient.from('subscription_history').insert([{
         id: subId,
         workspaceId,
@@ -104,7 +113,7 @@ export async function POST(request: Request) {
         createdAt: now.toISOString()
       }]);
     } catch (e) {
-      console.error('Failed to insert into subscription_history table', e);
+      console.error('Failed to insert into subscriptions / subscription_history table', e);
     }
 
     // Set Response & Update pfms_tier cookie to targetTier
