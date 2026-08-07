@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
     const { planId, isAnnual } = await request.json();
-    const targetTier = planId === 'enterprise' ? 'enterprise' : 'pro';
+    const targetTier = planId || 'pro';
 
     let orgId: string | null = null;
     let userEmail = 'admin@example.com';
@@ -138,14 +138,14 @@ export async function POST(request: Request) {
       } catch (_e) {}
     }
 
-    const defaultPriceMonthly = targetTier === 'enterprise' ? 45000 : 15000;
-    const defaultPriceAnnual = targetTier === 'enterprise' ? 432000 : 144000;
+    const defaultPriceMonthly = (targetTier === 'enterprise' || targetTier === 'entrepreneur') ? 45000 : 15000;
+    const defaultPriceAnnual = (targetTier === 'enterprise' || targetTier === 'entrepreneur') ? 432000 : 144000;
 
     const planPriceNaira = isAnnual 
       ? (targetPlan?.priceAnnual ?? defaultPriceAnnual)
       : (targetPlan?.priceMonthly ?? defaultPriceMonthly);
 
-    const planName = targetPlan?.name || (targetTier === 'enterprise' ? 'Enterprise & Cooperative' : 'Commercial Pro');
+    const planName = targetPlan?.name || ((targetTier === 'enterprise' || targetTier === 'entrepreneur') ? 'Entrepreneur & Cooperative' : 'Commercial Pro');
     const planDesc = targetPlan?.description || 'Includes multi-farm telemetry, CCTV monitoring, and AI voice logging.';
 
     // Convert Naira to USD cents equivalent (approx $1 = ₦1500 exchange rate)

@@ -56,7 +56,7 @@ const menuItems = [
   { name: 'Sales & Invoices', href: '/dashboard/sales', icon: ShoppingCart, roles: ['Admin', 'Manager'] },
   { name: 'Staff Management', href: '/dashboard/staff', icon: Users, roles: ['Admin', 'Manager'] },
   { name: 'Enterprise Hub', href: '/dashboard/enterprise', icon: Building2, roles: ['Admin', 'Manager'] },
-  { name: 'Super Admin CMS', href: '/dashboard/admin', icon: ShieldCheck, roles: ['Admin'] },
+  { name: 'Subscription', href: '/dashboard/admin', icon: ShieldCheck, roles: ['Admin'] },
   { name: 'CCTV Monitoring', href: '/dashboard/cctv', icon: Video, roles: ['Admin'] },
 ];
 
@@ -168,7 +168,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
 
   const isAdmin = role === 'Admin';
   const visibleItems = menuItems.filter(item => {
-    if (item.name === 'Super Admin CMS') {
+    if (item.name === 'Subscription') {
       return role === 'SuperAdmin' || activeWorkspace?.id === 'main-org_owner_main';
     }
     return item.roles.includes(role);
@@ -179,6 +179,19 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const planParam = searchParams.get('plan');
   const isUpgraded = searchParams.get('upgraded') === 'true';
   const [currentTier, setCurrentTier] = useState(tier);
+  const [proPrice, setProPrice] = useState(15000);
+
+  useEffect(() => {
+    fetch('/api/admin/plans', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const proPlan = data.find((p: any) => p.id === 'pro');
+          if (proPlan?.priceMonthly) setProPrice(proPlan.priceMonthly);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setCurrentTier(tier);
@@ -444,7 +457,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </nav>
         </div>
         {/* Plan Upgrade Banner in Sidebar */}
-        {!isCollapsed && tier === 'free' && (
+        {!isCollapsed && currentTier === 'free' && (
           <div className="mx-3 mb-2 p-3 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 rounded-xl text-center">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">FREE STARTER</span>
@@ -458,16 +471,18 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               }}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 rounded-md transition-colors shadow-sm cursor-pointer"
             >
-              Upgrade to Pro (₦15,000/mo)
+              Upgrade to Pro (₦{proPrice.toLocaleString()}/mo)
             </button>
           </div>
         )}
 
-        {!isCollapsed && tier === 'pro' && (
+        {!isCollapsed && currentTier !== 'free' && (
           <div className="mx-3 mb-2 p-2.5 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-emerald-300 uppercase truncate">Commercial Pro Active</p>
+              <p className="text-[11px] font-bold text-emerald-300 uppercase truncate">
+                {currentTier === 'entrepreneur' ? 'Entrepreneur Plan Active' : currentTier === 'enterprise' ? 'Enterprise Plan Active' : 'Commercial Pro Active'}
+              </p>
               <p className="text-[9px] text-emerald-400/80 truncate">Unlimited Branches & CCTV</p>
             </div>
           </div>

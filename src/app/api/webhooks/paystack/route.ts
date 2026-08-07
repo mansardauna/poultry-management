@@ -65,9 +65,9 @@ export async function POST(request: Request) {
       }
 
       // 2. Process Subscription Upgrade Payment
-      if (metadata.planTier || metadata.orgId) {
+      if (metadata.planTier || metadata.planId || metadata.orgId) {
         const orgId = metadata.orgId || 'org-main';
-        const targetTier = metadata.planTier === 'enterprise' ? 'enterprise' : 'pro';
+        const targetTier = metadata.planTier || metadata.planId || 'pro';
         const isAnnual = metadata.isAnnual === true || metadata.isAnnual === 'true';
 
         const durationDays = isAnnual ? 365 : 30;
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
               cctvEnabled: true,
               aiLoggerEnabled: true,
               exportReportsEnabled: true,
-              enterpriseHubEnabled: targetTier === 'enterprise'
+              enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
             })
             .eq('workspaceId', workspaceId);
         } else {
@@ -116,14 +116,14 @@ export async function POST(request: Request) {
               cctvEnabled: true,
               aiLoggerEnabled: true,
               exportReportsEnabled: true,
-              enterpriseHubEnabled: targetTier === 'enterprise'
+              enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
             }]);
         }
 
         const subId = `sub_${Date.now()}`;
-        const planName = targetTier === 'enterprise'
-          ? (isAnnual ? 'Enterprise & Coop (Annual)' : 'Enterprise & Coop (Monthly)')
-          : (isAnnual ? 'Commercial Pro (Annual)' : 'Commercial Pro (Monthly)');
+        const isEnt = targetTier === 'enterprise' || targetTier === 'entrepreneur';
+        const displayTitle = targetTier === 'entrepreneur' ? 'Entrepreneur Plan' : targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro';
+        const planName = `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`;
 
         await serviceRoleClient.from('subscription_history').insert([{
           id: subId,

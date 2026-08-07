@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => ({}));
     const { planTier = 'pro', isAnnual = false, demo = true } = body;
-    const targetTier = planTier === 'enterprise' ? 'enterprise' : 'pro';
+    const targetTier = planTier || 'pro';
 
     let orgId = cookieOrgId;
 
@@ -50,17 +50,53 @@ export async function POST(request: Request) {
       })
       .eq('id', orgId);
 
+    // Sync to systemSettings table
+    const workspaceId = `main-${orgId}`;
+    const { data: sysSet } = await serviceRoleClient
+      .from('systemSettings')
+      .select('id')
+      .eq('workspaceId', workspaceId)
+      .limit(1)
+      .maybeSingle();
+
+    if (sysSet) {
+      await serviceRoleClient
+        .from('systemSettings')
+        .update({
+          subscriptionTier: targetTier,
+          plan: targetTier,
+          cctvEnabled: true,
+          aiLoggerEnabled: true,
+          exportReportsEnabled: true,
+          enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
+        })
+        .eq('workspaceId', workspaceId);
+    } else {
+      await serviceRoleClient
+        .from('systemSettings')
+        .insert([{
+          id: 'sys-' + Date.now().toString().slice(-6),
+          workspaceId,
+          subscriptionTier: targetTier,
+          plan: targetTier,
+          cctvEnabled: true,
+          aiLoggerEnabled: true,
+          exportReportsEnabled: true,
+          enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
+        }]);
+    }
+
     // Record Subscription History Entry in subscription_history table
     const subId = `sub_${Date.now()}`;
-    const amount = targetTier === 'enterprise' ? (isAnnual ? 432000 : 45000) : (isAnnual ? 144000 : 15000);
-    const planName = targetTier === 'enterprise' 
-      ? (isAnnual ? 'Enterprise & Coop (Annual)' : 'Enterprise & Coop (Monthly)')
-      : (isAnnual ? 'Commercial Pro (Annual)' : 'Commercial Pro (Monthly)');
+    const isEnt = targetTier === 'enterprise' || targetTier === 'entrepreneur';
+    const amount = isEnt ? (isAnnual ? 432000 : 45000) : (isAnnual ? 144000 : 15000);
+    const displayTitle = targetTier === 'entrepreneur' ? 'Entrepreneur Plan' : targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro';
+    const planName = `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`;
 
     try {
       await serviceRoleClient.from('subscription_history').insert([{
         id: subId,
-        workspaceId: `main-${orgId}`,
+        workspaceId,
         planName,
         amount,
         status: 'Paid',
@@ -77,7 +113,7 @@ export async function POST(request: Request) {
       tier: targetTier,
       endsAt,
       durationDays,
-      message: `Successfully upgraded to ${targetTier === 'enterprise' ? 'Enterprise & Cooperative' : 'Commercial Pro'}!`,
+      message: `Successfully upgraded to ${displayTitle}!`,
     });
 
     response.cookies.set('pfms_tier', targetTier, {

@@ -337,39 +337,17 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           )}
         </div>
 
-        {/* Plan Status Badge & Upgrade CTA */}
-        <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Current Plan</span>
-            <span className={`text-xs font-bold ${currentTier !== 'free' ? 'text-emerald-600' : 'text-slate-700'}`}>
-              {currentTier === 'enterprise' ? 'Enterprise & Coop' : currentTier === 'pro' ? 'Commercial Pro' : 'Free Starter'}
-            </span>
-          </div>
-
-          {currentTier === 'free' ? (
+        {/* Upgrade CTA for Free Plan Users */}
+        {currentTier === 'free' && (
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
             <button
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
               className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
             >
               <span>Upgrade</span>
             </button>
-          ) : (
-            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active {currentTier === 'enterprise' ? 'Enterprise' : 'Pro'}
-            </span>
-          )}
-        </div>
-
-        {/* User profile */}
-        <div className="flex items-center gap-3 border-l border-slate-200 pl-3">
-          <div className="h-9 w-9 bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100 rounded-md">
-            <User size={20} />
           </div>
-          <div className="hidden md:block text-sm">
-            <p className="font-medium text-slate-800">{role} User</p>
-            <p className="text-slate-500 text-xs">Farm {role}</p>
-          </div>
-        </div>
+        )}
       </div>
     </header>
   );
