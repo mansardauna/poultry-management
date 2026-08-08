@@ -159,6 +159,53 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [accountNumber, setAccountNumber] = useState(systemSettings?.accountNumber || '');
   const [accountName, setAccountName] = useState(systemSettings?.accountName || '');
 
+  // Change Password State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword) {
+      toast.error('Please enter a new password');
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters long');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New password and confirm password do not match');
+      return;
+    }
+    setIsUpdatingPassword(true);
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Password updated successfully!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to update password');
+      }
+    } catch (_err) {
+      toast.error('An error occurred while updating password');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSaveAlertSettings = async () => {
@@ -673,37 +720,87 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
       {/* Tab 2: Profile & Pricing */}
       {activeTab === 'profile' && (
-        <Card>
-          <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
-              <User size={18} className="text-green-500" /> Farm Profile & Pricing
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TextField label="Farm / Organization Name" fullWidth variant="outlined" value={farmName} onChange={(e) => setFarmName(e.target.value)} helperText="Official farm name displayed on billing cards and invoices." />
-              <TextField label="Admin Full Name" fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
-              <TextField label="Admin Email Address" type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
-              <TextField label="Admin Contact Phone" fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
-              <TextField label="Billing Region / Currency" fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText="e.g. Nigeria & West Africa (NGN)" />
-              
-              <div className="md:col-span-2 pt-4 border-t border-slate-100">
-                <p className="text-xs font-semibold uppercase text-slate-500 mb-3 flex items-center gap-1">
-                  <DollarSign size={14} /> Egg Pricing Configuration
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <TextField label="Egg Price Per Crate (Small) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
-                  <TextField label="Egg Price Per Crate (Large) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="border-b border-slate-100">
+              <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+                <User size={18} className="text-green-500" /> Farm Profile & Pricing
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <TextField label="Farm / Organization Name" fullWidth variant="outlined" value={farmName} onChange={(e) => setFarmName(e.target.value)} helperText="Official farm name displayed on billing cards and invoices." />
+                <TextField label="Admin Full Name" fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
+                <TextField label="Admin Email Address" type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+                <TextField label="Admin Contact Phone" fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
+                <TextField label="Billing Region / Currency" fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText="e.g. Nigeria & West Africa (NGN)" />
+                
+                <div className="md:col-span-2 pt-4 border-t border-slate-100">
+                  <p className="text-xs font-semibold uppercase text-slate-500 mb-3 flex items-center gap-1">
+                    <DollarSign size={14} /> Egg Pricing Configuration
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <TextField label="Egg Price Per Crate (Small) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
+                    <TextField label="Egg Price Per Crate (Large) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="pt-6 flex justify-end">
-              <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
-                Save Profile & Pricing
-              </MuiButton>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="pt-6 flex justify-end">
+                <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
+                  Save Profile & Pricing
+                </MuiButton>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Account Security & Change Password */}
+          <Card>
+            <CardHeader className="border-b border-slate-100">
+              <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+                <Shield size={18} className="text-indigo-600" /> Account Security & Change Password
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <TextField 
+                  label="Current Password" 
+                  type="password" 
+                  fullWidth 
+                  variant="outlined" 
+                  value={currentPassword} 
+                  onChange={(e) => setCurrentPassword(e.target.value)} 
+                />
+                <TextField 
+                  label="New Password" 
+                  type="password" 
+                  fullWidth 
+                  variant="outlined" 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  helperText="Minimum 6 characters"
+                />
+                <TextField 
+                  label="Confirm New Password" 
+                  type="password" 
+                  fullWidth 
+                  variant="outlined" 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                />
+              </div>
+              <div className="pt-4 flex justify-end">
+                <MuiButton 
+                  onClick={handleUpdatePassword} 
+                  disabled={isUpdatingPassword || !newPassword}
+                  variant="contained" 
+                  sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}
+                >
+                  {isUpdatingPassword ? 'Updating Password...' : 'Update Password'}
+                </MuiButton>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Tab 3: Alert Rules */}

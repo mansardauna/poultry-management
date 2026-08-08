@@ -16,9 +16,13 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
   const [step, setStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Step 1: Workspace/Branch Details
+  // Step 1: Workspace/Branch & Farm Profile Details
   const [branchName, setBranchName] = useState('');
   const [branchType, setBranchType] = useState('Layer Farm');
+  const [ownerName, setOwnerName] = useState('');
+  const [ownerPhone, setOwnerPhone] = useState('');
+  const [farmLocation, setFarmLocation] = useState('');
+  const [estimatedCapacity, setEstimatedCapacity] = useState('5000');
   const [createdBranchId, setCreatedBranchId] = useState<string | null>(null);
 
   // Step 2: First Flock Details
@@ -51,6 +55,10 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         const d = JSON.parse(draftStr);
         if (d.branchName && !branchName) setBranchName(d.branchName);
         if (d.branchType && !branchType) setBranchType(d.branchType);
+        if (d.ownerName && !ownerName) setOwnerName(d.ownerName);
+        if (d.ownerPhone && !ownerPhone) setOwnerPhone(d.ownerPhone);
+        if (d.farmLocation && !farmLocation) setFarmLocation(d.farmLocation);
+        if (d.estimatedCapacity && !estimatedCapacity) setEstimatedCapacity(d.estimatedCapacity);
         if (d.breed && !breed) setBreed(d.breed);
         if (d.flockQty && !flockQty) setFlockQty(d.flockQty);
         if (d.flockType && !flockType) setFlockType(d.flockType);
@@ -96,6 +104,10 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
       localStorage.setItem('pfms_onboarding_draft', JSON.stringify({
         branchName,
         branchType,
+        ownerName,
+        ownerPhone,
+        farmLocation,
+        estimatedCapacity,
         breed,
         flockQty,
         flockType,
@@ -107,7 +119,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         staffPassword
       }));
     } catch (_e) {}
-  }, [branchName, branchType, breed, flockQty, flockType, flockAge, staffName, staffRole, staffSalary, staffUsername, staffPassword]);
+  }, [branchName, branchType, ownerName, ownerPhone, farmLocation, estimatedCapacity, breed, flockQty, flockType, flockAge, staffName, staffRole, staffSalary, staffUsername, staffPassword]);
 
   const handleClose = () => {
     if (typeof window !== 'undefined') {
@@ -158,7 +170,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     try {
       let targetWsId = createdBranchId;
 
-      // 1. Save Branch Workspace
+      // 1. Save Branch Workspace & Farm Profile
       if (branchName.trim()) {
         if (workspaces.length > 0) {
           const primaryWs = workspaces[0];
@@ -175,6 +187,16 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
           });
           targetWsId = workspaceId;
         }
+
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            farmName: branchName.trim(),
+            adminName: ownerName.trim(),
+            adminPhone: ownerPhone.trim(),
+          }),
+        }).catch(() => {});
       }
 
       // 2. Save Flock Batch (if provided)
@@ -227,14 +249,13 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] relative border border-slate-200">
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-100 flex flex-col md:flex-row relative">
         
-        {/* Close Button Top Right */}
-        <button
+        {/* Close Button */}
+        <button 
           onClick={handleClose}
-          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-          title="Close Setup Wizard"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 bg-slate-100 p-2 rounded-full transition-colors z-20 cursor-pointer"
         >
           <X size={18} />
         </button>
@@ -248,7 +269,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
             </div>
             <ul className="space-y-4 md:space-y-6">
               {[
-                { s: 1, label: 'Farm Branch', icon: Box },
+                { s: 1, label: 'Farm Profile & Branch', icon: Box },
                 { s: 2, label: 'Flock Setup', icon: Clipboard },
                 { s: 3, label: 'Staff Member', icon: User },
                 { s: 4, label: 'Starter Guide', icon: GraduationCap },
@@ -295,28 +316,68 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         {/* Scrollable Content Panel */}
         <div className="flex-1 p-6 md:p-8 flex flex-col justify-between bg-white overflow-y-auto max-h-[80vh]">
           
-          {/* Step 1: Farm Branch */}
+          {/* Step 1: Farm Profile & Branch */}
           {step === 1 && (
             <div className="space-y-6 flex-1 flex flex-col justify-between">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Create your first Farm Branch</h2>
-                  <p className="text-xs text-slate-500 mt-1">Branches help you segregate inventory, financial logs, and staff across physical farm locations.</p>
+                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Configure Farm Profile & Primary Branch</h2>
+                  <p className="text-xs text-slate-500 mt-1">Set up your farm profile, owner details, location, and operational capacity.</p>
                 </div>
                 
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Branch Name</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Farm / Organization Name</label>
                     <input 
                       type="text" 
                       value={branchName}
                       onChange={(e) => setBranchName(e.target.value)}
-                      placeholder="e.g. Main Farm - Abuja Branch"
+                      placeholder="e.g. Grand Poultry Farm - Main Branch"
                       className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Branch Farm Type</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Owner / Manager Full Name</label>
+                    <input 
+                      type="text" 
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      placeholder="e.g. Mansur Dauna"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Phone / WhatsApp Number</label>
+                    <input 
+                      type="text" 
+                      value={ownerPhone}
+                      onChange={(e) => setOwnerPhone(e.target.value)}
+                      placeholder="e.g. +234 801 234 5678"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Location Address / State</label>
+                    <input 
+                      type="text" 
+                      value={farmLocation}
+                      onChange={(e) => setFarmLocation(e.target.value)}
+                      placeholder="e.g. Abuja, Nigeria"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Est. Total Capacity (Birds)</label>
+                    <input 
+                      type="number" 
+                      value={estimatedCapacity}
+                      onChange={(e) => setEstimatedCapacity(e.target.value)}
+                      placeholder="e.g. 5000"
+                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Branch Operational Type</label>
                     <select 
                       value={branchType}
                       onChange={(e) => setBranchType(e.target.value)}
