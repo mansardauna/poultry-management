@@ -35,7 +35,7 @@ export function AdminCmsClient({
   allHistory?: any[];
   allOrgs?: any[];
 }) {
-  const isSuperAdmin = userRole === 'SuperAdmin' || currentUserEmail === 'owner@poultry.com' || currentUserEmail === 'superadmin@pfms.com';
+  const isSuperAdmin = userRole === 'SuperAdmin' || currentUserEmail === 'superadmin@pfms.com';
   const [activeTab, setActiveTab] = useState<'plans' | 'cms' | 'transactions' | 'orgs'>('plans');
   const [plans, setPlans] = useState<SaasPlanConfig[]>(initialPlans);
   const [isSaving, setIsSaving] = useState(false);
