@@ -43,7 +43,8 @@ export default async function SettingsPage() {
 
   const workspaces = (await supabase.from('workspaces').select('*')).data || [];
   const paymentMethods = (await supabase.from('payment_methods').select('*').eq('workspaceId', workspaceId)).data || [];
-  const subscriptionHistory = (await supabase.from('subscription_history').select('*').eq('workspaceId', workspaceId).order('createdAt', { ascending: false })).data || [];
+  const { data: rawHist } = await supabase.from('subscription_history').select('*').order('createdAt', { ascending: false });
+  const subscriptionHistory = rawHist || [];
 
   return <SettingsClient 
     initialSettings={alertSettings} 

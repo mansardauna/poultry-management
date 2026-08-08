@@ -324,7 +324,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   };
 
   return (
-    <div className="space-y-6 max-w-5xl pb-12">
+    <div className="w-full space-y-6 pb-12 font-sans">
       {/* Header Title */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-3">

@@ -68,9 +68,33 @@ export default async function AdminCmsPage() {
     // Fallback to default
   }
 
+  let allSubscriptions: any[] = [];
+  let allHistory: any[] = [];
+  let allOrgs: any[] = [];
+
+  try {
+    const { data: subData } = await serviceRoleClient.from('subscriptions').select('*');
+    if (subData) allSubscriptions = subData;
+
+    const { data: histData } = await serviceRoleClient.from('subscription_history').select('*').order('createdAt', { ascending: false });
+    if (histData) allHistory = histData;
+
+    const { data: orgData } = await serviceRoleClient.from('organizations').select('*');
+    if (orgData) allOrgs = orgData;
+  } catch (_err) {
+    // Console log or handle fallback
+  }
+
   return (
     <div className="p-6 md:p-8">
-      <AdminCmsClient initialPlans={plans} currentUserEmail={userEmail} />
+      <AdminCmsClient 
+        initialPlans={plans} 
+        currentUserEmail={userEmail} 
+        userRole={user?.role || 'Admin'}
+        allSubscriptions={allSubscriptions}
+        allHistory={allHistory}
+        allOrgs={allOrgs}
+      />
     </div>
   );
 }

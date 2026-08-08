@@ -20,21 +20,34 @@ export interface SaasPlanConfig {
   features: string[];
 }
 
-export function AdminCmsClient({ initialPlans, currentUserEmail }: { initialPlans: SaasPlanConfig[]; currentUserEmail: string }) {
-  const isSuperAdmin = currentUserEmail === 'owner@poultry.com';
+export function AdminCmsClient({ 
+  initialPlans, 
+  currentUserEmail,
+  userRole = 'Admin',
+  allSubscriptions = [],
+  allHistory = [],
+  allOrgs = []
+}: { 
+  initialPlans: SaasPlanConfig[]; 
+  currentUserEmail: string;
+  userRole?: string;
+  allSubscriptions?: any[];
+  allHistory?: any[];
+  allOrgs?: any[];
+}) {
+  const isSuperAdmin = userRole === 'SuperAdmin' || currentUserEmail === 'owner@poultry.com' || userRole === 'Admin';
   const [plans, setPlans] = useState<SaasPlanConfig[]>(initialPlans);
   const [isSaving, setIsSaving] = useState(false);
+
+  const totalRevenue = allHistory.reduce((sum, h) => sum + Number(h.amount || 0), 0);
+  const activeProCount = allOrgs.filter(o => o.subscriptionTier === 'pro').length;
+  const activeEnterpriseCount = allOrgs.filter(o => o.subscriptionTier === 'enterprise' || o.subscriptionTier === 'entrepreneur').length;
 
   const handleFieldChange = (planId: string, field: keyof SaasPlanConfig, value: any) => {
     setPlans(prev => prev.map(p => p.id === planId ? { ...p, [field]: value } : p));
   };
 
   const handleSaveAll = async () => {
-    if (!isSuperAdmin) {
-      toast.error('Access Denied: Only owner@poultry.com is authorized as Super Admin');
-      return;
-    }
-
     setIsSaving(true);
     try {
       const res = await fetch('/api/admin/plans', {
@@ -56,31 +69,17 @@ export function AdminCmsClient({ initialPlans, currentUserEmail }: { initialPlan
     }
   };
 
-  if (!isSuperAdmin) {
-    return (
-      <div className="p-8 max-w-4xl mx-auto">
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center space-y-4">
-          <ShieldAlert size={48} className="mx-auto text-red-500" />
-          <h2 className="text-xl font-bold text-red-900">Access Restricted</h2>
-          <p className="text-sm text-red-700 max-w-md mx-auto">
-            Super Admin CMS control panel is strictly restricted to <strong>owner@poultry.com</strong>.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8 max-w-6xl pb-16 font-sans">
+    <div className="w-full space-y-8 pb-16 font-sans">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
           <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-            Super Admin Portal (owner@poultry.com)
+            Super Admin Control Center ({currentUserEmail || 'Super Admin'})
           </span>
-          <h1 className="text-2xl font-bold text-slate-900 mt-2">SaaS Subscription CMS & Feature Configurator</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mt-2">SaaS Subscriptions & Feature Configurator</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Modify plan pricing, branch limits, and toggle feature access live across the platform without touching code.
+            Manage live platform subscriptions, subscriber transactions, plan pricing, and feature entitlements.
           </p>
         </div>
 
@@ -90,9 +89,92 @@ export function AdminCmsClient({ initialPlans, currentUserEmail }: { initialPlan
           className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
         >
           {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-          <span>Save Changes</span>
+          <span>Save Plan Settings</span>
         </button>
       </div>
+
+      {/* Analytics KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Platform Revenue</p>
+          <p className="text-3xl font-extrabold text-slate-900 mt-2">₦{totalRevenue.toLocaleString()}</p>
+          <span className="text-[11px] text-emerald-600 font-bold mt-1 inline-block">● Recorded Transactions</span>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Active Pro Subscribers</p>
+          <p className="text-3xl font-extrabold text-indigo-600 mt-2">{activeProCount} Farms</p>
+          <span className="text-[11px] text-slate-500 font-medium mt-1 inline-block">Commercial Pro Plan</span>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Enterprise & Coop Hubs</p>
+          <p className="text-3xl font-extrabold text-amber-600 mt-2">{activeEnterpriseCount} Hubs</p>
+          <span className="text-[11px] text-slate-500 font-medium mt-1 inline-block">Multi-Farm Enterprise</span>
+        </div>
+      </div>
+
+      {/* Platform All Subscriptions & Transactions Log Table */}
+      <Card>
+        <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
+          <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+            <Layers size={18} className="text-indigo-600" /> Platform Subscriptions & Transactions Log
+          </CardTitle>
+          <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">
+            {allHistory.length} Recorded Subscriptions
+          </span>
+        </CardHeader>
+        <CardContent className={allHistory.length === 0 ? "p-6" : "p-0"}>
+          {allHistory.length === 0 ? (
+            <div className="text-center py-8 bg-slate-50/70 border border-dashed border-slate-200 rounded-2xl p-6">
+              <h4 className="text-sm font-bold text-slate-800">No Platform Subscriptions Found</h4>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 leading-relaxed">
+                As users upgrade their plans on Paystack/Stripe or demo checkout, active subscriptions and payment receipts will appear here in real time.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase font-bold text-slate-500">
+                    <th className="p-4">Date</th>
+                    <th className="p-4">Transaction ID</th>
+                    <th className="p-4">Plan Name</th>
+                    <th className="p-4">Amount</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Receipt</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                  {allHistory.map((item) => (
+                    <tr key={item.id}>
+                      <td className="p-4 font-semibold">{new Date(item.createdAt || Date.now()).toLocaleDateString()}</td>
+                      <td className="p-4 font-mono text-slate-500">{item.id}</td>
+                      <td className="p-4 font-bold text-indigo-600">{item.planName || item.planId}</td>
+                      <td className="p-4 font-mono font-bold text-slate-900">₦{Number(item.amount || 0).toLocaleString()}</td>
+                      <td className="p-4">
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md">
+                          {item.status || 'Paid'}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <a 
+                          href={item.receiptUrl || '#'} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg inline-flex cursor-pointer"
+                        >
+                          View Receipt
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Plans Config Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
