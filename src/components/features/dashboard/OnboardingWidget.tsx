@@ -83,21 +83,17 @@ export function OnboardingWidget({
   if (isDismissed && completedCount === 4) return null;
 
   return (
-    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-xl border border-indigo-900/50 mb-8 relative overflow-hidden font-sans">
-      {/* Decorative Glow */}
-      <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/3 -mb-12 w-48 h-48 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
-
+    <div className="bg-slate-900 text-white rounded-sm p-6 border border-slate-800 mb-8 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-indigo-900/60 relative z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-            <Sparkles size={20} />
+          <div className="w-9 h-9 rounded-sm bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <Sparkles size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-white tracking-tight">Farm Setup & Onboarding Progress</h3>
-              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              <h3 className="text-base font-bold text-white tracking-tight">Farm Setup & Onboarding Progress</h3>
+              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded-sm uppercase tracking-wider">
                 {completedCount} of 4 Completed ({progressPercent}%)
               </span>
             </div>
@@ -110,15 +106,15 @@ export function OnboardingWidget({
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
           <button
             onClick={() => onOpenStep(nextPendingStep.id)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs uppercase tracking-wider px-5 py-3 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-4 py-2.5 rounded-sm flex items-center gap-2 transition-all cursor-pointer"
           >
             <span>Resume Step {nextPendingStep.id}: {nextPendingStep.actionText}</span>
-            <ArrowRight size={16} />
+            <ArrowRight size={15} />
           </button>
           
           <button
             onClick={handleDismiss}
-            className="text-slate-400 hover:text-white text-xs p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-slate-400 hover:text-white text-xs p-1.5 rounded-sm hover:bg-slate-800 transition-colors"
             title="Dismiss widget"
           >
             <X size={16} />
@@ -127,36 +123,36 @@ export function OnboardingWidget({
       </div>
 
       {/* Progress Bar Segment */}
-      <div className="py-4 border-b border-indigo-900/40 relative z-10">
+      <div className="py-4 border-b border-slate-800">
         <div className="flex justify-between text-[11px] font-bold text-slate-400 mb-2">
           <span>Overall Setup Progress</span>
           <span className="text-indigo-400 font-mono">{progressPercent}%</span>
         </div>
-        <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-700">
+        <div className="w-full bg-slate-800 rounded-sm h-2 overflow-hidden p-0.5 border border-slate-700">
           <div 
-            className="bg-gradient-to-r from-indigo-500 via-indigo-400 to-emerald-400 h-full rounded-full transition-all duration-700 shadow-sm"
+            className="bg-indigo-500 h-full rounded-sm transition-all duration-700"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
       {/* 4 Interactive Step Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-5 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-5">
         {steps.map((step) => (
           <div
             key={step.id}
             onClick={() => onOpenStep(step.id)}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+            className={`p-4 rounded-sm border transition-all cursor-pointer flex flex-col justify-between ${
               step.isDone
-                ? 'bg-slate-900/60 border-emerald-500/40 text-slate-300 hover:border-emerald-500'
+                ? 'bg-slate-800/50 border-emerald-500/40 text-slate-300 hover:border-emerald-500'
                 : step.id === nextPendingStep.id
-                ? 'bg-indigo-950/80 border-indigo-500 shadow-lg shadow-indigo-500/10 text-white ring-2 ring-indigo-500/30'
-                : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                ? 'bg-indigo-950/60 border-indigo-500 text-white'
+                : 'bg-slate-800/30 border-slate-800 text-slate-400 hover:border-slate-700'
             }`}
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-xl ${
+                <div className={`p-2 rounded-sm ${
                   step.isDone 
                     ? 'bg-emerald-500/20 text-emerald-400' 
                     : step.id === nextPendingStep.id 
@@ -166,11 +162,11 @@ export function OnboardingWidget({
                   <step.icon size={16} />
                 </div>
                 {step.isDone ? (
-                  <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                  <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-sm">
                     <CheckCircle2 size={12} /> Done
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md">
+                  <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-sm">
                     <Circle size={12} /> Step {step.id}
                   </span>
                 )}
@@ -180,7 +176,7 @@ export function OnboardingWidget({
               <p className="text-[11px] text-slate-400 mt-1 leading-snug">{step.desc}</p>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-indigo-900/40 flex items-center justify-between text-[11px] font-bold">
+            <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] font-bold">
               <span className={step.isDone ? 'text-emerald-400' : 'text-indigo-400'}>
                 {step.isDone ? 'Completed' : step.actionText}
               </span>
