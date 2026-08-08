@@ -136,6 +136,28 @@ export async function POST(request: Request) {
     const userId = user.id;
     const userRole = user.user_metadata?.role || (emailInput === 'owner@poultry.com' ? 'Admin' : 'Staff');
 
+    // Reject deleted staff/manager accounts
+    if (userRole === 'Staff' || userRole === 'Manager') {
+      const { data: userRecs } = await adminClient
+        .from('users')
+        .select('id')
+        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()}`)
+        .limit(1);
+
+      const { data: staffRecs } = await adminClient
+        .from('staff')
+        .select('id')
+        .or(`name.eq.${emailInput},contact.eq.${emailInput}`)
+        .limit(1);
+
+      if ((!userRecs || userRecs.length === 0) && (!staffRecs || staffRecs.length === 0)) {
+        return NextResponse.json(
+          { error: 'This staff account has been removed or revoked by the farm administrator.' },
+          { status: 401 }
+        );
+      }
+    }
+
     let orgId = 'org_owner_main';
     if (user.email === 'owner@poultry.com') {
       await adminClient.from('organization_members').upsert({ orgId, userId, role: 'Admin' });

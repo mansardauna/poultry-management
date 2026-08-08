@@ -172,9 +172,56 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+    // 1. Fetch staff details before deletion to clean up auth credentials
+    const { data: staffMembers } = await supabase.from('staff').select('*').eq('id', id).eq('workspaceId', workspaceId);
+    const staffMember = staffMembers?.[0];
+
+    // 2. Delete from `staff` table
     await supabase.from('staff').delete().eq('id', id).eq('workspaceId', workspaceId);
+
+    // 3. Delete from `users` table & Supabase Auth if credentials exist
+    if (staffMember) {
+      const identifiers = [
+        staffMember.name?.trim(),
+        staffMember.contact?.trim()
+      ].filter(Boolean);
+
+      for (const n of identifiers) {
+        if (n) {
+          try {
+            await supabase.from('users').delete().or(`username.eq.${n},username.eq.${n.toLowerCase()}`);
+          } catch (_e) {}
+        }
+      }
+
+      // Delete from Supabase Auth
+      try {
+        const { supabase: adminClient } = await import('@/lib/supabase');
+        const { data: usersData } = await adminClient.auth.admin.listUsers();
+        
+        const candidateEmails = [
+          staffMember.name?.toLowerCase().replace(/\s+/g, '') + '@farm.local',
+          staffMember.contact?.toLowerCase(),
+          staffMember.contact?.toLowerCase() + '@farm.local',
+          staffMember.name?.toLowerCase()
+        ].filter(Boolean);
+
+        const authUserToDelete = usersData?.users?.find(u => 
+          candidateEmails.includes(u.email?.toLowerCase())
+        );
+
+        if (authUserToDelete) {
+          await adminClient.auth.admin.deleteUser(authUserToDelete.id);
+        }
+      } catch (_authErr) {
+        console.error('Failed to revoke Supabase Auth for deleted staff:', _authErr);
+      }
+    }
+
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err: any) {
+    console.error('Delete staff error:', err);
     return NextResponse.json({ error: 'Failed to delete staff' }, { status: 500 });
   }
 }
