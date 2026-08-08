@@ -38,3 +38,34 @@
     @apply font-sans antialiased;
   }
 }
+
+/* Custom Sleek Sidebar Scrollbar */
+.scrollbar-sidebar::-webkit-scrollbar,
+.scrollbar-custom::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-track,
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-thumb,
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(129, 140, 248, 0.25);
+  border-radius: 9999px;
+  transition: background 0.3s ease;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-thumb:hover,
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: rgba(129, 140, 248, 0.6);
+}
+
+/* Firefox scrollbar support */
+.scrollbar-sidebar,
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(129, 140, 248, 0.3) transparent;
+}

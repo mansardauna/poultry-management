@@ -298,7 +298,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-xl py-2 z-50 text-slate-800">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-xl py-2 z-50 text-slate-800 max-h-64 overflow-y-auto scrollbar-sidebar">
                   <div className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Your Farms
                   </div>
@@ -394,7 +394,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             <X size={24} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto py-4 scrollbar-custom">
+        <div className="flex-1 overflow-y-auto py-4 scrollbar-sidebar scrollbar-custom">
           <nav className="space-y-1 px-3">
             {visibleItems.map((item) => {
               const isActive = item.href === '/dashboard' 
