@@ -91,14 +91,43 @@ export async function POST(request: Request) {
     if (body.username && body.password) {
       const salt = bcrypt.genSaltSync(10);
       const passwordHash = bcrypt.hashSync(body.password, salt);
-      await supabase.from('users').insert([{
-        id: `usr_${Date.now()}`,
-        username: body.username.trim(),
-        passwordHash: passwordHash,
-        role: body.role === 'Manager' ? 'Manager' : 'Staff',
-        createdBy: adminUsername,
-        createdAt: new Date().toISOString()
-      }]);
+      const staffRole = body.role === 'Manager' ? 'Manager' : 'Staff';
+      const staffUsername = body.username.trim();
+      const staffEmail = staffUsername.includes('@') ? staffUsername : `${staffUsername}@farm.local`;
+
+      try {
+        await supabase.from('users').insert([{
+          id: `usr_${Date.now()}`,
+          username: staffUsername,
+          passwordHash: passwordHash,
+          role: staffRole,
+          createdBy: adminUsername,
+          createdAt: new Date().toISOString()
+        }]);
+      } catch (_e) {}
+
+      try {
+        const { supabase: adminClient } = await import('@/lib/supabase');
+        const { data: usersData } = await adminClient.auth.admin.listUsers();
+        const existingAuth = usersData?.users.find(u => u.email?.toLowerCase() === staffEmail.toLowerCase());
+
+        if (existingAuth) {
+          await adminClient.auth.admin.updateUserById(existingAuth.id, {
+            password: body.password,
+            email_confirm: true,
+            user_metadata: { role: staffRole }
+          });
+        } else {
+          await adminClient.auth.admin.createUser({
+            email: staffEmail,
+            password: body.password,
+            email_confirm: true,
+            user_metadata: { role: staffRole }
+          });
+        }
+      } catch (_authErr) {
+        console.error('Supabase Auth sync error:', _authErr);
+      }
     }
     
     await supabase.from('alertLogs').insert([{
