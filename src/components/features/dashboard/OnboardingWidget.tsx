@@ -123,7 +123,7 @@ export function OnboardingWidget({
       </div>
 
       {/* Progress Bar Segment */}
-      <div className="py-4 border-b border-slate-800">
+      <div className="pt-4">
         <div className="flex justify-between text-[11px] font-bold text-slate-400 mb-2">
           <span>Overall Setup Progress</span>
           <span className="text-indigo-400 font-mono">{progressPercent}%</span>
@@ -134,56 +134,6 @@ export function OnboardingWidget({
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-      </div>
-
-      {/* 4 Interactive Step Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-5">
-        {steps.map((step) => (
-          <div
-            key={step.id}
-            onClick={() => onOpenStep(step.id)}
-            className={`p-4 rounded-sm border transition-all cursor-pointer flex flex-col justify-between ${
-              step.isDone
-                ? 'bg-slate-800/50 border-emerald-500/40 text-slate-300 hover:border-emerald-500'
-                : step.id === nextPendingStep.id
-                ? 'bg-indigo-950/60 border-indigo-500 text-white'
-                : 'bg-slate-800/30 border-slate-800 text-slate-400 hover:border-slate-700'
-            }`}
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-sm ${
-                  step.isDone 
-                    ? 'bg-emerald-500/20 text-emerald-400' 
-                    : step.id === nextPendingStep.id 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-slate-800 text-slate-500'
-                }`}>
-                  <step.icon size={16} />
-                </div>
-                {step.isDone ? (
-                  <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-sm">
-                    <CheckCircle2 size={12} /> Done
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-sm">
-                    <Circle size={12} /> Step {step.id}
-                  </span>
-                )}
-              </div>
-
-              <h4 className="text-xs font-bold text-white tracking-wide">{step.title}</h4>
-              <p className="text-[11px] text-slate-400 mt-1 leading-snug">{step.desc}</p>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] font-bold">
-              <span className={step.isDone ? 'text-emerald-400' : 'text-indigo-400'}>
-                {step.isDone ? 'Completed' : step.actionText}
-              </span>
-              <ArrowRight size={14} className={step.isDone ? 'text-emerald-400' : 'text-indigo-400'} />
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
