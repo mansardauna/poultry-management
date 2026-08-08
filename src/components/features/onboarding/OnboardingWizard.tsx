@@ -34,6 +34,81 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
   const [staffUsername, setStaffUsername] = useState('');
   const [staffPassword, setStaffPassword] = useState('');
 
+  // Pre-populate Step 1 from active workspace if available
+  React.useEffect(() => {
+    if (!branchName && workspaces.length > 0) {
+      setBranchName(workspaces[0].name || '');
+      setBranchType(workspaces[0].type || 'Layer Farm');
+      setCreatedBranchId(workspaces[0].id);
+    }
+  }, [workspaces]);
+
+  // Pre-populate Step 2 & Step 3 from database & localStorage draft
+  React.useEffect(() => {
+    try {
+      const draftStr = localStorage.getItem('pfms_onboarding_draft');
+      if (draftStr) {
+        const d = JSON.parse(draftStr);
+        if (d.branchName && !branchName) setBranchName(d.branchName);
+        if (d.branchType && !branchType) setBranchType(d.branchType);
+        if (d.breed && !breed) setBreed(d.breed);
+        if (d.flockQty && !flockQty) setFlockQty(d.flockQty);
+        if (d.flockType && !flockType) setFlockType(d.flockType);
+        if (d.flockAge && !flockAge) setFlockAge(d.flockAge);
+        if (d.staffName && !staffName) setStaffName(d.staffName);
+        if (d.staffRole && !staffRole) setStaffRole(d.staffRole);
+        if (d.staffSalary && !staffSalary) setStaffSalary(d.staffSalary);
+        if (d.staffUsername && !staffUsername) setStaffUsername(d.staffUsername);
+        if (d.staffPassword && !staffPassword) setStaffPassword(d.staffPassword);
+      }
+    } catch (_e) {}
+
+    fetch('/api/batches')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const b = data[0];
+          setBreed(prev => prev || b.breed || '');
+          setFlockQty(prev => prev || String(b.quantity || ''));
+          setFlockType(prev => prev || b.type || 'Layers');
+          setFlockAge(prev => prev || String(b.ageInWeeks || ''));
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/staff')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const s = data[0];
+          setStaffName(prev => prev || s.name || '');
+          setStaffRole(prev => prev || s.role || 'Attendant');
+          setStaffSalary(prev => prev || String(s.salary || '45000'));
+          setStaffUsername(prev => prev || s.username || '');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Save form drafts to localStorage continuously
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('pfms_onboarding_draft', JSON.stringify({
+        branchName,
+        branchType,
+        breed,
+        flockQty,
+        flockType,
+        flockAge,
+        staffName,
+        staffRole,
+        staffSalary,
+        staffUsername,
+        staffPassword
+      }));
+    } catch (_e) {}
+  }, [branchName, branchType, breed, flockQty, flockType, flockAge, staffName, staffRole, staffSalary, staffUsername, staffPassword]);
+
   const handleClose = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('pfms_onboarded_dismissed', 'true');
@@ -274,7 +349,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                   disabled={isSaving || !branchName.trim()}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
-                  Create Branch <ChevronRight size={16} />
+                  Next <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -348,7 +423,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                   disabled={isSaving || !breed || !flockQty}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
-                  Register Flock <ChevronRight size={16} />
+                  Next <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -431,7 +506,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                   disabled={isSaving || !staffName || !staffUsername || !staffPassword}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
-                  Save Staff <ChevronRight size={16} />
+                  Next <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -476,7 +551,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                   onClick={handleClose}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider w-full py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 cursor-pointer transition-all"
                 >
-                  Launch My Dashboard <ChevronRight size={18} />
+                  Submit & Complete Setup <ChevronRight size={18} />
                 </button>
               </div>
             </div>
