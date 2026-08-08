@@ -57,6 +57,14 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
     }
   }
 
+  // Fallback to platform public keys if farm admin has not specified custom keys
+  if (!paystackPublicKey) {
+    paystackPublicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_3793f0a514d7924ef937e0e47089eeaa1a15f019';
+  }
+  if (!stripePublicKey) {
+    stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51OaL9pDjqS5IbRFu2ph5BzeDGGJ523QU4qr26XoSffgUqMySKyRsOvtsQzz47bPxmXzGytICrR9mlEIEvKL8KhML00bAJVhjNL';
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center font-sans">
       <div className="max-w-xl w-full">
