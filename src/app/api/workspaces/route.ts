@@ -14,32 +14,72 @@ export async function GET(request: Request) {
   const orgIdMatch = request.headers.get('cookie')?.match(/pfms_org_id=([^;]+)/);
   let orgId = orgIdMatch ? orgIdMatch[1] : '';
 
+  const userEmail = user.email || '';
+  const userClean = userEmail.split('@')[0];
+
+  // 1. Check if user is a Staff or Manager with assigned workspace / branches
+  const { data: staffRec } = await supabase
+    .from('staff')
+    .select('workspaceId, assignedBranches')
+    .or(`name.eq.${userEmail},contact.eq.${userEmail},name.eq.${userClean}`)
+    .limit(1)
+    .maybeSingle();
+
+  const { data: userRec } = await supabase
+    .from('users')
+    .select('workspaceId, role')
+    .or(`username.eq.${userClean},email.eq.${userEmail}`)
+    .limit(1)
+    .maybeSingle();
+
+  const targetWsId = staffRec?.assignedBranches?.[0] || staffRec?.workspaceId || userRec?.workspaceId;
+  const isStaffOrManager = user.role === 'Staff' || user.role === 'Manager' || userRec?.role === 'Staff' || userRec?.role === 'Manager';
+
+  if (targetWsId) {
+    const { data: assignedWorkspaces } = await supabase
+      .from('workspaces')
+      .select('*')
+      .or(`id.eq.${targetWsId},id.like.%${targetWsId}%`);
+
+    if (assignedWorkspaces && assignedWorkspaces.length > 0) {
+      return NextResponse.json(assignedWorkspaces);
+    }
+  }
+
   if (!orgId) {
     const { data: memberData } = await supabase
       .from('organization_members')
       .select('orgId')
       .eq('userId', user.id)
       .limit(1)
-      .single();
+      .maybeSingle();
     if (memberData?.orgId) {
       orgId = memberData.orgId;
     }
   }
 
-  const owner = (user.email?.split('@')[0] || 'admin').toLowerCase();
+  const owner = userClean.toLowerCase();
 
   let query = supabase.from('workspaces').select('*');
 
   if (orgId) {
     query = query.like('id', `%${orgId}%`);
-  } else {
+  } else if (!isStaffOrManager) {
     query = query.eq('ownerUsername', owner);
   }
 
-  const { data: workspaces } = await query;
+  let { data: workspaces } = await query;
+
+  // 2. Fallback for Staff/Manager: If still empty, return ALL existing farm workspaces
+  if ((!workspaces || workspaces.length === 0) && isStaffOrManager) {
+    const { data: allWorkspaces } = await supabase.from('workspaces').select('*').order('createdAt', { ascending: true });
+    if (allWorkspaces && allWorkspaces.length > 0) {
+      return NextResponse.json(allWorkspaces);
+    }
+  }
 
   if (!workspaces || workspaces.length === 0) {
-    // Automatically initialize a clean, isolated branch for this user
+    // Automatically initialize a clean, isolated branch ONLY for new admins/owners
     const isolatedId = orgId ? `main-${orgId}` : `ws_${user.id.replace(/-/g, '')}`;
     const defaultBranch = {
       id: isolatedId,

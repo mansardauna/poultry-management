@@ -135,19 +135,20 @@ export async function POST(request: Request) {
     const user = authResult.user;
     const userId = user.id;
     const userRole = user.user_metadata?.role || (emailInput === 'owner@poultry.com' ? 'Admin' : 'Staff');
+    const userClean = emailInput.split('@')[0];
 
     // Reject deleted staff/manager accounts
     if (userRole === 'Staff' || userRole === 'Manager') {
       const { data: userRecs } = await adminClient
         .from('users')
         .select('id')
-        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()}`)
+        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()},username.eq.${userClean}`)
         .limit(1);
 
       const { data: staffRecs } = await adminClient
         .from('staff')
         .select('id')
-        .or(`name.eq.${emailInput},contact.eq.${emailInput}`)
+        .or(`name.eq.${emailInput},contact.eq.${emailInput},username.eq.${userClean}`)
         .limit(1);
 
       if ((!userRecs || userRecs.length === 0) && (!staffRecs || staffRecs.length === 0)) {
@@ -158,35 +159,31 @@ export async function POST(request: Request) {
       }
     }
 
-    let orgId = 'org_owner_main';
-    if (user.email === 'owner@poultry.com') {
-      await adminClient.from('organization_members').upsert({ orgId, userId, role: 'Admin' });
-    } else {
-      const { data: memberData } = await adminClient.from('organization_members').select('orgId').eq('userId', userId).maybeSingle();
-      orgId = memberData?.orgId || `org_${userId.replace(/-/g, '').slice(0, 10)}`;
+    // Check metadata first for staff assigned workspace
+    let targetWorkspaceId = user.user_metadata?.workspaceId || '';
+
+    // Look up staff member's assigned farm workspace ID from staff table
+    if (!targetWorkspaceId) {
+      const { data: staffMember } = await adminClient
+        .from('staff')
+        .select('workspaceId, assignedBranches')
+        .or(`username.eq.${userClean},name.eq.${emailInput},contact.eq.${emailInput},name.eq.${userClean}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (staffMember?.assignedBranches && Array.isArray(staffMember.assignedBranches) && staffMember.assignedBranches.length > 0) {
+        targetWorkspaceId = staffMember.assignedBranches[0];
+      } else if (staffMember?.workspaceId) {
+        targetWorkspaceId = staffMember.workspaceId;
+      }
     }
 
-    let targetWorkspaceId = user.email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-${orgId}`;
-
-    // Look up staff member's assigned farm workspace ID
-    const { data: staffMember } = await adminClient
-      .from('staff')
-      .select('workspaceId, assignedBranches')
-      .or(`name.eq.${emailInput},contact.eq.${emailInput}`)
-      .limit(1)
-      .maybeSingle();
-
-    if (staffMember?.assignedBranches && Array.isArray(staffMember.assignedBranches) && staffMember.assignedBranches.length > 0) {
-      targetWorkspaceId = staffMember.assignedBranches[0];
-    } else if (staffMember?.workspaceId) {
-      targetWorkspaceId = staffMember.workspaceId;
-    }
-
-    if (!staffMember && emailInput) {
+    // Look up workspaceId from users table
+    if (!targetWorkspaceId) {
       const { data: userRec } = await adminClient
         .from('users')
         .select('workspaceId')
-        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()}`)
+        .or(`username.eq.${userClean},username.eq.${emailInput},email.eq.${emailInput}`)
         .limit(1)
         .maybeSingle();
 
@@ -195,8 +192,25 @@ export async function POST(request: Request) {
       }
     }
 
-    // Fallback: If target workspace ID has no data, bind to primary workspace in system
-    if (targetWorkspaceId.startsWith('main-org_usr_') || targetWorkspaceId.startsWith('main-org_')) {
+    let orgId = 'org_owner_main';
+    if (user.email === 'owner@poultry.com') {
+      await adminClient.from('organization_members').upsert({ orgId, userId, role: 'Admin' });
+    } else {
+      const { data: memberData } = await adminClient.from('organization_members').select('orgId').eq('userId', userId).maybeSingle();
+      if (memberData?.orgId) {
+        orgId = memberData.orgId;
+      } else if (userRole === 'Admin') {
+        orgId = `org_${userId.replace(/-/g, '').slice(0, 10)}`;
+      }
+    }
+
+    if (!targetWorkspaceId) {
+      targetWorkspaceId = user.email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-${orgId}`;
+    }
+
+    // Fallback: Verify that targetWorkspaceId exists in workspaces table
+    const { data: validWs } = await adminClient.from('workspaces').select('id').eq('id', targetWorkspaceId).maybeSingle();
+    if (!validWs) {
       const { data: mainWs } = await adminClient.from('workspaces').select('id').order('createdAt', { ascending: true }).limit(1);
       if (mainWs && mainWs.length > 0) {
         targetWorkspaceId = mainWs[0].id;

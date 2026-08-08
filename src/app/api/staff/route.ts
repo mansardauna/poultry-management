@@ -78,10 +78,13 @@ export async function POST(request: Request) {
       ? body.assignedBranches
       : (workspaceId ? [workspaceId] : []);
 
+    const staffUsername = body.username ? body.username.trim() : body.name?.toLowerCase().replace(/\s+/g, '');
+
     const newStaff = {
       id: 's' + Date.now().toString().slice(-8),
       workspaceId,
       name: body.name,
+      username: staffUsername,
       role: body.role || 'Staff',
       salary: Number(body.salary) || 0,
       attendanceDays: Number(body.attendanceDays) || 0,
@@ -96,7 +99,6 @@ export async function POST(request: Request) {
       const salt = bcrypt.genSaltSync(10);
       const passwordHash = bcrypt.hashSync(body.password, salt);
       const staffRole = body.role === 'Manager' ? 'Manager' : 'Staff';
-      const staffUsername = body.username.trim();
       const staffEmail = staffUsername.includes('@') ? staffUsername : `${staffUsername}@farm.local`;
 
       try {
@@ -120,14 +122,14 @@ export async function POST(request: Request) {
           await adminClient.auth.admin.updateUserById(existingAuth.id, {
             password: body.password,
             email_confirm: true,
-            user_metadata: { role: staffRole }
+            user_metadata: { role: staffRole, workspaceId: workspaceId, username: staffUsername }
           });
         } else {
           await adminClient.auth.admin.createUser({
             email: staffEmail,
             password: body.password,
             email_confirm: true,
-            user_metadata: { role: staffRole }
+            user_metadata: { role: staffRole, workspaceId: workspaceId, username: staffUsername }
           });
         }
       } catch (_authErr) {
