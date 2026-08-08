@@ -74,15 +74,19 @@ export async function POST(request: Request) {
     const user = await getAuthUser();
     const adminUsername = user?.email?.split('@')[0] || 'admin';
 
+    const assignedBranchList = (Array.isArray(body.assignedBranches) && body.assignedBranches.length > 0)
+      ? body.assignedBranches
+      : (workspaceId ? [workspaceId] : []);
+
     const newStaff = {
       id: 's' + Date.now().toString().slice(-8),
       workspaceId,
       name: body.name,
-      role: body.role,
-      salary: Number(body.salary),
+      role: body.role || 'Staff',
+      salary: Number(body.salary) || 0,
       attendanceDays: Number(body.attendanceDays) || 0,
       contact: body.contact || '',
-      assignedBranches: body.assignedBranches || []
+      assignedBranches: assignedBranchList
     };
     
     await supabase.from('staff').insert([newStaff]);

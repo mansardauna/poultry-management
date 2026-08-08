@@ -52,11 +52,17 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
   const [tasks, setTasks] = useState<StaffTask[]>(initialTasks);
   const [payrollLogs, setPayrollLogs] = useState<PayrollLog[]>([]);
 
+  const { workspaces, activeWorkspace } = useWorkspace();
+
   const handleOpen = () => {
     if (tier === 'free' && staff.length >= 2) {
       toast.error('Free plan is limited to 2 staff members. Upgrade to Commercial Pro for unlimited staff!');
       router.push('/dashboard/settings');
       return;
+    }
+    if (assignedBranches.length === 0 && workspaces.length > 0) {
+      const defaultWsId = activeWorkspace?.id || workspaces[0]?.id;
+      if (defaultWsId) setAssignedBranches([defaultWsId]);
     }
     setOpen(true);
   };
@@ -85,7 +91,6 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
   const [assignedBranches, setAssignedBranches] = useState<string[]>([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { workspaces } = useWorkspace();
 
   // Assign Task Form
   const [taskName, setTaskName] = useState('');
