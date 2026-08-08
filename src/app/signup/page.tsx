@@ -120,28 +120,40 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-4xl flex bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200 min-h-[500px]">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900/5 p-4 sm:p-6 lg:p-10 font-sans">
+      <div className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1400px] flex bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 min-h-[600px] md:min-h-[680px] lg:min-h-[740px]">
         {/* Left Side: Illustration */}
-        <div className="hidden md:flex md:w-1/2 relative bg-indigo-50 border-r border-slate-100 items-center justify-center">
+        <div className="hidden md:flex md:w-1/2 lg:w-[55%] relative bg-slate-950 border-r border-slate-100 items-center justify-center overflow-hidden">
           <Image 
             src="/login_illustration.png" 
-            alt="Peaceful Poultry Farm Illustration" 
+            alt="Poultry Farm Management System" 
             fill 
-            className="object-cover"
+            className="object-cover transition-transform duration-700 hover:scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+          
+          <div className="absolute bottom-10 left-10 right-10 text-white z-10 space-y-2 backdrop-blur-md bg-slate-950/40 p-6 rounded-2xl border border-white/10">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-500/30">
+              Start Commercial Management
+            </span>
+            <h2 className="text-2xl lg:text-3xl font-extrabold tracking-wide text-white">
+              Initialize Your Poultry Farm
+            </h2>
+            <p className="text-xs lg:text-sm text-slate-300 font-medium">
+              Join thousands of commercial farm owners managing multi-section flocks, egg production, and financial accounting.
+            </p>
+          </div>
         </div>
         
         {/* Right Side: Signup Form */}
-        <div className="w-full md:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white relative">
-          <Suspense fallback={<div className="text-center p-8 text-slate-500">Loading signup...</div>}>
+        <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
+          <Suspense fallback={<div className="text-center p-8 text-slate-500 font-medium">Loading signup...</div>}>
             <SignupForm />
           </Suspense>
           
-          <div className="mt-8 text-center text-xs text-slate-400 font-medium">
-            <p>&copy; 2026 Poultry Farms. All rights reserved.</p>
+          <div className="pt-8 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 mt-6">
+            <p>&copy; 2026 Poultry Farm Management System. All rights reserved.</p>
           </div>
         </div>
       </div>

@@ -79,93 +79,108 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 font-sans">
-      <div className="w-full max-w-4xl flex bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200 min-h-[500px]">
-        {/* Left Side: Illustration */}
-        <div className="hidden md:flex md:w-1/2 relative bg-indigo-50 border-r border-slate-100 items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900/5 p-4 sm:p-6 lg:p-10 font-sans">
+      <div className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1400px] flex bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 min-h-[600px] md:min-h-[680px] lg:min-h-[740px]">
+        {/* Left Side: Rich Hero Illustration */}
+        <div className="hidden md:flex md:w-1/2 lg:w-[55%] relative bg-slate-950 border-r border-slate-100 items-center justify-center overflow-hidden">
           <Image 
             src="/login_illustration.png" 
-            alt="Peaceful Poultry Farm Illustration" 
+            alt="Poultry Farm Management System" 
             fill 
-            className="object-cover"
+            className="object-cover transition-transform duration-700 hover:scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+          
+          <div className="absolute bottom-10 left-10 right-10 text-white z-10 space-y-2 backdrop-blur-md bg-slate-950/40 p-6 rounded-2xl border border-white/10">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-500/30">
+              Commercial Farm Operations
+            </span>
+            <h2 className="text-2xl lg:text-3xl font-extrabold tracking-wide text-white">
+              Poultry Farm Management
+            </h2>
+            <p className="text-xs lg:text-sm text-slate-300 font-medium">
+              Multi-branch analytics, flock tracking, egg production logs, and automated feed threshold alerts.
+            </p>
+          </div>
         </div>
         
-        {/* Right Side: Login Form */}
-        <div className="w-full md:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white relative">
-          <div className="mb-8 text-center md:text-left">
-            <h1 className="text-3xl font-bold uppercase tracking-wider text-slate-800 mb-2">
-              Welcome Back
-            </h1>
-            <p className="text-sm font-medium text-indigo-600">Poultry Farm Management System</p>
-          </div>
-          
-          <form onSubmit={handleLogin} className="space-y-5">
-            {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm text-center border border-red-200 font-medium">
-                {error}
-              </div>
-            )}
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Email Address</label>
-                <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  placeholder="Enter your email address"
-                  required
-                />
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">Password</label>
-                  <Link
-                    href={email ? `/reset-password?email=${encodeURIComponent(email)}` : '/reset-password'}
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
-                  placeholder="Enter your password"
-                  required
-                />
-                <button 
-                  type="button" 
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[34px] text-slate-400 hover:text-indigo-600 transition-colors p-1"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+        {/* Right Side: Wider Login Form */}
+        <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
+          <div>
+            <div className="mb-10 text-center md:text-left">
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">Enterprise Control Portal</span>
+              <h1 className="text-3xl lg:text-4xl font-extrabold uppercase tracking-tight text-slate-900 mt-1 mb-2">
+                Welcome Back
+              </h1>
+              <p className="text-sm font-medium text-slate-500">Sign in to manage your farm branches & operations.</p>
             </div>
+            
+            <form onSubmit={handleLogin} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm text-center border border-red-200 font-semibold shadow-sm">
+                  {error}
+                </div>
+              )}
+              
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2">Email Address or Username</label>
+                  <input 
+                    type="text" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border-2 border-slate-200 rounded-xl p-4 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
+                    placeholder="e.g. owner@poultry.com or username"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700">Password</label>
+                    <Link
+                      href={email ? `/reset-password?email=${encodeURIComponent(email)}` : '/reset-password'}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full border-2 border-slate-200 rounded-xl p-4 pr-14 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-[42px] text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
 
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="w-full bg-indigo-600 text-white font-bold text-sm py-3.5 mt-2 rounded-lg uppercase tracking-wider hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-md shadow-indigo-200"
-            >
-              {isSubmitting ? 'Authenticating…' : 'Secure Login'}
-            </button>
-          </form>
-          
-          <div className="text-center mt-6 relative z-10">
-            <Link href="/signup" className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer block p-2">
-              Don't have an account? Sign up here
-            </Link>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm py-4 mt-4 rounded-xl uppercase tracking-wider transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
+              >
+                {isSubmitting ? 'Authenticating…' : 'Secure Login'}
+              </button>
+            </form>
+            
+            <div className="text-center mt-8">
+              <Link href="/signup" className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer inline-block p-2">
+                Don't have an account? Sign up here &rarr;
+              </Link>
+            </div>
           </div>
-          
-          <div className="mt-8 text-center text-xs text-slate-400 font-medium">
-            <p>&copy; 2026 Poultry Farms Management. All rights reserved.</p>
+
+          <div className="pt-8 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 mt-6">
+            <p>&copy; 2026 Poultry Farm Management System. All rights reserved.</p>
           </div>
         </div>
       </div>

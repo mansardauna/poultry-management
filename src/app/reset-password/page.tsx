@@ -64,13 +64,13 @@ function ResetPasswordForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl overflow-hidden border border-slate-200 p-8 sm:p-10 space-y-6">
-      <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center shadow-sm">
-          <KeyRound size={24} />
+    <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 p-8 sm:p-12 lg:p-14 space-y-8">
+      <div className="text-center space-y-3">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center shadow-sm border border-indigo-100">
+          <KeyRound size={32} />
         </div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Reset Your Password</h1>
-        <p className="text-xs text-slate-500">Enter your email and set your new secure password.</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Reset Your Password</h1>
+        <p className="text-sm text-slate-500 font-medium">Enter your account email and specify your new password below.</p>
       </div>
 
       {isSuccess ? (
