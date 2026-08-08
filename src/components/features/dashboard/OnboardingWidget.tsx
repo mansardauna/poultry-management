@@ -9,13 +9,15 @@ interface OnboardingWidgetProps {
   batchesCount: number;
   staffCount: number;
   onOpenStep: (stepNumber: number) => void;
+  userRole?: string;
 }
 
 export function OnboardingWidget({
   workspacesCount,
   batchesCount,
   staffCount,
-  onOpenStep
+  onOpenStep,
+  userRole = 'Admin'
 }: OnboardingWidgetProps) {
   const [guideRead, setGuideRead] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -26,6 +28,8 @@ export function OnboardingWidget({
       setIsDismissed(localStorage.getItem('pfms_widget_dismissed') === 'true');
     }
   }, []);
+
+  if (userRole !== 'Admin') return null;
 
   const step1Done = workspacesCount > 0;
   const step2Done = batchesCount > 0;

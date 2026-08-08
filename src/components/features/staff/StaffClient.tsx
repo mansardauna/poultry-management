@@ -529,14 +529,19 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             onChange={(e) => setName(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-          <TextField
-            label="Role (e.g. Farm Attendant)"
-            fullWidth
-            variant="outlined"
-            value={staffRole}
-            onChange={(e) => setStaffRole(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
-          />
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="staff-role-select-label">Access Role</InputLabel>
+            <Select
+              labelId="staff-role-select-label"
+              label="Access Role"
+              value={staffRole || 'Staff'}
+              onChange={(e) => setStaffRole(e.target.value)}
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="Staff">Staff (Farm Attendant)</MenuItem>
+              <MenuItem value="Manager">Manager (Farm Operations)</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             label="Monthly Salary (₦)"
             type="number"

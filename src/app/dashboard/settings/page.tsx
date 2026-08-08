@@ -53,5 +53,6 @@ export default async function SettingsPage() {
     initialSubscriptionHistory={subscriptionHistory}
     workspaces={workspaces} 
     workspaceId={workspaceId} 
+    role={role}
   />;
 }

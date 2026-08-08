@@ -44,13 +44,14 @@ import {
  */
 interface DashboardClientProps {
   initialData: DatabaseSchema;
+  userRole?: string;
 }
 
 /**
  * Client component for the main dashboard view.
  * @param {DashboardClientProps} props - The component props.
  */
-export function DashboardClient({ initialData }: DashboardClientProps) {
+export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardClientProps) {
   const [data, setData] = useState<DatabaseSchema>(initialData);
   const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
   const { activeWorkspace, workspaces } = useWorkspace();
@@ -319,6 +320,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         batchesCount={data.batches.length}
         staffCount={data.staff.length}
         onOpenStep={(stepNum) => setOnboardingStep(stepNum)}
+        userRole={userRole}
       />
 
       {onboardingStep !== null && (

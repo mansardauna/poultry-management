@@ -64,6 +64,7 @@ interface SettingsClientProps {
   initialSubscriptionHistory?: any[];
   workspaces: Workspace[];
   workspaceId: string;
+  role?: string;
 }
 
 /**
@@ -71,13 +72,13 @@ interface SettingsClientProps {
  *
  * @param props - Component properties.
  */
-export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId }: SettingsClientProps) {
+export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin' }: SettingsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   
   const [activeTab, setActiveTab] = useState<'profile' | 'alerts' | 'gateways' | 'subscription'>(
-    tabParam === 'subscription' || tabParam === 'billing' ? 'subscription' : 'subscription'
+    role === 'Staff' ? 'profile' : (tabParam === 'subscription' || tabParam === 'billing' ? 'subscription' : 'subscription')
   );
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
@@ -382,26 +383,30 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           </div>
         </div>
 
-        <button
-          onClick={() => setShowUpgradeModal(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2"
-        >
-          <Sparkles size={16} /> Upgrade Plan
-        </button>
+        {role === 'Admin' && (
+          <button
+            onClick={() => setShowUpgradeModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2"
+          >
+            <Sparkles size={16} /> Upgrade Plan
+          </button>
+        )}
       </div>
 
       {/* Navigation Tabs */}
       <div className="flex border-b border-slate-200 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('subscription')}
-          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-            activeTab === 'subscription' 
-              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <DollarSign size={16} /> My Subscription & Billing
-        </button>
+        {role !== 'Staff' && (
+          <button
+            onClick={() => setActiveTab('subscription')}
+            className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+              activeTab === 'subscription' 
+                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <DollarSign size={16} /> My Subscription & Billing
+          </button>
+        )}
         <button
           onClick={() => setActiveTab('profile')}
           className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
@@ -410,28 +415,32 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <User size={16} /> Farm Profile & Pricing
+          <User size={16} /> {role === 'Staff' ? 'My Profile & Change Password' : 'Farm Profile & Pricing'}
         </button>
-        <button
-          onClick={() => setActiveTab('alerts')}
-          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-            activeTab === 'alerts' 
-              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <BellRing size={16} /> Alert Rules
-        </button>
-        <button
-          onClick={() => setActiveTab('gateways')}
-          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-            activeTab === 'gateways' 
-              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <CreditCard size={16} /> Payment Gateway Keys
-        </button>
+        {role !== 'Staff' && (
+          <>
+            <button
+              onClick={() => setActiveTab('alerts')}
+              className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                activeTab === 'alerts' 
+                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <BellRing size={16} /> Alert Rules
+            </button>
+            <button
+              onClick={() => setActiveTab('gateways')}
+              className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                activeTab === 'gateways' 
+                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <CreditCard size={16} /> Payment Gateway Keys
+            </button>
+          </>
+        )}
       </div>
 
       {/* Tab 1: Subscription & Billing Dashboard (Inspired by Reference UI) */}

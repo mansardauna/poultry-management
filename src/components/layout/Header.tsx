@@ -345,7 +345,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
             </span>
           </div>
         ) : (
-          currentTier === 'free' && (
+          role === 'Admin' && currentTier === 'free' && (
             <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
               <button
                 onClick={() => router.push('/dashboard/settings?tab=subscription')}

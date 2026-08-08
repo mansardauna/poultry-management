@@ -104,6 +104,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
 
   return (
     <DashboardClient
+      userRole={user?.role || 'Admin'}
       initialData={{
         batches: batches as ChickenBatch[],
         eggs: eggs as EggRecord[],
