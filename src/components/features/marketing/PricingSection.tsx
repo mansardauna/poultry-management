@@ -47,7 +47,7 @@ const DEFAULT_PLANS: SaasPlan[] = [
   },
   {
     id: 'enterprise',
-    name: 'Enterprise & Coop',
+    name: 'Enterprise Plus',
     description: 'Multi-farm enterprises & agricultural cooperatives.',
     priceMonthly: 45000,
     priceAnnual: 432000,

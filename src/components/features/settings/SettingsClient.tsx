@@ -480,15 +480,15 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           </Card>
 
           {/* Current Plan Summary Box */}
-          <Card className="border-2 border-indigo-200">
+          <Card className="border-2 border-indigo-200 shadow-sm">
             <CardHeader className="border-b border-slate-100 bg-indigo-50/30">
               <CardTitle className="text-sm font-bold uppercase text-slate-800 flex items-center justify-between">
                 <span>Current Active Subscription</span>
-                <span className={`text-xs px-3 py-1 rounded-full font-extrabold uppercase ${
-                  currentTier === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                  currentTier === 'pro' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-800'
+                <span className={`text-xs px-3.5 py-1 rounded-full font-extrabold uppercase ${
+                  currentTier === 'enterprise' ? 'bg-purple-600 text-white shadow-sm' :
+                  currentTier === 'pro' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-200 text-slate-800'
                 }`}>
-                  {currentTier === 'enterprise' ? 'Enterprise Cooperative' : currentTier === 'pro' ? 'Commercial Pro' : 'Free Starter'}
+                  {currentTier === 'enterprise' ? 'Enterprise Plus' : currentTier === 'pro' ? 'Commercial Pro' : 'Free Starter'}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -503,9 +503,9 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   </div>
                   <p className="text-xs text-slate-600 mt-2 max-w-lg leading-relaxed">
                     {currentTier === 'enterprise' 
-                      ? 'Includes Multi-Farm Enterprise Hub, White-Label Cooperative Portal, 24/7 Consultant Support, Custom API & Logistics.'
+                      ? 'Enterprise Plus includes Multi-Farm Enterprise Hub, White-Label Cooperative Portal, 24/7 Consultant Support, Custom API & Logistics.'
                       : currentTier === 'pro'
-                      ? 'Includes AI Voice Auto-Logger, CCTV Live Surveillance, PDF/Excel Exports, and Unlimited Branches & Staff.'
+                      ? 'Commercial Pro includes AI Voice Auto-Logger, CCTV Live Surveillance, PDF/Excel Exports, and Unlimited Branches & Staff.'
                       : 'Free Starter Plan includes up to 1 branch, 2 staff members, and basic flock logs.'}
                   </p>
                 </div>
@@ -513,7 +513,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                   <button
                     onClick={() => setShowUpgradeModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl shadow-md transition-colors cursor-pointer whitespace-nowrap"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
                   >
                     {currentTier === 'free' ? 'Upgrade Plan' : 'Manage / Change Tier'}
                   </button>
@@ -545,183 +545,6 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Real Dynamic Payment Methods Card */}
-          <Card>
-            <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
-                  <CreditCard size={18} className="text-indigo-600" /> Saved Payment Methods (Auto-Billing)
-                </CardTitle>
-                <p className="text-[11px] text-slate-500 mt-0.5">Save up to 3 cards or digital wallets. Active default method is auto-billed monthly.</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
-                  {paymentMethods.length}/3 Saved
-                </span>
-                <button
-                  disabled={paymentMethods.length >= 3}
-                  onClick={() => setOpenAddCardModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus size={14} /> Add Payment Method
-                </button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              {/* Auto-Debit Active Status Banner */}
-              <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl flex items-center justify-between mb-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0">
-                    <Zap size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Automated Recurring Subscription Active</h4>
-                    <p className="text-[11px] text-slate-600">
-                      Your default active card is set to automatically renew your subscription monthly. No manual payments required.
-                    </p>
-                  </div>
-                </div>
-                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-emerald-300 flex-shrink-0">
-                  Auto-Renewal Active
-                </span>
-              </div>
-
-              {paymentMethods.length === 0 ? (
-                <div className="text-center py-8 bg-slate-50/70 border border-dashed border-slate-200 rounded-2xl p-6">
-                  <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CreditCard size={24} />
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-800">No Saved Payment Methods</h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4 leading-relaxed">
-                    Save up to 3 credit cards, Apple Pay, or Google Pay. The active card will auto-bill your subscription monthly.
-                  </p>
-                  <button 
-                    onClick={() => setOpenAddCardModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-colors cursor-pointer inline-flex items-center gap-1.5"
-                  >
-                    <Plus size={16} /> Add Payment Method
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {paymentMethods.map((pm) => (
-                    <div key={pm.id} className={`border p-4 rounded-xl flex items-center justify-between ${
-                      pm.isDefault ? 'border-emerald-300 bg-emerald-50/20 shadow-sm' : 'border-slate-200'
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-8 rounded font-bold text-[10px] flex items-center justify-center uppercase text-white ${
-                          pm.brand === 'Apple Pay' ? 'bg-black' : pm.brand === 'Google Pay' ? 'bg-blue-600' : 'bg-slate-900'
-                        }`}>
-                          {pm.brand || 'Card'}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs font-bold text-slate-900">
-                              {pm.brand || 'Card'} {pm.last4?.length === 4 && !pm.last4?.includes('PAY') ? `ending in •••• ${pm.last4}` : pm.last4}
-                            </p>
-                            {pm.isDefault && (
-                              <span className="text-[9px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                Active Auto-Debit Method
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-slate-500 mt-0.5">
-                            Expires {String(pm.expMonth).padStart(2, '0')}/{String(pm.expYear).slice(-2)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {pm.isDefault ? (
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md border border-emerald-200">
-                            Active Default
-                          </span>
-                        ) : (
-                          <button 
-                            onClick={async () => {
-                              await fetch('/api/settings', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'addPaymentMethod', brand: pm.brand, last4: pm.last4, expMonth: pm.expMonth, expYear: pm.expYear, isDefault: true })
-                              });
-                              setPaymentMethods(prev => prev.map(p => ({ ...p, isDefault: p.id === pm.id })));
-                              toast.success(`Set ${pm.brand} as active auto-debit method`);
-                            }}
-                            className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-md transition-colors cursor-pointer"
-                          >
-                            Set as Active Method
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => handleDeletePaymentMethod(pm.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
-                          title="Remove payment method"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Real Dynamic Subscription History Table */}
-          <Card>
-            <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
-                <Download size={18} className="text-slate-600" /> Subscription History & Receipts
-              </CardTitle>
-            </CardHeader>
-            <CardContent className={subscriptionHistory.length === 0 ? "p-6" : "p-0"}>
-              {subscriptionHistory.length === 0 ? (
-                <div className="text-center py-8 bg-slate-50/70 border border-dashed border-slate-200 rounded-2xl p-6">
-                  <div className="w-12 h-12 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Download size={24} />
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-800">No Subscription History Found</h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 leading-relaxed">
-                    You have no recorded plan transactions yet. Billing receipts and renewal invoices will appear here after your first plan upgrade.
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase font-bold text-slate-500">
-                        <th className="p-4">Date</th>
-                        <th className="p-4">Plan Tier</th>
-                        <th className="p-4">Amount</th>
-                        <th className="p-4">Receipt</th>
-                        <th className="p-4 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                      {subscriptionHistory.map((item) => (
-                        <tr key={item.id}>
-                          <td className="p-4">{new Date(item.createdAt || Date.now()).toLocaleDateString()}</td>
-                          <td className="p-4 font-bold text-indigo-600">{item.planName || item.planId}</td>
-                          <td className="p-4 font-mono font-bold text-slate-900">
-                            {item.currency === 'USD' ? '$' : '₦'}{Number(item.amount || 0).toLocaleString()}
-                          </td>
-                          <td className="p-4 font-mono text-slate-500">#{item.id.slice(-8)}</td>
-                          <td className="p-4 text-right">
-                            <button 
-                              onClick={() => toast.success('Downloading Official Receipt PDF...')}
-                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 inline-flex cursor-pointer"
-                            >
-                              <Download size={12} /> PDF Receipt
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -1060,10 +883,14 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
               </button>
             </div>
 
-            {/* 3. Enterprise & Cooperative Plan */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between shadow-sm relative">
+            {/* 3. Enterprise Plus Plan */}
+            <div className="bg-white border-2 border-purple-500/40 rounded-2xl p-6 flex flex-col justify-between shadow-md relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-lg tracking-widest">
+                PLUS
+              </div>
+
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">Enterprise & Coop</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Enterprise Plus</h3>
                 <p className="text-xs text-slate-500 mb-4 h-10">Multi-farm enterprise hub & white-label cooperative management.</p>
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
@@ -1103,93 +930,10 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 onClick={() => handleInitiateCheckout('enterprise', isAnnual)}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow transition-all cursor-pointer"
               >
-                {currentTier === 'enterprise' ? 'Current Plan (Renew)' : 'Get Enterprise'}
+                {currentTier === 'enterprise' ? 'Current Plan (Renew)' : 'Get Enterprise Plus'}
               </button>
             </div>
 
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Payment Method Modal */}
-      <Dialog 
-        open={openAddCardModal} 
-        onClose={() => setOpenAddCardModal(false)}
-        fullWidth 
-        maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}
-      >
-        <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
-          <h3 className="font-bold text-base flex items-center gap-2">
-            <CreditCard size={18} className="text-indigo-400" /> Save New Payment Method
-          </h3>
-          <button onClick={() => setOpenAddCardModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
-            <X size={18} />
-          </button>
-        </div>
-
-        <DialogContent className="p-6 space-y-4">
-          <p className="text-xs text-slate-500 mb-2">
-            Enter your card details below to save a payment method for plan billing and automated renewals.
-          </p>
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormControl fullWidth size="small">
-              <InputLabel>Payment Network</InputLabel>
-              <Select value={cardBrand} label="Payment Network" onChange={(e) => setCardBrand(e.target.value)}>
-                <MenuItem value="Visa">Visa</MenuItem>
-                <MenuItem value="Mastercard">Mastercard</MenuItem>
-                <MenuItem value="Verve">Verve</MenuItem>
-                <MenuItem value="Apple Pay">Apple Pay 🍎</MenuItem>
-                <MenuItem value="Google Pay">Google Pay G</MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField 
-              label="Last 4 Digits" 
-              placeholder="e.g. 4242" 
-              size="small" 
-              slotProps={{ htmlInput: { maxLength: 4 } }}
-              value={cardLast4} 
-              onChange={(e) => setCardLast4(e.target.value)} 
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <TextField 
-              label="Expiry Month (MM)" 
-              placeholder="12" 
-              size="small" 
-              value={cardExpMonth} 
-              onChange={(e) => setCardExpMonth(e.target.value)} 
-            />
-            <TextField 
-              label="Expiry Year (YYYY)" 
-              placeholder="2028" 
-              size="small" 
-              value={cardExpYear} 
-              onChange={(e) => setCardExpYear(e.target.value)} 
-            />
-          </div>
-
-          <FormControlLabel 
-            control={<Checkbox checked={cardIsDefault} onChange={(e) => setCardIsDefault(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} 
-            label={<span className="text-xs font-semibold text-slate-700">Set as Primary Default Card</span>} 
-          />
-
-          <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
-            <button
-              onClick={() => setOpenAddCardModal(false)}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAddPaymentMethod}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg shadow cursor-pointer"
-            >
-              Save Payment Method
-            </button>
           </div>
         </DialogContent>
       </Dialog>
