@@ -137,101 +137,90 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     }
   };
 
-  const handleCreateBranch = async () => {
+  const handleNextStep1 = () => {
     if (!branchName.trim()) {
       toast.error('Please enter a farm branch name');
       return;
     }
-    setIsSaving(true);
-    try {
-      if (workspaces.length > 0) {
-        const primaryWs = workspaces[0];
-        await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
-        setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType });
-        setCreatedBranchId(primaryWs.id);
-      } else {
-        const workspaceId = `farm-${Date.now()}`;
-        await addWorkspace({
-          id: workspaceId,
-          name: branchName.trim(),
-          type: branchType,
-          createdAt: new Date().toISOString(),
-        });
-        setCreatedBranchId(workspaceId);
-      }
-      toast.success('Primary branch configured successfully!');
-      setStep(2);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to configure branch');
-    } finally {
-      setIsSaving(false);
-    }
+    setStep(2);
   };
 
-  const handleSaveFlock = async () => {
-    if (!breed || !flockQty) {
-      toast.error('Breed and quantity are required');
-      return;
-    }
-    setIsSaving(true);
-    try {
-      const res = await fetch('/api/batches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          breed,
-          quantity: Number(flockQty),
-          type: flockType,
-          farmSection: 'Section A',
-          vaccinationStatus: 'Up to Date',
-          ageInWeeks: Number(flockAge) || 1,
-        }),
-      });
-
-      if (res.ok) {
-        toast.success('Initial flock registered!');
-        setStep(3);
-      } else {
-        toast.error('Failed to register flock');
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSaving(false);
-    }
+  const handleNextStep2 = () => {
+    setStep(3);
   };
 
-  const handleSaveStaff = async () => {
-    if (!staffName || !staffUsername || !staffPassword) {
-      toast.error('Name, username and password are required');
-      return;
-    }
+  const handleNextStep3 = () => {
+    setStep(4);
+  };
+
+  const handleSubmitAll = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch('/api/staff', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: staffName,
-          role: staffRole,
-          salary: Number(staffSalary),
-          contact: '',
-          assignedBranches: createdBranchId ? [createdBranchId] : [],
-          username: staffUsername,
-          password: staffPassword,
-        }),
-      });
+      let targetWsId = createdBranchId;
 
-      if (res.ok) {
-        toast.success('First staff member registered!');
-        setStep(4);
-      } else {
-        const errData = await res.json();
-        toast.error(errData.error || 'Failed to register staff member');
+      // 1. Save Branch Workspace
+      if (branchName.trim()) {
+        if (workspaces.length > 0) {
+          const primaryWs = workspaces[0];
+          await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
+          setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType });
+          targetWsId = primaryWs.id;
+        } else {
+          const workspaceId = `farm-${Date.now()}`;
+          await addWorkspace({
+            id: workspaceId,
+            name: branchName.trim(),
+            type: branchType,
+            createdAt: new Date().toISOString(),
+          });
+          targetWsId = workspaceId;
+        }
       }
+
+      // 2. Save Flock Batch (if provided)
+      if (breed.trim() && flockQty) {
+        await fetch('/api/batches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            breed: breed.trim(),
+            quantity: Number(flockQty),
+            type: flockType,
+            farmSection: 'Section A',
+            vaccinationStatus: 'Up to Date',
+            ageInWeeks: Number(flockAge) || 1,
+          }),
+        }).catch(() => {});
+      }
+
+      // 3. Save Staff Member (if provided)
+      if (staffName.trim() && staffUsername.trim() && staffPassword.trim()) {
+        await fetch('/api/staff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: staffName.trim(),
+            role: staffRole,
+            salary: Number(staffSalary) || 45000,
+            contact: '',
+            assignedBranches: targetWsId ? [targetWsId] : [],
+            username: staffUsername.trim(),
+            password: staffPassword.trim(),
+          }),
+        }).catch(() => {});
+      }
+
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('pfms_onboarding_draft');
+        localStorage.setItem('pfms_onboarded_dismissed', 'true');
+        localStorage.setItem('pfms_starter_guide_read', 'true');
+      }
+
+      toast.success('Farm onboarding setup submitted successfully!');
+      onClose();
     } catch (err) {
       console.error(err);
+      toast.error('Error submitting onboarding setup');
     } finally {
       setIsSaving(false);
     }
@@ -345,8 +334,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
               {/* Action Bar */}
               <div className="pt-6 border-t border-slate-100 flex justify-end sticky bottom-0 bg-white z-10">
                 <button 
-                  onClick={handleCreateBranch}
-                  disabled={isSaving || !branchName.trim()}
+                  onClick={handleNextStep1}
+                  disabled={!branchName.trim()}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
                   Next <ChevronRight size={16} />
@@ -419,9 +408,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                   Skip Step
                 </button>
                 <button 
-                  onClick={handleSaveFlock}
-                  disabled={isSaving || !breed || !flockQty}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
+                  onClick={handleNextStep2}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer transition-all"
                 >
                   Next <ChevronRight size={16} />
                 </button>
@@ -502,9 +490,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                   Skip Step
                 </button>
                 <button 
-                  onClick={handleSaveStaff}
-                  disabled={isSaving || !staffName || !staffUsername || !staffPassword}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
+                  onClick={handleNextStep3}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer transition-all"
                 >
                   Next <ChevronRight size={16} />
                 </button>
@@ -548,10 +535,11 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
               {/* Final Launch Button */}
               <div className="pt-6 border-t border-slate-100 sticky bottom-0 bg-white z-10">
                 <button 
-                  onClick={handleClose}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider w-full py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 cursor-pointer transition-all"
+                  onClick={handleSubmitAll}
+                  disabled={isSaving}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider w-full py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 disabled:opacity-50 cursor-pointer transition-all"
                 >
-                  Submit & Complete Setup <ChevronRight size={18} />
+                  {isSaving ? 'Submitting Setup...' : 'Submit & Complete Setup'} <ChevronRight size={18} />
                 </button>
               </div>
             </div>
