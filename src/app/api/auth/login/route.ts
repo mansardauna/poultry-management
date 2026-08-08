@@ -117,7 +117,7 @@ export async function POST(request: Request) {
           if (!authResult) {
             const response = NextResponse.json({ ok: true, role: staffRole });
             response.cookies.set('pfms_role', staffRole, { path: '/' });
-            response.cookies.set('pfms_workspace', 'main', { path: '/' });
+            response.cookies.set('pfms_workspace', userRec.workspaceId || 'main-org_owner_main', { path: '/' });
             return response;
           }
         }
@@ -144,19 +144,54 @@ export async function POST(request: Request) {
       orgId = memberData?.orgId || `org_${userId.replace(/-/g, '').slice(0, 10)}`;
     }
 
-    const defaultWorkspaceId = user.email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-${orgId}`;
+    let targetWorkspaceId = user.email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-${orgId}`;
+
+    // Look up staff member's assigned farm workspace ID
+    const { data: staffMember } = await adminClient
+      .from('staff')
+      .select('workspaceId, assignedBranches')
+      .or(`name.eq.${emailInput},contact.eq.${emailInput}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (staffMember?.assignedBranches && Array.isArray(staffMember.assignedBranches) && staffMember.assignedBranches.length > 0) {
+      targetWorkspaceId = staffMember.assignedBranches[0];
+    } else if (staffMember?.workspaceId) {
+      targetWorkspaceId = staffMember.workspaceId;
+    }
+
+    if (!staffMember && emailInput) {
+      const { data: userRec } = await adminClient
+        .from('users')
+        .select('workspaceId')
+        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (userRec?.workspaceId) {
+        targetWorkspaceId = userRec.workspaceId;
+      }
+    }
+
+    // Fallback: If target workspace ID has no data, bind to primary workspace in system
+    if (targetWorkspaceId.startsWith('main-org_usr_') || targetWorkspaceId.startsWith('main-org_')) {
+      const { data: mainWs } = await adminClient.from('workspaces').select('id').order('createdAt', { ascending: true }).limit(1);
+      if (mainWs && mainWs.length > 0) {
+        targetWorkspaceId = mainWs[0].id;
+      }
+    }
 
     const { data: sysData } = await adminClient
       .from('systemSettings')
       .select('subscriptionTier, plan')
-      .or(`workspaceId.eq.${defaultWorkspaceId},workspaceId.eq.${orgId}`)
+      .or(`workspaceId.eq.${targetWorkspaceId},workspaceId.eq.${orgId}`)
       .limit(1)
       .maybeSingle();
 
     let tier = sysData?.subscriptionTier || sysData?.plan || (user.email === 'owner@poultry.com' ? 'pro' : 'free');
 
     const response = NextResponse.json({ ok: true, role: userRole });
-    response.cookies.set('pfms_workspace', defaultWorkspaceId, { path: '/' });
+    response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/' });
     response.cookies.set('pfms_org_id', orgId, { path: '/' });
     response.cookies.set('pfms_tier', tier, { path: '/' });
     response.cookies.set('pfms_role', userRole, { path: '/' });

@@ -105,6 +105,7 @@ export async function POST(request: Request) {
           username: staffUsername,
           passwordHash: passwordHash,
           role: staffRole,
+          workspaceId: workspaceId,
           createdBy: adminUsername,
           createdAt: new Date().toISOString()
         }]);
