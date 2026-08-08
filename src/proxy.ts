@@ -56,7 +56,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user) {
-    supabaseResponse.headers.set('x-user-role', user.user_metadata?.role || 'Admin')
+    const isSuperAdminEmail = user.email === 'owner@poultry.com' || user.email === 'superadmin@pfms.com' || user.email === 'admin@example.com';
+    const userRole = isSuperAdminEmail || user.user_metadata?.role === 'SuperAdmin' ? 'SuperAdmin' : (user.user_metadata?.role || 'Admin');
+    supabaseResponse.headers.set('x-user-role', userRole)
     supabaseResponse.headers.set('x-user-email', user.email || '')
     
     // Read organization details from cookies (set during login/signup)

@@ -56,7 +56,7 @@ const menuItems = [
   { name: 'Sales & Invoices', href: '/dashboard/sales', icon: ShoppingCart, roles: ['Admin', 'Manager'] },
   { name: 'Staff Management', href: '/dashboard/staff', icon: Users, roles: ['Admin', 'Manager'] },
   { name: 'Enterprise Hub', href: '/dashboard/enterprise', icon: Building2, roles: ['Admin', 'Manager'] },
-  { name: 'Subscription', href: '/dashboard/admin', icon: ShieldCheck, roles: ['Admin'] },
+  { name: 'Super Admin Portal', href: '/dashboard/admin', icon: ShieldCheck, roles: ['SuperAdmin'] },
   { name: 'CCTV Monitoring', href: '/dashboard/cctv', icon: Video, roles: ['Admin'] },
 ];
 
@@ -167,7 +167,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const { texts } = useLanguage();
 
   const isAdmin = role === 'Admin' || role === 'SuperAdmin';
-  const visibleItems = menuItems.filter(item => item.roles.includes(role) || (role === 'Admin' && item.name === 'Subscription'));
+  const visibleItems = menuItems.filter(item => item.roles.includes(role));
 
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get('onboarding') === 'true';
