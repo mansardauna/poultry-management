@@ -8,11 +8,12 @@ import { useWorkspace } from '../WorkspaceContext';
 
 interface OnboardingWizardProps {
   onClose: () => void;
+  initialStep?: number;
 }
 
-export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
+export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardProps) {
   const { addWorkspace, updateWorkspace, workspaces, setActiveWorkspace } = useWorkspace();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
 
   // Step 1: Workspace/Branch Details
@@ -36,6 +37,7 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
   const handleClose = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('pfms_onboarded_dismissed', 'true');
+      localStorage.setItem('pfms_starter_guide_read', 'true');
     }
     onClose();
   };
@@ -187,7 +189,12 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
                 { s: 3, label: 'Staff Member', icon: User },
                 { s: 4, label: 'Starter Guide', icon: GraduationCap },
               ].map((item) => (
-                <li key={item.s} className="flex items-center gap-3">
+                <li 
+                  key={item.s} 
+                  onClick={() => setStep(item.s)}
+                  className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity"
+                  title={`Jump to Step ${item.s}`}
+                >
                   <div className={`p-2 rounded-xl transition-colors ${
                     step === item.s 
                       ? 'bg-indigo-600 text-white shadow-md' 

@@ -24,6 +24,8 @@ import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useWorkspace } from "../WorkspaceContext";
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
+import { OnboardingWidget } from "./OnboardingWidget";
+import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -50,6 +52,7 @@ interface DashboardClientProps {
  */
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const [data, setData] = useState<DatabaseSchema>(initialData);
+  const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
   const { activeWorkspace, workspaces } = useWorkspace();
   const { texts, language } = useLanguage();
   const { timeRange, filterByTimeRange } = useTimeFilter();
@@ -309,6 +312,24 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             </button>
           </div>
         </div>
+
+      {/* Farm Setup Onboarding Progress Widget */}
+      <OnboardingWidget
+        workspacesCount={workspaces.length}
+        batchesCount={data.batches.length}
+        staffCount={data.staff.length}
+        onOpenStep={(stepNum) => setOnboardingStep(stepNum)}
+      />
+
+      {onboardingStep !== null && (
+        <OnboardingWizard
+          initialStep={onboardingStep}
+          onClose={() => {
+            setOnboardingStep(null);
+            refreshData();
+          }}
+        />
+      )}
 
       {/* Core Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">

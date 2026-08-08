@@ -10,6 +10,12 @@ import { LandingFooter } from '@/components/layout/LandingFooter';
 
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [cms, setCms] = useState({
+    heroHeading: 'AI-Driven poultry farms with human-level precision',
+    heroSubtitle: 'Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.',
+    announcementBanner: '🔥 New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now!',
+    ctaText: 'Get Started Free'
+  });
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -20,6 +26,13 @@ export default function LandingPage() {
       .catch(() => {
         setIsLoggedIn(false);
       });
+
+    fetch('/api/admin/cms')
+      .then(res => res.json())
+      .then(data => {
+        if (data.heroHeading) setCms(data);
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -36,10 +49,10 @@ export default function LandingPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 max-w-4xl mx-auto leading-[1.1]">
-            AI-Driven poultry farms with <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-rose-500">human-level</span> precision
+            {cms.heroHeading}
           </h1>
           <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.
+            {cms.heroSubtitle}
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">

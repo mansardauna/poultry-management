@@ -1,7 +1,8 @@
 'use strict';
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { ShieldAlert, Save, RefreshCw, Layers, CheckCircle, Video, Sparkles, FileSpreadsheet, Building2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -35,17 +36,38 @@ export function AdminCmsClient({
   allHistory?: any[];
   allOrgs?: any[];
 }) {
-  const isSuperAdmin = userRole === 'SuperAdmin' || currentUserEmail === 'superadmin@pfms.com';
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState<'plans' | 'cms' | 'transactions' | 'orgs'>('plans');
+
+  useEffect(() => {
+    if (tabParam === 'cms' || tabParam === 'plans' || tabParam === 'transactions' || tabParam === 'orgs') {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
   const [plans, setPlans] = useState<SaasPlanConfig[]>(initialPlans);
   const [isSaving, setIsSaving] = useState(false);
 
   // Landing Page CMS State
-  const [heroHeading, setHeroHeading] = useState('Smart Poultry Farm Management & AI Telemetry System');
-  const [heroSubtitle, setHeroSubtitle] = useState('Streamline flock health, feed inventory, egg production, CCTV surveillance, and financial reporting across all your farm branches.');
+  const [heroHeading, setHeroHeading] = useState('AI-Driven poultry farms with human-level precision');
+  const [heroSubtitle, setHeroSubtitle] = useState('Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.');
   const [announcementBanner, setAnnouncementBanner] = useState('🔥 New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now!');
   const [supportPhone, setSupportPhone] = useState('+234 800 768 5879');
   const [supportEmail, setSupportEmail] = useState('support@pfms-poultry.com');
+
+  useEffect(() => {
+    fetch('/api/admin/cms')
+      .then(res => res.json())
+      .then(data => {
+        if (data.heroHeading) setHeroHeading(data.heroHeading);
+        if (data.heroSubtitle) setHeroSubtitle(data.heroSubtitle);
+        if (data.announcementBanner) setAnnouncementBanner(data.announcementBanner);
+        if (data.supportPhone) setSupportPhone(data.supportPhone);
+        if (data.supportEmail) setSupportEmail(data.supportEmail);
+      })
+      .catch(() => {});
+  }, []);
 
   const totalRevenue = allHistory.reduce((sum, h) => sum + Number(h.amount || 0), 0);
   const activeProCount = allOrgs.filter(o => o.subscriptionTier === 'pro').length;
@@ -78,7 +100,30 @@ export function AdminCmsClient({
   };
 
   const handleSaveCms = async () => {
-    toast.success('Landing Page CMS content saved & published live!');
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/admin/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          heroHeading,
+          heroSubtitle,
+          announcementBanner,
+          supportPhone,
+          supportEmail
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || 'Landing Page CMS content saved & published live!');
+      } else {
+        toast.error(data.error || 'Failed to save CMS');
+      }
+    } catch {
+      toast.error('Error saving CMS content');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

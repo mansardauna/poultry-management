@@ -27,7 +27,8 @@ import {
   Pencil,
   Trash2,
   Building2,
-  ShieldCheck
+  ShieldCheck,
+  Layout
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
@@ -57,6 +58,7 @@ const menuItems = [
   { name: 'Staff Management', href: '/dashboard/staff', icon: Users, roles: ['Admin', 'Manager'] },
   { name: 'Enterprise Hub', href: '/dashboard/enterprise', icon: Building2, roles: ['Admin', 'Manager'] },
   { name: 'Super Admin Portal', href: '/dashboard/admin', icon: ShieldCheck, roles: ['SuperAdmin'] },
+  { name: 'Landing CMS', href: '/dashboard/admin?tab=cms', icon: Layout, roles: ['SuperAdmin'] },
   { name: 'CCTV Monitoring', href: '/dashboard/cctv', icon: Video, roles: ['Admin'] },
 ];
 
