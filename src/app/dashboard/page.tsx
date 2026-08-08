@@ -1,4 +1,6 @@
 'use strict';
+import { redirect } from "next/navigation";
+import { getAuthUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { getWorkspaceId } from "@/lib/workspace";
 import { DashboardClient } from "@/components/features/dashboard/DashboardClient";
@@ -30,6 +32,11 @@ import type {
 
 /** Exported function default */
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const user = await getAuthUser();
+  if (user?.email === 'superadmin@pfms.com' || user?.role === 'SuperAdmin') {
+    redirect('/dashboard/admin');
+  }
+
   const workspaceId = await getWorkspaceId();
   const searchParams = await props.searchParams;
   const page = parseInt((searchParams?.page as string) || '1');

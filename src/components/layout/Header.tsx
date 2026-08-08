@@ -337,16 +337,24 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           )}
         </div>
 
-        {/* Upgrade CTA for Free Plan Users */}
-        {currentTier === 'free' && (
+        {/* Super Admin Badge or Upgrade CTA */}
+        {role === 'SuperAdmin' ? (
           <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
-            <button
-              onClick={() => router.push('/dashboard/settings?tab=subscription')}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
-            >
-              <span>Upgrade</span>
-            </button>
+            <span className="bg-indigo-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">
+              Platform Super Admin
+            </span>
           </div>
+        ) : (
+          currentTier === 'free' && (
+            <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
+              <button
+                onClick={() => router.push('/dashboard/settings?tab=subscription')}
+                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+              >
+                <span>Upgrade</span>
+              </button>
+            </div>
+          )
         )}
       </div>
     </header>

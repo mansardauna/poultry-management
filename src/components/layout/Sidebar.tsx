@@ -456,7 +456,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </nav>
         </div>
         {/* Plan Upgrade Banner in Sidebar */}
-        {!isCollapsed && currentTier === 'free' && (
+        {!isCollapsed && role !== 'SuperAdmin' && currentTier === 'free' && (
           <div className="mx-3 mb-2 p-3 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 rounded-xl text-center">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">FREE STARTER</span>
@@ -475,7 +475,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </div>
         )}
 
-        {!isCollapsed && currentTier !== 'free' && (
+        {!isCollapsed && role !== 'SuperAdmin' && currentTier !== 'free' && (
           <div className="mx-3 mb-2 p-2.5 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <div className="flex-1 min-w-0">
@@ -483,6 +483,16 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 {currentTier === 'entrepreneur' ? 'Entrepreneur Plan Active' : currentTier === 'enterprise' ? 'Enterprise Plan Active' : 'Commercial Pro Active'}
               </p>
               <p className="text-[9px] text-emerald-400/80 truncate">Unlimited Branches & CCTV</p>
+            </div>
+          </div>
+        )}
+
+        {!isCollapsed && role === 'SuperAdmin' && (
+          <div className="mx-3 mb-2 p-3 bg-indigo-950/80 border border-indigo-500/40 rounded-xl flex items-center gap-2.5">
+            <ShieldCheck size={18} className="text-indigo-400 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-indigo-300 uppercase truncate">Super Admin Control</p>
+              <p className="text-[9px] text-indigo-400/80 truncate">Full System Management & CMS</p>
             </div>
           </div>
         )}
