@@ -476,14 +476,11 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         )}
 
         {!isCollapsed && role !== 'SuperAdmin' && currentTier !== 'free' && (
-          <div className="mx-3 mb-2 p-2.5 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-emerald-300 uppercase truncate">
-                {currentTier === 'entrepreneur' ? 'Entrepreneur Plan Active' : currentTier === 'enterprise' ? 'Enterprise Plan Active' : 'Commercial Pro Active'}
-              </p>
-              <p className="text-[9px] text-emerald-400/80 truncate">Unlimited Branches & CCTV</p>
-            </div>
+          <div className="mx-3 mb-2 px-3 py-2 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+            <span className="text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider truncate">
+              {currentTier === 'entrepreneur' ? 'Entrepreneur' : currentTier === 'enterprise' ? 'Enterprise' : 'Pro'}
+            </span>
           </div>
         )}
 
