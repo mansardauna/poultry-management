@@ -1,22 +1,30 @@
 'use strict';
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Play, Video, AlertTriangle, Activity, RefreshCw, Phone, Circle, QrCode, X } from 'lucide-react';
+import { Play, Video, Activity, RefreshCw, Phone, QrCode, X, Trash2, Camera, AlertCircle } from 'lucide-react';
 import { 
   Dialog, 
-  DialogTitle, 
   DialogContent, 
   DialogActions, 
   TextField, 
   Button as MuiButton 
 } from '@mui/material';
-
 import { useRouter } from 'next/navigation';
 
-interface DiagnosticsLog {
+export interface CameraDevice {
+  id: string;
+  name: string;
+  cameraId: string;
+  streamUrl?: string;
+  streamType?: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface DiagnosticsLog {
   id: string;
   date: string;
   device: string;
@@ -29,23 +37,33 @@ export default function CCTVPage() {
   const [openRepairModal, setOpenRepairModal] = useState(false);
   const [openConnectModal, setOpenConnectModal] = useState(false);
   const [connectTab, setConnectTab] = useState<'qr' | 'url'>('qr');
+  
+  const [cameraName, setCameraName] = useState('');
   const [cameraId, setCameraId] = useState('');
+  const [streamUrl, setStreamUrl] = useState('');
   const [technicianNote, setTechnicianNote] = useState('');
+  
+  const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [diagnosticsLogs, setDiagnosticsLogs] = useState<DiagnosticsLog[]>([]);
-  const [isCameraBRebooting, setIsCameraBRebooting] = useState(false);
   const [tier, setTier] = useState('free');
+  
+  // Real Phone Camera WebRTC Scanner State
+  const [isScanning, setIsScanning] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setTier(match[1]);
   }, []);
 
-  const refreshLogs = async () => {
+  const refreshData = async () => {
     try {
       const res = await fetch('/api/cctv');
       if (res.ok) {
-        const logs = await res.json();
-        setDiagnosticsLogs(logs);
+        const data = await res.json();
+        if (data.cameras) setCameras(data.cameras);
+        if (data.logs) setDiagnosticsLogs(data.logs);
       }
     } catch (err) {
       console.error(err);
@@ -53,9 +71,48 @@ export default function CCTVPage() {
   };
 
   useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-    refreshLogs();
+    refreshData();
   }, []);
+
+  // WebRTC Real Phone Camera Scanner
+  const startPhoneCameraScan = async () => {
+    try {
+      setIsScanning(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { ideal: 'environment' } } 
+      });
+      mediaStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      toast.success('Phone camera activated! Point camera at QR sticker.');
+    } catch (err) {
+      console.error(err);
+      toast.error('Unable to access camera. Please allow camera permissions.');
+      setIsScanning(false);
+    }
+  };
+
+  const stopPhoneCameraScan = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(t => t.stop());
+      mediaStreamRef.current = null;
+    }
+    setIsScanning(false);
+  };
+
+  const handleOpenConnect = () => {
+    setOpenConnectModal(true);
+  };
+
+  const handleCloseConnect = () => {
+    stopPhoneCameraScan();
+    setOpenConnectModal(false);
+    setCameraName('');
+    setCameraId('');
+    setStreamUrl('');
+  };
 
   const handleOpenRepair = () => setOpenRepairModal(true);
   const handleCloseRepair = () => {
@@ -63,16 +120,61 @@ export default function CCTVPage() {
     setTechnicianNote('');
   };
 
-  const handleOpenConnect = () => setOpenConnectModal(true);
-  const handleCloseConnect = () => {
-    setOpenConnectModal(false);
-    setCameraId('');
+  const handlePairCamera = async () => {
+    if (!cameraName.trim()) {
+      toast.error('Please enter a camera name');
+      return;
+    }
+    if (!cameraId.trim() && !streamUrl.trim()) {
+      toast.error('Please enter a Camera Serial ID or Stream URL');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/cctv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'pair_camera',
+          name: cameraName.trim(),
+          cameraId: cameraId.trim(),
+          streamUrl: streamUrl.trim(),
+          streamType: connectTab === 'url' ? 'RTSP' : 'QR_SERIAL'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.camera) {
+          setCameras(prev => [data.camera, ...prev]);
+        }
+        refreshData();
+        handleCloseConnect();
+        toast.success(`Successfully paired "${cameraName.trim()}"!`);
+      } else {
+        toast.error('Failed to pair camera');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error connecting to camera API');
+    }
   };
 
-  const handleConnectCamera = () => {
-    if (!cameraId) return;
-    toast.success(`Successfully paired with camera ${cameraId}!`);
-    handleCloseConnect();
+  const handleDeleteCamera = async (id: string, name: string) => {
+    if (!window.confirm(`Unpair camera "${name}"?`)) return;
+    try {
+      const res = await fetch('/api/cctv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_camera', id })
+      });
+      if (res.ok) {
+        setCameras(prev => prev.filter(c => c.id !== id));
+        toast.success(`Camera "${name}" removed.`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDispatchTechnician = async () => {
@@ -90,7 +192,7 @@ export default function CCTVPage() {
       });
 
       if (res.ok) {
-        refreshLogs();
+        refreshData();
         handleCloseRepair();
         toast.success('Technician dispatched! Ticket created in system.');
       } else {
@@ -106,12 +208,10 @@ export default function CCTVPage() {
       const res = await fetch('/api/cctv', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'ping'
-        })
+        body: JSON.stringify({ action: 'ping' })
       });
       if (res.ok) {
-        refreshLogs();
+        refreshData();
         toast.success('Ping sent! Gateway response: 2ms (Healthy).');
       }
     } catch (err) {
@@ -119,23 +219,16 @@ export default function CCTVPage() {
     }
   };
 
-  const handleSoftReboot = async (device: string) => {
+  const handleSoftReboot = async (deviceName: string) => {
     try {
       const res = await fetch('/api/cctv', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'reboot',
-          device
-        })
+        body: JSON.stringify({ action: 'reboot', device: deviceName })
       });
       if (res.ok) {
-        refreshLogs();
-        if (device === 'Camera Array B') {
-          setIsCameraBRebooting(true);
-          setTimeout(() => setIsCameraBRebooting(false), 8000);
-        }
-        toast.success(`Reboot signal sent to ${device}.`);
+        refreshData();
+        toast.success(`Reboot signal sent to ${deviceName}.`);
       }
     } catch (err) {
       console.error(err);
@@ -159,21 +252,9 @@ export default function CCTVPage() {
             Continuous HD security surveillance, automated predator & intruder motion detection, multi-camera grid streaming, and remote technician dispatch.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-2xl mx-auto mb-8 text-xs font-semibold text-slate-200">
-            <div className="bg-slate-800/90 p-4 rounded-xl border border-slate-700/80 flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> Multi-Coop Live Streams
-            </div>
-            <div className="bg-slate-800/90 p-4 rounded-xl border border-slate-700/80 flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> AI Predator Alerts
-            </div>
-            <div className="bg-slate-800/90 p-4 rounded-xl border border-slate-700/80 flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> Remote Dispatch Controls
-            </div>
-          </div>
-
           <button
             onClick={() => router.push('/dashboard/settings')}
-            className="bg-gradient-to-r from-amber-400 via-indigo-500 to-amber-400 text-slate-950 font-black text-base px-8 py-4 rounded-xl shadow-2xl hover:scale-105 transition-transform"
+            className="bg-gradient-to-r from-amber-400 via-indigo-500 to-amber-400 text-slate-950 font-black text-base px-8 py-4 rounded-xl shadow-2xl hover:scale-105 transition-transform cursor-pointer"
           >
             ⚡ Unlock CCTV Monitoring for ₦15,000/mo
           </button>
@@ -184,126 +265,114 @@ export default function CCTVPage() {
 
   return (
     <div className="space-y-6">
-      {/* CCTV Page Header */}
-      <div className="flex items-center justify-between">
+      {/* CCTV Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 uppercase">Surveillance CCTV Connectivity</h1>
-          <p className="text-sm text-slate-500 mt-1">Real-time security monitoring & system health</p>
+          <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Surveillance CCTV Connectivity</h1>
+          <p className="text-sm text-slate-500 mt-1">Real-time security monitoring, IP camera streams & diagnostic logs</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button 
             onClick={handleOpenConnect}
-            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 text-sm font-semibold uppercase transition-colors flex items-center gap-2"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer"
           >
-            <QrCode size={18} /> Connect Camera
+            <QrCode size={16} /> + Connect Camera
           </button>
           <button 
             onClick={handleOpenRepair}
-            className="bg-red-650 hover:bg-red-700 text-white px-4 py-2 text-sm font-semibold uppercase transition-colors flex items-center gap-2"
+            className="bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-xl text-xs font-bold uppercase transition-colors flex items-center gap-2 cursor-pointer"
           >
-            <Phone size={18} /> Dispatch Technician
+            <Phone size={16} /> Dispatch Technician
           </button>
         </div>
       </div>
 
-      {/* Critical System Alert Banner */}
-      <div className="border-2 border-red-500 bg-red-50 p-4 flex items-center gap-4">
-        <AlertTriangle size={36} className="text-red-600 animate-pulse flex-shrink-0" />
-        <div>
-          <p className="text-sm font-semibold text-red-950 uppercase">🚨 SECURITY SURVEILLANCE CRITICAL MALFUNCTION</p>
-          <p className="text-xs text-red-800 mt-0.5">
-            <strong>System Drop Detected:</strong> Camera Array B (Coop 2 Laying Section) has suffered a critical drop and is currently OFFLINE. Perimeter stability is compromised! Restore continuous uptime on security arrays immediately.
+      {/* Real Paired Camera Stream Grid */}
+      {cameras.length === 0 ? (
+        <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-12 text-center rounded-2xl">
+          <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-100">
+            <Video size={32} />
+          </div>
+          <h3 className="text-lg font-extrabold text-slate-900 mb-1">No Hardware CCTV Cameras Paired</h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto mb-6 leading-relaxed">
+            Connect your farm&apos;s physical IP cameras, RTSP streams, or scan the camera QR sticker using your phone to display live surveillance feeds.
           </p>
+          <button 
+            onClick={handleOpenConnect}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl shadow-md shadow-indigo-600/20 inline-flex items-center gap-2 cursor-pointer transition-all"
+          >
+            <QrCode size={16} /> Pair Your First Camera Now
+          </button>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {cameras.map((cam) => (
+            <Card key={cam.id} className="rounded-2xl border border-slate-200 shadow-sm overflow-hidden bg-white">
+              <CardHeader className="bg-slate-50 border-b border-slate-200 py-3 px-4 flex flex-row items-center justify-between">
+                <CardTitle className="text-xs font-bold uppercase text-slate-900 tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" /> {cam.name}
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md uppercase">
+                    {cam.status || 'Online'}
+                  </span>
+                  <button 
+                    onClick={() => handleDeleteCamera(cam.id, cam.name)}
+                    className="text-slate-400 hover:text-red-600 p-1 transition-colors cursor-pointer"
+                    title="Unpair camera"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </CardHeader>
+
+              <CardContent className="p-0 relative bg-slate-950 aspect-video flex items-center justify-center text-white overflow-hidden">
+                {cam.streamUrl && (cam.streamUrl.startsWith('http') || cam.streamUrl.startsWith('blob')) ? (
+                  <video 
+                    src={cam.streamUrl} 
+                    controls 
+                    autoPlay 
+                    muted 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col justify-between p-4 font-mono text-[10px] text-emerald-400 z-10">
+                    <div className="flex justify-between">
+                      <span className="font-bold text-white uppercase">{cam.name}</span>
+                      <span className="text-emerald-400 font-bold">LIVE STREAMING ●</span>
+                    </div>
+                    <div className="text-center py-6 flex flex-col items-center gap-2">
+                      <Play size={36} className="text-indigo-400 animate-pulse" />
+                      <span className="font-bold text-slate-200 text-xs tracking-wider">HARDWARE STREAM ACTIVE</span>
+                      <span className="text-[10px] text-slate-400">ID / URL: {cam.cameraId || cam.streamUrl || 'CAM-ONLINE'}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400 text-[9px]">
+                      <span>FORMAT: {cam.streamType || 'RTSP/HLS'}</span>
+                      <span>PAIRED: {new Date(cam.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+
+              <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-mono text-[11px]">ID: {cam.cameraId}</span>
+                <button 
+                  onClick={() => handleSoftReboot(cam.name)}
+                  className="text-slate-700 font-bold hover:text-indigo-600 flex items-center gap-1 text-[11px] cursor-pointer"
+                >
+                  <RefreshCw size={13} /> Reboot Camera
+                </button>
+              </div>
+            </Card>
+          ))}
         </div>
-      </div>
+      )}
 
-      {/* Camera Live Feed Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Camera A - Unstable */}
-        <Card className="rounded-md border-2 border-slate-200">
-          <CardHeader className="bg-slate-50 border-b border-slate-200 py-3 flex items-center justify-between">
-            <CardTitle className="text-xs font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <Circle size={14} className="text-emerald-500 animate-ping" /> Camera Array A (Perimeter / Section A)
-            </CardTitle>
-            <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 uppercase">
-              Signal Unstable (Jitter)
-            </span>
-          </CardHeader>
-          <CardContent className="p-0 relative bg-slate-950 aspect-video flex items-center justify-center text-white overflow-hidden">
-            {/* Simulated Live Camera with scanlines / static noise overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08)_0%,transparent_100%)]" />
-            
-            {/* Visual Stream Mock */}
-            <div className="w-full h-full flex flex-col justify-between p-4 font-mono text-[10px] text-emerald-400 z-10">
-              <div className="flex justify-between">
-                <span>CAM_A_PERIMETER</span>
-                <span>REC ●</span>
-              </div>
-              <div className="text-center text-slate-500 text-xs py-4 flex flex-col items-center gap-2">
-                <Play size={32} className="text-indigo-400 animate-pulse" />
-                <span className="font-semibold text-slate-300">STREAMING FROM COOP SECTION A</span>
-              </div>
-              <div className="flex justify-between text-slate-400">
-                <span>1080P @ 15FPS</span>
-                <span>MAY-16-2026 12:44:19 PM</span>
-              </div>
-            </div>
-
-            {/* Scanlines Effect */}
-            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px]" />
-          </CardContent>
-        </Card>
-
-        {/* Camera B - MALFUNCTION STATE */}
-        <Card className={`rounded-md border-2 ${isCameraBRebooting ? 'border-amber-400 bg-amber-50/10' : 'border-red-500 bg-red-50/10'}`}>
-            <CardHeader className={`${isCameraBRebooting ? 'bg-amber-50/50 border-amber-100' : 'bg-red-50/50 border-red-100'} border-b py-3 flex items-center justify-between`}>
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
-              <Video size={16} className={`${isCameraBRebooting ? 'text-amber-600 animate-spin' : 'text-red-650 animate-pulse'}`} /> Camera Array B (Coop 2 / Section B)
-            </CardTitle>
-            <span className={`text-[10px] font-semibold px-2 py-0.5 uppercase ${
-              isCameraBRebooting ? 'bg-amber-100 text-amber-800 animate-pulse' : 'bg-red-100 text-red-800 animate-pulse'
-            }`}>
-              {isCameraBRebooting ? 'SYSTEM REBOOT IN PROGRESS...' : 'OFFLINE / CRITICAL MALFUNCTION'}
-            </span>
-          </CardHeader>
-          <CardContent className="p-0 relative bg-slate-900 aspect-video flex items-center justify-center text-white overflow-hidden">
-            {/* TV Static Noise overlay */}
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,#fff_0%,#000_100%)] animate-pulse" />
-            
-            {/* Visual Stream Mock */}
-            <div className={`w-full h-full flex flex-col justify-between p-4 font-mono text-[10px] z-10 ${
-              isCameraBRebooting ? 'text-amber-500' : 'text-red-500'
-            }`}>
-              <div className="flex justify-between">
-                <span>CAM_B_COOP2_LAYING</span>
-                <span>{isCameraBRebooting ? 'REBOOTING ↻' : 'OFFLINE ✖'}</span>
-              </div>
-              <div className="text-center py-4 flex flex-col items-center gap-2">
-                <Video size="40" className={isCameraBRebooting ? 'text-amber-500 animate-spin' : 'text-red-500 animate-bounce'} />
-                <span className="font-semibold text-sm tracking-wider uppercase">
-                  {isCameraBRebooting ? 'HANDSHAKE NEGOTIATING' : 'NO CARRIER SIGNAL'}
-                </span>
-                <span className="text-[10px]">
-                  {isCameraBRebooting ? 'BROADCASTING HARDWARE BOOTLOADER...' : 'HARDWARE INTERRUPT (CHECK POWER/CABLES)'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>0.00KB/S @ 0FPS</span>
-                <span>{isCameraBRebooting ? 'RE-ESTABLISHING PROTOCOLS' : 'SYSTEM CONNECTION LOST'}</span>
-              </div>
-            </div>
-
-            {/* Static Scanline lines */}
-            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_8px]" />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Diagnostics Logs & Diagnostic Controls */}
+      {/* Diagnostics Logs & Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
+            <CardTitle className="text-sm font-bold uppercase text-slate-800 tracking-wider">
               Surveillance Network Diagnostic Logs
             </CardTitle>
           </CardHeader>
@@ -319,87 +388,92 @@ export default function CCTVPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-                  {diagnosticsLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-slate-400">{log.date}</td>
-                      <td className="px-4 py-3 font-semibold text-slate-900">{log.device}</td>
-                      <td className="px-4 py-3 text-slate-650 font-medium">{log.event}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 text-[9px] font-semibold uppercase ${
-                          log.status === 'Healthy' ? 'bg-emerald-100 text-emerald-800' :
-                          log.status === 'Warning' ? 'bg-amber-100 text-amber-800' :
-                          log.status === 'Error' ? 'bg-red-100 text-red-800 animate-pulse' :
-                          'bg-indigo-100 text-indigo-800'
-                        }`}>{log.status}</span>
+                  {diagnosticsLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-6 text-center text-slate-400 font-sans">
+                        No network logs recorded yet.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    diagnosticsLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3 text-slate-400">{log.date}</td>
+                        <td className="px-4 py-3 font-semibold text-slate-900">{log.device}</td>
+                        <td className="px-4 py-3 text-slate-650 font-medium">{log.event}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 text-[9px] font-semibold uppercase ${
+                            log.status === 'Healthy' ? 'bg-emerald-100 text-emerald-800' :
+                            log.status === 'Warning' ? 'bg-amber-100 text-amber-800' :
+                            log.status === 'Error' ? 'bg-red-100 text-red-800' :
+                            'bg-indigo-100 text-indigo-800'
+                          }`}>{log.status}</span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
           </CardContent>
         </Card>
 
-        {/* Diagnostic Control Actions Panel */}
+        {/* Diagnostic Controls */}
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
-              Diagnostic Controls
+            <CardTitle className="text-sm font-bold uppercase text-slate-800 tracking-wider">
+              Diagnostic Actions
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
-            <p className="text-xs text-slate-500">Perform real-time signals, router pings, or device resets to resolve CCTV network drops:</p>
+            <p className="text-xs text-slate-500">Test router pings or dispatch field technicians for hardware inspections:</p>
             
             <button 
               onClick={handlePingGateway}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 py-2.5 text-xs font-semibold uppercase transition-all flex items-center justify-center gap-2"
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 py-2.5 text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 rounded-xl cursor-pointer"
             >
-              <Activity size="16" /> Ping NVR Router Gateway
+              <Activity size={16} /> Ping NVR Router Gateway
             </button>
 
             <button 
-              onClick={() => handleSoftReboot('Camera Array A')}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 py-2.5 text-xs font-semibold uppercase transition-all flex items-center justify-center gap-2"
+              onClick={handleOpenRepair}
+              className="w-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2.5 text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 rounded-xl cursor-pointer"
             >
-              <RefreshCw size="16" /> Soft-Reboot Camera Array A
-            </button>
-
-            <button 
-              onClick={() => handleSoftReboot('Camera Array B')}
-              className="w-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2.5 text-xs font-semibold uppercase transition-all flex items-center justify-center gap-2"
-            >
-              <RefreshCw size="16" /> Recover / Reboot Camera Array B
+              <Phone size={16} /> Dispatch Technician Ticket
             </button>
           </CardContent>
         </Card>
       </div>
 
       {/* Dispatch Technician Modal */}
-      <Dialog open={openRepairModal} onClose={handleCloseRepair} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 600 }}>Dispatch Security System Technician</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
-          <div className="h-2" />
-          <p className="text-xs text-slate-500">
-            This will dispatch a field technician to inspect and fix the security camera wiring, network drops, or hardware malfunctions.
+      <Dialog open={openRepairModal} onClose={handleCloseRepair} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+          <h3 className="font-extrabold text-base uppercase">Dispatch Security System Technician</h3>
+          <button onClick={handleCloseRepair} className="text-slate-400 hover:text-white cursor-pointer">
+            <X size={20} />
+          </button>
+        </div>
+        <DialogContent className="flex flex-col gap-4 p-6">
+          <p className="text-xs text-slate-600">
+            Dispatch a field technician to inspect physical camera wiring, network switches, or power lines on your farm.
           </p>
           <TextField
-            label="Service Ticket Notes & Details"
+            label="Service Ticket Notes & Issue Details *"
             fullWidth
             multiline
             rows={4}
             variant="outlined"
-            placeholder="e.g. Camera Array B (Section B) is completely offline. Hardware interrupt. Please inspect wiring and power lines immediately."
+            placeholder="e.g. Camera Array in Coop 1 is offline. Please inspect wiring and power supply lines."
             value={technicianNote}
             onChange={(e) => setTechnicianNote(e.target.value)}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseRepair} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+        <DialogActions sx={{ p: 2.5, bgcolor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+          <MuiButton onClick={handleCloseRepair} sx={{ color: '#64748b', fontWeight: 600 }}>Cancel</MuiButton>
           <MuiButton 
             onClick={handleDispatchTechnician} 
             variant="contained" 
             disabled={!technicianNote}
-            sx={{ bgcolor: '#dc2626', '&:hover': { bgcolor: '#b91c1c' }, borderRadius: 2, boxShadow: 'none' }}
+            sx={{ bgcolor: '#dc2626', '&:hover': { bgcolor: '#b91c1c' }, fontWeight: 700, borderRadius: 2 }}
           >
             Dispatch Now
           </MuiButton>
@@ -410,8 +484,8 @@ export default function CCTVPage() {
       <Dialog open={openConnectModal} onClose={handleCloseConnect} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}>
         <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
           <div>
-            <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">Pair & Connect Hardware CCTV Camera</h3>
-            <p className="text-xs text-indigo-200 mt-0.5">Scan camera QR sticker or pair via RTSP/IP stream</p>
+            <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">Pair Live Hardware Camera</h3>
+            <p className="text-xs text-indigo-200 mt-0.5">Scan camera QR sticker using phone or input Camera ID</p>
           </div>
           <button onClick={handleCloseConnect} className="text-slate-400 hover:text-white cursor-pointer">
             <X size={20} />
@@ -426,7 +500,7 @@ export default function CCTVPage() {
               connectTab === 'qr' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-700'
             }`}
           >
-            <QrCode size={16} /> Instant QR Scan Pairing
+            <Camera size={16} /> Phone Camera QR Scanner
           </button>
           <button
             onClick={() => setConnectTab('url')}
@@ -442,57 +516,73 @@ export default function CCTVPage() {
           {connectTab === 'qr' ? (
             <div className="flex flex-col items-center text-center space-y-4">
               <p className="text-xs text-slate-600 max-w-md leading-relaxed">
-                <strong>Yes, absolutely!</strong> Point your camera lens at the QR code below, or scan the QR code sticker printed on your camera box/chassis to pair automatically.
+                Turn on your phone/device camera to scan the QR code sticker printed on your hardware camera box or chassis.
               </p>
 
-              <div className="bg-white p-6 rounded-2xl border-2 border-indigo-200 shadow-md flex flex-col items-center justify-center gap-3 w-56 h-56 relative overflow-hidden">
-                <QrCode size={120} className="text-indigo-600" />
-                <span className="text-[10px] font-mono text-indigo-700 uppercase font-bold tracking-widest bg-indigo-50 px-2 py-0.5 rounded">
-                  {cameraId ? cameraId : 'SCANNING FOR CAMERA...'}
-                </span>
-                <div className="absolute inset-x-0 top-0 h-1 bg-indigo-500 animate-pulse" />
+              {/* Real Live WebRTC Scanner Box */}
+              <div className="w-full max-w-sm aspect-square bg-slate-900 rounded-2xl border-2 border-indigo-500 overflow-hidden relative flex flex-col items-center justify-center shadow-lg">
+                {isScanning ? (
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div className="p-6 flex flex-col items-center gap-3 text-slate-400">
+                    <Camera size={56} className="text-indigo-400 animate-pulse" />
+                    <span className="text-xs font-bold text-slate-300">Camera Permission Required</span>
+                    <button
+                      onClick={startPhoneCameraScan}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      <Camera size={16} /> Turn On Camera to Scan
+                    </button>
+                  </div>
+                )}
+                
+                {isScanning && (
+                  <div className="absolute inset-x-0 top-0 h-1 bg-indigo-400 animate-pulse shadow-md" />
+                )}
               </div>
 
-              <div className="w-full max-w-md space-y-2">
+              <div className="w-full space-y-3 pt-2">
                 <TextField
                   label="Camera Name / Farm Location *"
                   fullWidth
                   variant="outlined"
                   size="small"
                   placeholder="e.g. Coop 1 Laying Section / North Gate"
+                  value={cameraName}
+                  onChange={(e) => setCameraName(e.target.value)}
                 />
 
                 <TextField
-                  label="Hardware Serial No / Camera ID (Optional)"
+                  label="Camera ID / Serial Number *"
                   fullWidth
                   variant="outlined"
                   size="small"
-                  placeholder="CAM-8931-S2 (Auto-filled on scan)"
+                  placeholder="CAM-8931-S2 (Auto-filled on QR scan or enter manually)"
                   value={cameraId}
                   onChange={(e) => setCameraId(e.target.value)}
                 />
               </div>
-
-              <button
-                onClick={() => setCameraId(`CAM-${Math.floor(1000 + Math.random() * 9000)}-S2`)}
-                className="text-xs text-indigo-600 font-bold hover:underline cursor-pointer flex items-center gap-1"
-              >
-                📷 Auto-Scan Camera QR Sticker (Simulate Camera Scan)
-              </button>
             </div>
           ) : (
             <div className="space-y-4">
               <p className="text-xs text-slate-600 leading-relaxed">
-                Enter your farm camera&apos;s RTSP/HLS stream URL or hardware serial number to pair live video feeds to the PFMS dashboard.
+                Enter your IP camera stream URL (RTSP, HLS, WebRTC) to stream video feeds live.
               </p>
 
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
                 <TextField
-                  label="Camera Name / Section *"
+                  label="Camera Name / Farm Location *"
                   fullWidth
                   variant="outlined"
                   size="small"
                   placeholder="e.g. Coop 1 Laying Section / North Gate"
+                  value={cameraName}
+                  onChange={(e) => setCameraName(e.target.value)}
                 />
 
                 <TextField
@@ -501,16 +591,15 @@ export default function CCTVPage() {
                   variant="outlined"
                   size="small"
                   placeholder="rtsp://admin:password@192.168.1.64:554/stream1"
-                  value={cameraId}
-                  onChange={(e) => setCameraId(e.target.value)}
+                  value={streamUrl}
+                  onChange={(e) => setStreamUrl(e.target.value)}
                   helperText="Supported: RTSP (Hikvision/Dahua/Reolink), HLS (.m3u8), or WebRTC"
                 />
 
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-1">
-                  <p className="font-bold text-slate-900">💡 Common Camera URL Formats:</p>
+                  <p className="font-bold text-slate-900">💡 Common Camera Stream Formats:</p>
                   <p>• <strong>Hikvision / Dahua</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.64:554/Streaming/Channels/101</code></p>
                   <p>• <strong>Reolink / Tapo</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.100:554/h264Preview_01_main</code></p>
-                  <p>• <strong>Cloud / HLS Stream</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">https://cctv.myfarm.com/live/stream1.m3u8</code></p>
                 </div>
               </div>
             </div>
@@ -522,12 +611,12 @@ export default function CCTVPage() {
             Cancel
           </MuiButton>
           <MuiButton 
-            onClick={handleConnectCamera} 
+            onClick={handlePairCamera} 
             variant="contained" 
-            disabled={!cameraId}
+            disabled={!cameraName.trim() || (!cameraId.trim() && !streamUrl.trim())}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, textTransform: 'none', fontWeight: 700, px: 3, borderRadius: 2 }}
           >
-            Pair Real Camera Stream
+            Pair Live Camera Stream
           </MuiButton>
         </DialogActions>
       </Dialog>
