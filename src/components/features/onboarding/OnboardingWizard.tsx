@@ -326,25 +326,25 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-100 flex flex-col md:flex-row relative">
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] sm:max-h-[88vh] overflow-hidden border border-slate-100 flex flex-col md:flex-row relative">
         
         {/* Close Button */}
         <button 
           onClick={handleClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 bg-slate-100 p-2 rounded-full transition-colors z-20 cursor-pointer"
+          className="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-700 bg-slate-100 p-2 rounded-full transition-colors z-30 cursor-pointer"
         >
           <X size={18} />
         </button>
 
         {/* Sidebar Steps Progress */}
-        <div className="md:w-1/3 bg-slate-900 text-slate-100 p-6 flex flex-col justify-between flex-shrink-0">
+        <div className="md:w-1/3 bg-slate-900 text-slate-100 p-5 sm:p-6 flex flex-col justify-between shrink-0 max-h-[25vh] md:max-h-full overflow-y-auto">
           <div>
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex items-center gap-2 mb-4 md:mb-6">
               <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">P</div>
               <span className="font-bold tracking-wider uppercase text-xs text-indigo-300">Farm Onboarding</span>
             </div>
-            <ul className="space-y-4 md:space-y-6">
+            <ul className="flex md:flex-col gap-3 md:gap-6 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
               {[
                 { s: 1, label: 'Farm Profile & Branch', icon: Box },
                 { s: 2, label: 'Flock Setup', icon: Clipboard },
@@ -354,7 +354,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 <li 
                   key={item.s} 
                   onClick={() => setStep(item.s)}
-                  className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-90 transition-opacity shrink-0"
                   title={`Jump to Step ${item.s}`}
                 >
                   <div className={`p-2 rounded-xl transition-colors ${
@@ -370,7 +370,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                     <p className={`text-[10px] uppercase tracking-wider font-extrabold ${
                       step === item.s ? 'text-indigo-400' : 'text-slate-500'
                     }`}>Step {item.s}</p>
-                    <p className={`text-xs font-semibold ${
+                    <p className={`text-xs font-semibold hidden md:block ${
                       step === item.s ? 'text-white' : 'text-slate-400'
                     }`}>{item.label}</p>
                   </div>
@@ -383,7 +383,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
             <button 
               onClick={handleSkipAll}
               disabled={isSaving}
-              className="mt-6 text-xs font-semibold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors text-left cursor-pointer flex items-center gap-1"
+              className="mt-4 md:mt-6 text-xs font-semibold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors text-left cursor-pointer flex items-center gap-1 shrink-0"
             >
               ⚡ Skip Setup & Start
             </button>
@@ -391,18 +391,18 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         </div>
 
         {/* Scrollable Content Panel */}
-        <div className="flex-1 p-6 md:p-8 flex flex-col justify-between bg-white overflow-y-auto max-h-[80vh]">
+        <div className="flex-1 p-5 sm:p-8 flex flex-col justify-between bg-white overflow-hidden max-h-[67vh] md:max-h-full">
           
           {/* Step 1: Farm Profile & Branch */}
           {step === 1 && (
-            <div className="space-y-6 flex-1 flex flex-col justify-between">
-              <div className="space-y-4">
+            <div className="flex-1 flex flex-col justify-between overflow-hidden">
+              <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Configure Farm Profile & Primary Branch</h2>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">Configure Farm Profile & Primary Branch</h2>
                   <p className="text-xs text-slate-500 mt-1">Set up your farm profile, owner details, location, and operational capacity.</p>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
                   <div className="md:col-span-2">
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Farm / Organization Name</label>
                     <input 
@@ -469,12 +469,12 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 </div>
               </div>
 
-              {/* Action Bar */}
-              <div className="pt-6 border-t border-slate-100 flex justify-end sticky bottom-0 bg-white z-10">
+              {/* Always Visible Fixed Bottom Action Bar */}
+              <div className="pt-4 mt-3 border-t border-slate-100 flex justify-end bg-white shrink-0 z-10">
                 <button 
                   onClick={handleNextStep1}
                   disabled={!branchName.trim() || isSaving}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all w-full sm:w-auto justify-center"
                 >
                   {isSaving ? 'Saving...' : 'Save Branch & Continue'} <ChevronRight size={16} />
                 </button>
@@ -484,14 +484,14 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
 
           {/* Step 2: First Flock */}
           {step === 2 && (
-            <div className="space-y-6 flex-1 flex flex-col justify-between">
-              <div className="space-y-4">
+            <div className="flex-1 flex flex-col justify-between overflow-hidden">
+              <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first flock batch</h2>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first flock batch</h2>
                   <p className="text-xs text-slate-500 mt-1">Add initial chicken batches to monitor mortality rates, vaccination routines, and yield metrics.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4 pb-2">
                   <div className="col-span-2">
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Breed / Hybrid</label>
                     <input 
@@ -537,8 +537,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 </div>
               </div>
 
-              {/* Action Bar */}
-              <div className="pt-6 border-t border-slate-100 flex justify-between items-center sticky bottom-0 bg-white z-10">
+              {/* Always Visible Fixed Bottom Action Bar */}
+              <div className="pt-4 mt-3 border-t border-slate-100 flex justify-between items-center bg-white shrink-0 z-10">
                 <button 
                   onClick={() => setStep(3)}
                   className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
@@ -558,14 +558,14 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
 
           {/* Step 3: First Staff */}
           {step === 3 && (
-            <div className="space-y-6 flex-1 flex flex-col justify-between">
-              <div className="space-y-4">
+            <div className="flex-1 flex flex-col justify-between overflow-hidden">
+              <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first staff member</h2>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first staff member</h2>
                   <p className="text-xs text-slate-500 mt-1">Create staff login credentials to begin delegating daily tasks and logging work.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4 pb-2">
                   <div className="col-span-2">
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Full Name</label>
                     <input 
@@ -620,8 +620,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 </div>
               </div>
 
-              {/* Action Bar */}
-              <div className="pt-6 border-t border-slate-100 flex justify-between items-center sticky bottom-0 bg-white z-10">
+              {/* Always Visible Fixed Bottom Action Bar */}
+              <div className="pt-4 mt-3 border-t border-slate-100 flex justify-between items-center bg-white shrink-0 z-10">
                 <button 
                   onClick={() => setStep(4)}
                   className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
@@ -641,16 +641,16 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
 
           {/* Step 4: Starter Pack */}
           {step === 4 && (
-            <div className="space-y-6 flex-1 flex flex-col justify-between">
-              <div className="space-y-4">
+            <div className="flex-1 flex flex-col justify-between overflow-hidden">
+              <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-wide flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide flex items-center gap-2">
                     <CheckCircle2 className="text-emerald-500" size={24} /> Farm Setup Complete!
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">Quick operational breakdown of your poultry management workspace.</p>
                 </div>
                 
-                <div className="space-y-3 max-h-[220px] overflow-y-auto bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
                   <div className="space-y-1">
                     <p className="font-bold text-slate-900">🥚 Daily Egg Yield & Mortality Logs</p>
                     <p className="text-slate-600 leading-relaxed">
@@ -672,8 +672,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 </div>
               </div>
 
-              {/* Final Launch Button */}
-              <div className="pt-6 border-t border-slate-100 sticky bottom-0 bg-white z-10">
+              {/* Always Visible Fixed Final Launch Button */}
+              <div className="pt-4 mt-3 border-t border-slate-100 bg-white shrink-0 z-10">
                 <button 
                   onClick={handleSubmitAll}
                   disabled={isSaving}
