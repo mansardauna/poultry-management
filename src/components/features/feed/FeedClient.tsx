@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
-import { Plus, BarChart2, AlertTriangle, MapPin, Truck, Edit2, Trash2 } from 'lucide-react';
+import { Plus, BarChart2, AlertTriangle, MapPin, Truck, Edit2, Trash2, Download, Printer } from 'lucide-react';
+import { downloadCSV, printBrandedReport } from '@/lib/exportReports';
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { FeedInventory, DailyFeedLog, ChickenBatch, ProcurePipeline } from "@/data/types";
@@ -48,6 +49,22 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   const canEdit = role === 'Admin' || role === 'Manager';
   const [logs, setLogs] = useState<DailyFeedLog[]>(initialLogs);
   const [procurePipeline, setProcurePipeline] = useState<ProcurePipeline[]>(initialProcurePipeline);
+  
+  const handleExportReports = (format: 'csv' | 'pdf') => {
+    const columns = [
+      { header: 'ID', key: 'id' },
+      { header: 'Feed Type', key: 'type' },
+      { header: 'Stock Remaining (Kg)', key: 'quantityKg' },
+      { header: 'Cost Per Bag (₦)', key: 'costPerBag' },
+    ];
+
+    if (format === 'csv') {
+      downloadCSV(feeds, columns, 'feed_inventory_report.csv');
+      toast.success('Feed inventory CSV report downloaded!');
+    } else {
+      printBrandedReport('Feed Stock & Consumption Audit', feeds, columns);
+    }
+  };
   
   // Modals state
   const [openUsage, setOpenUsage] = useState(false);
@@ -375,24 +392,36 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
   return (
     <div className="space-y-6">
-      {/* Header Controls */}
-      <div className="flex items-center justify-between">
+      {/* Header and Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{texts.feed.title}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{texts.feed.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{texts.feed.subtitle}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button 
-            onClick={handleOpenLogistics}
-            className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2 animate-pulse"
+            onClick={() => handleExportReports('csv')}
+            className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <MapPin size={18} /> Logistics Pipeline
+            <Download size={15} /> Export CSV
+          </button>
+          <button 
+            onClick={() => handleExportReports('pdf')}
+            className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <Printer size={15} /> Print Report
+          </button>
+          <button 
+            onClick={() => setOpenLogistics(true)}
+            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <Truck size={15} /> Logistics Pipeline
           </button>
           <button 
             onClick={handleOpenUsage}
-            className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-50 transition-colors"
+            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
           >
-            {texts.feed.logUsage}
+            Log Usage
           </button>
           <button 
             onClick={handleOpenRestock}

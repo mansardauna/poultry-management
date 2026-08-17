@@ -470,41 +470,41 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   return (
     <div className="space-y-6">
       {/* Header and Controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{texts.eggs.title}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{texts.eggs.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{texts.eggs.subtitle}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button 
             onClick={() => handleExportReports('csv')}
-            className="bg-slate-100 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <Download size={16} /> Export CSV
+            <Download size={15} /> Export CSV
           </button>
           <button 
             onClick={() => handleExportReports('pdf')}
-            className="bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            <Printer size={16} /> Print Report
+            <Printer size={15} /> Print Report
           </button>
           <button 
             onClick={handleOpenAudit}
-            className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors"
+            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
           >
-            {texts.eggs.auditCushioning}
+            Audit Cushioning
           </button>
           <button 
             onClick={handleOpenMaturation}
-            className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors"
+            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
           >
-            {texts.eggs.logMaturation}
+            Log Maturation
           </button>
           <button 
             onClick={handleOpenCollect}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={20} /> {texts.eggs.logCollection}
+            <Plus size={16} /> {texts.eggs.logCollection}
           </button>
         </div>
       </div>
