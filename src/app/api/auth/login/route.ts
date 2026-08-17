@@ -217,6 +217,13 @@ export async function POST(request: Request) {
       }
     }
 
+    const { data: orgData } = await adminClient
+      .from('organizations')
+      .select('subscriptionTier')
+      .eq('id', orgId)
+      .limit(1)
+      .maybeSingle();
+
     const { data: sysData } = await adminClient
       .from('systemSettings')
       .select('subscriptionTier, plan')
@@ -224,7 +231,7 @@ export async function POST(request: Request) {
       .limit(1)
       .maybeSingle();
 
-    let tier = sysData?.subscriptionTier || sysData?.plan || (user.email === 'owner@poultry.com' ? 'pro' : 'free');
+    let tier = orgData?.subscriptionTier || sysData?.subscriptionTier || sysData?.plan || (user.email === 'owner@poultry.com' ? 'pro' : 'free');
 
     const response = NextResponse.json({ ok: true, role: userRole });
     response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/' });

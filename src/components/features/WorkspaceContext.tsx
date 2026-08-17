@@ -141,15 +141,17 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteWorkspace = async (id: string) => {
-    if (id === 'main') throw new Error('Cannot delete the main workspace');
+    if (workspaces.length <= 1) {
+      throw new Error('Cannot delete the primary farm branch. At least one branch must remain.');
+    }
 
     const response = await fetch(`/api/workspaces?id=${id}`, {
       method: 'DELETE',
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unable to delete workspace' }));
-      throw new Error(error?.error || 'Unable to delete workspace');
+      const error = await response.json().catch(() => ({ error: 'Unable to delete branch' }));
+      throw new Error(error?.error || 'Unable to delete branch');
     }
 
     const newWorkspaces = workspaces.filter((ws) => ws.id !== id);
@@ -157,8 +159,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
     if (activeWorkspace?.id === id) {
       const fallback = newWorkspaces[0] ?? DEFAULT_WORKSPACE;
+      setActiveWorkspaceState(fallback);
       Cookies.set('pfms_workspace', fallback.id, { path: '/' });
-      window.location.href = '/';
+      window.location.reload();
     }
   };
 

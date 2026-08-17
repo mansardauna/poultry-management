@@ -302,7 +302,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                   <div className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Your Farms
                   </div>
-                  {workspaces.map(ws => (
+                  {workspaces.map((ws, index) => (
                     <div
                       key={ws.id}
                       className={clsx(
@@ -325,7 +325,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                       </button>
                       {/* Admin-only edit/delete buttons */}
                       {isAdmin && (
-                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -337,7 +337,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                           >
                             <Pencil size={13} />
                           </button>
-                          {ws.id !== 'main' && (
+                          {workspaces.length > 1 && index !== 0 && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
