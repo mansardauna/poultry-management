@@ -197,13 +197,24 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         <Menu size={22} />
       </button>
 
+      {/* Mobile Search Icon Button (visible when search is NOT active on mobile) */}
+      {!isSearchFocused && (
+        <button
+          onClick={() => setIsSearchFocused(true)}
+          className="sm:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer ml-1"
+          aria-label="Search"
+        >
+          <Search size={20} />
+        </button>
+      )}
+
       {/* Expanding & Active Search Bar Container */}
       <div 
         ref={searchContainerRef}
-        className={`flex-1 transition-all duration-300 ${
+        className={`transition-all duration-300 ${
           isSearchFocused 
-            ? 'fixed inset-x-2 top-2 z-50 bg-white p-2 rounded-2xl shadow-2xl border border-indigo-500 md:relative md:inset-auto md:top-auto md:p-0 md:shadow-none md:border-none md:z-auto' 
-            : 'ml-2 md:ml-0'
+            ? 'fixed inset-x-2 top-2 z-50 bg-white p-2 rounded-2xl shadow-2xl border border-indigo-500 block' 
+            : 'hidden sm:block flex-1 ml-2 md:ml-0'
         }`}
       >
         <form onSubmit={handleSearch} className="w-full max-w-full md:max-w-md relative group">
@@ -211,6 +222,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
             <Search size={18} className="text-indigo-500" />
           </div>
           <input
+            autoFocus={isSearchFocused}
             className={`block w-full pl-10 pr-9 py-2 sm:py-2.5 border rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm font-medium transition-all shadow-sm ${
               isSearchFocused ? 'border-indigo-500 ring-2 ring-indigo-100' : 'border-slate-300'
             }`}
@@ -223,11 +235,19 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               if (!isSearchFocused) setIsSearchFocused(true);
             }}
           />
-          {searchQuery && (
+          {searchQuery ? (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+            >
+              <X size={16} />
+            </button>
+          ) : isSearchFocused && (
+            <button
+              type="button"
+              onClick={() => setIsSearchFocused(false)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 sm:hidden"
             >
               <X size={16} />
             </button>
