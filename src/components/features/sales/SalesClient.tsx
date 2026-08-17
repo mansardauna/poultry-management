@@ -492,21 +492,147 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         </Card>
       )}
 
-      {/* World-Class Executive Invoice Generator Modal */}
+      {/* 1. Record New Sale Modal */}
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        fullWidth 
+        maxWidth="sm"
+        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}
+      >
+        <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-lg shadow-lg shadow-indigo-600/30">
+              <Plus size={22} />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-base sm:text-lg tracking-tight">Record New Farm Sale</h3>
+              <p className="text-xs text-indigo-200">Log immediate farm sales transaction to record revenue</p>
+            </div>
+          </div>
+          <button onClick={handleClose} className="text-slate-400 hover:text-white cursor-pointer">
+            <X size={20} />
+          </button>
+        </div>
+
+        <DialogContent className="p-5 sm:p-6 space-y-4 bg-slate-50">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <TextField 
+              label="Customer Name *" 
+              placeholder="e.g. Iya Faruq Frozen / Walk-in Customer" 
+              fullWidth 
+              size="small"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormControl fullWidth size="small">
+                <InputLabel>Product Type</InputLabel>
+                <Select value={type} label="Product Type" onChange={(e) => setType(e.target.value)}>
+                  <MenuItem value="Eggs">Eggs (Cracked / Fresh)</MenuItem>
+                  <MenuItem value="Chickens">Chickens (Spent Layers / Broilers)</MenuItem>
+                  <MenuItem value="Manure">Organic Manure / Fertilizer</MenuItem>
+                  <MenuItem value="Feeds">Feed Inventory Resale</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth size="small">
+                <InputLabel>Flock Batch</InputLabel>
+                <Select value={selectedBatchId} label="Flock Batch" onChange={(e) => setSelectedBatchId(e.target.value)}>
+                  {activeBatches.map(b => (
+                    <MenuItem key={b.id} value={b.id}>{b.breed} ({b.id} - {b.quantity} birds)</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <TextField 
+                label="Quantity Sold *" 
+                type="number"
+                placeholder="e.g. 50" 
+                size="small"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+              />
+
+              <TextField 
+                label="Total Amount Received (₦) *" 
+                type="number"
+                placeholder="e.g. 225000" 
+                size="small"
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormControl fullWidth size="small">
+                <InputLabel>Payment Method</InputLabel>
+                <Select value={paymentMethod} label="Payment Method" onChange={(e) => setPaymentMethod(e.target.value)}>
+                  <MenuItem value="Bank transfer">Bank Transfer</MenuItem>
+                  <MenuItem value="Cash">Cash</MenuItem>
+                  <MenuItem value="POS">POS Terminal</MenuItem>
+                  <MenuItem value="Paystack">Paystack Online</MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField 
+                label="Sale Date" 
+                type="date"
+                size="small"
+                value={saleDate}
+                onChange={(e) => setSaleDate(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </div>
+          </div>
+        </DialogContent>
+
+        <DialogActions className="p-4 bg-white border-t border-slate-200 flex justify-end gap-2">
+          <MuiButton onClick={handleClose} variant="text" sx={{ textTransform: 'none', color: '#64748b' }}>
+            Cancel
+          </MuiButton>
+          <MuiButton 
+            onClick={() => {
+              if (!customerName || !quantity || !totalAmount) {
+                toast.error('Please enter customer name, quantity, and total amount');
+                return;
+              }
+              handleAddSale();
+            }} 
+            variant="contained" 
+            sx={{ 
+              bgcolor: '#0f172a', 
+              '&:hover': { bgcolor: '#1e293b' }, 
+              textTransform: 'none', 
+              fontWeight: 700, 
+              px: 3, 
+              py: 1, 
+              borderRadius: 2.5 
+            }}
+          >
+            Save New Sale
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* 2. World-Class Executive Invoice Generator Modal */}
       <Dialog 
         open={openInvoiceModal} 
         onClose={() => setOpenInvoiceModal(false)} 
         fullWidth 
         maxWidth="md"
-        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}
+        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}
       >
-        <div className="bg-slate-900 text-white p-6 flex items-center justify-between">
+        <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-lg shadow-lg shadow-indigo-600/30">
               <FileText size={22} />
             </div>
             <div>
-              <h3 className="font-extrabold text-lg tracking-tight">World-Class Invoice Generator</h3>
+              <h3 className="font-extrabold text-base sm:text-lg tracking-tight">World-Class Invoice Generator</h3>
               <p className="text-xs text-indigo-200">Create merchant customer invoices with instant online payment links</p>
             </div>
           </div>
@@ -515,10 +641,10 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           </button>
         </div>
 
-        <DialogContent className="p-6 space-y-6 bg-slate-50">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <DialogContent className="p-5 sm:p-6 space-y-6 bg-slate-50">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">1. Customer & Billing Details</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <TextField 
                 label="Customer / Business Name *" 
                 placeholder="e.g. Maitama Supermarket Ltd" 
@@ -546,7 +672,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">2. Line Items & Pricing</h4>
             <div className="space-y-4">
               <TextField 
@@ -558,7 +684,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 onChange={(e) => setInvItems(e.target.value)}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <TextField 
                   label="Quantity *" 
                   type="number"
@@ -593,13 +719,13 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 block">Total Invoice Amount</span>
                 <span className="text-[11px] text-slate-500">Calculated based on quantity × unit price</span>
               </div>
-              <div className="text-2xl font-black font-mono text-indigo-650">
+              <div className="text-xl sm:text-2xl font-black font-mono text-indigo-650">
                 ₦{(Number(invQuantity || 1) * Number(invUnitPrice || 0)).toLocaleString()}
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">3. Initial Payment Status</h4>
             <FormControl fullWidth size="small">
               <InputLabel>Status</InputLabel>
@@ -611,9 +737,9 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           </div>
         </DialogContent>
 
-        <DialogActions className="p-4 bg-white border-t border-slate-200 flex justify-between items-center">
-          <span className="text-xs text-slate-400 font-medium">Generating will produce a shareable Paystack online payment link.</span>
-          <div className="flex gap-2">
+        <DialogActions className="p-4 bg-white border-t border-slate-200 flex justify-between items-center flex-wrap gap-2">
+          <span className="text-xs text-slate-400 font-medium hidden sm:inline">Generates a shareable Paystack online payment link.</span>
+          <div className="flex gap-2 w-full sm:w-auto justify-end">
             <MuiButton onClick={() => setOpenInvoiceModal(false)} variant="text" sx={{ textTransform: 'none', color: '#64748b' }}>
               Cancel
             </MuiButton>
@@ -636,22 +762,22 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         </DialogActions>
       </Dialog>
 
-      {/* Invoice Viewer Modal */}
+      {/* 3. Responsive Invoice Viewer Modal */}
       <Dialog 
         open={openInvoiceView} 
         onClose={handleCloseInvoiceView} 
         fullWidth 
         maxWidth="md" 
-        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}
+        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}
       >
         <DialogContent className="p-0 overflow-y-auto bg-slate-50">
-          <div className="bg-slate-900 text-white p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
+          <div className="bg-slate-900 text-white p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
+              <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30 shrink-0">
                 <FileText size={24} />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 flex-wrap">
                   Invoice #{selectedInvoice?.id}
                   <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${
                     selectedInvoice?.status === 'Paid' 
@@ -665,23 +791,23 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <button 
                 onClick={() => selectedInvoice && handleCopyPaymentLink(selectedInvoice)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
                 <Copy size={14} /> Copy Online Link
               </button>
               <button 
                 onClick={() => selectedInvoice && handleShareWhatsApp(selectedInvoice)} 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
                 <MessageSquare size={14} /> Share WhatsApp
               </button>
-              <button onClick={handlePrint} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5">
+              <button onClick={handlePrint} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
                 <Printer size={14} /> Print PDF
               </button>
-              <button onClick={handleCloseInvoiceView} className="text-slate-400 hover:text-white p-2">
+              <button onClick={handleCloseInvoiceView} className="text-slate-400 hover:text-white p-2 cursor-pointer">
                 <X size={20} />
               </button>
             </div>
@@ -689,14 +815,14 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
           {/* Shareable Online Payment Link Notice Banner */}
           {selectedInvoice && selectedInvoice.status !== 'Paid' && (
-            <div className="p-4 bg-indigo-50 border-b border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-indigo-900 font-medium">
-                <ShieldCheck size={18} className="text-indigo-600 shrink-0" />
-                <span>Shareable Online Payment Link: <strong className="font-mono text-indigo-700">{typeof window !== 'undefined' ? window.location.origin : ''}/pay-invoice/{selectedInvoice.id}</strong></span>
+            <div className="p-4 bg-indigo-50 border-b border-indigo-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-start sm:items-center gap-2 text-indigo-900 font-medium min-w-0">
+                <ShieldCheck size={18} className="text-indigo-600 shrink-0 mt-0.5 sm:mt-0" />
+                <span className="truncate">Shareable Online Payment Link: <strong className="font-mono text-indigo-700 truncate">{typeof window !== 'undefined' ? window.location.origin : ''}/pay-invoice/{selectedInvoice.id}</strong></span>
               </div>
               <button 
                 onClick={() => handleCopyPaymentLink(selectedInvoice)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shrink-0 flex items-center gap-1"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
               >
                 <Copy size={12} /> Copy Link
               </button>
@@ -704,42 +830,42 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           )}
 
           {/* Printable Professional Invoice Body */}
-          <div className="p-8 sm:p-12 bg-white text-slate-800 space-y-8 font-sans">
-            <div className="flex justify-between items-start border-b border-slate-200 pb-8">
+          <div className="p-4 sm:p-8 md:p-12 bg-white text-slate-800 space-y-6 font-sans overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6 sm:pb-8">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-base">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-base shrink-0">
                     P
                   </div>
-                  <h2 className="text-2xl font-bold tracking-tight text-slate-900">POULTRY FARM ENTERPRISE</h2>
+                  <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900 break-words">POULTRY FARM ENTERPRISE</h2>
                 </div>
                 <p className="text-xs text-slate-500">Official Merchant Invoice</p>
                 <p className="text-xs text-slate-500">Support: billing@poultryfarm.com</p>
               </div>
 
-              <div className="text-right">
-                <span className="text-3xl font-extrabold tracking-tight text-slate-900 font-mono">INVOICE</span>
-                <p className="text-xs font-bold text-indigo-600 font-mono mt-1">#{selectedInvoice?.id}</p>
-                <p className="text-xs text-slate-500 mt-2">Date: <strong>{selectedInvoice?.date}</strong></p>
+              <div className="text-left sm:text-right">
+                <span className="text-xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-mono block">INVOICE</span>
+                <p className="text-xs font-bold text-indigo-600 font-mono mt-0.5">#{selectedInvoice?.id}</p>
+                <p className="text-xs text-slate-500 mt-1">Date: <strong>{selectedInvoice?.date}</strong></p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 p-4 sm:p-6 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed To:</span>
-                <h4 className="text-base font-extrabold text-slate-900">{selectedInvoice?.customerName}</h4>
+                <h4 className="text-sm sm:text-base font-extrabold text-slate-900 break-words">{selectedInvoice?.customerName}</h4>
                 <p className="text-slate-500 mt-1">Status: <strong className={selectedInvoice?.status === 'Paid' ? 'text-emerald-600' : 'text-amber-600'}>{selectedInvoice?.status}</strong></p>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Due Amount:</span>
-                <div className="text-3xl font-extrabold font-mono text-indigo-650">
+                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-indigo-650">
                   ₦{selectedInvoice?.totalAmount.toLocaleString()}
                 </div>
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-slate-200">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full text-left text-xs min-w-[400px]">
                 <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-[10px] tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-3 px-4">Item Description</th>
@@ -757,6 +883,12 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <div className="pt-4 flex justify-end">
+              <MuiButton onClick={handleCloseInvoiceView} variant="outlined" sx={{ textTransform: 'none', color: '#64748b', borderColor: '#cbd5e1' }}>
+                Close Preview
+              </MuiButton>
             </div>
           </div>
         </DialogContent>

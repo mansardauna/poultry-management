@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, Calendar, Settings, CheckCircle, Clock, Trash2 } from 'lucide-react';
+import { Plus, Calendar, Settings, CheckCircle, Clock, Trash2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DatabaseSchema, MedicationTemplate, MedicationSchedule, ChickenBatch } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
@@ -352,20 +352,28 @@ export function HealthClient({ role }: { role: string }) {
       </Dialog>
 
       {/* Add Template Modal */}
-      <Dialog open={openTemplate} onClose={() => setOpenTemplate(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-poppins)', textTransform: 'uppercase', fontWeight: 600 }}>Define Medication Template</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
-          <div className="h-2" />
+      <Dialog open={openTemplate} onClose={() => setOpenTemplate(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}>
+        <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
+          <div>
+            <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">Define Medication Template</h3>
+            <p className="text-xs text-indigo-200 mt-0.5">Create reusable vaccination & medication schedules for flock breeds</p>
+          </div>
+          <button onClick={() => setOpenTemplate(false)} className="text-slate-400 hover:text-white cursor-pointer">
+            <X size={20} />
+          </button>
+        </div>
+
+        <DialogContent className="flex flex-col gap-4 p-5 sm:p-6 bg-slate-50">
           <TextField
-            label="Template Name"
+            label="Template Name *"
             fullWidth
             variant="outlined"
+            size="small"
             value={templateName}
             onChange={(e) => setTemplateName(e.target.value)}
             placeholder="e.g. Standard Broiler 8-Week Program"
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-          <FormControl fullWidth variant="outlined">
+          <FormControl fullWidth variant="outlined" size="small">
             <InputLabel>Target Flock Type</InputLabel>
             <Select
               value={targetType}
@@ -379,66 +387,97 @@ export function HealthClient({ role }: { role: string }) {
             </Select>
           </FormControl>
           
-          <div className="mt-4 border-t border-slate-200 pt-4 space-y-3">
-            <h4 className="text-xs font-semibold uppercase text-slate-500 mb-2">Schedule Stages</h4>
+          <div className="mt-2 border-t border-slate-200 pt-4 space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Schedule Stages</h4>
+              <span className="text-[11px] text-slate-400">Define day offset & medication name</span>
+            </div>
+
             {stages.map((st, i) => (
-              <div key={i} className="flex gap-2 items-center">
-                <TextField
-                  label="Day Offset"
-                  type="number"
-                  variant="outlined"
-                  size="small"
-                  className="w-24"
-                  value={st.dayOffset}
-                  onChange={(e) => {
-                    const newStages = [...stages];
-                    newStages[i].dayOffset = Number(e.target.value);
-                    setStages(newStages);
-                  }}
-                />
-                <TextField
-                  label="Medication Name"
-                  variant="outlined"
-                  size="small"
-                  className="flex-1"
-                  value={st.medicationName}
-                  onChange={(e) => {
-                    const newStages = [...stages];
-                    newStages[i].medicationName = e.target.value;
-                    setStages(newStages);
-                  }}
-                />
-                <FormControl variant="outlined" size="small" className="w-32">
-                  <Select
-                    value={st.type}
-                    onChange={(e) => {
-                      const newStages = [...stages];
-                      newStages[i].type = e.target.value as any;
-                      setStages(newStages);
-                    }}
-                  >
-                    <MenuItem value="Vaccine">Vaccine</MenuItem>
-                    <MenuItem value="Medication">Medication</MenuItem>
-                    <MenuItem value="Supplement">Supplement</MenuItem>
-                  </Select>
-                </FormControl>
+              <div key={i} className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:gap-2 sm:items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 w-full items-center">
+                  <div className="sm:col-span-3">
+                    <TextField
+                      label="Day Offset *"
+                      type="number"
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      value={st.dayOffset}
+                      onChange={(e) => {
+                        const newStages = [...stages];
+                        newStages[i].dayOffset = Number(e.target.value);
+                        setStages(newStages);
+                      }}
+                      placeholder="1"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-5">
+                    <TextField
+                      label="Medication / Vaccine *"
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      value={st.medicationName}
+                      onChange={(e) => {
+                        const newStages = [...stages];
+                        newStages[i].medicationName = e.target.value;
+                        setStages(newStages);
+                      }}
+                      placeholder="e.g. Newcastle / Gumboro"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-4">
+                    <FormControl variant="outlined" size="small" fullWidth>
+                      <InputLabel>Type</InputLabel>
+                      <Select
+                        value={st.type}
+                        label="Type"
+                        onChange={(e) => {
+                          const newStages = [...stages];
+                          newStages[i].type = e.target.value as any;
+                          setStages(newStages);
+                        }}
+                      >
+                        <MenuItem value="Vaccine">Vaccine</MenuItem>
+                        <MenuItem value="Medication">Medication</MenuItem>
+                        <MenuItem value="Supplement">Supplement</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                </div>
               </div>
             ))}
+
             <button 
               onClick={addStageRow}
-              className="text-indigo-600 text-xs font-semibold hover:underline"
+              className="mt-2 text-indigo-600 text-xs font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
-              + Add Stage
+              + Add Another Schedule Stage
             </button>
           </div>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={() => setOpenTemplate(false)} sx={{ color: '#64748b' }}>Cancel</MuiButton>
+
+        <DialogActions sx={{ p: 2.5, bgcolor: 'white', borderTop: '1px solid #e2e8f0', justifyContent: 'space-between' }}>
+          <MuiButton onClick={() => setOpenTemplate(false)} variant="outlined" sx={{ textTransform: 'none', color: '#64748b', borderColor: '#cbd5e1', fontWeight: 600 }}>
+            Cancel
+          </MuiButton>
           <MuiButton 
-            onClick={handleSaveTemplate} 
+            onClick={() => {
+              if (!templateName.trim()) {
+                toast.error('Please enter a Template Name');
+                return;
+              }
+              if (stages.some(s => !s.medicationName.trim())) {
+                toast.error('Please enter Medication/Vaccine Name for all schedule stages');
+                return;
+              }
+              handleSaveTemplate();
+            }} 
             variant="contained" 
-            disabled={!templateName || stages.some(s => !s.medicationName)}
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
+            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, textTransform: 'none', fontWeight: 700, px: 3, borderRadius: 2 }}
           >
             Save Template
           </MuiButton>
