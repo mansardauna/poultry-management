@@ -66,11 +66,7 @@ export function useTableLogic<T>({ data, searchFields = [], initialPageSize = 20
   }, [sortedData, currentPage, pageSize]);
 
   const totalPages = Math.ceil(sortedData.length / pageSize) || 1;
-
-  // Reset to page 1 if data shrinks below current page
-  useMemo(() => {
-    if (currentPage > totalPages) setCurrentPage(1);
-  }, [totalPages, currentPage]);
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
   return {
     data: paginatedData,
