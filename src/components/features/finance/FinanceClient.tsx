@@ -448,7 +448,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Expense Category</InputLabel>
+            <InputLabel shrink>Expense Category</InputLabel>
             <Select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -500,7 +500,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Expense Category</InputLabel>
+            <InputLabel shrink>Expense Category</InputLabel>
             <Select value={category} onChange={(e) => setCategory(e.target.value)} label="Expense Category" className="rounded-sm">
               <MenuItem value="Feed">Feed</MenuItem>
               <MenuItem value="Drugs">Drugs &amp; Vaccines</MenuItem>

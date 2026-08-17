@@ -849,7 +849,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Nesting Box</InputLabel>
+            <InputLabel shrink>Nesting Box</InputLabel>
             <Select
               value={auditBox}
               onChange={(e) => setAuditBox(e.target.value)}
@@ -863,7 +863,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Cushion Condition</InputLabel>
+            <InputLabel shrink>Cushion Condition</InputLabel>
             <Select
               value={auditCondition}
               onChange={(e) => setAuditCondition(e.target.value)}
@@ -903,7 +903,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Newly Laying Bird ID</InputLabel>
+            <InputLabel shrink>Newly Laying Bird ID</InputLabel>
             <Select
               value={maturationBirdId}
               onChange={(e) => setMaturationBirdId(e.target.value)}
@@ -1010,7 +1010,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Nesting Box</InputLabel>
+            <InputLabel shrink>Nesting Box</InputLabel>
             <Select
               value={editAuditBox}
               onChange={(e) => setEditAuditBox(e.target.value)}
@@ -1024,7 +1024,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Cushion Condition</InputLabel>
+            <InputLabel shrink>Cushion Condition</InputLabel>
             <Select
               value={editAuditCondition}
               onChange={(e) => setEditAuditCondition(e.target.value)}
@@ -1064,7 +1064,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Newly Laying Bird ID</InputLabel>
+            <InputLabel shrink>Newly Laying Bird ID</InputLabel>
             <Select
               value={editMaturationBirdId}
               onChange={(e) => setEditMaturationBirdId(e.target.value)}

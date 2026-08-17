@@ -451,7 +451,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setAgeInWeeks(e.target.value)}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Type</InputLabel>
+            <InputLabel shrink>Type</InputLabel>
             <Select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -464,7 +464,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Farm Section</InputLabel>
+            <InputLabel shrink>Farm Section</InputLabel>
             <Select
               value={farmSection}
               onChange={(e) => setFarmSection(e.target.value)}
@@ -477,7 +477,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Vaccination Status</InputLabel>
+            <InputLabel shrink>Vaccination Status</InputLabel>
             <Select
               value={vaccinationStatus}
               onChange={(e) => setVaccinationStatus(e.target.value)}
@@ -618,7 +618,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setTransferCount(e.target.value)}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Target Section</InputLabel>
+            <InputLabel shrink>Target Section</InputLabel>
             <Select
               value={targetSection}
               onChange={(e) => setTargetSection(e.target.value)}
@@ -673,7 +673,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setAgeInWeeks(e.target.value)}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Type</InputLabel>
+            <InputLabel shrink>Type</InputLabel>
             <Select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -686,7 +686,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Farm Section</InputLabel>
+            <InputLabel shrink>Farm Section</InputLabel>
             <Select
               value={farmSection}
               onChange={(e) => setFarmSection(e.target.value)}

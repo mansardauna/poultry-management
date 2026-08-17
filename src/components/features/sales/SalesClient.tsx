@@ -516,19 +516,24 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         </div>
 
         <DialogContent className="p-5 sm:p-6 space-y-6 bg-slate-50">
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
-            <TextField 
-              label="Customer Name / Business *" 
-              placeholder="e.g. John Doe / City Hotel" 
-              fullWidth 
-              size="small"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            />
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div>
+              <TextField 
+                label="Customer Name / Business *" 
+                placeholder="e.g. John Doe / City Hotel" 
+                fullWidth 
+                size="small"
+                variant="outlined"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
+                sx={{ mb: 1 }}
+              />
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-4">
-              <FormControl fullWidth size="small">
-                <InputLabel>Product Type</InputLabel>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-5">
+              <FormControl fullWidth size="small" variant="outlined">
+                <InputLabel shrink>Product Type</InputLabel>
                 <Select value={type} label="Product Type" onChange={(e) => setType(e.target.value)}>
                   <MenuItem value="Eggs">Eggs (Cracked / Fresh)</MenuItem>
                   <MenuItem value="Chickens">Chickens (Spent Layers / Broilers)</MenuItem>
@@ -537,8 +542,8 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 </Select>
               </FormControl>
 
-              <FormControl fullWidth size="small">
-                <InputLabel>Flock Batch</InputLabel>
+              <FormControl fullWidth size="small" variant="outlined">
+                <InputLabel shrink>Flock Batch</InputLabel>
                 <Select value={selectedBatchId} label="Flock Batch" onChange={(e) => setSelectedBatchId(e.target.value)}>
                   {activeBatches.map(b => (
                     <MenuItem key={b.id} value={b.id}>{b.breed} ({b.id} - {b.quantity} birds)</MenuItem>
@@ -547,14 +552,16 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               </FormControl>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-5">
               <TextField 
                 label="Quantity Sold *" 
                 type="number"
                 placeholder="e.g. 50" 
                 size="small"
+                variant="outlined"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
 
               <TextField 
@@ -562,14 +569,16 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 type="number"
                 placeholder="e.g. 225000" 
                 size="small"
+                variant="outlined"
                 value={totalAmount}
                 onChange={(e) => setTotalAmount(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-4">
-              <FormControl fullWidth size="small">
-                <InputLabel>Payment Method</InputLabel>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-5">
+              <FormControl fullWidth size="small" variant="outlined">
+                <InputLabel shrink>Payment Method</InputLabel>
                 <Select value={paymentMethod} label="Payment Method" onChange={(e) => setPaymentMethod(e.target.value)}>
                   <MenuItem value="Bank transfer">Bank Transfer</MenuItem>
                   <MenuItem value="Cash">Cash</MenuItem>
@@ -582,6 +591,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 label="Sale Date" 
                 type="date"
                 size="small"
+                variant="outlined"
                 value={saleDate}
                 onChange={(e) => setSaleDate(e.target.value)}
                 slotProps={{ inputLabel: { shrink: true } }}
@@ -642,56 +652,69 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         </div>
 
         <DialogContent className="p-5 sm:p-6 space-y-6 bg-slate-50">
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">1. Customer & Billing Details</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-5">
               <TextField 
                 label="Customer / Business Name *" 
                 placeholder="e.g. Maitama Supermarket Ltd" 
                 fullWidth 
                 size="small"
+                variant="outlined"
                 value={invCustomerName}
                 onChange={(e) => setInvCustomerName(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
               <TextField 
                 label="Customer Phone / WhatsApp" 
                 placeholder="e.g. +234 803 123 4567" 
                 fullWidth 
                 size="small"
+                variant="outlined"
                 value={invPhone}
                 onChange={(e) => setInvPhone(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
               <TextField 
                 label="Customer Email" 
                 placeholder="e.g. billing@maitama.com" 
                 fullWidth 
                 size="small"
+                variant="outlined"
                 value={invEmail}
                 onChange={(e) => setInvEmail(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">2. Line Items & Pricing</h4>
-            <div className="space-y-5">
-              <TextField 
-                label="Invoice Items / Description *" 
-                placeholder="e.g. 50 Crates of Large Eggs + Packaging" 
-                fullWidth 
-                size="small"
-                value={invItems}
-                onChange={(e) => setInvItems(e.target.value)}
-              />
+            <div className="space-y-6">
+              <div>
+                <TextField 
+                  label="Invoice Items / Description *" 
+                  placeholder="e.g. 50 Crates of Large Eggs + Packaging" 
+                  fullWidth 
+                  size="small"
+                  variant="outlined"
+                  value={invItems}
+                  onChange={(e) => setInvItems(e.target.value)}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  sx={{ mb: 1 }}
+                />
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-5">
                 <TextField 
                   label="Quantity *" 
                   type="number"
                   placeholder="50" 
                   size="small"
+                  variant="outlined"
                   value={invQuantity}
                   onChange={(e) => setInvQuantity(e.target.value)}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
 
                 <TextField 
@@ -699,14 +722,17 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                   type="number"
                   placeholder="4400" 
                   size="small"
+                  variant="outlined"
                   value={invUnitPrice}
                   onChange={(e) => setInvUnitPrice(e.target.value)}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
 
                 <TextField 
                   label="Payment Due Date" 
                   type="date"
                   size="small"
+                  variant="outlined"
                   value={invDueDate}
                   onChange={(e) => setInvDueDate(e.target.value)}
                   slotProps={{ inputLabel: { shrink: true } }}

@@ -754,7 +754,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Feed Type</InputLabel>
+            <InputLabel shrink>Feed Type</InputLabel>
             <Select
               value={useFeedId}
               onChange={(e) => setUseFeedId(e.target.value)}
@@ -767,7 +767,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Chicken Batch</InputLabel>
+            <InputLabel shrink>Chicken Batch</InputLabel>
             <Select
               value={useBatchId}
               onChange={(e) => setUseBatchId(e.target.value)}
@@ -808,7 +808,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Feed Type</InputLabel>
+            <InputLabel shrink>Feed Type</InputLabel>
             <Select
               value={restockFeedId}
               onChange={(e) => setRestockFeedId(e.target.value)}
@@ -876,7 +876,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Partner Supplier</InputLabel>
+            <InputLabel shrink>Partner Supplier</InputLabel>
             <Select
               value={pipelineSupplier}
               onChange={(e) => setPipelineSupplier(e.target.value)}
@@ -889,7 +889,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Restructured Status</InputLabel>
+            <InputLabel shrink>Restructured Status</InputLabel>
             <Select
               value={pipelineStatus}
               onChange={(e) => setPipelineStatus(e.target.value)}
@@ -975,7 +975,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Status</InputLabel>
+            <InputLabel shrink>Status</InputLabel>
             <Select
               value={editPipelineStatus}
               onChange={(e) => setEditPipelineStatus(e.target.value)}
