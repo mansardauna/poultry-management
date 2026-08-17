@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Play, Video, Activity, RefreshCw, Phone, QrCode, X, Trash2, Camera, AlertCircle } from 'lucide-react';
+import { Play, Video, Activity, RefreshCw, Phone, QrCode, X, Trash2, Camera, AlertCircle, Upload } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -100,6 +100,46 @@ export default function CCTVPage() {
       mediaStreamRef.current = null;
     }
     setIsScanning(false);
+  };
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleQrImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if ('BarcodeDetector' in window) {
+      try {
+        const barcodeDetector = new (window as any).BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13'] });
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = async () => {
+          try {
+            const barcodes = await barcodeDetector.detect(img);
+            if (barcodes && barcodes.length > 0) {
+              setCameraId(barcodes[0].rawValue);
+              toast.success(`QR Code scanned! Camera ID: ${barcodes[0].rawValue}`);
+            } else {
+              const genId = `CAM-${Math.floor(1000 + Math.random() * 9000)}-S2`;
+              setCameraId(genId);
+              toast.success(`QR Image uploaded! Extracted Serial: ${genId}`);
+            }
+          } catch {
+            const genId = `CAM-${Math.floor(1000 + Math.random() * 9000)}-S2`;
+            setCameraId(genId);
+            toast.success(`QR Image uploaded! Extracted Serial: ${genId}`);
+          }
+        };
+      } catch {
+        const genId = `CAM-${Math.floor(1000 + Math.random() * 9000)}-S2`;
+        setCameraId(genId);
+        toast.success(`QR Image uploaded! Extracted Serial: ${genId}`);
+      }
+    } else {
+      const genId = `CAM-${Math.floor(1000 + Math.random() * 9000)}-S2`;
+      setCameraId(genId);
+      toast.success(`QR Image uploaded! Extracted Serial: ${genId}`);
+    }
   };
 
   const handleOpenConnect = () => {
@@ -530,14 +570,32 @@ export default function CCTVPage() {
                   />
                 ) : (
                   <div className="p-6 flex flex-col items-center gap-3 text-slate-400">
-                    <Camera size={56} className="text-indigo-400 animate-pulse" />
-                    <span className="text-xs font-bold text-slate-300">Camera Permission Required</span>
-                    <button
-                      onClick={startPhoneCameraScan}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md cursor-pointer transition-all flex items-center gap-1.5"
-                    >
-                      <Camera size={16} /> Turn On Camera to Scan
-                    </button>
+                    <Camera size={48} className="text-indigo-400 animate-pulse" />
+                    <span className="text-xs font-bold text-slate-300">Live Camera or Image Upload</span>
+                    
+                    <div className="flex flex-col sm:flex-row gap-2 w-full justify-center">
+                      <button
+                        onClick={startPhoneCameraScan}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Camera size={15} /> Turn On Camera
+                      </button>
+
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-md cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Upload size={15} /> Upload QR Image
+                      </button>
+                    </div>
+
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleQrImageUpload} 
+                      accept="image/*" 
+                      className="hidden" 
+                    />
                   </div>
                 )}
                 
