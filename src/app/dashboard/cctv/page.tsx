@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Play, Video, AlertTriangle, Activity, RefreshCw, Phone, Circle, QrCode } from 'lucide-react';
+import { Play, Video, AlertTriangle, Activity, RefreshCw, Phone, Circle, QrCode, X } from 'lucide-react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -406,35 +406,62 @@ export default function CCTVPage() {
       </Dialog>
 
       {/* Connect Camera Modal */}
-      <Dialog open={openConnectModal} onClose={handleCloseConnect} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 600 }}>Pair New Camera via QR Code</DialogTitle>
-        <DialogContent className="flex flex-col gap-6 pt-4 items-center text-center">
-          <div className="h-2" />
-          <p className="text-xs text-slate-500">
-            Scan this QR code using the Farm Camera App, or manually enter the Camera ID below to pair it to the central NVR system.
-          </p>
-          <div className="bg-slate-50 p-6 rounded-lg border-2 border-dashed border-indigo-200 flex flex-col items-center justify-center gap-3 w-48 h-48">
-            <QrCode size={96} className="text-indigo-600" />
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">NVR-SYNC-AWAIT</span>
+      <Dialog open={openConnectModal} onClose={handleCloseConnect} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}>
+        <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
+          <div>
+            <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">Pair & Connect Hardware CCTV Camera</h3>
+            <p className="text-xs text-indigo-200 mt-0.5">Connect RTSP, HLS, ONVIF IP Cameras or NVR Systems</p>
           </div>
-          <TextField
-            label="Hardware Camera ID (e.g. CAM-2938-X)"
-            fullWidth
-            variant="outlined"
-            placeholder="Enter ID manually..."
-            value={cameraId}
-            onChange={(e) => setCameraId(e.target.value)}
-          />
+          <button onClick={handleCloseConnect} className="text-slate-400 hover:text-white cursor-pointer">
+            <X size={20} />
+          </button>
+        </div>
+
+        <DialogContent className="flex flex-col gap-4 p-5 sm:p-6 bg-slate-50">
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Enter your farm camera&apos;s RTSP/HLS stream URL or hardware serial number to pair live video feeds to the PFMS dashboard.
+          </p>
+
+          <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <TextField
+              label="Camera Name / Section *"
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="e.g. Coop 1 Laying Section / North Gate"
+            />
+
+            <TextField
+              label="RTSP / HLS / IP Camera Stream URL *"
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="rtsp://admin:password@192.168.1.64:554/stream1"
+              value={cameraId}
+              onChange={(e) => setCameraId(e.target.value)}
+              helperText="Supported: RTSP (Hikvision/Dahua/Reolink), HLS (.m3u8), or WebRTC"
+            />
+
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-1">
+              <p className="font-bold text-slate-900">💡 Common Camera URL Formats:</p>
+              <p>• <strong>Hikvision / Dahua</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.64:554/Streaming/Channels/101</code></p>
+              <p>• <strong>Reolink / Tapo</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.100:554/h264Preview_01_main</code></p>
+              <p>• <strong>Cloud / HLS Stream</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">https://cctv.myfarm.com/live/stream1.m3u8</code></p>
+            </div>
+          </div>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseConnect} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+
+        <DialogActions sx={{ p: 2.5, bgcolor: 'white', borderTop: '1px solid #e2e8f0', justifyContent: 'space-between' }}>
+          <MuiButton onClick={handleCloseConnect} variant="outlined" sx={{ textTransform: 'none', color: '#64748b', borderColor: '#cbd5e1', fontWeight: 600 }}>
+            Cancel
+          </MuiButton>
           <MuiButton 
             onClick={handleConnectCamera} 
             variant="contained" 
             disabled={!cameraId}
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
+            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, textTransform: 'none', fontWeight: 700, px: 3, borderRadius: 2 }}
           >
-            Pair Camera
+            Pair Real Camera Stream
           </MuiButton>
         </DialogActions>
       </Dialog>
