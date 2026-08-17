@@ -28,6 +28,7 @@ export default function CCTVPage() {
   const router = useRouter();
   const [openRepairModal, setOpenRepairModal] = useState(false);
   const [openConnectModal, setOpenConnectModal] = useState(false);
+  const [connectTab, setConnectTab] = useState<'qr' | 'url'>('qr');
   const [cameraId, setCameraId] = useState('');
   const [technicianNote, setTechnicianNote] = useState('');
   const [diagnosticsLogs, setDiagnosticsLogs] = useState<DiagnosticsLog[]>([]);
@@ -410,45 +411,110 @@ export default function CCTVPage() {
         <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
           <div>
             <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">Pair & Connect Hardware CCTV Camera</h3>
-            <p className="text-xs text-indigo-200 mt-0.5">Connect RTSP, HLS, ONVIF IP Cameras or NVR Systems</p>
+            <p className="text-xs text-indigo-200 mt-0.5">Scan camera QR sticker or pair via RTSP/IP stream</p>
           </div>
           <button onClick={handleCloseConnect} className="text-slate-400 hover:text-white cursor-pointer">
             <X size={20} />
           </button>
         </div>
 
+        {/* Tab Selector */}
+        <div className="flex border-b border-slate-200 bg-white px-6 pt-3 gap-6 text-xs font-bold uppercase tracking-wider">
+          <button
+            onClick={() => setConnectTab('qr')}
+            className={`pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              connectTab === 'qr' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-700'
+            }`}
+          >
+            <QrCode size={16} /> Instant QR Scan Pairing
+          </button>
+          <button
+            onClick={() => setConnectTab('url')}
+            className={`pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              connectTab === 'url' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-700'
+            }`}
+          >
+            <Video size={16} /> RTSP / IP Stream URL
+          </button>
+        </div>
+
         <DialogContent className="flex flex-col gap-4 p-5 sm:p-6 bg-slate-50">
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Enter your farm camera&apos;s RTSP/HLS stream URL or hardware serial number to pair live video feeds to the PFMS dashboard.
-          </p>
+          {connectTab === 'qr' ? (
+            <div className="flex flex-col items-center text-center space-y-4">
+              <p className="text-xs text-slate-600 max-w-md leading-relaxed">
+                <strong>Yes, absolutely!</strong> Point your camera lens at the QR code below, or scan the QR code sticker printed on your camera box/chassis to pair automatically.
+              </p>
 
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <TextField
-              label="Camera Name / Section *"
-              fullWidth
-              variant="outlined"
-              size="small"
-              placeholder="e.g. Coop 1 Laying Section / North Gate"
-            />
+              <div className="bg-white p-6 rounded-2xl border-2 border-indigo-200 shadow-md flex flex-col items-center justify-center gap-3 w-56 h-56 relative overflow-hidden">
+                <QrCode size={120} className="text-indigo-600" />
+                <span className="text-[10px] font-mono text-indigo-700 uppercase font-bold tracking-widest bg-indigo-50 px-2 py-0.5 rounded">
+                  {cameraId ? cameraId : 'SCANNING FOR CAMERA...'}
+                </span>
+                <div className="absolute inset-x-0 top-0 h-1 bg-indigo-500 animate-pulse" />
+              </div>
 
-            <TextField
-              label="RTSP / HLS / IP Camera Stream URL *"
-              fullWidth
-              variant="outlined"
-              size="small"
-              placeholder="rtsp://admin:password@192.168.1.64:554/stream1"
-              value={cameraId}
-              onChange={(e) => setCameraId(e.target.value)}
-              helperText="Supported: RTSP (Hikvision/Dahua/Reolink), HLS (.m3u8), or WebRTC"
-            />
+              <div className="w-full max-w-md space-y-2">
+                <TextField
+                  label="Camera Name / Farm Location *"
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="e.g. Coop 1 Laying Section / North Gate"
+                />
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-1">
-              <p className="font-bold text-slate-900">💡 Common Camera URL Formats:</p>
-              <p>• <strong>Hikvision / Dahua</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.64:554/Streaming/Channels/101</code></p>
-              <p>• <strong>Reolink / Tapo</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.100:554/h264Preview_01_main</code></p>
-              <p>• <strong>Cloud / HLS Stream</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">https://cctv.myfarm.com/live/stream1.m3u8</code></p>
+                <TextField
+                  label="Hardware Serial No / Camera ID (Optional)"
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="CAM-8931-S2 (Auto-filled on scan)"
+                  value={cameraId}
+                  onChange={(e) => setCameraId(e.target.value)}
+                />
+              </div>
+
+              <button
+                onClick={() => setCameraId(`CAM-${Math.floor(1000 + Math.random() * 9000)}-S2`)}
+                className="text-xs text-indigo-600 font-bold hover:underline cursor-pointer flex items-center gap-1"
+              >
+                📷 Auto-Scan Camera QR Sticker (Simulate Camera Scan)
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Enter your farm camera&apos;s RTSP/HLS stream URL or hardware serial number to pair live video feeds to the PFMS dashboard.
+              </p>
+
+              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <TextField
+                  label="Camera Name / Section *"
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="e.g. Coop 1 Laying Section / North Gate"
+                />
+
+                <TextField
+                  label="RTSP / HLS / IP Camera Stream URL *"
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="rtsp://admin:password@192.168.1.64:554/stream1"
+                  value={cameraId}
+                  onChange={(e) => setCameraId(e.target.value)}
+                  helperText="Supported: RTSP (Hikvision/Dahua/Reolink), HLS (.m3u8), or WebRTC"
+                />
+
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-1">
+                  <p className="font-bold text-slate-900">💡 Common Camera URL Formats:</p>
+                  <p>• <strong>Hikvision / Dahua</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.64:554/Streaming/Channels/101</code></p>
+                  <p>• <strong>Reolink / Tapo</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">rtsp://admin:pass@192.168.1.100:554/h264Preview_01_main</code></p>
+                  <p>• <strong>Cloud / HLS Stream</strong>: <code className="text-indigo-600 bg-white px-1 py-0.5 rounded font-mono">https://cctv.myfarm.com/live/stream1.m3u8</code></p>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
 
         <DialogActions sx={{ p: 2.5, bgcolor: 'white', borderTop: '1px solid #e2e8f0', justifyContent: 'space-between' }}>
