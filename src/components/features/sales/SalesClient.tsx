@@ -515,18 +515,18 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           </button>
         </div>
 
-        <DialogContent className="p-5 sm:p-6 space-y-4 bg-slate-50">
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <DialogContent className="p-5 sm:p-6 space-y-6 bg-slate-50">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
             <TextField 
-              label="Customer Name *" 
-              placeholder="e.g. Iya Faruq Frozen / Walk-in Customer" 
+              label="Customer Name / Business *" 
+              placeholder="e.g. John Doe / City Hotel" 
               fullWidth 
               size="small"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-4">
               <FormControl fullWidth size="small">
                 <InputLabel>Product Type</InputLabel>
                 <Select value={type} label="Product Type" onChange={(e) => setType(e.target.value)}>
@@ -547,7 +547,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               </FormControl>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-4">
               <TextField 
                 label="Quantity Sold *" 
                 type="number"
@@ -567,7 +567,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-4">
               <FormControl fullWidth size="small">
                 <InputLabel>Payment Method</InputLabel>
                 <Select value={paymentMethod} label="Payment Method" onChange={(e) => setPaymentMethod(e.target.value)}>
@@ -642,9 +642,9 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         </div>
 
         <DialogContent className="p-5 sm:p-6 space-y-6 bg-slate-50">
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">1. Customer & Billing Details</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4">
               <TextField 
                 label="Customer / Business Name *" 
                 placeholder="e.g. Maitama Supermarket Ltd" 
@@ -672,9 +672,9 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">2. Line Items & Pricing</h4>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <TextField 
                 label="Invoice Items / Description *" 
                 placeholder="e.g. 50 Crates of Large Eggs + Packaging" 
@@ -684,7 +684,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 onChange={(e) => setInvItems(e.target.value)}
               />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4">
                 <TextField 
                   label="Quantity *" 
                   type="number"

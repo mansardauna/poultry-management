@@ -751,7 +751,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Log Feed Usage Modal */}
       <Dialog open={openUsage} onClose={handleCloseUsage} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Feed Consumption</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Feed Type</InputLabel>
@@ -805,7 +805,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Receive Stock Modal */}
       <Dialog open={openRestock} onClose={handleCloseRestock} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Receive Stock (Restock)</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Feed Type</InputLabel>
@@ -864,7 +864,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Logistics Procurement Pipeline Modal */}
       <Dialog open={openLogistics} onClose={handleCloseLogistics} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Logistics Procurement Step</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
             label="Pipeline Milestone Action"
@@ -928,7 +928,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Edit Consumption Log Modal */}
       <Dialog open={openEditLog} onClose={handleCloseEditLog} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Feed Consumption</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
             label="Quantity Consumed (kg)"
@@ -956,7 +956,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Edit Pipeline Modal */}
       <Dialog open={openEditPipeline} onClose={handleCloseEditPipeline} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Procurement Pipeline</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
             label="Milestone Action"

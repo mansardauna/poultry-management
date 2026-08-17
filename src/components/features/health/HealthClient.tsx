@@ -300,7 +300,7 @@ export function HealthClient({ role }: { role: string }) {
       {/* Apply Template Modal */}
       <Dialog open={openApply} onClose={() => setOpenApply(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-poppins)', textTransform: 'uppercase', fontWeight: 600 }}>Apply Medication Template</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Select Batch</InputLabel>

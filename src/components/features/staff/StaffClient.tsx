@@ -524,7 +524,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       {/* Add Staff Modal */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase' }}>Add Staff Member</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
             label="Full Name"

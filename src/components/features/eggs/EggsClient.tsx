@@ -784,7 +784,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       {/* Log Collection Modal */}
       <Dialog open={openCollect} onClose={handleCloseCollect} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Egg Collection</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
             label="Collection Date"
@@ -846,7 +846,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       {/* Cushioning Audit Modal */}
       <Dialog open={openAudit} onClose={handleCloseAudit} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Record Nesting Box Cushion Audit</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Nesting Box</InputLabel>
@@ -900,7 +900,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       {/* Maturation Log Modal */}
       <Dialog open={openMaturation} onClose={handleCloseMaturation} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Newly Laying Maturation Metric</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Newly Laying Bird ID</InputLabel>
@@ -961,7 +961,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       {/* Edit Collection Modal */}
       <Dialog open={openEditCollection} onClose={handleCloseEditCollection} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Egg Collection</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
             label="Good Eggs Count"
@@ -1007,7 +1007,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       {/* Edit Audit Modal */}
       <Dialog open={openEditAudit} onClose={handleCloseEditAudit} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Cushioning Audit</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Nesting Box</InputLabel>
@@ -1061,7 +1061,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       {/* Edit Maturation Modal */}
       <Dialog open={openEditMaturation} onClose={handleCloseEditMaturation} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
         <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Maturation Record</DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
             <InputLabel>Newly Laying Bird ID</InputLabel>
