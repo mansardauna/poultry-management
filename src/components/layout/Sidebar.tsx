@@ -34,6 +34,7 @@ import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
 import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { useLanguage } from '../features/LanguageContext';
+import { useWhiteLabel } from '../features/WhiteLabelContext';
 import toast from 'react-hot-toast';
 
 /**
@@ -167,6 +168,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
 
   const { workspaces, activeWorkspace, isLoading, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
   const { texts } = useLanguage();
+  const whiteLabel = useWhiteLabel();
 
   const isAdmin = role === 'Admin' || role === 'SuperAdmin';
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
@@ -288,10 +290,14 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 className="w-full flex items-center justify-between py-2 px-2 hover:bg-indigo-900 rounded-md transition-colors text-left"
               >
                 <div className="flex items-center gap-2 truncate">
-                  <Box size={24} className="text-blue-400 flex-shrink-0" />
+                  {whiteLabel.logoUrl ? (
+                    <img src={whiteLabel.logoUrl} alt="Logo" className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                  ) : (
+                    <Box size={24} className="text-blue-400 flex-shrink-0" />
+                  )}
                   <div className="flex flex-col truncate">
-                    <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'PFMS'}</span>
-                    <span className="text-xs text-indigo-400">Workspace</span>
+                    <span className="font-semibold text-white text-sm truncate">{whiteLabel.coopName || activeWorkspace?.name || 'PFMS'}</span>
+                    <span className="text-xs text-indigo-400">{activeWorkspace?.name || 'Workspace'}</span>
                   </div>
                 </div>
                 <ChevronDown size={16} className={clsx("text-indigo-400 transition-transform", isDropdownOpen && "rotate-180")} />

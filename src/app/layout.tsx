@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 import { WorkspaceProvider } from "@/components/features/WorkspaceContext";
 import { LanguageProvider } from "@/components/features/LanguageContext";
 import { TimeFilterProvider } from "@/components/features/TimeFilterContext";
+import { WhiteLabelProvider } from "@/components/features/WhiteLabelContext";
 import { Preloader } from "@/components/features/Preloader";
 import { InstallPrompt } from "@/components/features/InstallPrompt";
 
@@ -44,10 +45,12 @@ export default function RootLayout({
         <LanguageProvider>
           <TimeFilterProvider>
             <Preloader />
-            <WorkspaceProvider>
-              {children}
-              <InstallPrompt />
-            </WorkspaceProvider>
+            <WhiteLabelProvider>
+              <WorkspaceProvider>
+                {children}
+                <InstallPrompt />
+              </WorkspaceProvider>
+            </WhiteLabelProvider>
           </TimeFilterProvider>
         </LanguageProvider>
       </body>
