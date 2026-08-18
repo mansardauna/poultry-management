@@ -352,7 +352,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
   const handleInitiateCheckout = async (planId: string, isAnnualCycle: boolean) => {
     try {
-      toast.loading('Initiating checkout...', { id: 'chk-toast' });
+      toast.loading('Initiating plan upgrade...', { id: 'chk-toast' });
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -361,6 +361,9 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       const data = await res.json();
       toast.dismiss('chk-toast');
       if (data.url) {
+        document.cookie = `pfms_tier=${planId}; path=/; max-age=31536000`;
+        setCurrentTier(planId);
+        toast.success(`Plan updated to ${planId === 'enterprise' || planId === 'entrepreneur' ? 'Enterprise Plus' : 'Commercial Pro'}!`);
         window.location.href = data.url;
       } else {
         toast.error(data.error || 'Failed to start checkout');

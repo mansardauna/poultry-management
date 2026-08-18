@@ -17,7 +17,8 @@ interface EnterpriseClientProps {
 
 export function EnterpriseClient({ tier, workspaces, cooperative, apiKeys = [], consultants = [] }: EnterpriseClientProps) {
   const router = useRouter();
-  const isEnterprise = tier === 'enterprise';
+  const normTier = (tier || '').toLowerCase();
+  const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
   // State for White-label branding
   const [coopName, setCoopName] = useState(cooperative?.coopName || 'National Poultry Farmers Cooperative');

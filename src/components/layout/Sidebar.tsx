@@ -401,7 +401,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 ? pathname === '/dashboard' 
                 : (pathname === item.href || pathname.startsWith(item.href + '/'));
                 
-              const isLocked = (item.name === 'CCTV Monitoring' && currentTier === 'free') || (item.name === 'Enterprise Hub' && currentTier !== 'enterprise');
+              const normTier = (currentTier || '').toLowerCase();
+              const isEnterpriseTier = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
+              const isProTier = isEnterpriseTier || normTier === 'pro';
+              const isLocked = (item.name === 'CCTV Monitoring' && !isProTier) || (item.name === 'Enterprise Hub' && !isEnterpriseTier);
                 
               return (
                 <Link
