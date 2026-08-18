@@ -101,6 +101,44 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
 
   return (
     <div className="space-y-8 max-w-6xl pb-16 font-sans">
+      {/* Top Enterprise Sub-Navigation Bar */}
+      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold uppercase tracking-wider">
+        <button
+          onClick={() => router.push('/dashboard/enterprise/branches')}
+          className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
+        >
+          <Building2 size={16} /> Branch Matrix
+        </button>
+
+        <button
+          onClick={() => router.push('/dashboard/enterprise/whitelabel')}
+          className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
+        >
+          <Sparkles size={16} /> White-Label & Themes
+        </button>
+
+        <button
+          onClick={() => router.push('/dashboard/enterprise/api')}
+          className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap bg-indigo-600 text-white shadow-md"
+        >
+          <Key size={16} /> API Keys & Webhooks ({apiKeys.length})
+        </button>
+
+        <button
+          onClick={() => router.push('/dashboard/enterprise/vet')}
+          className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
+        >
+          <Sparkles size={16} /> 24/7 Vet Hotline
+        </button>
+
+        <button
+          onClick={() => router.push('/dashboard/enterprise/feed-pool')}
+          className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
+        >
+          <Sparkles size={16} /> Wholesale Feed Pool
+        </button>
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">

@@ -465,37 +465,37 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                   {!isCollapsed && !isLocked && item.name === 'Enterprise Hub' && (pathname.startsWith('/dashboard/enterprise')) && (
                     <div className="pl-9 pr-2 py-1.5 space-y-1 bg-indigo-950/60 text-[11px] font-medium border-l-2 border-purple-500/40 my-1">
                       <Link 
-                        href="/dashboard/enterprise?tab=matrix" 
+                        href="/dashboard/enterprise/branches" 
                         onClick={() => setIsMobileOpen(false)}
-                        className="block text-indigo-200 hover:text-white py-1 hover:underline"
+                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/branches') ? 'text-white font-bold' : 'text-indigo-200 hover:text-white'}`}
                       >
-                        • Branch Matrix & Telemetry
+                        • Branch Matrix & Transfers
                       </Link>
                       <Link 
-                        href="/dashboard/enterprise?tab=whitelabel" 
+                        href="/dashboard/enterprise/whitelabel" 
                         onClick={() => setIsMobileOpen(false)}
-                        className="block text-purple-300 hover:text-white py-1 hover:underline"
+                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/whitelabel') ? 'text-white font-bold' : 'text-purple-300 hover:text-white'}`}
                       >
                         • White-Label & Themes
                       </Link>
                       <Link 
-                        href="/dashboard/enterprise?tab=apikeys" 
+                        href="/dashboard/enterprise/api" 
                         onClick={() => setIsMobileOpen(false)}
-                        className="block text-indigo-300 hover:text-white py-1 hover:underline"
+                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/api') ? 'text-white font-bold' : 'text-indigo-300 hover:text-white'}`}
                       >
                         • API Keys & Webhooks
                       </Link>
                       <Link 
-                        href="/dashboard/enterprise?tab=vet" 
+                        href="/dashboard/enterprise/vet" 
                         onClick={() => setIsMobileOpen(false)}
-                        className="block text-emerald-300 hover:text-white py-1 hover:underline"
+                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/vet') ? 'text-white font-bold' : 'text-emerald-300 hover:text-white'}`}
                       >
                         • 24/7 Vet Hotline
                       </Link>
                       <Link 
-                        href="/dashboard/enterprise?tab=bulk" 
+                        href="/dashboard/enterprise/feed-pool" 
                         onClick={() => setIsMobileOpen(false)}
-                        className="block text-amber-300 hover:text-white py-1 hover:underline"
+                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/feed-pool') ? 'text-white font-bold' : 'text-amber-300 hover:text-white'}`}
                       >
                         • Wholesale Feed Pool
                       </Link>
