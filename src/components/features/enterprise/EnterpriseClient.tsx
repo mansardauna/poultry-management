@@ -718,10 +718,10 @@ export function EnterpriseClient({
               <div className="bg-slate-900 text-white p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <span className="text-[10px] bg-emerald-500 text-slate-950 font-black uppercase px-2.5 py-0.5 rounded font-mono">
-                    24/7 DEDICATED CONSULTANT
+                    24/7 DEDICATED VET CONSULTANT
                   </span>
-                  <h3 className="text-lg font-bold text-white">Dr. Samuel Okafor (Lead Vet Specialist)</h3>
-                  <p className="text-xs text-slate-300 font-mono">+234 800-POULTRY-VET (Direct Hotline)</p>
+                  <h3 className="text-lg font-bold text-white">On-Call Certified Veterinary Specialist</h3>
+                  <p className="text-xs text-slate-300 font-mono">+234 800-POULTRY-VET (Direct Emergency Line)</p>
                 </div>
 
                 <a 
