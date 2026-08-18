@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
@@ -14,7 +15,10 @@ import {
   Coins,
   CheckSquare,
   Bell,
-  MapPin
+  MapPin,
+  Calendar,
+  Sparkles,
+  Lock
 } from 'lucide-react';
 import { DatabaseSchema, StaffTask, AlertLog } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
@@ -57,6 +61,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const { activeWorkspace, workspaces } = useWorkspace();
   const { texts, language } = useLanguage();
   const { timeRange, filterByTimeRange } = useTimeFilter();
+
+  const [tier, setTier] = useState('free');
+  const router = useRouter();
+
+  useEffect(() => {
+    const match = document.cookie.match(/pfms_tier=([^;]+)/);
+    if (match) setTier(match[1]);
+  }, []);
 
   const alertLogsLogic = useTableLogic({
     data: filterByTimeRange(data.alertLogs || []),
@@ -288,6 +300,35 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
   const activeTasks = filterByTimeRange(data.tasks || []).filter(t => t.status === 'Pending');
 
+  const normTier = (tier || '').toLowerCase();
+  const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
+  const isPro = isEnterprise || normTier === 'pro';
+  const isFree = !isPro;
+
+  // Generate GitHub-Style 365-Day Sales Contribution Grid Data
+  const salesHeatmapDays = [];
+  for (let i = 364; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const salesThatDay = data.sales.filter(s => s.date === dateStr);
+    const totalAmount = salesThatDay.reduce((sum, s) => sum + s.totalAmount, 0);
+    const count = salesThatDay.length;
+
+    let intensity = 0;
+    if (totalAmount > 50000) intensity = 4;
+    else if (totalAmount > 25000) intensity = 3;
+    else if (totalAmount > 10000) intensity = 2;
+    else if (totalAmount > 0 || count > 0) intensity = 1;
+
+    salesHeatmapDays.push({
+      date: dateStr,
+      count,
+      totalAmount,
+      intensity
+    });
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome & Farm Profile Banner */}
@@ -426,57 +467,172 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       {/* Daily Egg Production Chart & Weekly Comparative Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <Card>
-            <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
-                {texts.dashboard.eggProductionVolumeChart}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
-                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
-                      labelClassName=" text-slate-800 text-xs uppercase"
-                    />
-                    <Legend />
-                    <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name="Good Eggs Collected" />
-                    <Bar dataKey="CrackedSpoilt" stackId="a" fill="#ef4444" name="Cracked / Spoilt" />
-                  </BarChart>
-                </ResponsiveContainer>
+          {isFree ? (
+            <Card className="border-2 border-indigo-200 bg-slate-900 text-white p-8 text-center rounded-2xl shadow-xl">
+              <div className="w-16 h-16 bg-indigo-600/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/40 animate-pulse">
+                <Lock size={32} />
               </div>
-            </CardContent>
-          </Card>
+              <h3 className="text-xl font-extrabold text-white mb-2">Production Analytics & Financial Charts Locked</h3>
+              <p className="text-xs text-slate-300 max-w-md mx-auto mb-6 leading-relaxed">
+                Free accounts have basic flock tracking. Upgrade to Commercial Pro or Enterprise Plus to unlock daily egg production bar charts, financial revenue line charts, and AI voice auto-loggers.
+              </p>
+              <button 
+                onClick={() => router.push('/dashboard/settings?tab=subscription')}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3.5 rounded-xl shadow-lg cursor-pointer transition-all inline-flex items-center gap-2"
+              >
+                <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
+              </button>
+            </Card>
+          ) : (
+            <>
+              <Card>
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+                    {texts.dashboard.eggProductionVolumeChart}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                      <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                        <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
+                          labelClassName=" text-slate-800 text-xs uppercase"
+                        />
+                        <Legend />
+                        <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name="Good Eggs Collected" />
+                        <Bar dataKey="CrackedSpoilt" stackId="a" fill="#ef4444" name="Cracked / Spoilt" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
-                Sales & Revenue Trend
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                  <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
-                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
-                      labelClassName=" text-slate-800 text-xs uppercase"
-                      formatter={(value: any) => [`₦${Number(value || 0).toLocaleString()}`, "Revenue"]}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Sales Revenue (₦)" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+                    Sales & Revenue Trend
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                      <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                        <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
+                          labelClassName=" text-slate-800 text-xs uppercase"
+                          formatter={(value: any) => [`₦${Number(value || 0).toLocaleString()}`, "Revenue"]}
+                        />
+                        <Legend />
+                        <Line type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Sales Revenue (₦)" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* GitHub-Style 365-Day Sales Contribution Activity Heatmap Grid (ENTERPRISE EXCLUSIVE) */}
+          {isEnterprise ? (
+            <Card className="border border-slate-200 bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden">
+              <CardHeader className="border-b border-slate-800 bg-slate-950 py-4 px-6 flex flex-row items-center justify-between">
+                <CardTitle className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2 font-mono">
+                  <Sparkles size={16} /> 365-Day Enterprise Sales Contribution Heatmap Grid
+                </CardTitle>
+                <span className="text-[10px] text-slate-400 font-mono">365 DAYS RECORDED</span>
+              </CardHeader>
+
+              <CardContent className="p-6 space-y-4">
+                <div className="overflow-x-auto pb-2 scrollbar-custom">
+                  <div className="inline-grid grid-rows-7 grid-flow-col gap-1 min-w-[700px]">
+                    {salesHeatmapDays.map((day, idx) => (
+                      <div
+                        key={idx}
+                        title={`${day.date}: ${day.count} sales (₦${day.totalAmount.toLocaleString()})`}
+                        className={`w-3 h-3 rounded-sm transition-all cursor-pointer hover:scale-125 ${
+                          day.intensity === 4 ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' :
+                          day.intensity === 3 ? 'bg-emerald-500' :
+                          day.intensity === 2 ? 'bg-emerald-700' :
+                          day.intensity === 1 ? 'bg-emerald-900/60' : 'bg-slate-800/60'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 border-t border-slate-800 pt-3">
+                  <span>GitHub Sales Intensity Grid</span>
+                  <div className="flex items-center gap-1.5">
+                    <span>Less</span>
+                    <span className="w-2.5 h-2.5 rounded-sm bg-slate-800/60" />
+                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-900/60" />
+                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-700" />
+                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
+                    <span>More</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="bg-purple-950/40 border border-purple-500/30 p-6 rounded-2xl text-center space-y-3 shadow-lg">
+              <span className="bg-purple-600 text-white font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">ENTERPRISE EXCLUSIVE</span>
+              <h4 className="text-sm font-extrabold text-white">GitHub-Style 365-Day Sales Activity Heatmap Grid</h4>
+              <p className="text-xs text-purple-200 max-w-md mx-auto">Upgrade to Enterprise Plus to unlock 365-day sales contribution activity heatmaps and multi-farm calendars.</p>
+              <button onClick={() => router.push('/dashboard/settings?tab=subscription')} className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-xl cursor-pointer shadow">
+                ⚡ Upgrade to Enterprise Plus
+              </button>
+            </div>
+          )}
+
+          {/* Multi-Farm Production & Vet Calendar (ENTERPRISE EXCLUSIVE) */}
+          {isEnterprise && (
+            <Card className="border border-slate-200 bg-white rounded-2xl shadow-sm">
+              <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-bold uppercase text-slate-900 flex items-center gap-2">
+                  <Calendar size={18} className="text-indigo-600" /> Multi-Farm Production & Vet Inspection Calendar
+                </CardTitle>
+                <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2.5 py-1 rounded font-mono">
+                  {todayFormatted}
+                </span>
+              </CardHeader>
+
+              <CardContent className="p-6 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
+                  <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase text-emerald-700 block">VACCINATION SCHEDULE</span>
+                    <p className="text-slate-900 font-bold">Gumboro Vaccine (Coop 2)</p>
+                    <p className="text-[10px] text-slate-500 font-mono">Due: Tomorrow at 08:00 AM</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase text-indigo-700 block">FEED DELIVERY</span>
+                    <p className="text-slate-900 font-bold">100 Bags Layer Mash</p>
+                    <p className="text-[10px] text-slate-500 font-mono">Scheduled: Friday 10:00 AM</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-purple-200 bg-purple-50/50 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase text-purple-700 block">VET FARM AUDIT</span>
+                    <p className="text-slate-900 font-bold">Dr. Okafor Routine Inspection</p>
+                    <p className="text-[10px] text-slate-500 font-mono">Aug 22, 2026</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
+                    <span className="text-[9px] font-extrabold uppercase text-amber-800 block">EGG CRATE DISPATCH</span>
+                    <p className="text-slate-900 font-bold">Maitama Supermarket (300 Crates)</p>
+                    <p className="text-[10px] text-slate-500 font-mono">Aug 24, 2026</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="flex flex-col space-y-6">

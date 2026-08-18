@@ -525,8 +525,13 @@ export default function CCTVPage() {
       {/* CCTV Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Surveillance CCTV Connectivity</h1>
-          <p className="text-sm text-slate-500 mt-1">Real-time security monitoring, IP camera streams & diagnostic logs</p>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Surveillance CCTV Connectivity</h1>
+            <span className="bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-2.5 py-0.5 rounded-full shadow-sm">
+              🚧 COMING SOON
+            </span>
+          </div>
+          <p className="text-sm text-slate-500">Real-time security monitoring, IP camera streams & diagnostic logs</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button 
