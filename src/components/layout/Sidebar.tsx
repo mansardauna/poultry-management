@@ -407,53 +407,95 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               const isLocked = (item.name === 'CCTV Monitoring' && !isProTier) || (item.name === 'Enterprise Hub' && !isEnterpriseTier);
                 
               return (
-                <Link
-                  key={item.name}
-                  href={isLocked ? '/dashboard/settings?tab=subscription' : item.href}
-                  onClick={(e) => {
-                     if (isLocked) {
-                        e.preventDefault();
-                        toast.error(
-                          item.name === 'Enterprise Hub' 
-                            ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
-                            : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
-                        );
-                        router.push('/dashboard/settings?tab=subscription');
-                        return;
-                     }
-                     setIsMobileOpen(false);
-                  }}
-                  className={clsx(
-                    isActive ? 'bg-indigo-800 text-white' : 'hover:bg-indigo-900 hover:text-white',
-                    isLocked && 'opacity-60 grayscale',
-                    'group flex items-center px-3 py-3 text-sm font-semibold rounded-md transition-colors relative',
-                    isCollapsed ? 'justify-center' : ''
-                  )}
-                  title={isCollapsed ? item.name : undefined}
-                >
-                  <item.icon
-                    size={22}
+                <div key={item.name}>
+                  <Link
+                    href={isLocked ? '/dashboard/settings?tab=subscription' : item.href}
+                    onClick={(e) => {
+                       if (isLocked) {
+                          e.preventDefault();
+                          toast.error(
+                            item.name === 'Enterprise Hub' 
+                              ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
+                              : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
+                          );
+                          router.push('/dashboard/settings?tab=subscription');
+                          return;
+                       }
+                       setIsMobileOpen(false);
+                    }}
                     className={clsx(
-                      isActive ? 'text-blue-400' : 'text-indigo-400 group-hover:text-blue-300',
-                      'flex-shrink-0 transition-colors',
-                      isCollapsed ? 'mr-0' : 'mr-3'
+                      isActive ? 'bg-indigo-800 text-white' : 'hover:bg-indigo-900 hover:text-white',
+                      isLocked && 'opacity-60 grayscale',
+                      'group flex items-center px-3 py-3 text-sm font-semibold rounded-md transition-colors relative',
+                      isCollapsed ? 'justify-center' : ''
                     )}
-                  />
-                  {!isCollapsed && (
-                     <span className="truncate flex-1">
-                        {texts.menu[item.name] || item.name}
-                     </span>
+                    title={isCollapsed ? item.name : undefined}
+                  >
+                    <item.icon
+                      size={22}
+                      className={clsx(
+                        isActive ? 'text-blue-400' : 'text-indigo-400 group-hover:text-blue-300',
+                        'flex-shrink-0 transition-colors',
+                        isCollapsed ? 'mr-0' : 'mr-3'
+                      )}
+                    />
+                    {!isCollapsed && (
+                       <span className="truncate flex-1">
+                          {texts.menu[item.name] || item.name}
+                       </span>
+                    )}
+                    
+                    {!isCollapsed && isLocked && (
+                      <span className="text-[10px] uppercase font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">PRO</span>
+                    )}
+                    
+                    {/* Active Indicator */}
+                    {isActive && !isLocked && (
+                      <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
+                    )}
+                  </Link>
+
+                  {/* Enterprise Hub Sub-Menu Links */}
+                  {!isCollapsed && !isLocked && item.name === 'Enterprise Hub' && (pathname.startsWith('/dashboard/enterprise')) && (
+                    <div className="pl-9 pr-2 py-1.5 space-y-1 bg-indigo-950/60 text-[11px] font-medium border-l-2 border-purple-500/40 my-1">
+                      <Link 
+                        href="/dashboard/enterprise?tab=matrix" 
+                        onClick={() => setIsMobileOpen(false)}
+                        className="block text-indigo-200 hover:text-white py-1 hover:underline"
+                      >
+                        • Branch Matrix & Telemetry
+                      </Link>
+                      <Link 
+                        href="/dashboard/enterprise?tab=whitelabel" 
+                        onClick={() => setIsMobileOpen(false)}
+                        className="block text-purple-300 hover:text-white py-1 hover:underline"
+                      >
+                        • White-Label & Themes
+                      </Link>
+                      <Link 
+                        href="/dashboard/enterprise?tab=apikeys" 
+                        onClick={() => setIsMobileOpen(false)}
+                        className="block text-indigo-300 hover:text-white py-1 hover:underline"
+                      >
+                        • API Keys & Webhooks
+                      </Link>
+                      <Link 
+                        href="/dashboard/enterprise?tab=vet" 
+                        onClick={() => setIsMobileOpen(false)}
+                        className="block text-emerald-300 hover:text-white py-1 hover:underline"
+                      >
+                        • 24/7 Vet Hotline
+                      </Link>
+                      <Link 
+                        href="/dashboard/enterprise?tab=bulk" 
+                        onClick={() => setIsMobileOpen(false)}
+                        className="block text-amber-300 hover:text-white py-1 hover:underline"
+                      >
+                        • Wholesale Feed Pool
+                      </Link>
+                    </div>
                   )}
-                  
-                  {!isCollapsed && isLocked && (
-                    <span className="text-[10px] uppercase font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">PRO</span>
-                  )}
-                  
-                  {/* Active Indicator */}
-                  {isActive && !isLocked && (
-                    <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
-                  )}
-                </Link>
+                </div>
               );
             })}
           </nav>

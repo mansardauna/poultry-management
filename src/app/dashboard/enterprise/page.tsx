@@ -16,18 +16,44 @@ export default async function EnterprisePage() {
   const normTier = (rawTier || '').toLowerCase();
   const tier = (normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus') ? 'enterprise' : (normTier === 'pro' ? 'pro' : 'free');
 
-  const [workspacesRes, coopRes, apiKeysRes, consultantsRes] = await Promise.all([
+  // Fetch real data from database across all branches with zero demo data!
+  const [workspacesRes, coopRes, apiKeysRes, consultantsRes, bulkOrdersRes, batchesRes, eggsRes, feedsRes, salesRes] = await Promise.all([
     supabase.from('workspaces').select('*'),
     supabase.from('enterprise_cooperatives').select('*').eq('workspaceId', workspaceId).limit(1),
     supabase.from('enterprise_api_keys').select('*').eq('workspaceId', workspaceId),
-    supabase.from('enterprise_consultants').select('*').eq('workspaceId', workspaceId)
+    supabase.from('enterprise_consultants').select('*').eq('workspaceId', workspaceId),
+    supabase.from('enterprise_bulk_orders').select('*').eq('workspaceId', workspaceId),
+    supabase.from('batches').select('id, currentQuantity, workspaceId'),
+    supabase.from('eggs').select('id, quantity, workspaceId'),
+    supabase.from('feeds').select('id, quantityKg, workspaceId'),
+    supabase.from('sales').select('id, totalAmount, workspaceId')
   ]);
+
+  const workspaces = workspacesRes.data || [];
+  const batches = batchesRes.data || [];
+  const eggs = eggsRes.data || [];
+  const feeds = feedsRes.data || [];
+  const sales = salesRes.data || [];
+
+  // Compute real aggregated stats per branch
+  const branchMetrics: Record<string, { totalBirds: number; totalEggs: number; feedStockKg: number; revenue: number }> = {};
+  
+  workspaces.forEach(ws => {
+    branchMetrics[ws.id] = {
+      totalBirds: batches.filter(b => b.workspaceId === ws.id || !b.workspaceId).reduce((acc, b) => acc + Number(b.currentQuantity || 0), 0),
+      totalEggs: eggs.filter(e => e.workspaceId === ws.id || !e.workspaceId).reduce((acc, e) => acc + Number(e.quantity || 0), 0),
+      feedStockKg: feeds.filter(f => f.workspaceId === ws.id || !f.workspaceId).reduce((acc, f) => acc + Number(f.quantityKg || 0), 0),
+      revenue: sales.filter(s => s.workspaceId === ws.id || !s.workspaceId).reduce((acc, s) => acc + Number(s.totalAmount || 0), 0)
+    };
+  });
 
   return <EnterpriseClient 
     tier={tier} 
-    workspaces={workspacesRes.data || []} 
+    workspaces={workspaces} 
+    branchMetrics={branchMetrics}
     cooperative={coopRes.data?.[0]}
     apiKeys={apiKeysRes.data || []}
     consultants={consultantsRes.data || []}
+    bulkOrders={bulkOrdersRes.data || []}
   />;
 }
