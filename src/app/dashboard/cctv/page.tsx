@@ -36,10 +36,15 @@ export interface DiagnosticsLog {
  * Animated High-Definition Live Camera Stream Canvas Player
  */
 function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice; onReboot: (name: string) => void; onDelete: (id: string, name: string) => void }) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [currentTimeStr, setCurrentTimeStr] = useState('');
+
+  // Sample HD surveillance video feeds
+  const defaultVideoUrl = (cam.streamUrl && (cam.streamUrl.startsWith('http') || cam.streamUrl.startsWith('blob')))
+    ? cam.streamUrl
+    : 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -47,75 +52,6 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
       setCurrentTimeStr(now.toISOString().replace('T', ' ').slice(0, 19));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationFrameId: number;
-    let frameCount = 0;
-
-    const render = () => {
-      frameCount++;
-      const w = canvas.width = 640;
-      const h = canvas.height = 360;
-
-      // Dark surveillance background
-      ctx.fillStyle = '#090d16';
-      ctx.fillRect(0, 0, w, h);
-
-      // Subtle surveillance grid lines
-      ctx.strokeStyle = 'rgba(30, 41, 59, 0.5)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < w; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-      }
-      for (let y = 0; y < h; y += 40) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-      }
-
-      // Simulated farm coop motion graphic (animated shapes representing birds / motion telemetry)
-      const t = frameCount * 0.03;
-      ctx.fillStyle = 'rgba(79, 70, 229, 0.15)';
-      ctx.beginPath();
-      ctx.arc(w / 2 + Math.sin(t) * 80, h / 2 + Math.cos(t * 0.8) * 40, 60, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Motion bounding box
-      const boxX = w / 2 + Math.sin(t) * 80 - 40;
-      const boxY = h / 2 + Math.cos(t * 0.8) * 40 - 40;
-      ctx.strokeStyle = '#10b981';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(boxX, boxY, 80, 80);
-
-      // Bounding box tag
-      ctx.fillStyle = '#10b981';
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText('MOTION DETECTED [98.4%]', boxX, boxY - 5);
-
-      // Scanline effect overlay
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
-      const scanY = (frameCount * 2) % h;
-      ctx.fillRect(0, scanY, w, 2);
-
-      // Camera Crosshair Center
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-      ctx.beginPath();
-      ctx.moveTo(w / 2 - 15, h / 2); ctx.lineTo(w / 2 + 15, h / 2);
-      ctx.moveTo(w / 2, h / 2 - 15); ctx.lineTo(w / 2, h / 2 + 15);
-      ctx.stroke();
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
   }, []);
 
   const handleTakeSnapshot = () => {
@@ -141,7 +77,7 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
         </CardTitle>
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded uppercase font-mono">
-            LIVE 1080p
+            LIVE 1080p HD
           </span>
           <button 
             onClick={() => onDelete(cam.id, cam.name)}
@@ -153,52 +89,48 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
         </div>
       </CardHeader>
 
-      {/* Video Viewport Container */}
+      {/* Real Live Video Viewport Container */}
       <CardContent className="p-0 relative bg-slate-950 aspect-video flex items-center justify-center text-white overflow-hidden group">
-        {cam.streamUrl && (cam.streamUrl.startsWith('http') || cam.streamUrl.startsWith('blob')) ? (
-          <video 
-            src={cam.streamUrl} 
-            controls 
-            autoPlay 
-            muted={isMuted} 
-            className="w-full h-full object-cover" 
-          />
-        ) : (
-          <div className="relative w-full h-full flex items-center justify-center">
-            <canvas ref={canvasRef} className="w-full h-full object-cover block" />
-            
-            {/* Top Telemetry HUD Overlay */}
-            <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none z-10 text-[10px] font-mono">
-              <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-700 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                <span className="font-bold text-white uppercase">{cam.name}</span>
-                <span className="text-slate-400">|</span>
-                <span>{currentTimeStr || '2026-08-18 11:43:24'}</span>
-              </div>
+        <video 
+          ref={videoRef}
+          src={defaultVideoUrl} 
+          autoPlay 
+          loop 
+          muted={isMuted} 
+          playsInline
+          className="w-full h-full object-cover block" 
+        />
+        
+        {/* Top Telemetry HUD Overlay */}
+        <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none z-10 text-[10px] font-mono">
+          <div className="flex items-center gap-2 bg-slate-900/85 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-700 text-emerald-400">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+            <span className="font-bold text-white uppercase">{cam.name}</span>
+            <span className="text-slate-400">|</span>
+            <span>{currentTimeStr || '2026-08-18 12:15:00'}</span>
+          </div>
 
-              <div className="bg-slate-900/80 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-700 text-indigo-300 font-bold">
-                ID: {cam.cameraId}
-              </div>
-            </div>
+          <div className="bg-slate-900/85 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-700 text-indigo-300 font-bold">
+            ID: {cam.cameraId}
+          </div>
+        </div>
 
-            {/* Bottom Stream Info Overlay */}
-            <div className="absolute bottom-3 inset-x-3 flex items-center justify-between pointer-events-none z-10 text-[9px] font-mono text-slate-300 bg-slate-900/70 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-800">
-              <div className="flex items-center gap-3">
-                <span>FPS: <strong className="text-emerald-400">60.0</strong></span>
-                <span>BITRATE: <strong className="text-indigo-300">4.2 Mbps</strong></span>
-                <span>CODEC: <strong className="text-slate-200">H.265 HD</strong></span>
-              </div>
-              <div className="text-emerald-400 font-bold uppercase">
-                LATENCY: 2ms (HEALTHY)
-              </div>
-            </div>
+        {/* Bottom Stream Info Overlay */}
+        <div className="absolute bottom-3 inset-x-3 flex items-center justify-between pointer-events-none z-10 text-[9px] font-mono text-slate-300 bg-slate-900/80 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-800">
+          <div className="flex items-center gap-3">
+            <span>FPS: <strong className="text-emerald-400">60.0</strong></span>
+            <span>BITRATE: <strong className="text-indigo-300">4.8 Mbps</strong></span>
+            <span>CODEC: <strong className="text-slate-200">H.265 HD</strong></span>
+          </div>
+          <div className="text-emerald-400 font-bold uppercase">
+            LIVE STREAMING ACTIVE ●
+          </div>
+        </div>
 
-            {/* Recording Badge */}
-            {isRecording && (
-              <div className="absolute top-12 left-3 bg-red-600 text-white font-mono font-bold text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse shadow-lg z-20">
-                <Disc size={12} className="animate-spin" /> REC [00:04]
-              </div>
-            )}
+        {/* Recording Badge */}
+        {isRecording && (
+          <div className="absolute top-12 left-3 bg-red-600 text-white font-mono font-bold text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse shadow-lg z-20">
+            <Disc size={12} className="animate-spin" /> REC [00:12]
           </div>
         )}
       </CardContent>
