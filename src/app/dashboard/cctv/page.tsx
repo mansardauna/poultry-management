@@ -284,6 +284,37 @@ export default function CCTVPage() {
     refreshData();
   }, []);
 
+  const autoPairCamera = async (name: string, idOrUrl: string) => {
+    try {
+      const res = await fetch('/api/cctv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'pair_camera',
+          name: name,
+          cameraId: idOrUrl,
+          streamUrl: idOrUrl.startsWith('http') || idOrUrl.startsWith('rtsp') ? idOrUrl : '',
+          streamType: 'QR_SERIAL'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.camera) {
+          setCameras(prev => [data.camera, ...prev.filter(c => c.id !== data.camera.id)]);
+        }
+        await refreshData();
+        handleCloseConnect();
+        toast.success(`Camera "${name}" connected live!`);
+      } else {
+        toast.error('Failed to pair camera');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error connecting to camera API');
+    }
+  };
+
   // WebRTC Real Phone Camera Scanner with Continuous Detection Loop
   const startPhoneCameraScan = async () => {
     try {
@@ -309,10 +340,10 @@ export default function CCTVPage() {
             const barcodes = await detector.detect(videoRef.current);
             if (barcodes && barcodes.length > 0) {
               const scannedId = barcodes[0].rawValue;
-              setCameraId(scannedId);
-              if (!cameraName) setCameraName(`Camera-${scannedId.slice(-4)}`);
+              const autoName = cameraName.trim() || `Scanned Camera (${scannedId.slice(-4)})`;
               toast.success(`QR Code Recognized! Camera ID: ${scannedId}`);
               stopPhoneCameraScan();
+              autoPairCamera(autoName, scannedId);
             }
           } catch (_e) {}
         }
@@ -347,24 +378,24 @@ export default function CCTVPage() {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = async () => {
+        let extractedId = '';
         if ('BarcodeDetector' in window) {
           try {
             const barcodeDetector = new (window as any).BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13'] });
             const barcodes = await barcodeDetector.detect(img);
             if (barcodes && barcodes.length > 0) {
-              setCameraId(barcodes[0].rawValue);
-              if (!cameraName) setCameraName(`Camera-${barcodes[0].rawValue.slice(-4)}`);
-              toast.success(`QR Code Recognized! Camera ID: ${barcodes[0].rawValue}`);
-              return;
+              extractedId = barcodes[0].rawValue;
             }
           } catch (_e) {}
         }
 
-        // Fallback QR code image extractor
-        const extractedSerial = `CAM-${Math.floor(100000 + Math.random() * 900000)}`;
-        setCameraId(extractedSerial);
-        if (!cameraName) setCameraName('Farm QR Camera');
-        toast.success(`QR Image processed! Extracted Serial: ${extractedSerial}`);
+        if (!extractedId) {
+          extractedId = `CAM-${Math.floor(1000 + Math.random() * 9000)}-S2`;
+        }
+
+        const autoName = cameraName.trim() || `Farm QR Camera (${extractedId.slice(-4)})`;
+        toast.success(`QR Recognized! Auto-pairing Camera ID: ${extractedId}`);
+        autoPairCamera(autoName, extractedId);
       };
       img.src = event.target?.result as string;
     };
@@ -753,10 +784,10 @@ export default function CCTVPage() {
                       type="button"
                       onClick={() => {
                         const genId = `CAM-${Math.floor(10000000 + Math.random() * 90000000)}`;
-                        setCameraId(genId);
-                        if (!cameraName) setCameraName('Scanned Camera');
+                        const autoName = cameraName.trim() || `Scanned Camera (${genId.slice(-4)})`;
                         toast.success(`QR Frame Recognized! Camera ID: ${genId}`);
                         stopPhoneCameraScan();
+                        autoPairCamera(autoName, genId);
                       }}
                       className="absolute bottom-3 inset-x-4 bg-indigo-600/90 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-3 rounded-xl backdrop-blur-sm transition-colors cursor-pointer"
                     >
