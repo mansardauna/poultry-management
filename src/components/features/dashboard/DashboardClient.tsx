@@ -607,27 +607,43 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               <CardContent className="p-6 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
                   <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-emerald-700 block">VACCINATION SCHEDULE</span>
-                    <p className="text-slate-900 font-bold">Gumboro Vaccine (Coop 2)</p>
-                    <p className="text-[10px] text-slate-500 font-mono">Due: Tomorrow at 08:00 AM</p>
+                    <span className="text-[9px] font-extrabold uppercase text-emerald-700 block">VACCINATION & HEALTH</span>
+                    <p className="text-slate-900 font-bold">
+                      {data.batches[0] ? `${data.batches[0].breed} (${data.batches[0].type || 'Layers'})` : 'Flock Health Routine'}
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-mono">
+                      {data.batches[0] ? `Age: ${data.batches[0].ageInWeeks || 18} Weeks` : 'Status: Active'}
+                    </p>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-indigo-700 block">FEED DELIVERY</span>
-                    <p className="text-slate-900 font-bold">100 Bags Layer Mash</p>
-                    <p className="text-[10px] text-slate-500 font-mono">Scheduled: Friday 10:00 AM</p>
+                    <span className="text-[9px] font-extrabold uppercase text-indigo-700 block">FEED STOCK LEVEL</span>
+                    <p className="text-slate-900 font-bold">
+                      {data.feeds[0] ? `${data.feeds[0].quantityKg}kg ${data.feeds[0].type}` : 'Feed Inventory Normal'}
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-mono">
+                      {totalFeedKg < 50 ? '⚠️ Low Stock Alert' : 'Stock Status: Optimal'}
+                    </p>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-purple-200 bg-purple-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-purple-700 block">VET FARM AUDIT</span>
-                    <p className="text-slate-900 font-bold">Dr. Okafor Routine Inspection</p>
-                    <p className="text-[10px] text-slate-500 font-mono">Aug 22, 2026</p>
+                    <span className="text-[9px] font-extrabold uppercase text-purple-700 block">VET & DIAGNOSTICS</span>
+                    <p className="text-slate-900 font-bold">
+                      {data.alertLogs[0] ? data.alertLogs[0].message : 'Scheduled Farm Audit'}
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-mono">
+                      {data.alertLogs[0] ? `Date: ${data.alertLogs[0].date}` : 'Audit Status: Certified'}
+                    </p>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-amber-800 block">EGG CRATE DISPATCH</span>
-                    <p className="text-slate-900 font-bold">Maitama Supermarket (300 Crates)</p>
-                    <p className="text-[10px] text-slate-500 font-mono">Aug 24, 2026</p>
+                    <span className="text-[9px] font-extrabold uppercase text-amber-800 block">SALES DISPATCH LOG</span>
+                    <p className="text-slate-900 font-bold">
+                      {data.sales[0] ? `${data.sales[0].customerName} (₦${data.sales[0].totalAmount.toLocaleString()})` : 'Recent Wholesale Dispatch'}
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-mono">
+                      {data.sales[0] ? `Date: ${data.sales[0].date}` : 'Dispatch Status: Dispatched'}
+                    </p>
                   </div>
                 </div>
               </CardContent>
