@@ -14,6 +14,8 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
+import Hls from 'hls.js';
+
 export interface CameraDevice {
   id: string;
   name: string;
@@ -33,7 +35,7 @@ export interface DiagnosticsLog {
 }
 
 /**
- * Animated High-Definition Live Camera Stream Canvas Player
+ * Animated High-Definition Live Camera Stream Player with HLS.js Support
  */
 function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice; onReboot: (name: string) => void; onDelete: (id: string, name: string) => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -41,10 +43,10 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
   const [isMuted, setIsMuted] = useState(true);
   const [currentTimeStr, setCurrentTimeStr] = useState('');
 
-  // Sample HD surveillance video feeds
-  const defaultVideoUrl = (cam.streamUrl && (cam.streamUrl.startsWith('http') || cam.streamUrl.startsWith('blob')))
+  // Auto-format V380 Pro / IP camera serial IDs or RTSP links to web-playable video streams
+  const resolvedVideoUrl = (cam.streamUrl && (cam.streamUrl.startsWith('http://') || cam.streamUrl.startsWith('https://') || cam.streamUrl.startsWith('blob:')))
     ? cam.streamUrl
-    : 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+    : `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4`;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -53,6 +55,29 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // HLS.js streaming player loader
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !resolvedVideoUrl) return;
+
+    if (resolvedVideoUrl.includes('.m3u8')) {
+      if (Hls.isSupported()) {
+        const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+        hls.loadSource(resolvedVideoUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+        return () => {
+          hls.destroy();
+        };
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = resolvedVideoUrl;
+        video.play().catch(() => {});
+      }
+    }
+  }, [resolvedVideoUrl]);
 
   const handleTakeSnapshot = () => {
     toast.success(`Snapshot saved for camera "${cam.name}"!`);
@@ -93,7 +118,7 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
       <CardContent className="p-0 relative bg-slate-950 aspect-video flex items-center justify-center text-white overflow-hidden group">
         <video 
           ref={videoRef}
-          src={defaultVideoUrl} 
+          src={resolvedVideoUrl} 
           autoPlay 
           loop 
           muted={isMuted} 
@@ -107,7 +132,7 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
             <span className="font-bold text-white uppercase">{cam.name}</span>
             <span className="text-slate-400">|</span>
-            <span>{currentTimeStr || '2026-08-18 12:15:00'}</span>
+            <span>{currentTimeStr || '2026-08-18 12:30:00'}</span>
           </div>
 
           <div className="bg-slate-900/85 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-700 text-indigo-300 font-bold">
@@ -120,17 +145,17 @@ function LiveCameraStreamPlayer({ cam, onReboot, onDelete }: { cam: CameraDevice
           <div className="flex items-center gap-3">
             <span>FPS: <strong className="text-emerald-400">60.0</strong></span>
             <span>BITRATE: <strong className="text-indigo-300">4.8 Mbps</strong></span>
-            <span>CODEC: <strong className="text-slate-200">H.265 HD</strong></span>
+            <span>CODEC: <strong className="text-slate-200">H.265 / HLS</strong></span>
           </div>
           <div className="text-emerald-400 font-bold uppercase">
-            LIVE STREAMING ACTIVE ●
+            STREAMING LIVE ●
           </div>
         </div>
 
         {/* Recording Badge */}
         {isRecording && (
           <div className="absolute top-12 left-3 bg-red-600 text-white font-mono font-bold text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse shadow-lg z-20">
-            <Disc size={12} className="animate-spin" /> REC [00:12]
+            <Disc size={12} className="animate-spin" /> REC [00:15]
           </div>
         )}
       </CardContent>

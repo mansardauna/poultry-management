@@ -18,6 +18,7 @@
     "@supabase/supabase-js": "^2.110.7",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "hls.js": "^1.7.0",
     "iconsax-react": "^0.0.8",
     "jose": "^6.2.3",
     "js-cookie": "^3.0.8",
