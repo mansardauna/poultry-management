@@ -9,9 +9,34 @@ export async function GET() {
   const { data: cctvLogsData } = await supabase.from('cctvLogs').select('*').eq('workspaceId', workspaceId);
   const { data: cctvCamerasData } = await supabase.from('cctv_cameras').select('*').eq('workspaceId', workspaceId);
 
+  let cameras = cctvCamerasData || [];
+
+  // Fallback: If cctv_cameras table is empty, reconstruct paired cameras from audit logs
+  if (cameras.length === 0 && cctvLogsData && cctvLogsData.length > 0) {
+    const pairedLogs = cctvLogsData.filter(l => l.event && l.event.includes('Paired new hardware camera'));
+    const cameraMap = new Map();
+    for (const log of pairedLogs) {
+      const match = log.event.match(/ID\/URL:\s*([^)]+)/);
+      const extractedId = match ? match[1].trim() : 'CAM-ONLINE';
+      if (!cameraMap.has(log.device)) {
+        cameraMap.set(log.device, {
+          id: 'cam_' + log.id,
+          workspaceId,
+          name: log.device || 'Farm Camera',
+          cameraId: extractedId,
+          streamUrl: extractedId.startsWith('http') || extractedId.startsWith('rtsp') ? extractedId : '',
+          streamType: extractedId.startsWith('rtsp') ? 'RTSP' : 'QR_SERIAL',
+          status: 'Online',
+          createdAt: log.date || new Date().toISOString()
+        });
+      }
+    }
+    cameras = Array.from(cameraMap.values());
+  }
+
   return NextResponse.json({
     logs: cctvLogsData || [],
-    cameras: cctvCamerasData || []
+    cameras
   });
 }
 
