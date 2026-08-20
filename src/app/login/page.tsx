@@ -9,8 +9,10 @@ import Link from 'next/link';
 import { Dialog, DialogContent } from '@mui/material';
 
 export default function LoginPage() {
+  const [portalType, setPortalType] = useState<'standard' | 'enterprise'>('standard');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [subdomain, setSubdomain] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,16 +41,25 @@ export default function LoginPage() {
     setError('');
     setIsSubmitting(true);
 
+    if (portalType === 'enterprise') {
+      document.cookie = "pfms_tier=enterprise; path=/; max-age=31536000";
+    }
+
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, portalType, subdomain }),
     });
 
     setIsSubmitting(false);
 
     if (response.ok) {
-      router.push('/dashboard');
+      if (portalType === 'enterprise') {
+        document.cookie = "pfms_tier=enterprise; path=/; max-age=31536000";
+        router.push('/dashboard/enterprise/branches');
+      } else {
+        router.push('/dashboard');
+      }
       router.refresh();
       return;
     }
@@ -108,12 +119,40 @@ export default function LoginPage() {
         {/* Right Side: Wider Login Form */}
         <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
           <div>
-            <div className="mb-10 text-center md:text-left">
-              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">Enterprise Control Portal</span>
+            <div className="mb-6 text-center md:text-left">
+              {/* Portal Mode Switcher */}
+              <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 mb-6 border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPortalType('standard')}
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    portalType === 'standard' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  🏢 Standard Login
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPortalType('enterprise')}
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    portalType === 'enterprise' ? 'bg-purple-900 text-white shadow-md' : 'text-purple-700 hover:text-purple-900'
+                  }`}
+                >
+                  🏛️ Enterprise Portal
+                </button>
+              </div>
+
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+                {portalType === 'enterprise' ? 'Enterprise & Cooperative Control' : 'Farm Management System'}
+              </span>
               <h1 className="text-3xl lg:text-4xl font-extrabold uppercase tracking-tight text-slate-900 mt-1 mb-2">
-                Welcome Back
+                {portalType === 'enterprise' ? 'Enterprise Sign-In' : 'Welcome Back'}
               </h1>
-              <p className="text-sm font-medium text-slate-500">Sign in to manage your farm branches & operations.</p>
+              <p className="text-sm font-medium text-slate-500">
+                {portalType === 'enterprise' 
+                  ? 'Sign in to access your Multi-Farm Branch Matrix, White-Label Portal & REST APIs.'
+                  : 'Sign in to manage your farm branches & operations.'}
+              </p>
             </div>
             
             <form onSubmit={handleLogin} className="space-y-6">
@@ -124,6 +163,21 @@ export default function LoginPage() {
               )}
               
               <div className="space-y-5">
+                {portalType === 'enterprise' && (
+                  <div>
+                    <label className="block text-xs font-extrabold uppercase tracking-wider text-purple-900 mb-2">
+                      Cooperative Subdomain / Organization Code
+                    </label>
+                    <input 
+                      type="text" 
+                      value={subdomain}
+                      onChange={(e) => setSubdomain(e.target.value)}
+                      className="w-full border-2 border-purple-200 rounded-xl p-3.5 text-sm focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition-all bg-purple-50/40 font-mono font-medium"
+                      placeholder="e.g. main-coop or farm1"
+                    />
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2">Email Address or Username</label>
                   <input 

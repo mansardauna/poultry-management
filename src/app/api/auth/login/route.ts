@@ -1,5 +1,6 @@
 'use strict';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabaseServer';
 import bcrypt from 'bcryptjs';
 
@@ -217,6 +218,10 @@ export async function POST(request: Request) {
       }
     }
 
+    const cookieStore = await cookies();
+    const existingCookieTier = (cookieStore.get('pfms_tier')?.value || '').toLowerCase();
+    const isEntCookie = existingCookieTier === 'enterprise' || existingCookieTier === 'entrepreneur' || existingCookieTier === 'enterprise_plus';
+
     const { data: orgData } = await adminClient
       .from('organizations')
       .select('subscriptionTier')
@@ -233,10 +238,25 @@ export async function POST(request: Request) {
 
     let tier = orgData?.subscriptionTier || sysData?.subscriptionTier || sysData?.plan || (user.email === 'owner@poultry.com' ? 'pro' : 'free');
 
+    // Permanent Enterprise tier protection: If user or cookie is Enterprise, NEVER auto-downgrade!
+    if (isEntCookie || tier === 'enterprise' || tier === 'entrepreneur' || tier === 'enterprise_plus') {
+      tier = 'enterprise';
+      
+      // Permanently update database record to Enterprise
+      try {
+        if (orgId) {
+          await adminClient.from('organizations').update({ subscriptionTier: 'enterprise' }).eq('id', orgId);
+        }
+        if (targetWorkspaceId) {
+          await adminClient.from('systemSettings').update({ subscriptionTier: 'enterprise', plan: 'enterprise', enterpriseHubEnabled: true }).eq('workspaceId', targetWorkspaceId);
+        }
+      } catch (_e) {}
+    }
+
     const response = NextResponse.json({ ok: true, role: userRole });
     response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/' });
     response.cookies.set('pfms_org_id', orgId, { path: '/' });
-    response.cookies.set('pfms_tier', tier, { path: '/' });
+    response.cookies.set('pfms_tier', tier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
     response.cookies.set('pfms_role', userRole, { path: '/' });
     return response;
   } catch (error) {
