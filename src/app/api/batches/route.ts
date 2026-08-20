@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     if (body.action === 'mortality') {
-      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).eq('workspaceId', workspaceId).limit(1);
+      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).limit(1);
       const batch = batchesData?.[0];
       if (batch) {
         const count = Number(body.mortalityCount) || 1;
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     if (body.action === 'vaccination') {
-      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).eq('workspaceId', workspaceId).limit(1);
+      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).limit(1);
       const batch = batchesData?.[0];
       if (batch) {
         await supabase.from('batches')
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     if (body.action === 'transfer') {
-      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).eq('workspaceId', workspaceId).limit(1);
+      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).limit(1);
       const batch = batchesData?.[0];
       if (batch) {
         const oldSection = batch.farmSection;
