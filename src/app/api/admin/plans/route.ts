@@ -16,12 +16,19 @@ const DEFAULT_PLANS = [
     aiLoggerEnabled: false,
     exportReportsEnabled: false,
     enterpriseHubEnabled: false,
-    features: ['1 Farm Branch Included', 'Basic Egg & Feed Logs', 'Community Forum Support', '2 Staff Accounts']
+    features: [
+      '1 Farm Branch Included',
+      'Basic Egg Collection & Feed Tracking',
+      'Basic Flock Mortality & Weight Logs',
+      '2 Staff Accounts',
+      'Basic KPI Metrics Summary',
+      'Community Forum & Documentation Support'
+    ]
   },
   {
     id: 'pro',
     name: 'Commercial Pro',
-    description: 'For growing poultry farms requiring AI telemetry and automated reports.',
+    description: 'For growing poultry farms requiring AI telemetry, advanced charts, and automated reports.',
     priceMonthly: 15000,
     priceAnnual: 144000,
     maxBranches: 5,
@@ -29,12 +36,20 @@ const DEFAULT_PLANS = [
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
     enterpriseHubEnabled: false,
-    features: ['Up to 5 Farm Branches', 'CCTV Live Surveillance', 'AI Voice Auto-Logger', 'PDF & Excel Export Reports', 'Unlimited Staff Accounts']
+    features: [
+      'Up to 5 Regional Farm Branches',
+      'Production Analytics Bar & Line Charts',
+      'Voice & Text AI Auto-Logger Widget',
+      'CCTV Live Surveillance Gateway',
+      'PDF & Excel Exportable Financial Reports',
+      'Shift Checklist Queue & Payroll Indicators',
+      'Unlimited Staff Accounts'
+    ]
   },
   {
     id: 'enterprise',
     name: 'Enterprise & Cooperative',
-    description: 'For multi-farm operations, cooperative white-label portals, and API access.',
+    description: 'For multi-farm operations, cooperative white-label portals, REST APIs, and vet hotlines.',
     priceMonthly: 45000,
     priceAnnual: 432000,
     maxBranches: 999,
@@ -42,7 +57,16 @@ const DEFAULT_PLANS = [
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
     enterpriseHubEnabled: true,
-    features: ['Unlimited Farm Branches', 'Cooperative White-Label Portal', '24/7 Priority Consultant Hotline', 'Custom REST API Keys', 'Multi-Farm Matrix Dashboard']
+    features: [
+      'Unlimited Regional Farm Branches',
+      'Multi-Farm Branch Matrix & Aggregated Telemetry',
+      'Cross-Branch Inter-Location Stock Transfers',
+      'Permanent Branch Deletion & Matrix Control',
+      'Global White-Labeling & Themes (Logo, Subdomain, Invoices & PDF)',
+      'Production REST API Keys & Webhooks (QuickBooks, SAP, Sage)',
+      '24/7 Priority Veterinarian Inspection Ticket Hotline',
+      'Wholesale Feed Procurement Pool (15% Bulk Volume Discounts)'
+    ]
   }
 ];
 

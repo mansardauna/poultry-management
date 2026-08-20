@@ -21,8 +21,8 @@ export interface SaasPlan {
 const DEFAULT_PLANS: SaasPlan[] = [
   {
     id: 'free',
-    name: 'Starter',
-    description: 'Perfect for small backyard farms.',
+    name: 'Free Starter',
+    description: 'Perfect for small farms getting started with digital log management.',
     priceMonthly: 0,
     priceAnnual: 0,
     maxBranches: 1,
@@ -30,12 +30,19 @@ const DEFAULT_PLANS: SaasPlan[] = [
     aiLoggerEnabled: false,
     exportReportsEnabled: false,
     enterpriseHubEnabled: false,
-    features: ['1 Farm Branch', 'Up to 2 Staff Members', 'Basic AI Logger', '30-day Data Retention']
+    features: [
+      '1 Farm Branch Included',
+      'Basic Egg Collection & Feed Tracking',
+      'Basic Flock Mortality & Weight Logs',
+      '2 Staff Accounts',
+      'Basic KPI Metrics Summary',
+      'Community Forum & Documentation Support'
+    ]
   },
   {
     id: 'pro',
     name: 'Commercial Pro',
-    description: 'For commercial farms scaling up.',
+    description: 'For growing poultry farms requiring AI telemetry, advanced charts, and automated reports.',
     priceMonthly: 15000,
     priceAnnual: 144000,
     maxBranches: 5,
@@ -43,12 +50,20 @@ const DEFAULT_PLANS: SaasPlan[] = [
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
     enterpriseHubEnabled: false,
-    features: ['Unlimited Farm Branches', 'Unlimited Staff & Managers', 'Voice-Powered AI Logger', 'CCTV Monitoring & Alerts', 'Google Pay Supported']
+    features: [
+      'Up to 5 Regional Farm Branches',
+      'Production Analytics Bar & Line Charts',
+      'Voice & Text AI Auto-Logger Widget',
+      'CCTV Live Surveillance Gateway',
+      'PDF & Excel Exportable Financial Reports',
+      'Shift Checklist Queue & Payroll Indicators',
+      'Unlimited Staff Accounts'
+    ]
   },
   {
     id: 'enterprise',
-    name: 'Enterprise Plus',
-    description: 'Multi-farm enterprises & agricultural cooperatives.',
+    name: 'Enterprise & Cooperative',
+    description: 'For multi-farm operations, cooperative white-label portals, REST APIs, and vet hotlines.',
     priceMonthly: 45000,
     priceAnnual: 432000,
     maxBranches: 999,
@@ -56,7 +71,16 @@ const DEFAULT_PLANS: SaasPlan[] = [
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
     enterpriseHubEnabled: true,
-    features: ['Multi-Farm Enterprise Management Hub', 'Cooperative White-Label Portal & Custom Branding', '24/7 Priority Consultant Hotline & Custom API Access']
+    features: [
+      'Unlimited Regional Farm Branches',
+      'Multi-Farm Branch Matrix & Aggregated Telemetry',
+      'Cross-Branch Inter-Location Stock Transfers',
+      'Permanent Branch Deletion & Matrix Control',
+      'Global White-Labeling & Themes (Logo, Subdomain, Invoices & PDF)',
+      'Production REST API Keys & Webhooks (QuickBooks, SAP, Sage)',
+      '24/7 Priority Veterinarian Inspection Ticket Hotline',
+      'Wholesale Feed Procurement Pool (15% Bulk Volume Discounts)'
+    ]
   }
 ];
 

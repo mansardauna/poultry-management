@@ -857,23 +857,27 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <ul className="space-y-3 text-xs text-slate-200 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">Everything in Starter Plan</span>
+                    <span className="font-bold">Up to 5 Regional Farm Branches</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">AI Voice & Text Auto-Logger</span>
+                    <span className="font-bold">Production Analytics Bar & Line Charts</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">CCTV Live Stream & AI Predator Alerts</span>
+                    <span className="font-bold">Voice & Text AI Auto-Logger Widget</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">Export PDF & Excel Financial Reports</span>
+                    <span className="font-bold">CCTV Live Surveillance Gateway</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span>Unlimited Farm Branches & Staff</span>
+                    <span className="font-bold">PDF & Excel Export Financial Reports</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
+                    <span>Shift Checklist & Payroll Indicators</span>
                   </li>
                 </ul>
               </div>
@@ -908,23 +912,27 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <ul className="space-y-3 text-xs text-slate-700 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span className="font-bold">Everything in Commercial Pro</span>
+                    <span className="font-bold">Multi-Farm Branch Matrix & Telemetry</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span>Multi-Farm Enterprise Management Hub</span>
+                    <span className="font-bold">Cross-Branch Stock Transfers & Deletion</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span>Cooperative White-Label Portal</span>
+                    <span className="font-bold">Global White-Labeling & Themes (Logo & PDF)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span>24/7 Priority Consultant Phone Line</span>
+                    <span className="font-bold">Production REST API Keys & Webhooks</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span>Custom API & Warehouse Logistics</span>
+                    <span className="font-bold">24/7 Priority Veterinarian Hotline</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
+                    <span className="font-bold">Wholesale Feed Pool (15% Bulk Discount)</span>
                   </li>
                 </ul>
               </div>

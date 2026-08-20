@@ -313,6 +313,20 @@ export function AdminCmsClient({
                         className="w-4 h-4 text-indigo-600 rounded"
                       />
                     </label>
+
+                    {/* Features List Textarea (One line per feature) */}
+                    <div className="pt-2">
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        SaaS Plan Feature Items (One per line)
+                      </label>
+                      <textarea
+                        rows={6}
+                        value={Array.isArray(plan.features) ? plan.features.join('\n') : ''}
+                        onChange={(e) => handleFieldChange(plan.id, 'features', e.target.value.split('\n'))}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-800 focus:outline-none focus:border-indigo-500"
+                        placeholder="Enter features one line per item..."
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>

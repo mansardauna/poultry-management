@@ -144,22 +144,12 @@ export default function PricingPage() {
                       <Check className={isFeatured ? "text-emerald-400" : "text-emerald-500"} size={16} />
                       <span>{plan.maxBranches >= 999 ? 'Unlimited Farm Branches' : `Up to ${plan.maxBranches} Farm Branch${plan.maxBranches > 1 ? 'es' : ''}`}</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      {plan.cctvEnabled ? <Check className={isFeatured ? "text-emerald-400" : "text-emerald-500"} size={16} /> : <X className="text-slate-400" size={16} />}
-                      <span className={!plan.cctvEnabled ? 'line-through text-slate-400' : ''}>CCTV Live Surveillance</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      {plan.aiLoggerEnabled ? <Check className={isFeatured ? "text-emerald-400" : "text-emerald-500"} size={16} /> : <X className="text-slate-400" size={16} />}
-                      <span className={!plan.aiLoggerEnabled ? 'line-through text-slate-400' : ''}>Voice AI Auto-Logger</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      {plan.exportReportsEnabled ? <Check className={isFeatured ? "text-emerald-400" : "text-emerald-500"} size={16} /> : <X className="text-slate-400" size={16} />}
-                      <span className={!plan.exportReportsEnabled ? 'line-through text-slate-400' : ''}>PDF & CSV Export Reports</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      {plan.enterpriseHubEnabled ? <Check className={isFeatured ? "text-emerald-400" : "text-emerald-500"} size={16} /> : <X className="text-slate-400" size={16} />}
-                      <span className={!plan.enterpriseHubEnabled ? 'line-through text-slate-400' : ''}>Enterprise Cooperative Portal & API</span>
-                    </li>
+                    {Array.isArray(plan.features) && plan.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className={isFeatured ? "text-emerald-400 mt-0.5 flex-shrink-0" : "text-emerald-500 mt-0.5 flex-shrink-0"} size={16} />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
