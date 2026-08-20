@@ -456,22 +456,19 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </CardHeader>
           <CardContent className="pt-6 flex-1">
             {isFree ? (
-              <div className="bg-slate-900 text-white p-8 text-center rounded-2xl shadow-xl h-full flex flex-col justify-center items-center space-y-4">
-                <div className="w-14 h-14 bg-indigo-600/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto border border-indigo-500/40 animate-pulse">
-                  <Lock size={28} />
-                </div>
-                <div className="space-y-1 max-w-md">
-                  <span className="bg-indigo-600 text-white font-extrabold text-[10px] uppercase px-3 py-1 rounded-full shadow">
+              <div className="p-8 text-center rounded-2xl border border-slate-200 bg-white h-full flex flex-col justify-center items-center space-y-4">
+                <div className="space-y-2 max-w-md">
+                  <span className="bg-amber-100 text-amber-800 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full border border-amber-200">
                     PRO & ENTERPRISE DASHBOARD FEATURE
                   </span>
-                  <h3 className="text-lg font-extrabold text-white pt-2">Production Analytics & Financial Charts Locked</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <h3 className="text-lg font-extrabold text-slate-900 pt-1">Production Analytics & Financial Charts Locked</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
                     Free accounts have basic flock tracking. Upgrade to Commercial Pro or Enterprise Plus to unlock daily egg production bar charts and revenue line charts.
                   </p>
                 </div>
                 <button 
                   onClick={() => router.push('/dashboard/settings?tab=subscription')}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl shadow-lg cursor-pointer transition-all inline-flex items-center gap-2"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl shadow cursor-pointer transition-all inline-flex items-center gap-2"
                 >
                   <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
                 </button>

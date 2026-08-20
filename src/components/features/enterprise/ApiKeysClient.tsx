@@ -72,24 +72,21 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
   if (!isEnterprise) {
     return (
       <div className="space-y-6 max-w-4xl pb-16 font-sans">
-        <div className="bg-slate-900 text-white p-8 md:p-12 rounded-3xl text-center space-y-6 shadow-2xl relative overflow-hidden border border-slate-800">
-          <div className="w-20 h-20 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto border border-purple-500/30 animate-pulse">
-            <Key size={40} />
-          </div>
+        <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
-            <span className="bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">
+            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full">
               ENTERPRISE TIER REQUIRED
             </span>
-            <h2 className="text-3xl font-extrabold text-white">Enterprise REST API & Webhooks</h2>
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Enterprise REST API & Webhooks</h2>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               Custom REST API Keys, OAuth scopes, and automated ERP webhook triggers (QuickBooks, SAP, Sage) are exclusively available on Enterprise Plus.
             </p>
           </div>
 
-          <div className="pt-4 max-w-md mx-auto">
+          <div className="pt-2 max-w-md mx-auto">
             <button
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-4 rounded-2xl shadow-xl transition-all cursor-pointer"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
               ⚡ Upgrade to Enterprise & Cooperative (₦45,000/mo)
             </button>
