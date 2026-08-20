@@ -1,19 +1,19 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, getTenantWorkspaces } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   try {
     const workspaceId = await getWorkspaceId();
+    const workspaces = await getTenantWorkspaces();
 
-    const [coopRes, apiKeysRes, consultantsRes, bulkOrdersRes, workspacesRes] = await Promise.all([
+    const [coopRes, apiKeysRes, consultantsRes, bulkOrdersRes] = await Promise.all([
       supabase.from('enterprise_cooperatives').select('*').eq('workspaceId', workspaceId).limit(1),
       supabase.from('enterprise_api_keys').select('*').eq('workspaceId', workspaceId),
       supabase.from('enterprise_consultants').select('*').eq('workspaceId', workspaceId),
       supabase.from('enterprise_bulk_orders').select('*').eq('workspaceId', workspaceId),
-      supabase.from('workspaces').select('*')
     ]);
 
     return NextResponse.json({
@@ -21,7 +21,7 @@ export async function GET() {
       apiKeys: apiKeysRes.data || [],
       consultants: consultantsRes.data || [],
       bulkOrders: bulkOrdersRes.data || [],
-      workspaces: workspacesRes.data || []
+      workspaces: workspaces || []
     });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to fetch enterprise data' }, { status: 500 });

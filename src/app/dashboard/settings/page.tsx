@@ -1,13 +1,12 @@
 'use strict';
 import { supabase } from "@/lib/supabase";
 import { SettingsClient } from "@/components/features/settings/SettingsClient";
-import { getWorkspaceId } from "@/lib/workspace";
+import { getWorkspaceId, getTenantWorkspaces } from "@/lib/workspace";
 import { getAuthUser } from "@/lib/auth";
 
 /** Exported function default */
 export default async function SettingsPage() {
   const workspaceId = await getWorkspaceId();
-  
   const user = await getAuthUser();
   const role = user?.role || 'Staff';
 
@@ -41,9 +40,9 @@ export default async function SettingsPage() {
     billingRegion: 'Nigeria & West Africa (NGN)'
   };
 
-  const workspaces = (await supabase.from('workspaces').select('*')).data || [];
+  const workspaces = await getTenantWorkspaces(user);
   const paymentMethods = (await supabase.from('payment_methods').select('*').eq('workspaceId', workspaceId)).data || [];
-  const { data: rawHist } = await supabase.from('subscription_history').select('*').order('createdAt', { ascending: false });
+  const { data: rawHist } = await supabase.from('subscription_history').select('*').eq('workspaceId', workspaceId).order('createdAt', { ascending: false });
   const subscriptionHistory = rawHist || [];
 
   return <SettingsClient 
