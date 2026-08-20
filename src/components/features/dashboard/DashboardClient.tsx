@@ -305,30 +305,6 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const isPro = isEnterprise || normTier === 'pro';
   const isFree = !isPro;
 
-  // Generate GitHub-Style 365-Day Sales Contribution Grid Data
-  const salesHeatmapDays = [];
-  for (let i = 364; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    const salesThatDay = data.sales.filter(s => s.date === dateStr);
-    const totalAmount = salesThatDay.reduce((sum, s) => sum + s.totalAmount, 0);
-    const count = salesThatDay.length;
-
-    let intensity = 0;
-    if (totalAmount > 50000) intensity = 4;
-    else if (totalAmount > 25000) intensity = 3;
-    else if (totalAmount > 10000) intensity = 2;
-    else if (totalAmount > 0 || count > 0) intensity = 1;
-
-    salesHeatmapDays.push({
-      date: dateStr,
-      count,
-      totalAmount,
-      intensity
-    });
-  }
-
   return (
     <div className="space-y-6">
       {/* Welcome & Farm Profile Banner */}
@@ -464,196 +440,136 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         </Card>
       </div>
 
-      {/* Daily Egg Production Chart & Weekly Comparative Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          {isFree ? (
-            <Card className="border-2 border-indigo-200 bg-slate-900 text-white p-8 text-center rounded-2xl shadow-xl">
-              <div className="w-16 h-16 bg-indigo-600/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/40 animate-pulse">
-                <Lock size={32} />
+      {/* Production Analytics & Multi-Farm Calendar Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Production Charts */}
+        <Card className="flex flex-col justify-between">
+          <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+              {texts.dashboard.eggProductionVolumeChart} & Sales Trend
+            </CardTitle>
+            {isPro && (
+              <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono uppercase">
+                Live Data
+              </span>
+            )}
+          </CardHeader>
+          <CardContent className="pt-6 flex-1">
+            {isFree ? (
+              <div className="bg-slate-900 text-white p-8 text-center rounded-2xl shadow-xl h-full flex flex-col justify-center items-center space-y-4">
+                <div className="w-14 h-14 bg-indigo-600/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto border border-indigo-500/40 animate-pulse">
+                  <Lock size={28} />
+                </div>
+                <div className="space-y-1 max-w-md">
+                  <span className="bg-indigo-600 text-white font-extrabold text-[10px] uppercase px-3 py-1 rounded-full shadow">
+                    PRO & ENTERPRISE DASHBOARD FEATURE
+                  </span>
+                  <h3 className="text-lg font-extrabold text-white pt-2">Production Analytics & Financial Charts Locked</h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Free accounts have basic flock tracking. Upgrade to Commercial Pro or Enterprise Plus to unlock daily egg production bar charts and revenue line charts.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => router.push('/dashboard/settings?tab=subscription')}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl shadow-lg cursor-pointer transition-all inline-flex items-center gap-2"
+                >
+                  <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
+                </button>
               </div>
-              <h3 className="text-xl font-extrabold text-white mb-2">Production Analytics & Financial Charts Locked</h3>
-              <p className="text-xs text-slate-300 max-w-md mx-auto mb-6 leading-relaxed">
-                Free accounts have basic flock tracking. Upgrade to Commercial Pro or Enterprise Plus to unlock daily egg production bar charts, financial revenue line charts, and AI voice auto-loggers.
-              </p>
-              <button 
-                onClick={() => router.push('/dashboard/settings?tab=subscription')}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3.5 rounded-xl shadow-lg cursor-pointer transition-all inline-flex items-center gap-2"
-              >
-                <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
-              </button>
-            </Card>
-          ) : (
-            <>
-              <Card>
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
-                    {texts.dashboard.eggProductionVolumeChart}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="h-80 w-full">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                      <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
-                        <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
-                        <Tooltip 
-                          contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
-                          labelClassName=" text-slate-800 text-xs uppercase"
-                        />
-                        <Legend />
-                        <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name="Good Eggs Collected" />
-                        <Bar dataKey="CrackedSpoilt" stackId="a" fill="#ef4444" name="Cracked / Spoilt" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+            ) : (
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      labelClassName="text-slate-800 text-xs uppercase font-bold"
+                    />
+                    <Legend />
+                    <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name="Good Eggs Collected" />
+                    <Bar dataKey="CrackedSpoilt" stackId="a" fill="#ef4444" name="Cracked / Spoilt" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-              <Card>
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
-                    Sales & Revenue Trend
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="h-80 w-full">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                      <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
-                        <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
-                        <Tooltip 
-                          contentStyle={{ borderRadius: '0px', border: '1px solid #cbd5e1' }}
-                          labelClassName=" text-slate-800 text-xs uppercase"
-                          formatter={(value: any) => [`₦${Number(value || 0).toLocaleString()}`, "Revenue"]}
-                        />
-                        <Legend />
-                        <Line type="monotone" dataKey="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Sales Revenue (₦)" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          )}
+        {/* Multi-Farm Production & Vet Inspection Calendar */}
+        <Card className="flex flex-col justify-between border border-slate-200 bg-white rounded-2xl shadow-sm">
+          <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-bold uppercase text-slate-900 flex items-center gap-2">
+              <Calendar size={18} className="text-indigo-600" /> Multi-Farm Production & Schedule
+            </CardTitle>
+            <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2.5 py-1 rounded font-mono">
+              {todayFormatted}
+            </span>
+          </CardHeader>
 
-          {/* GitHub-Style 365-Day Sales Contribution Activity Heatmap Grid (ENTERPRISE EXCLUSIVE) */}
-          {isEnterprise ? (
-            <Card className="border border-slate-200 bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden">
-              <CardHeader className="border-b border-slate-800 bg-slate-950 py-4 px-6 flex flex-row items-center justify-between">
-                <CardTitle className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2 font-mono">
-                  <Sparkles size={16} /> 365-Day Enterprise Sales Contribution Heatmap Grid
-                </CardTitle>
-                <span className="text-[10px] text-slate-400 font-mono">365 DAYS RECORDED</span>
-              </CardHeader>
+          <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
+              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
+                <span className="text-[9px] font-extrabold uppercase text-emerald-700 block tracking-wider">VACCINATION & HEALTH</span>
+                <p className="text-slate-900 font-bold text-sm">
+                  {data.batches[0] ? `${data.batches[0].breed} (${data.batches[0].type || 'Layers'})` : 'Flock Health Routine'}
+                </p>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  {data.batches[0] ? `Age: ${data.batches[0].ageInWeeks || 18} Weeks` : 'Status: Active'}
+                </p>
+              </div>
 
-              <CardContent className="p-6 space-y-4">
-                <div className="overflow-x-auto pb-2 scrollbar-custom">
-                  <div className="inline-grid grid-rows-7 grid-flow-col gap-1 min-w-[700px]">
-                    {salesHeatmapDays.map((day, idx) => (
-                      <div
-                        key={idx}
-                        title={`${day.date}: ${day.count} sales (₦${day.totalAmount.toLocaleString()})`}
-                        className={`w-3 h-3 rounded-sm transition-all cursor-pointer hover:scale-125 ${
-                          day.intensity === 4 ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' :
-                          day.intensity === 3 ? 'bg-emerald-500' :
-                          day.intensity === 2 ? 'bg-emerald-700' :
-                          day.intensity === 1 ? 'bg-emerald-900/60' : 'bg-slate-800/60'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
+              <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
+                <span className="text-[9px] font-extrabold uppercase text-indigo-700 block tracking-wider">FEED STOCK LEVEL</span>
+                <p className="text-slate-900 font-bold text-sm">
+                  {data.feeds[0] ? `${data.feeds[0].quantityKg}kg ${data.feeds[0].type}` : 'Feed Inventory Normal'}
+                </p>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  {totalFeedKg < 50 ? '⚠️ Low Stock Alert' : 'Stock Status: Optimal'}
+                </p>
+              </div>
 
-                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 border-t border-slate-800 pt-3">
-                  <span>GitHub Sales Intensity Grid</span>
-                  <div className="flex items-center gap-1.5">
-                    <span>Less</span>
-                    <span className="w-2.5 h-2.5 rounded-sm bg-slate-800/60" />
-                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-900/60" />
-                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-700" />
-                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
-                    <span>More</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="bg-purple-950/40 border border-purple-500/30 p-6 rounded-2xl text-center space-y-3 shadow-lg">
-              <span className="bg-purple-600 text-white font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">ENTERPRISE EXCLUSIVE</span>
-              <h4 className="text-sm font-extrabold text-white">GitHub-Style 365-Day Sales Activity Heatmap Grid</h4>
-              <p className="text-xs text-purple-200 max-w-md mx-auto">Upgrade to Enterprise Plus to unlock 365-day sales contribution activity heatmaps and multi-farm calendars.</p>
-              <button onClick={() => router.push('/dashboard/settings?tab=subscription')} className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-xl cursor-pointer shadow">
-                ⚡ Upgrade to Enterprise Plus
-              </button>
+              <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/50 space-y-1">
+                <span className="text-[9px] font-extrabold uppercase text-purple-700 block tracking-wider">VET & DIAGNOSTICS</span>
+                <p className="text-slate-900 font-bold text-sm">
+                  {data.alertLogs[0] ? data.alertLogs[0].message : 'Scheduled Farm Audit'}
+                </p>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  {data.alertLogs[0] ? `Date: ${data.alertLogs[0].date}` : 'Audit Status: Certified'}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
+                <span className="text-[9px] font-extrabold uppercase text-amber-800 block tracking-wider">SALES DISPATCH LOG</span>
+                <p className="text-slate-900 font-bold text-sm">
+                  {data.sales[0] ? `${data.sales[0].customerName} (₦${data.sales[0].totalAmount.toLocaleString()})` : 'Recent Wholesale Dispatch'}
+                </p>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  {data.sales[0] ? `Date: ${data.sales[0].date}` : 'Dispatch Status: Dispatched'}
+                </p>
+              </div>
             </div>
-          )}
 
-          {/* Multi-Farm Production & Vet Calendar (ENTERPRISE EXCLUSIVE) */}
-          {isEnterprise && (
-            <Card className="border border-slate-200 bg-white rounded-2xl shadow-sm">
-              <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm font-bold uppercase text-slate-900 flex items-center gap-2">
-                  <Calendar size={18} className="text-indigo-600" /> Multi-Farm Production & Vet Inspection Calendar
-                </CardTitle>
-                <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2.5 py-1 rounded font-mono">
-                  {todayFormatted}
-                </span>
-              </CardHeader>
+            {!isEnterprise && (
+              <div className="bg-purple-50 border border-purple-200 p-3 rounded-xl flex items-center justify-between text-xs">
+                <span className="text-purple-900 font-semibold">Unlock multi-farm branch calendar & cross-transfers</span>
+                <button
+                  onClick={() => router.push('/dashboard/settings?tab=subscription')}
+                  className="bg-purple-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg cursor-pointer hover:bg-purple-700"
+                >
+                  Enterprise Tier
+                </button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-              <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
-                  <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-emerald-700 block">VACCINATION & HEALTH</span>
-                    <p className="text-slate-900 font-bold">
-                      {data.batches[0] ? `${data.batches[0].breed} (${data.batches[0].type || 'Layers'})` : 'Flock Health Routine'}
-                    </p>
-                    <p className="text-[10px] text-slate-500 font-mono">
-                      {data.batches[0] ? `Age: ${data.batches[0].ageInWeeks || 18} Weeks` : 'Status: Active'}
-                    </p>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-indigo-700 block">FEED STOCK LEVEL</span>
-                    <p className="text-slate-900 font-bold">
-                      {data.feeds[0] ? `${data.feeds[0].quantityKg}kg ${data.feeds[0].type}` : 'Feed Inventory Normal'}
-                    </p>
-                    <p className="text-[10px] text-slate-500 font-mono">
-                      {totalFeedKg < 50 ? '⚠️ Low Stock Alert' : 'Stock Status: Optimal'}
-                    </p>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl border border-purple-200 bg-purple-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-purple-700 block">VET & DIAGNOSTICS</span>
-                    <p className="text-slate-900 font-bold">
-                      {data.alertLogs[0] ? data.alertLogs[0].message : 'Scheduled Farm Audit'}
-                    </p>
-                    <p className="text-[10px] text-slate-500 font-mono">
-                      {data.alertLogs[0] ? `Date: ${data.alertLogs[0].date}` : 'Audit Status: Certified'}
-                    </p>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-amber-800 block">SALES DISPATCH LOG</span>
-                    <p className="text-slate-900 font-bold">
-                      {data.sales[0] ? `${data.sales[0].customerName} (₦${data.sales[0].totalAmount.toLocaleString()})` : 'Recent Wholesale Dispatch'}
-                    </p>
-                    <p className="text-[10px] text-slate-500 font-mono">
-                      {data.sales[0] ? `Date: ${data.sales[0].date}` : 'Dispatch Status: Dispatched'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        <div className="flex flex-col space-y-6">
-          {/* Weekly Comparative Analytics Card */}
-          <Card>
+      {/* Analytics & Performance Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Weekly Comparative Analytics Card */}
+        <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
               {texts.dashboard.weeklyComparativeAnalytics}
@@ -661,33 +577,26 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-sm font-medium text-slate-500">{texts.dashboard.lastWeekYield}</span>
-              <span className="text-sm text-slate-900">{previousYield}</span>
+              <span className="text-xs font-medium text-slate-500">{texts.dashboard.lastWeekYield}</span>
+              <span className="text-xs font-bold text-slate-900">{previousYield}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-sm font-medium text-slate-500">{texts.dashboard.currentWeekYield}</span>
-              <span className="text-sm text-indigo-650">{currentYield}</span>
+              <span className="text-xs font-medium text-slate-500">{texts.dashboard.currentWeekYield}</span>
+              <span className="text-xs font-bold text-indigo-650">{currentYield}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-sm font-medium text-slate-500">{texts.dashboard.absoluteNetGrowth}</span>
-              <span className={`text-sm ${netGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              <span className="text-xs font-medium text-slate-500">{texts.dashboard.absoluteNetGrowth}</span>
+              <span className={`text-xs font-bold ${netGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                 {netGrowth >= 0 ? '+' : ''}{netGrowth} ({netGrowth >= 0 ? '+' : ''}{netGrowthPercent}%)
               </span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-sm font-medium text-slate-500">{texts.dashboard.totalExpenses}</span>
-              <span className="text-sm text-red-600">₦{totalExpenses.toLocaleString()}</span>
+              <span className="text-xs font-medium text-slate-500">{texts.dashboard.totalExpenses}</span>
+              <span className="text-xs font-bold text-red-600">₦{totalExpenses.toLocaleString()}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-sm font-medium text-slate-500">Feed Conversion Ratio</span>
-              <span className="text-sm text-amber-600 font-bold">{currentYield > 0 ? (totalFeedKg / (currentYield / 30)).toFixed(2) : '0.00'} kg/crate</span>
-            </div>
-            <div className="bg-slate-50 p-4 border border-slate-200">
-              <p className="text-xs  text-slate-800 uppercase">{texts.dashboard.currentInventoryAudit}</p>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Feed Stock stands at <strong>{totalFeedKg} kg</strong>. 
-                Total Birds tracked: <strong>{totalChickens}</strong>.
-              </p>
+              <span className="text-xs font-medium text-slate-500">Feed Conversion Ratio</span>
+              <span className="text-xs text-amber-600 font-bold">{currentYield > 0 ? (totalFeedKg / (currentYield / 30)).toFixed(2) : '0.00'} kg/crate</span>
             </div>
           </CardContent>
         </Card>
@@ -699,33 +608,70 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               {texts.dashboard.breakEvenAnalysis}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">{texts.dashboard.incurredCost}</span>
-                <span className= "text-slate-900">₦{totalIncurredCost.toLocaleString()}</span>
+          <CardContent className="p-6 space-y-4">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-medium">{texts.dashboard.incurredCost}</span>
+              <span className="text-slate-900 font-bold">₦{totalIncurredCost.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-medium">{texts.dashboard.projectedFlockValue}</span>
+              <span className="text-indigo-650 font-bold">₦{projectedRevenue.toLocaleString()}</span>
+            </div>
+            
+            <div className="pt-2">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-700 font-semibold">{texts.dashboard.costRecoveryProgress}</span>
+                <span className="text-indigo-600 font-bold">{breakEvenPercent}%</span>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">{texts.dashboard.projectedFlockValue}</span>
-                <span className= "text-indigo-650">₦{projectedRevenue.toLocaleString()}</span>
+              <div className="w-full bg-slate-200 rounded-full h-2.5">
+                <div 
+                  className={`h-2.5 rounded-full ${Number(breakEvenPercent) >= 100 ? 'bg-emerald-500' : 'bg-indigo-600'}`}
+                  style={{ width: `${Math.min(Number(breakEvenPercent), 100)}%` }}
+                ></div>
               </div>
-              
-              <div className="pt-2">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className=" text-slate-700">{texts.dashboard.costRecoveryProgress}</span>
-                  <span className=" text-indigo-600">{breakEvenPercent}%</span>
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-2.5">
-                  <div 
-                    className={`h-2.5 rounded-full ${Number(breakEvenPercent) >= 100 ? 'bg-emerald-500' : 'bg-indigo-600'}`}
-                    style={{ width: `${Math.min(Number(breakEvenPercent), 100)}%` }}
-                  ></div>
-                </div>
-              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+              <p className="text-[10px] font-bold text-slate-800 uppercase">{texts.dashboard.currentInventoryAudit}</p>
+              <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                Feed Stock: <strong>{totalFeedKg} kg</strong> | Total Birds: <strong>{totalChickens}</strong>
+              </p>
             </div>
           </CardContent>
         </Card>
-        </div>
+
+        {/* Managed Branches / Farms */}
+        <Card>
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider flex items-center gap-2">
+              <MapPin size={18} className="text-indigo-650" /> {texts.dashboard.managedBranchesFarms} ({workspaces.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-2.5 max-h-[220px] overflow-y-auto text-xs font-mono">
+              {workspaces.map((ws) => (
+                <div 
+                  key={ws.id}
+                  className={`p-3 rounded-xl border transition-colors flex items-center justify-between ${
+                    activeWorkspace?.id === ws.id ? 'border-indigo-500 bg-indigo-50/60 font-bold' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <MapPin size={14} className={activeWorkspace?.id === ws.id ? 'text-indigo-600' : 'text-slate-400'} />
+                    <span className="text-slate-800 truncate max-w-[140px]">{ws.name}</span>
+                  </div>
+                  {activeWorkspace?.id === ws.id ? (
+                    <span className="bg-indigo-600 text-white text-[9px] px-2 py-0.5 rounded font-sans uppercase font-bold">
+                      {texts.common.active}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 font-sans">{ws.type || 'Branch'}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Dynamic Alerts Logs Queue & Checklist */}
@@ -791,128 +737,81 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </CardContent>
         </Card>
 
-        {/* Manager Checklist Queue */}
-        <Card>
-          <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <CheckSquare size={20} className="text-indigo-650" /> {texts.dashboard.shiftChecklistQueue}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <p className="text-xs text-slate-500 mb-4">
-              Real-time active staff tasks. Check off tasks once verified:
-            </p>
-            <div className="space-y-3 max-h-[300px] overflow-y-auto font-mono text-[11px]">
-              {activeTasks.length === 0 ? (
-                <div className="p-4 border border-dashed border-slate-200 text-center text-slate-400 italic">
-                  {texts.dashboard.noActiveTasks}
-                </div>
-              ) : (
-                activeTasks.map((task) => (
-                  <div 
-                    key={task.id}
-                    onClick={() => handleCompleteTask(task.id)}
-                    className="p-3 border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-200 cursor-pointer transition-colors flex items-start gap-3"
-                  >
-                    <CheckCircle size="20" className="flex-shrink-0 mt-0.5 text-slate-400 hover:text-emerald-600" />
-                    <div>
-                      <p className="text-xs  text-slate-800">{task.taskName}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Assigned to: {task.assignedTo} | {task.date}</p>
-                    </div>
+        {/* Right Column: Shift Checklist & Payroll Action Widget */}
+        <div className="flex flex-col space-y-6">
+          {/* Manager Checklist Queue */}
+          <Card>
+            <CardHeader className="border-b border-slate-100">
+              <CardTitle className="text-sm uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                <CheckSquare size={18} className="text-indigo-650" /> {texts.dashboard.shiftChecklistQueue}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <p className="text-xs text-slate-500 mb-3">
+                Active staff tasks. Check off tasks once verified:
+              </p>
+              <div className="space-y-2.5 max-h-[180px] overflow-y-auto font-mono text-[11px]">
+                {activeTasks.length === 0 ? (
+                  <div className="p-3 border border-dashed border-slate-200 text-center text-slate-400 italic rounded-xl">
+                    {texts.dashboard.noActiveTasks}
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Available Branches / Farms */}
-        <Card>
-          <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <MapPin size={20} className="text-indigo-650" /> {texts.dashboard.managedBranchesFarms}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <p className="text-xs text-slate-500 mb-4">
-              Overview of all farms configured in the system. Use the sidebar dropdown to switch.
-            </p>
-            <div className="space-y-3 max-h-[300px] overflow-y-auto font-mono text-[11px]">
-              {workspaces.map((ws) => (
-                <div 
-                  key={ws.id}
-                  className="p-3 border border-slate-200 bg-slate-50 hover:bg-indigo-50 transition-colors flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} className="text-slate-400" />
-                    <span className=" text-slate-800">{ws.name}</span>
-                  </div>
-                  {activeWorkspace?.id === ws.id && (
-                    <span className="bg-indigo-100 text-indigo-700 text-[9px] px-2 py-0.5 rounded-full  uppercase">
-                      {texts.common.active}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Salary Indicator Dashboard */}
-        <Card className={isPayday ? "border-amber-300 shadow-md shadow-amber-100" : ""}>
-          <CardHeader className={`border-b ${isPayday ? 'bg-amber-50 border-amber-100' : 'border-slate-100'}`}>
-            <CardTitle className={`text-sm uppercase tracking-wider flex items-center justify-between ${isPayday ? 'text-amber-700' : 'text-slate-700'}`}>
-              <span className="flex items-center gap-2">
-                <Coins size={20} className={isPayday ? "text-amber-600" : "text-indigo-650"} /> {texts.dashboard.salaryPayroll}
-              </span>
-              {isPayday && (
-                <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse uppercase">
-                  Action Required
-                </span>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <p className="text-xs text-slate-500 mb-4">
-              Monitor staff attendance days and upcoming payroll requirements.
-            </p>
-            <div className="space-y-4 font-mono">
-              <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                <span className="text-sm font-medium text-slate-500">{texts.dashboard.staffDuePay}</span>
-                <span className={`text-sm ${isPayday ? 'text-red-600 font-bold' : 'text-slate-900'}`}>
-                  {staffNeedingPay.length} / {data.staff.length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                <span className="text-sm font-medium text-slate-500">{texts.dashboard.pendingPayroll}</span>
-                <span className="text-sm text-amber-600 font-bold">₦{totalPendingPayroll.toLocaleString()}</span>
-              </div>
-              
-              <div className="mt-4 max-h-[150px] overflow-y-auto space-y-2 text-[11px]">
-                {staffNeedingPay.length > 0 ? (
-                  staffNeedingPay.map(s => (
-                    <div key={s.id} className="flex justify-between items-center bg-amber-50 p-2 rounded border border-amber-100">
-                      <span>{s.name} ({s.role})</span>
-                      <span className="text-red-600 font-bold">{s.attendanceDays} days</span>
+                ) : (
+                  activeTasks.map((task) => (
+                    <div 
+                      key={task.id}
+                      onClick={() => handleCompleteTask(task.id)}
+                      className="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-200 cursor-pointer transition-colors flex items-start gap-2.5"
+                    >
+                      <CheckCircle size="18" className="flex-shrink-0 mt-0.5 text-slate-400 hover:text-emerald-600" />
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">{task.taskName}</p>
+                        <p className="text-[10px] text-slate-400">Assigned: {task.assignedTo} | {task.date}</p>
+                      </div>
                     </div>
                   ))
-                ) : (
-                  <div className="p-3 border border-dashed border-slate-200 text-center text-slate-400 italic">
-                    {texts.dashboard.payrollUpToDate}
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Salary Indicator Dashboard */}
+          <Card className={isPayday ? "border-amber-300 shadow-md shadow-amber-100" : ""}>
+            <CardHeader className={`border-b ${isPayday ? 'bg-amber-50 border-amber-100' : 'border-slate-100'}`}>
+              <CardTitle className={`text-sm uppercase tracking-wider flex items-center justify-between ${isPayday ? 'text-amber-700' : 'text-slate-700'}`}>
+                <span className="flex items-center gap-2">
+                  <Coins size={18} className={isPayday ? "text-amber-600" : "text-indigo-650"} /> {texts.dashboard.salaryPayroll}
+                </span>
+                {isPayday && (
+                  <span className="bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full animate-pulse uppercase font-bold">
+                    Action Required
+                  </span>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-2.5 font-mono text-xs">
+                <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+                  <span className="font-medium text-slate-500">{texts.dashboard.staffDuePay}</span>
+                  <span className={`font-bold ${isPayday ? 'text-red-600' : 'text-slate-900'}`}>
+                    {staffNeedingPay.length} / {data.staff.length}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+                  <span className="font-medium text-slate-500">{texts.dashboard.pendingPayroll}</span>
+                  <span className="text-amber-600 font-bold">₦{totalPendingPayroll.toLocaleString()}</span>
+                </div>
+
+                {isPayday && (
+                  <div className="pt-2">
+                    <Link href="/dashboard/staff" className="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-xs uppercase font-bold transition-colors shadow-sm">
+                      {texts.dashboard.processPayrollNow}
+                    </Link>
                   </div>
                 )}
               </div>
-              
-              {isPayday && (
-                <div className="mt-4 pt-2">
-                  <Link href="/staff" className="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-2 rounded text-xs uppercase font-bold transition-colors">
-                    {texts.dashboard.processPayrollNow}
-                  </Link>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
