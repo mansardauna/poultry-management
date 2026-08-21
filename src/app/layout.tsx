@@ -15,11 +15,22 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "PFMS | Poultry Farm Management System",
-  description: "Enterprise multi-farm management, AI telemetry, and cooperative intelligence platform",
+  description: "Enterprise multi-farm management, AI telemetry, flock tracking, egg production logs, and cooperative intelligence platform",
   icons: {
     icon: "/icon.png",
     shortcut: "/favicon.ico",
     apple: "/icon.png",
+  },
+  openGraph: {
+    title: "Poultry Farm Management System (PFMS)",
+    description: "Enterprise multi-farm management, AI telemetry, flock tracking, and cooperative intelligence platform",
+    type: "website",
+    siteName: "Poultry Farm Management System",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PFMS | Poultry Farm Management System",
+    description: "Enterprise multi-farm management, AI telemetry, and cooperative intelligence platform",
   },
 };
 

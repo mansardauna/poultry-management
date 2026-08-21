@@ -35,6 +35,9 @@ export async function POST(req: Request) {
       if (orgId && subscriptionId) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         
+        const targetTier = (session.metadata?.planId || session.metadata?.planTier || 'pro').toLowerCase();
+        const normTier = (targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') ? 'enterprise' : 'pro';
+
         const subAny = subscription as any;
         await serviceRoleClient.from('subscriptions').insert({
           id: subAny.id,
@@ -46,7 +49,7 @@ export async function POST(req: Request) {
         });
 
         await serviceRoleClient.from('organizations').update({
-          subscriptionTier: 'pro',
+          subscriptionTier: normTier,
           subscriptionStatus: subscription.status
         }).eq('id', orgId);
 
@@ -54,11 +57,12 @@ export async function POST(req: Request) {
         await serviceRoleClient.from('systemSettings').upsert([{
           id: 'sys-' + Date.now().toString().slice(-6),
           workspaceId,
-          subscriptionTier: 'pro',
-          plan: 'pro',
+          subscriptionTier: normTier,
+          plan: normTier,
           cctvEnabled: true,
           aiLoggerEnabled: true,
-          exportReportsEnabled: true
+          exportReportsEnabled: true,
+          enterpriseHubEnabled: normTier === 'enterprise'
         }]);
       }
       break;
