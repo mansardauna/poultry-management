@@ -68,7 +68,17 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setTier(match[1]);
-  }, []);
+
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const isOnboarding = searchParams.get('onboarding') === 'true';
+      const hasDismissed = localStorage.getItem('pfms_onboarded_dismissed') === 'true';
+
+      if (userRole === 'Admin' && !hasDismissed && (isOnboarding || (data.batches.length === 0 && data.staff.length === 0))) {
+        setOnboardingStep(1);
+      }
+    }
+  }, [userRole, data.batches.length, data.staff.length]);
 
   const alertLogsLogic = useTableLogic({
     data: filterByTimeRange(data.alertLogs || []),

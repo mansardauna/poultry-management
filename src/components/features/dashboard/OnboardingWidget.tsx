@@ -31,10 +31,11 @@ export function OnboardingWidget({
 
   if (userRole !== 'Admin') return null;
 
-  const step1Done = workspacesCount > 0;
+  const branchSetupCompleted = typeof window !== 'undefined' && localStorage.getItem('pfms_branch_setup_completed') === 'true';
+  const step1Done = branchSetupCompleted || batchesCount > 0;
   const step2Done = batchesCount > 0;
   const step3Done = staffCount > 0;
-  const step4Done = guideRead || (step1Done && step2Done && step3Done);
+  const step4Done = guideRead;
 
   const steps = [
     {

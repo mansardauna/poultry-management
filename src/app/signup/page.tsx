@@ -42,6 +42,15 @@ function SignupForm() {
     setIsSubmitting(false);
 
     if (response.ok) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('pfms_onboarded_dismissed');
+        localStorage.removeItem('pfms_widget_dismissed');
+        localStorage.removeItem('pfms_starter_guide_read');
+        localStorage.removeItem('pfms_onboarding_draft');
+        localStorage.removeItem('pfms_branch_setup_completed');
+        localStorage.removeItem('pfms_white_label');
+        localStorage.removeItem('pfms_workspace');
+      }
       const targetUrl = plan === 'pro' ? '/dashboard?onboarding=true&plan=pro' : '/dashboard?onboarding=true';
       router.push(targetUrl);
       router.refresh();
