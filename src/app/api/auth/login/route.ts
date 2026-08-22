@@ -221,7 +221,7 @@ export async function POST(request: Request) {
     const { data: orgData } = await adminClient
       .from('organizations')
       .select('subscriptionTier')
-      .eq('id', orgId)
+      .or(`id.eq.${orgId},ownerId.eq.${userId}`)
       .limit(1)
       .maybeSingle();
 

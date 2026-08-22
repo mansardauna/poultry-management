@@ -18,6 +18,7 @@ import {
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '../WorkspaceContext';
+import { WorkspaceOnboarding } from '../WorkspaceOnboarding';
 
 interface BranchMatrixClientProps {
   tier: string;
@@ -32,6 +33,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
 
   const { setActiveWorkspace, activeWorkspace, deleteWorkspace } = useWorkspace();
   const [workspaces, setWorkspaces] = useState<any[]>(initialWorkspaces);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Transfer Stock Modal State
   const [openTransferModal, setOpenTransferModal] = useState(false);
@@ -232,12 +234,16 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
             <p className="text-xs text-slate-500 mt-0.5">Real live telemetry aggregated from database records across all farm branches</p>
           </div>
           <button 
-            onClick={() => router.push('/dashboard/settings?tab=subscription')}
+            onClick={() => setShowAddModal(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Plus size={16} /> Add Regional Branch
           </button>
         </CardHeader>
+
+        {showAddModal && (
+          <WorkspaceOnboarding onClose={() => { setShowAddModal(false); router.refresh(); }} />
+        )}
 
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -9,9 +9,9 @@ export default async function BranchMatrixPage() {
 
   // Fetch real database records across all farm branches
   const [batchesRes, eggsRes, feedsRes, salesRes] = await Promise.all([
-    supabase.from('batches').select('id, currentQuantity, workspaceId'),
+    supabase.from('batches').select('id, quantity, workspaceId'),
     supabase.from('eggs').select('id, quantity, workspaceId'),
-    supabase.from('feeds').select('id, quantityKg, workspaceId'),
+    supabase.from('feeds').select('id, quantity, quantityKg, workspaceId'),
     supabase.from('sales').select('id, totalAmount, workspaceId')
   ]);
 
@@ -22,12 +22,18 @@ export default async function BranchMatrixPage() {
 
   const branchMetrics: Record<string, { totalBirds: number; totalEggs: number; feedStockKg: number; revenue: number }> = {};
   
-  workspaces.forEach(ws => {
+  workspaces.forEach((ws, idx) => {
+    // If only 1 workspace exists or if ws.id matches:
+    const matchWs = (itemWsId?: string) => {
+      if (!itemWsId) return idx === 0;
+      return itemWsId === ws.id || itemWsId.includes(ws.id) || ws.id.includes(itemWsId);
+    };
+
     branchMetrics[ws.id] = {
-      totalBirds: batches.filter(b => b.workspaceId === ws.id || !b.workspaceId).reduce((acc, b) => acc + Number(b.currentQuantity || 0), 0),
-      totalEggs: eggs.filter(e => e.workspaceId === ws.id || !e.workspaceId).reduce((acc, e) => acc + Number(e.quantity || 0), 0),
-      feedStockKg: feeds.filter(f => f.workspaceId === ws.id || !f.workspaceId).reduce((acc, f) => acc + Number(f.quantityKg || 0), 0),
-      revenue: sales.filter(s => s.workspaceId === ws.id || !s.workspaceId).reduce((acc, s) => acc + Number(s.totalAmount || 0), 0)
+      totalBirds: batches.filter(b => matchWs(b.workspaceId)).reduce((acc, b) => acc + Number(b.quantity || 0), 0),
+      totalEggs: eggs.filter(e => matchWs(e.workspaceId)).reduce((acc, e) => acc + Number(e.quantity || 0), 0),
+      feedStockKg: feeds.filter(f => matchWs(f.workspaceId)).reduce((acc, f) => acc + Number(f.quantityKg || f.quantity || 0), 0),
+      revenue: sales.filter(s => matchWs(s.workspaceId)).reduce((acc, s) => acc + Number(s.totalAmount || 0), 0)
     };
   });
 

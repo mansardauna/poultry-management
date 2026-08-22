@@ -156,19 +156,22 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     }
     setIsSaving(true);
     try {
-      if (workspaces.length > 0) {
+      // If user is editing default un-named Main branch during initial onboarding:
+      if (workspaces.length === 1 && (workspaces[0].name === 'Main' || workspaces[0].name === 'Main Farm' || workspaces[0].name.toLowerCase().includes('branch'))) {
         const primaryWs = workspaces[0];
         await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
         setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType });
         setCreatedBranchId(primaryWs.id);
       } else {
+        // Otherwise ALWAYS create a NEW branch workspace!
         const workspaceId = `farm-${Date.now()}`;
-        await addWorkspace({
+        const newWs = {
           id: workspaceId,
           name: branchName.trim(),
           type: branchType,
           createdAt: new Date().toISOString(),
-        });
+        };
+        await addWorkspace(newWs);
         setCreatedBranchId(workspaceId);
       }
 

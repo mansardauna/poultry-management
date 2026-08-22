@@ -141,11 +141,11 @@ export async function getTenantTier(user?: any, cookieOrgId?: string, cookieTier
     orgId = member?.orgId || '';
   }
 
-  if (orgId) {
+  if (authUser?.id) {
     const { data: orgData } = await serviceRoleClient
       .from('organizations')
       .select('subscriptionTier')
-      .eq('id', orgId)
+      .or(`ownerId.eq.${authUser.id},id.eq.${orgId}`)
       .limit(1)
       .maybeSingle();
 

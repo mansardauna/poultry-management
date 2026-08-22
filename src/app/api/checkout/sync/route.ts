@@ -10,37 +10,57 @@ export async function POST(request: Request) {
     const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
     const body = await request.json().catch(() => ({}));
-    const { isAnnual = false, demo = true } = body;
-    let targetTier = body.planTier;
+    const { isAnnual = false } = body;
+    let targetTier = (body.planTier || 'pro').toLowerCase();
+    if (targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') {
+      targetTier = 'enterprise';
+    }
 
-    let orgId = cookieOrgId;
+    let orgId = cookieOrgId || '';
 
-    if (user && !orgId) {
-      const { data: memberData } = await serviceRoleClient
-        .from('organization_members')
-        .select('orgId')
-        .eq('userId', user.id)
-        .limit(1)
-        .single();
-      orgId = memberData?.orgId || null;
+    // Look up or create organization for authenticated user strictly
+    if (user?.id) {
+      if (!orgId) {
+        const { data: memberData } = await serviceRoleClient
+          .from('organization_members')
+          .select('orgId')
+          .eq('userId', user.id)
+          .limit(1)
+          .maybeSingle();
+        orgId = memberData?.orgId || '';
+      }
+
+      if (!orgId) {
+        const { data: userOrg } = await serviceRoleClient
+          .from('organizations')
+          .select('id')
+          .eq('ownerId', user.id)
+          .limit(1)
+          .maybeSingle();
+        orgId = userOrg?.id || '';
+      }
+
+      if (!orgId) {
+        orgId = `org_${user.id.replace(/-/g, '').slice(0, 10)}`;
+        try {
+          await serviceRoleClient.from('organizations').upsert([{
+            id: orgId,
+            name: `${(user.email || 'User').split('@')[0]}'s Farm`,
+            ownerId: user.id,
+            subscriptionTier: targetTier,
+            subscriptionStatus: 'active'
+          }]);
+          await serviceRoleClient.from('organization_members').upsert([{
+            orgId,
+            userId: user.id,
+            role: 'Admin'
+          }]);
+        } catch (_e) {}
+      }
     }
 
     if (!orgId) {
-      const { data: firstOrg } = await serviceRoleClient
-        .from('organizations')
-        .select('id')
-        .limit(1)
-        .single();
-      orgId = firstOrg?.id || 'org-main';
-    }
-
-    if (!targetTier) {
-      const { data: orgData } = await serviceRoleClient
-        .from('organizations')
-        .select('subscriptionTier')
-        .eq('id', orgId)
-        .maybeSingle();
-      targetTier = orgData?.subscriptionTier || 'pro';
+      orgId = 'org_owner_main';
     }
 
     // Calculate subscription duration
@@ -48,58 +68,37 @@ export async function POST(request: Request) {
     const durationDays = isAnnual ? 365 : 30;
     const endsAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString();
 
-    // Update Organization Tier and Expiration Date
+    // 1. Permanently Save Subscription to Database Organization Record
     await serviceRoleClient
       .from('organizations')
-      .update({
+      .upsert([{
+        id: orgId,
         subscriptionTier: targetTier,
         subscriptionStatus: 'active',
         subscriptionEndsAt: endsAt,
         updatedAt: now.toISOString(),
-      })
-      .eq('id', orgId);
+      }]);
 
-    // Sync to systemSettings table
+    // 2. Sync to systemSettings table for workspace
     const workspaceId = `main-${orgId}`;
-    const { data: sysSet } = await serviceRoleClient
+    await serviceRoleClient
       .from('systemSettings')
-      .select('id')
-      .eq('workspaceId', workspaceId)
-      .limit(1)
-      .maybeSingle();
+      .upsert([{
+        id: 'sys-' + orgId,
+        workspaceId,
+        subscriptionTier: targetTier,
+        plan: targetTier,
+        cctvEnabled: true,
+        aiLoggerEnabled: true,
+        exportReportsEnabled: true,
+        enterpriseHubEnabled: targetTier === 'enterprise'
+      }]);
 
-    if (sysSet) {
-      await serviceRoleClient
-        .from('systemSettings')
-        .update({
-          subscriptionTier: targetTier,
-          plan: targetTier,
-          cctvEnabled: true,
-          aiLoggerEnabled: true,
-          exportReportsEnabled: true,
-          enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
-        })
-        .eq('workspaceId', workspaceId);
-    } else {
-      await serviceRoleClient
-        .from('systemSettings')
-        .insert([{
-          id: 'sys-' + Date.now().toString().slice(-6),
-          workspaceId,
-          subscriptionTier: targetTier,
-          plan: targetTier,
-          cctvEnabled: true,
-          aiLoggerEnabled: true,
-          exportReportsEnabled: true,
-          enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
-        }]);
-    }
-
-    // Record Subscription History Entry in subscription_history table
+    // 3. Record Subscription History Entry in subscription_history table
     const subId = `sub_${Date.now()}`;
-    const isEnt = targetTier === 'enterprise' || targetTier === 'entrepreneur';
+    const isEnt = targetTier === 'enterprise';
     const amount = isEnt ? (isAnnual ? 432000 : 45000) : (isAnnual ? 144000 : 15000);
-    const displayTitle = targetTier === 'entrepreneur' ? 'Entrepreneur Plan' : targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro';
+    const displayTitle = isEnt ? 'Enterprise & Cooperative' : 'Commercial Pro';
     const planName = `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`;
 
     try {
@@ -135,6 +134,10 @@ export async function POST(request: Request) {
     });
 
     response.cookies.set('pfms_tier', targetTier, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+    });
+    response.cookies.set('pfms_org_id', orgId, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365,
     });

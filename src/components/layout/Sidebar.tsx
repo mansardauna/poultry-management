@@ -33,6 +33,7 @@ import {
 import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
 import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
+import { WorkspaceOnboarding } from '../features/WorkspaceOnboarding';
 import { useLanguage } from '../features/LanguageContext';
 import { useWhiteLabel } from '../features/WhiteLabelContext';
 import toast from 'react-hot-toast';
@@ -163,6 +164,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const { isMobileOpen, setIsMobileOpen } = useSidebar();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showNewBranchModal, setShowNewBranchModal] = useState(false);
   const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -371,7 +373,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                              router.push('/dashboard/settings');
                              return;
                           }
-                          setShowOnboarding(true);
+                          setShowNewBranchModal(true);
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-2 font-medium"
                       >
@@ -586,6 +588,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           setShowOnboarding(false);
           router.replace('/dashboard');
         }} />
+      )}
+
+      {showNewBranchModal && (
+        <WorkspaceOnboarding onClose={() => setShowNewBranchModal(false)} />
       )}
 
       {editingWorkspace && (
