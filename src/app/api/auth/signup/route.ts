@@ -74,7 +74,8 @@ export async function POST(request: Request) {
           id: defaultWorkspaceId,
           name: 'Main Branch',
           type: 'Layer Farm',
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          ownerUsername: displayName.toLowerCase()
        }]);
 
        const response = NextResponse.json({ ok: true, role: role });

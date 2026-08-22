@@ -218,10 +218,6 @@ export async function POST(request: Request) {
       }
     }
 
-    const cookieStore = await cookies();
-    const existingCookieTier = (cookieStore.get('pfms_tier')?.value || '').toLowerCase();
-    const isEntCookie = existingCookieTier === 'enterprise' || existingCookieTier === 'entrepreneur' || existingCookieTier === 'enterprise_plus';
-
     const { data: orgData } = await adminClient
       .from('organizations')
       .select('subscriptionTier')
@@ -237,12 +233,10 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     let tier = orgData?.subscriptionTier || sysData?.subscriptionTier || sysData?.plan || (user.email === 'owner@poultry.com' ? 'pro' : 'free');
+    const normTier = (tier || '').toLowerCase();
 
-    // Permanent Enterprise tier protection: If user or cookie is Enterprise, NEVER auto-downgrade!
-    if (isEntCookie || tier === 'enterprise' || tier === 'entrepreneur' || tier === 'enterprise_plus') {
+    if (normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus') {
       tier = 'enterprise';
-      
-      // Permanently update database record to Enterprise
       try {
         if (orgId) {
           await adminClient.from('organizations').update({ subscriptionTier: 'enterprise' }).eq('id', orgId);

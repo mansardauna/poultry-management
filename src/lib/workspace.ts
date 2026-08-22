@@ -6,28 +6,43 @@ import { supabase as serviceRoleClient } from './supabase';
 
 /**
  * Get the current workspace ID strictly isolated per organization / user.
+ * Validates that workspace cookies match the currently authenticated user's organization.
  */
 export async function getWorkspaceId(): Promise<string> {
+  const user = await getAuthUser();
   const cookieStore = await cookies();
   const workspaceCookie = cookieStore.get('pfms_workspace')?.value;
+  const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
-  // 1. If explicit valid workspace cookie exists, respect the workspace cookie!
-  if (workspaceCookie && workspaceCookie.trim().length > 0) {
-    return workspaceCookie;
-  }
-
-  const user = await getAuthUser();
-
-  // 2. Owner special case
+  // 1. Superadmin / Owner special case
   if (user?.email === 'owner@poultry.com') {
-    return 'main-org_owner_main';
+    return workspaceCookie && workspaceCookie.trim().length > 0 ? workspaceCookie : 'main-org_owner_main';
   }
 
   if (user?.id) {
     const userEmail = user.email || '';
-    const userClean = userEmail.split('@')[0];
+    const userClean = userEmail.split('@')[0].toLowerCase();
 
-    // 3. Check if staff/manager record has an assigned farm workspace
+    // Retrieve user's actual organization ID
+    let orgId = cookieOrgId || '';
+    if (!orgId) {
+      const { data: memberData } = await serviceRoleClient
+        .from('organization_members')
+        .select('orgId')
+        .eq('userId', user.id)
+        .limit(1)
+        .maybeSingle();
+      orgId = memberData?.orgId || `org_${user.id.replace(/-/g, '').slice(0, 10)}`;
+    }
+
+    // 2. Validate workspace cookie: ONLY accept cookie if it belongs to this user's orgId/username!
+    if (workspaceCookie && workspaceCookie.trim().length > 0) {
+      if (workspaceCookie.includes(orgId) || workspaceCookie.includes(userClean) || workspaceCookie.includes(user.id.replace(/-/g, '').slice(0, 8))) {
+        return workspaceCookie;
+      }
+    }
+
+    // 3. Check staff/manager record assigned workspace
     const { data: staffRec } = await serviceRoleClient
       .from('staff')
       .select('workspaceId, assignedBranches')
@@ -42,30 +57,7 @@ export async function getWorkspaceId(): Promise<string> {
       return staffRec.workspaceId;
     }
 
-    const { data: userRec } = await serviceRoleClient
-      .from('users')
-      .select('workspaceId')
-      .or(`username.eq.${userClean},email.eq.${userEmail}`)
-      .limit(1)
-      .maybeSingle();
-
-    if (userRec?.workspaceId) {
-      return userRec.workspaceId;
-    }
-
-    // 4. Retrieve authenticated user's organization from database
-    const { data: memberData } = await serviceRoleClient
-      .from('organization_members')
-      .select('orgId')
-      .eq('userId', user.id)
-      .limit(1)
-      .maybeSingle();
-
-    if (memberData?.orgId) {
-      return `main-${memberData.orgId}`;
-    }
-
-    return `ws_${user.id.replace(/-/g, '').slice(0, 12)}`;
+    return `main-${orgId}`;
   }
 
   return 'main-org_owner_main';
