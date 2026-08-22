@@ -6,7 +6,7 @@ import { getWorkspaceId } from '@/lib/workspace';
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  let [
+  const [
     batches, eggs, feeds, feedLogs, staff, sales, expenses, cushionAudits, maturationLogs,
     procurePipeline, cctvLogs, invoices, tasks, alertSettingsRecords, alertLogs, mortalityLogs,
     medicationTemplates, medicationSchedules, payrollLogs, equipment, contacts, farmPens
@@ -35,34 +35,6 @@ export async function GET() {
     supabase.from('farmPens').select('*').eq('workspaceId', workspaceId)
   ]);
 
-  let batchesList = batches.data || [];
-  let eggsList = eggs.data || [];
-  let feedsList = feeds.data || [];
-  let staffList = staff.data || [];
-  let salesList = sales.data || [];
-
-  // Fallbacks to guarantee data preservation across all farm telemetry
-  if (batchesList.length === 0) {
-    const fallback = await supabase.from('batches').select('*').limit(100);
-    if (fallback.data && fallback.data.length > 0) batchesList = fallback.data;
-  }
-  if (eggsList.length === 0) {
-    const fallback = await supabase.from('eggs').select('*').order('date', { ascending: false }).limit(500);
-    if (fallback.data && fallback.data.length > 0) eggsList = fallback.data;
-  }
-  if (feedsList.length === 0) {
-    const fallback = await supabase.from('feeds').select('*').limit(100);
-    if (fallback.data && fallback.data.length > 0) feedsList = fallback.data;
-  }
-  if (staffList.length === 0) {
-    const fallback = await supabase.from('staff').select('*').limit(100);
-    if (fallback.data && fallback.data.length > 0) staffList = fallback.data;
-  }
-  if (salesList.length === 0) {
-    const fallback = await supabase.from('sales').select('*').order('date', { ascending: false }).limit(500);
-    if (fallback.data && fallback.data.length > 0) salesList = fallback.data;
-  }
-
   const alertSettings = alertSettingsRecords.data?.[0] || {
     feedThresholdKg: 50,
     eggDropPercentage: 15,
@@ -72,12 +44,12 @@ export async function GET() {
   };
 
   return NextResponse.json({
-    batches: batchesList, 
-    eggs: eggsList, 
-    feeds: feedsList, 
+    batches: batches.data || [], 
+    eggs: eggs.data || [], 
+    feeds: feeds.data || [], 
     feedLogs: feedLogs.data || [], 
-    staff: staffList, 
-    sales: salesList, 
+    staff: staff.data || [], 
+    sales: sales.data || [], 
     expenses: expenses.data || [],
     cushionAudits: cushionAudits.data || [], 
     maturationLogs: maturationLogs.data || [], 

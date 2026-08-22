@@ -6,7 +6,7 @@ import { getWorkspaceId } from '@/lib/workspace';
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  let [
+  const [
     { data: eggs },
     { data: cushionAudits },
     { data: maturationLogs }
@@ -15,28 +15,6 @@ export async function GET() {
     supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId),
     supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId)
   ]);
-
-  // Fallback: If no records match specific workspaceId, fetch all records to ensure ZERO data loss
-  if (!eggs || eggs.length === 0) {
-    const fallbackEggs = await supabase.from('eggs').select('*').order('date', { ascending: false }).limit(500);
-    if (fallbackEggs.data && fallbackEggs.data.length > 0) {
-      eggs = fallbackEggs.data;
-    }
-  }
-
-  if (!cushionAudits || cushionAudits.length === 0) {
-    const fallbackAudits = await supabase.from('cushionAudits').select('*').order('date', { ascending: false }).limit(100);
-    if (fallbackAudits.data && fallbackAudits.data.length > 0) {
-      cushionAudits = fallbackAudits.data;
-    }
-  }
-
-  if (!maturationLogs || maturationLogs.length === 0) {
-    const fallbackMat = await supabase.from('maturationLogs').select('*').order('date', { ascending: false }).limit(100);
-    if (fallbackMat.data && fallbackMat.data.length > 0) {
-      maturationLogs = fallbackMat.data;
-    }
-  }
   
   return NextResponse.json({
     eggs: eggs || [],
@@ -156,7 +134,7 @@ export async function PUT(request: Request) {
           status: body.status,
           actionTaken: body.actionTaken
         })
-        .eq('id', body.id);
+        .eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
@@ -168,7 +146,7 @@ export async function PUT(request: Request) {
           avgWeightGrams: body.avgWeightGrams,
           notes: body.notes
         })
-        .eq('id', body.id);
+        .eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
@@ -178,7 +156,7 @@ export async function PUT(request: Request) {
         brokenEggs: body.brokenEggs,
         spoiltEggs: body.spoiltEggs
       })
-      .eq('id', body.id);
+      .eq('id', body.id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update record' }, { status: 500 });
@@ -188,19 +166,20 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
     const body = await request.json();
 
     if (body.action === 'deleteAudit') {
-      await supabase.from('cushionAudits').delete().eq('id', body.id);
+      await supabase.from('cushionAudits').delete().eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
     if (body.action === 'deleteMaturation') {
-      await supabase.from('maturationLogs').delete().eq('id', body.id);
+      await supabase.from('maturationLogs').delete().eq('id', body.id).eq('workspaceId', workspaceId);
       return NextResponse.json({ success: true });
     }
 
-    await supabase.from('eggs').delete().eq('id', body.id);
+    await supabase.from('eggs').delete().eq('id', body.id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
