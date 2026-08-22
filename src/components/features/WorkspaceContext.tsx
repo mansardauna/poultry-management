@@ -31,7 +31,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
 
 const DEFAULT_WORKSPACE: Workspace = {
   id: 'main',
-  name: 'Main Farm',
+  name: 'Main',
   type: 'Main',
   createdAt: new Date().toISOString(),
 };

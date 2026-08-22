@@ -15,8 +15,8 @@ export interface WhiteLabelSettings {
 }
 
 const DEFAULT_SETTINGS: WhiteLabelSettings = {
-  coopName: 'My Enterprise Poultry Farm',
-  subdomain: 'myfarm',
+  coopName: '',
+  subdomain: 'main',
   logoUrl: '',
   brandColor: 'indigo',
   customReportHeader: 'Official Farm Management Analytics Report',
@@ -39,23 +39,21 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
   });
 
   useEffect(() => {
-    // 1. Read from localStorage for immediate instant rendering
+    // Purge legacy un-scoped browser localStorage white-label settings to prevent cross-account leakage
     try {
-      const saved = localStorage.getItem('pfms_white_label');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setSettings(prev => ({ ...prev, ...parsed }));
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('pfms_white_label');
       }
     } catch (_e) {}
 
-    // 2. Fetch authoritative database settings from /api/enterprise
+    // Fetch authoritative database settings from /api/enterprise for the current workspace ONLY
     fetch('/api/enterprise')
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data?.cooperative) {
           const c = data.cooperative;
           const newSet = {
-            coopName: c.coopName || DEFAULT_SETTINGS.coopName,
+            coopName: c.coopName || '',
             subdomain: c.subdomain || DEFAULT_SETTINGS.subdomain,
             logoUrl: c.logoUrl || DEFAULT_SETTINGS.logoUrl,
             brandColor: (c.brandColor || DEFAULT_SETTINGS.brandColor) as any,
@@ -64,7 +62,6 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
             themeMode: c.themeMode || DEFAULT_SETTINGS.themeMode,
           };
           setSettings(newSet);
-          localStorage.setItem('pfms_white_label', JSON.stringify(newSet));
         }
       })
       .catch(() => {});
@@ -73,7 +70,6 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
   const updateWhiteLabel = async (newSettings: Partial<WhiteLabelSettings>) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
-    localStorage.setItem('pfms_white_label', JSON.stringify(updated));
 
     try {
       await fetch('/api/enterprise', {

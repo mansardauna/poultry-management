@@ -72,7 +72,7 @@ export async function POST(request: Request) {
        const defaultWorkspaceId = `main-${orgId}`;
        await serviceRoleClient.from('workspaces').insert([{
           id: defaultWorkspaceId,
-          name: 'Main Branch',
+          name: 'Main',
           type: 'Layer Farm',
           createdAt: new Date().toISOString(),
           ownerUsername: displayName.toLowerCase()

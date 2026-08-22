@@ -100,7 +100,7 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
   // Fallback: Create isolated default primary workspace for this tenant
   const defaultWs = {
     id: orgId ? `main-${orgId}` : `ws_${authUser.id.replace(/-/g, '').slice(0, 12)}`,
-    name: `${userClean.toUpperCase()} Farm Branch`,
+    name: 'Main',
     type: 'Main',
     createdAt: new Date().toISOString(),
     ownerUsername: userClean

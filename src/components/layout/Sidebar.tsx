@@ -296,8 +296,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                     <Box size={24} className="text-blue-400 flex-shrink-0" />
                   )}
                   <div className="flex flex-col truncate">
-                    <span className="font-semibold text-white text-sm truncate">{whiteLabel.coopName || activeWorkspace?.name || 'PFMS'}</span>
-                    <span className="text-xs text-indigo-400">{activeWorkspace?.name || 'Workspace'}</span>
+                    <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Main'}</span>
+                    <span className="text-xs text-indigo-400">{whiteLabel.coopName || activeWorkspace?.type || 'Farm Branch'}</span>
                   </div>
                 </div>
                 <ChevronDown size={16} className={clsx("text-indigo-400 transition-transform", isDropdownOpen && "rotate-180")} />
