@@ -10,13 +10,11 @@ import {
   CreditCard, 
   Mail, 
   CheckCircle2, 
-  Sparkles, 
   Eye, 
   EyeOff, 
   ArrowRight, 
   ArrowLeft, 
   Lock, 
-  Key, 
   ExternalLink,
   HelpCircle,
   Building2,
@@ -168,27 +166,22 @@ export default function SetupWizardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 sm:p-6 lg:p-10 flex flex-col justify-between">
-      {/* Top Header */}
+      {/* Top Header without logo */}
       <div className="max-w-5xl mx-auto w-full flex items-center justify-between pb-6 border-b border-slate-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shadow-sm">
-            <Sparkles size={20} />
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">{platformName}</h1>
-            <p className="text-xs text-indigo-600 font-medium">System Buyer Deployment & Installation Wizard</p>
-          </div>
+        <div>
+          <h1 className="text-xl font-extrabold tracking-tight text-slate-900">{platformName}</h1>
+          <p className="text-xs text-indigo-600 font-medium">System Buyer Deployment & Installation Wizard</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full">
+          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-3 py-1 rounded-sm">
             Self-Hosted Production Mode
           </span>
         </div>
       </div>
 
-      {/* Main Wizard Card */}
-      <div className="max-w-5xl mx-auto w-full my-8 bg-white border border-slate-200/80 rounded-3xl shadow-xl shadow-slate-900/5 overflow-hidden flex flex-col">
+      {/* Main Wizard Card - rounded-sm & shadow-sm */}
+      <div className="max-w-5xl mx-auto w-full my-8 bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden flex flex-col">
         {/* Stepper Navigation Header */}
         <div className="bg-slate-50/80 border-b border-slate-200 p-4 sm:p-6 grid grid-cols-5 gap-2 sm:gap-4">
           {steps.map((s) => {
@@ -201,17 +194,17 @@ export default function SetupWizardPage() {
                 onClick={() => {
                   if (isDone || s.num < currentStep) setCurrentStep(s.num);
                 }}
-                className={`flex flex-col sm:flex-row items-center gap-2.5 p-2.5 sm:p-3.5 rounded-2xl transition-all cursor-pointer ${
+                className={`flex flex-col sm:flex-row items-center gap-2.5 p-2.5 sm:p-3.5 rounded-sm transition-all cursor-pointer ${
                   isActive 
-                    ? 'bg-white border-2 border-indigo-600 text-slate-900 shadow-md shadow-indigo-950/5' 
+                    ? 'bg-white border-2 border-indigo-600 text-slate-900 shadow-sm' 
                     : isDone 
                     ? 'bg-emerald-50/80 text-emerald-800 border border-emerald-200/60' 
                     : 'text-slate-400 opacity-60 border border-transparent'
                 }`}
               >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold shrink-0 transition-colors ${
+                <div className={`w-8 h-8 rounded-sm flex items-center justify-center text-xs font-extrabold shrink-0 transition-colors ${
                   isActive 
-                    ? 'bg-indigo-600 text-white shadow' 
+                    ? 'bg-indigo-600 text-white shadow-sm' 
                     : isDone 
                     ? 'bg-emerald-600 text-white font-bold' 
                     : 'bg-slate-200 text-slate-500'
@@ -233,7 +226,7 @@ export default function SetupWizardPage() {
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
                   Step 1 of 5
                 </span>
                 <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
@@ -244,29 +237,29 @@ export default function SetupWizardPage() {
                 </p>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4">
+              <div className="bg-slate-50 border border-slate-200 p-6 rounded-sm space-y-4 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                    <div className="w-10 h-10 rounded-sm bg-white border border-slate-200 flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
                       <Server size={20} />
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">Supabase Cloud Database Status</h4>
-                      <p className="text-xs text-slate-500 font-medium">Reading credentials from <code className="text-indigo-700 bg-indigo-50 font-mono px-1.5 py-0.5 rounded border border-indigo-100">.env.local</code></p>
+                      <p className="text-xs text-slate-500 font-medium">Reading credentials from <code className="text-indigo-700 bg-indigo-50 font-mono px-1.5 py-0.5 rounded-sm border border-indigo-100">.env.local</code></p>
                     </div>
                   </div>
 
                   <button
                     onClick={handleTestDatabase}
                     disabled={isDbTesting}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-sm shadow-sm transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
                   >
                     {isDbTesting ? 'Testing…' : 'Test Connection Again'}
                   </button>
                 </div>
 
                 {dbStatus && (
-                  <div className={`p-4 rounded-xl text-xs font-semibold flex items-center gap-3 border ${
+                  <div className={`p-4 rounded-sm text-xs font-semibold flex items-center gap-3 border ${
                     dbStatus.connected 
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
                       : 'bg-red-50 text-red-800 border-red-200'
@@ -277,12 +270,12 @@ export default function SetupWizardPage() {
                 )}
               </div>
 
-              <div className="bg-indigo-50/60 border border-indigo-200/80 p-4 rounded-2xl text-xs text-indigo-900 leading-relaxed space-y-1.5 font-medium">
+              <div className="bg-indigo-50/60 border border-indigo-200/80 p-4 rounded-sm text-xs text-indigo-900 leading-relaxed space-y-1.5 font-medium shadow-sm">
                 <div className="flex items-center gap-2 font-extrabold text-indigo-950 uppercase tracking-wider text-[11px]">
                   <HelpCircle size={15} className="text-indigo-600" /> Buyer Installation Note:
                 </div>
                 <p>
-                  Ensure your <code className="bg-white px-1.5 py-0.5 rounded text-indigo-700 font-mono border border-indigo-200">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-white px-1.5 py-0.5 rounded text-indigo-700 font-mono border border-indigo-200">SUPABASE_SERVICE_ROLE_KEY</code> environment variables are configured before running setup.
+                  Ensure your <code className="bg-white px-1.5 py-0.5 rounded-sm text-indigo-700 font-mono border border-indigo-200">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-white px-1.5 py-0.5 rounded-sm text-indigo-700 font-mono border border-indigo-200">SUPABASE_SERVICE_ROLE_KEY</code> environment variables are configured before running setup.
                 </p>
               </div>
             </div>
@@ -292,7 +285,7 @@ export default function SetupWizardPage() {
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
                   Step 2 of 5
                 </span>
                 <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
@@ -304,7 +297,7 @@ export default function SetupWizardPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-2xl border border-slate-200">
+                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Lock size={16} className="text-indigo-600" /> Master Super Admin Account
                   </h3>
@@ -317,7 +310,7 @@ export default function SetupWizardPage() {
                       type="email"
                       value={superAdminEmail}
                       onChange={(e) => setSuperAdminEmail(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="e.g. owner@poultry.com"
                       required
                     />
@@ -331,7 +324,7 @@ export default function SetupWizardPage() {
                       type={showPassword ? "text" : "password"}
                       value={superAdminPassword}
                       onChange={(e) => setSuperAdminPassword(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 pr-10 text-xs font-mono text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 pr-10 text-xs font-mono text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="Minimum 6 characters"
                       required
                     />
@@ -345,7 +338,7 @@ export default function SetupWizardPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-2xl border border-slate-200">
+                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Building2 size={16} className="text-indigo-600" /> Platform Brand & Currency
                   </h3>
@@ -358,7 +351,7 @@ export default function SetupWizardPage() {
                       type="text"
                       value={platformName}
                       onChange={(e) => setPlatformName(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="e.g. Poultry Farm Management System"
                     />
                   </div>
@@ -370,7 +363,7 @@ export default function SetupWizardPage() {
                     <select
                       value={currencySymbol}
                       onChange={(e) => setCurrencySymbol(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white cursor-pointer"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white cursor-pointer"
                     >
                       <option value="₦">₦ - Nigerian Naira (NGN)</option>
                       <option value="$">$ - US Dollar (USD)</option>
@@ -389,7 +382,7 @@ export default function SetupWizardPage() {
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
                   Step 3 of 5
                 </span>
                 <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
@@ -402,7 +395,7 @@ export default function SetupWizardPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Paystack Gateway */}
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-2xl border border-slate-200">
+                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
@@ -426,7 +419,7 @@ export default function SetupWizardPage() {
                       type="text"
                       value={paystackPublicKey}
                       onChange={(e) => setPaystackPublicKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-emerald-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-emerald-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="pk_PAYSTACK_PUBLIC_KEY"
                     />
                   </div>
@@ -439,14 +432,14 @@ export default function SetupWizardPage() {
                       type="password"
                       value={paystackSecretKey}
                       onChange={(e) => setPaystackSecretKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-emerald-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-emerald-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="sk_PAYSTACK_SECRET_KEY"
                     />
                   </div>
                 </div>
 
                 {/* Stripe Gateway */}
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-2xl border border-slate-200">
+                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
@@ -470,7 +463,7 @@ export default function SetupWizardPage() {
                       type="text"
                       value={stripePublicKey}
                       onChange={(e) => setStripePublicKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="pk_STRIPE_PUBLIC_KEY"
                     />
                   </div>
@@ -483,7 +476,7 @@ export default function SetupWizardPage() {
                       type="password"
                       value={stripeSecretKey}
                       onChange={(e) => setStripeSecretKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="sk_STRIPE_SECRET_KEY"
                     />
                   </div>
@@ -496,7 +489,7 @@ export default function SetupWizardPage() {
           {currentStep === 4 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
                   Step 4 of 5
                 </span>
                 <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
@@ -508,7 +501,7 @@ export default function SetupWizardPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-2xl border border-slate-200">
+                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Mail size={16} className="text-indigo-600" /> Transactional Email Gateway
                   </h3>
@@ -521,7 +514,7 @@ export default function SetupWizardPage() {
                       type="password"
                       value={resendApiKey}
                       onChange={(e) => setResendApiKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxx"
                     />
                   </div>
@@ -534,13 +527,13 @@ export default function SetupWizardPage() {
                       type="email"
                       value={fromEmail}
                       onChange={(e) => setFromEmail(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
                       placeholder="support@pfms-poultry.com"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-2xl border border-slate-200">
+                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Layers size={16} className="text-indigo-600" /> SaaS Plan Pricing Defaults
                   </h3>
@@ -552,7 +545,7 @@ export default function SetupWizardPage() {
                         type="number"
                         value={proPriceMonthly}
                         onChange={(e) => setProPriceMonthly(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
                       />
                     </div>
                     <div>
@@ -561,7 +554,7 @@ export default function SetupWizardPage() {
                         type="number"
                         value={proPriceAnnual}
                         onChange={(e) => setProPriceAnnual(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
                       />
                     </div>
                   </div>
@@ -573,7 +566,7 @@ export default function SetupWizardPage() {
                         type="number"
                         value={enterprisePriceMonthly}
                         onChange={(e) => setEnterprisePriceMonthly(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
                       />
                     </div>
                     <div>
@@ -582,7 +575,7 @@ export default function SetupWizardPage() {
                         type="number"
                         value={enterprisePriceAnnual}
                         onChange={(e) => setEnterprisePriceAnnual(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
                       />
                     </div>
                   </div>
@@ -594,8 +587,8 @@ export default function SetupWizardPage() {
           {/* STEP 5: Complete & Launch */}
           {currentStep === 5 && (
             <div className="space-y-6 text-center py-6 animate-in zoom-in-95 duration-300 max-w-xl mx-auto">
-              <div className="w-20 h-20 rounded-full bg-emerald-50 border-2 border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-xl shadow-emerald-950/5">
-                <CheckCircle2 size={44} />
+              <div className="w-16 h-16 rounded-sm bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle2 size={36} />
               </div>
 
               <div className="space-y-2">
@@ -605,7 +598,7 @@ export default function SetupWizardPage() {
                 </p>
               </div>
 
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-left space-y-3">
+              <div className="bg-slate-50 p-6 rounded-sm border border-slate-200 text-left space-y-3 shadow-sm">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-2">
                   Master Super Admin Credentials Summary
                 </h4>
@@ -619,13 +612,13 @@ export default function SetupWizardPage() {
               <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <Link 
                   href="/dashboard/admin" 
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-sm shadow-sm transition-all flex items-center justify-center gap-2"
                 >
                   <ShieldCheck size={16} /> Open Super Admin Dashboard
                 </Link>
                 <Link 
                   href="/login" 
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200"
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 border border-slate-200"
                 >
                   <ArrowRight size={16} /> Log In to Platform
                 </Link>
@@ -640,7 +633,7 @@ export default function SetupWizardPage() {
             <button
               onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
               disabled={currentStep === 1 || isSubmitting}
-              className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ArrowLeft size={16} /> Back
             </button>
@@ -648,7 +641,7 @@ export default function SetupWizardPage() {
             {currentStep < 4 ? (
               <button
                 onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-md shadow-indigo-950/10"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm"
               >
                 <span>Continue to Step {currentStep + 1}</span>
                 <ArrowRight size={16} />
@@ -657,7 +650,7 @@ export default function SetupWizardPage() {
               <button
                 onClick={handleCompleteSetup}
                 disabled={isSubmitting}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-md shadow-emerald-950/10 disabled:opacity-50"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
                 {isSubmitting ? 'Completing Setup…' : '⚡ Complete Installation & Save Config'}
                 <CheckCircle2 size={16} />
