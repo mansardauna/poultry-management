@@ -38,10 +38,10 @@ export function AdminCmsClient({
 }) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<'plans' | 'cms' | 'transactions' | 'orgs'>('plans');
+  const [activeTab, setActiveTab] = useState<'plans' | 'cms' | 'transactions' | 'orgs' | 'gateways'>('plans');
 
   useEffect(() => {
-    if (tabParam === 'cms' || tabParam === 'plans' || tabParam === 'transactions' || tabParam === 'orgs') {
+    if (tabParam === 'cms' || tabParam === 'plans' || tabParam === 'transactions' || tabParam === 'orgs' || tabParam === 'gateways') {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
@@ -183,6 +183,14 @@ export function AdminCmsClient({
           }`}
         >
           Organizations & Accounts ({allOrgs.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('gateways')}
+          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
+            activeTab === 'gateways' ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'border-transparent text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          💳 Gateways & System Setup Wizard
         </button>
       </div>
 
@@ -514,6 +522,74 @@ export function AdminCmsClient({
                   ))}
                 </tbody>
               </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab 5: Gateways & Installation Setup Wizard */}
+      {activeTab === 'gateways' && (
+        <Card className="rounded-2xl border border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles size={20} className="text-indigo-600" /> Buyer System Setup & Gateway Configuration
+              </CardTitle>
+              <p className="text-xs text-slate-500 mt-0.5">Re-configure payment gateways, database environment keys, or launch the interactive deployment wizard</p>
+            </div>
+
+            <button
+              onClick={() => window.location.href = '/setup'}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow transition-all cursor-pointer flex items-center gap-2"
+            >
+              <span>🚀 Launch Full Setup Wizard (/setup)</span>
+            </button>
+          </CardHeader>
+
+          <CardContent className="p-6 space-y-6">
+            <div className="bg-indigo-50 border border-indigo-200 p-5 rounded-2xl space-y-2">
+              <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider">Software Buyer Installation Guide</h4>
+              <p className="text-xs text-indigo-800 leading-relaxed font-medium">
+                Anyone purchasing or deploying this application can run the interactive setup wizard at <code className="bg-white px-2 py-0.5 rounded text-indigo-700 font-bold border border-indigo-200">/setup</code> to initialize database schema, create Super Admin credentials, add Paystack & Stripe merchant keys, and set custom currency symbols.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border border-slate-200 p-5 rounded-2xl space-y-3 bg-slate-50">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span>💳 Paystack Merchant API Keys</span>
+                </h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Used for African / NGN card payments, bank transfers, and automated subscription checkout.
+                </p>
+                <div className="text-xs font-mono bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+                  <p className="text-slate-600">Public Key: <span className="text-emerald-600 font-bold">pk_PAYSTACK_PUBLIC_KEY</span></p>
+                  <p className="text-slate-600">Secret Key: <span className="text-emerald-600 font-bold">sk_PAYSTACK_SECRET_KEY</span></p>
+                </div>
+              </div>
+
+              <div className="border border-slate-200 p-5 rounded-2xl space-y-3 bg-slate-50">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span>💳 Stripe Merchant API Keys</span>
+                </h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Used for International USD credit cards, Apple Pay, and automated Stripe webhooks.
+                </p>
+                <div className="text-xs font-mono bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+                  <p className="text-slate-600">Publishable Key: <span className="text-indigo-600 font-bold">pk_STRIPE_PUBLIC_KEY</span></p>
+                  <p className="text-slate-600">Secret Key: <span className="text-indigo-600 font-bold">sk_STRIPE_SECRET_KEY</span></p>
+                  <p className="text-slate-600">Webhook Secret: <span className="text-indigo-600 font-bold">whsec_STRIPE_WEBHOOK_SECRET</span></p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => window.location.href = '/setup'}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
+              >
+                <span>Open Setup & Deployment Wizard →</span>
+              </button>
             </div>
           </CardContent>
         </Card>
