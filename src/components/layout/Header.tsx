@@ -361,6 +361,15 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           </select>
         </div>
 
+        {/* Guided Tour Trigger Button */}
+        <button
+          onClick={() => window.dispatchEvent(new Event('pfms_trigger_tour'))}
+          className="hidden lg:flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold px-2.5 py-1.5 rounded-md transition-colors cursor-pointer"
+          title="Re-run Guided Product Tour"
+        >
+          <span>Guided Tour</span>
+        </button>
+
         {/* Notification Bell */}
         <div className="relative" ref={dropdownRef}>
           <button

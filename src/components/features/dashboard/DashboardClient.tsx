@@ -30,6 +30,7 @@ import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
 import { OnboardingWidget } from "./OnboardingWidget";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
+import { FeatureTour } from "@/components/features/FeatureTour";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -360,8 +361,10 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         />
       )}
 
+      <FeatureTour />
+
       {/* Core Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+      <div data-tour="kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
         <Card className="hover:border-indigo-300 transition-colors">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">

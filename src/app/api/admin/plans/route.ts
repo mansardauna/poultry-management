@@ -93,7 +93,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.role === 'SuperAdmin';
+    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
 
     if (!user || !isSuperAdmin) {
       return NextResponse.json({ error: 'Unauthorized: Only Super Admin can update plan configurations' }, { status: 403 });

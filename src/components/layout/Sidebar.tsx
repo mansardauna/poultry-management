@@ -417,6 +417,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               return (
                 <div key={item.name}>
                   <Link
+                    data-tour={item.name === 'Enterprise Hub' ? 'enterprise-link' : item.name === 'Batches' ? 'sidebar-menu' : undefined}
                     href={isLocked ? '/dashboard/settings?tab=subscription' : item.href}
                     onClick={(e) => {
                        if (isLocked) {
