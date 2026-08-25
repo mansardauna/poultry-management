@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { BadgeStatus } from "@/components/ui/BadgeStatus";
 import { 
   Building2, 
   Trash2, 

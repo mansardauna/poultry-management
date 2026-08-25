@@ -31,6 +31,7 @@ import { useTimeFilter } from "../TimeFilterContext";
 import { OnboardingWidget } from "./OnboardingWidget";
 import { OnboardingWizard } from "../onboarding/OnboardingWizard";
 import { FeatureTour } from "@/components/features/FeatureTour";
+import { StatCard } from "@/components/ui/StatCard";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -364,94 +365,39 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
       <FeatureTour />
 
-      {/* Core Metrics Grid */}
+      {/* Core Telemetry Metrics Grid */}
       <div data-tour="kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-        <Card className="hover:border-indigo-300 transition-colors">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">{texts.dashboard.activeFlock}</p>
-                <p className="text-3xl text-slate-900 mt-2">{totalChickens}</p>
-              </div>
-              <div className="text-blue-500">
-                <Activity size={32} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs">
-              <span className={`flex items-center font-semibold px-2 py-0.5 ${recentMortality === 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
-                {recentMortality === 0 ? '0.0%' : `−${flockPct}%`}
-              </span>
-              <span className="text-slate-400 ml-2">{texts.dashboard.flockMortalityRate} ({texts.common[timeRange === 'all' ? 'allTime' : timeRange as 'weekly' | 'monthly' | 'yearly']})</span>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={texts.dashboard.activeFlock}
+          value={totalChickens.toLocaleString()}
+          subtext={`${recentMortality === 0 ? '0.0%' : `−${flockPct}%`} ${texts.dashboard.flockMortalityRate}`}
+          icon={Activity}
+          color="blue"
+        />
 
-        <Card className="hover:border-indigo-300 transition-colors">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">
-                  {timeRange === 'weekly' ? texts.dashboard.weeklyEggOutput : timeRange === 'monthly' ? texts.dashboard.monthlyEggOutput : timeRange === 'yearly' ? texts.dashboard.yearlyEggOutput : texts.dashboard.eggOutput}
-                </p>
-                <p className="text-3xl text-slate-900 mt-2">{currentYield}</p>
-              </div>
-              <div className="text-amber-600">
-                <Activity size={32} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs">
-              <span className={`flex items-center px-2 py-0.5 ${netGrowth >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
-                {netGrowth >= 0 ? <ArrowUp size={12} className="mr-1" /> : null} 
-                {netGrowth >= 0 ? '+' : ''}{netGrowthPercent}%
-              </span>
-              <span className="text-slate-400 ml-2">vs {previousYield} ({texts.common[timeRange === 'weekly' || timeRange === 'all' ? 'weekly' : timeRange === 'monthly' ? 'monthly' : 'yearly']})</span>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={timeRange === 'weekly' ? texts.dashboard.weeklyEggOutput : timeRange === 'monthly' ? texts.dashboard.monthlyEggOutput : timeRange === 'yearly' ? texts.dashboard.yearlyEggOutput : texts.dashboard.eggOutput}
+          value={`${currentYield.toLocaleString()} Eggs`}
+          subtext={`${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`}
+          icon={Activity}
+          color="amber"
+        />
 
-        <Card className="hover:border-indigo-300 transition-colors">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">
-                  {timeRange === 'weekly' ? texts.dashboard.weeklyEggRevenue : timeRange === 'monthly' ? texts.dashboard.monthlyEggRevenue : timeRange === 'yearly' ? texts.dashboard.yearlyEggRevenue : texts.dashboard.eggRevenue}
-                </p>
-                <p className="text-3xl text-slate-900 mt-2">₦{totalRevenue.toLocaleString()}</p>
-              </div>
-              <div className="text-indigo-600">
-                <BarChart2 size={32} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs">
-              <span className={`flex items-center px-2 py-0.5 ${revenueGrowth >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
-                {revenueGrowth >= 0 ? <ArrowUp size={12} className="mr-1" /> : null}
-                {revenueGrowth >= 0 ? '+' : ''}{revenueGrowthPct}%
-              </span>
-              <span className="text-slate-400 ml-2">vs ₦{previousRevenue.toLocaleString()} ({texts.common[timeRange === 'weekly' || timeRange === 'all' ? 'weekly' : timeRange === 'monthly' ? 'monthly' : 'yearly']})</span>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={timeRange === 'weekly' ? texts.dashboard.weeklyEggRevenue : timeRange === 'monthly' ? texts.dashboard.monthlyEggRevenue : timeRange === 'yearly' ? texts.dashboard.yearlyEggRevenue : texts.dashboard.eggRevenue}
+          value={`₦${totalRevenue.toLocaleString()}`}
+          subtext={`${revenueGrowth >= 0 ? '+' : ''}${revenueGrowthPct}% revenue trend`}
+          icon={BarChart2}
+          color="indigo"
+        />
 
-        <Card className="hover:border-indigo-300 transition-colors">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider">{texts.dashboard.operationalProfit}</p>
-                <p className="text-3xl text-emerald-600 mt-2">₦{netProfit.toLocaleString()}</p>
-              </div>
-              <div className="text-emerald-600">
-                <Activity size={32} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs">
-              <span className={` flex items-center px-2 py-0.5 ${profitGrowth >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
-                {profitGrowth >= 0 ? <ArrowUp size={12} className="mr-1" /> : null}
-                {profitGrowth >= 0 ? '+' : ''}{profitGrowthPct}%
-              </span>
-              <span className="text-slate-400 ml-2">vs previous period profit</span>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={texts.dashboard.operationalProfit}
+          value={`₦${netProfit.toLocaleString()}`}
+          subtext={`${profitGrowth >= 0 ? '+' : ''}${profitGrowthPct}% net margin`}
+          icon={Activity}
+          color="emerald"
+        />
       </div>
 
       {/* Production Analytics & Multi-Farm Calendar Grid */}
