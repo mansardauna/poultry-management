@@ -371,7 +371,6 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           title={texts.dashboard.activeFlock}
           value={totalChickens.toLocaleString()}
           subtext={`${recentMortality === 0 ? '0.0%' : `−${flockPct}%`} ${texts.dashboard.flockMortalityRate}`}
-          icon={Activity}
           color="blue"
         />
 
@@ -379,7 +378,6 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           title={timeRange === 'weekly' ? texts.dashboard.weeklyEggOutput : timeRange === 'monthly' ? texts.dashboard.monthlyEggOutput : timeRange === 'yearly' ? texts.dashboard.yearlyEggOutput : texts.dashboard.eggOutput}
           value={`${currentYield.toLocaleString()} Eggs`}
           subtext={`${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`}
-          icon={Activity}
           color="amber"
         />
 
@@ -387,7 +385,6 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           title={timeRange === 'weekly' ? texts.dashboard.weeklyEggRevenue : timeRange === 'monthly' ? texts.dashboard.monthlyEggRevenue : timeRange === 'yearly' ? texts.dashboard.yearlyEggRevenue : texts.dashboard.eggRevenue}
           value={`₦${totalRevenue.toLocaleString()}`}
           subtext={`${revenueGrowth >= 0 ? '+' : ''}${revenueGrowthPct}% revenue trend`}
-          icon={BarChart2}
           color="indigo"
         />
 
@@ -395,7 +392,6 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           title={texts.dashboard.operationalProfit}
           value={`₦${netProfit.toLocaleString()}`}
           subtext={`${profitGrowth >= 0 ? '+' : ''}${profitGrowthPct}% net margin`}
-          icon={Activity}
           color="emerald"
         />
       </div>

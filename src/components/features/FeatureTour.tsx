@@ -1,7 +1,7 @@
 'use strict';
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, ArrowLeft, X, CheckCircle2, Search, Egg, Mic, Printer, Building2 } from 'lucide-react';
 
 interface TourStep {
@@ -61,17 +61,19 @@ export function FeatureTour() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
+  // 1. Strict localStorage check on load
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const tourCompleted = localStorage.getItem('pfms_guided_tour_completed') === 'true';
-      if (!tourCompleted) {
-        const timer = setTimeout(() => setIsOpen(true), 1000);
+      const tourCompleted = localStorage.getItem('pfms_guided_tour_completed');
+      // ONLY auto-open if explicitly not completed
+      if (tourCompleted !== 'true') {
+        const timer = setTimeout(() => setIsOpen(true), 800);
         return () => clearTimeout(timer);
       }
     }
   }, []);
 
-  // Re-trigger event listener
+  // Listen for manual re-trigger event
   useEffect(() => {
     const handleReTrigger = () => {
       setCurrentStepIndex(0);
@@ -133,22 +135,23 @@ export function FeatureTour() {
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-auto font-sans animate-in fade-in duration-200">
-      {/* Background Overlay */}
-      <div 
-        onClick={handleComplete}
-        className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] transition-opacity" 
-      />
-
-      {/* Target Element Spotlight Ring */}
-      {targetRect && (
+      {/* Dynamic Cutout Spotlight Overlay: Box shadow 9999px creates dark backdrop around target without covering target itself */}
+      {targetRect ? (
         <div 
-          className="absolute border-2 border-indigo-500 ring-4 ring-indigo-500/40 rounded-xl transition-all duration-300 pointer-events-none z-[101] shadow-2xl shadow-indigo-500/50"
+          onClick={handleComplete}
+          className="absolute border-2 border-indigo-500 ring-4 ring-indigo-500/50 rounded-xl transition-all duration-300 pointer-events-auto z-[101] cursor-pointer"
           style={{
             top: `${Math.max(0, targetRect.top - 6)}px`,
             left: `${Math.max(0, targetRect.left - 6)}px`,
             width: `${targetRect.width + 12}px`,
             height: `${targetRect.height + 12}px`,
+            boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.65)',
           }}
+        />
+      ) : (
+        <div 
+          onClick={handleComplete}
+          className="absolute inset-0 bg-slate-950/65 backdrop-blur-[1px] transition-opacity" 
         />
       )}
 
@@ -174,7 +177,7 @@ export function FeatureTour() {
           }
         }
       >
-        {/* Pointer Arrow Indicator */}
+        {/* Card Header */}
         <div className="bg-slate-900 text-white p-5 relative">
           <button
             onClick={handleComplete}
