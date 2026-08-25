@@ -334,6 +334,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         </div>
           <div className="flex flex-wrap gap-2">
             <button 
+              data-tour="print-report-btn"
               onClick={() => window.print()}
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm  tracking-wider uppercase transition-colors"
             >

@@ -1,70 +1,77 @@
 'use strict';
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, ArrowLeft, X, CheckCircle2, Search, Egg, Wheat, Video, Building2, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Sparkles, ArrowRight, ArrowLeft, X, CheckCircle2, Search, Egg, Mic, Printer, Building2 } from 'lucide-react';
 
 interface TourStep {
   title: string;
   subtitle: string;
   description: string;
   highlightIcon: any;
-  targetQuery?: string;
+  targetQuery: string;
+  position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
 }
 
 const TOUR_STEPS: TourStep[] = [
   {
-    title: 'Welcome to Poultry Farm Management System!',
-    subtitle: 'Interactive Product Guided Tour',
-    description: 'Welcome aboard! Let’s take a quick 1-minute guided tour of your farm dashboard and key management modules.',
-    highlightIcon: Sparkles,
+    title: 'Egg Production & Collection Logs',
+    subtitle: 'Daily Crate Audits & Laying Records',
+    description: 'This is the Eggs module navigation! Access daily egg lay logs, track good vs cracked eggs, and auto-convert laying counts into crates (30 eggs/crate).',
+    highlightIcon: Egg,
+    targetQuery: '[data-tour="eggs-nav"]',
+    position: 'right'
+  },
+  {
+    title: 'AI Voice & Text Auto-Logger',
+    subtitle: 'Hands-Free Voice Log Entry',
+    description: 'This is the AI Auto-Log button! Speak or type raw notes like "We sold 12 crates today for 50k" and AI automatically parses & saves your records in 1 click.',
+    highlightIcon: Mic,
+    targetQuery: '[data-tour="ai-logger-btn"]',
+    position: 'top'
+  },
+  {
+    title: 'Print & Export Financial Reports',
+    subtitle: 'One-Click Financial & Stock PDF Export',
+    description: 'You can print or export comprehensive farm reports here! Click to print your dashboard analytics, revenue summaries, and expense ledgers instantly.',
+    highlightIcon: Printer,
+    targetQuery: '[data-tour="print-report-btn"]',
+    position: 'bottom'
   },
   {
     title: 'Global Search & Branch Switcher',
-    subtitle: 'Navigation & Multi-Farm Access',
-    description: 'Use the top search bar to jump to any farm module instantly. Access your multi-farm branches and change active coops from the top-left dropdown.',
+    subtitle: 'Quick Module Search & Coop Access',
+    description: 'Use this top search bar to jump to any farm module instantly (Batches, Feed, Staff, Invoices) or switch active regional farm branches.',
     highlightIcon: Search,
-    targetQuery: '[data-tour="search-bar"]'
+    targetQuery: '[data-tour="search-bar"]',
+    position: 'bottom'
   },
   {
-    title: 'Real-Time Telemetry KPI Cards',
-    subtitle: 'Flock Size, Egg Yield & Revenue',
-    description: 'Monitor your total active birds, daily egg crates collected, remaining feed stock in kilograms, and net revenue in real-time.',
-    highlightIcon: Egg,
-    targetQuery: '[data-tour="kpi-cards"]'
-  },
-  {
-    title: 'Daily Farm Operations',
-    subtitle: 'Flocks, Feed & Vaccination Schedules',
-    description: 'Log daily egg production, track feed consumption, manage broiler/layer batches, and view vaccination booster schedules from the left sidebar.',
-    highlightIcon: Wheat,
-    targetQuery: '[data-tour="sidebar-menu"]'
-  },
-  {
-    title: 'Enterprise Suite & WebRTC CCTV',
-    subtitle: 'Multi-Branch Matrix & CCTV Cameras',
-    description: 'Monitor coops live with WebRTC CCTV cameras, generate digital invoices with Paystack/Stripe links, and transfer stock between regional branches.',
+    title: 'Enterprise Hub & CCTV Surveillance',
+    subtitle: 'Multi-Farm Matrix & Security Gateway',
+    description: 'Access your multi-farm branch matrix, white-label cooperative branding, 24/7 priority vet hotline, and WebRTC CCTV live security streams here.',
     highlightIcon: Building2,
-    targetQuery: '[data-tour="enterprise-link"]'
+    targetQuery: '[data-tour="enterprise-nav"]',
+    position: 'right'
   }
 ];
 
 export function FeatureTour() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tourCompleted = localStorage.getItem('pfms_guided_tour_completed') === 'true';
       if (!tourCompleted) {
-        // Auto-open tour for new users on first dashboard load
-        const timer = setTimeout(() => setIsOpen(true), 1200);
+        const timer = setTimeout(() => setIsOpen(true), 1000);
         return () => clearTimeout(timer);
       }
     }
   }, []);
 
-  // Listen for custom trigger event (e.g. user clicks "Guided Tour" button in header/sidebar)
+  // Re-trigger event listener
   useEffect(() => {
     const handleReTrigger = () => {
       setCurrentStepIndex(0);
@@ -74,6 +81,29 @@ export function FeatureTour() {
     window.addEventListener('pfms_trigger_tour', handleReTrigger);
     return () => window.removeEventListener('pfms_trigger_tour', handleReTrigger);
   }, []);
+
+  // Update target element highlight bounds on step change
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const updateTargetBounds = () => {
+      const step = TOUR_STEPS[currentStepIndex];
+      if (step?.targetQuery) {
+        const el = document.querySelector(step.targetQuery);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          setTargetRect(rect);
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        } else {
+          setTargetRect(null);
+        }
+      }
+    };
+
+    updateTargetBounds();
+    window.addEventListener('resize', updateTargetBounds);
+    return () => window.removeEventListener('resize', updateTargetBounds);
+  }, [isOpen, currentStepIndex]);
 
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
@@ -102,79 +132,119 @@ export function FeatureTour() {
   const Icon = currentStep.highlightIcon;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 font-sans animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl shadow-slate-950/20 max-w-lg w-full overflow-hidden border border-slate-200">
-        {/* Header */}
-        <div className="bg-slate-900 text-white p-6 relative">
+    <div className="fixed inset-0 z-[100] pointer-events-auto font-sans animate-in fade-in duration-200">
+      {/* Background Overlay */}
+      <div 
+        onClick={handleComplete}
+        className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] transition-opacity" 
+      />
+
+      {/* Target Element Spotlight Ring */}
+      {targetRect && (
+        <div 
+          className="absolute border-2 border-indigo-500 ring-4 ring-indigo-500/40 rounded-xl transition-all duration-300 pointer-events-none z-[101] shadow-2xl shadow-indigo-500/50"
+          style={{
+            top: `${Math.max(0, targetRect.top - 6)}px`,
+            left: `${Math.max(0, targetRect.left - 6)}px`,
+            width: `${targetRect.width + 12}px`,
+            height: `${targetRect.height + 12}px`,
+          }}
+        />
+      )}
+
+      {/* Tour Popover Card */}
+      <div 
+        className="absolute z-[102] max-w-sm sm:max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transition-all duration-300"
+        style={
+          targetRect ? {
+            top: currentStep.position === 'top' 
+              ? `${Math.max(20, targetRect.top - 240)}px` 
+              : currentStep.position === 'bottom'
+              ? `${Math.min(window.innerHeight - 260, targetRect.bottom + 16)}px`
+              : `${Math.max(20, Math.min(window.innerHeight - 260, targetRect.top))}px`,
+            left: currentStep.position === 'right' 
+              ? `${Math.min(window.innerWidth - 380, targetRect.right + 16)}px` 
+              : currentStep.position === 'left'
+              ? `${Math.max(20, targetRect.left - 380)}px`
+              : `${Math.max(20, Math.min(window.innerWidth - 380, targetRect.left))}px`,
+          } : {
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
+          }
+        }
+      >
+        {/* Pointer Arrow Indicator */}
+        <div className="bg-slate-900 text-white p-5 relative">
           <button
             onClick={handleComplete}
-            className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer p-1"
+            className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer p-1"
             title="Skip Tour"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 flex items-center justify-center shrink-0">
-              <Icon size={24} />
+            <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center shrink-0">
+              <Icon size={20} />
             </div>
             <div>
-              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">
+              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">
                 Step {currentStepIndex + 1} of {TOUR_STEPS.length}
               </span>
-              <h3 className="text-lg font-extrabold text-white mt-1 leading-tight">{currentStep.title}</h3>
-              <p className="text-xs text-indigo-300 font-medium">{currentStep.subtitle}</p>
+              <h3 className="text-base font-extrabold text-white mt-0.5 leading-tight">{currentStep.title}</h3>
+              <p className="text-[11px] text-indigo-300 font-medium">{currentStep.subtitle}</p>
             </div>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 sm:p-8 space-y-6">
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+        {/* Card Body */}
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-slate-600 leading-relaxed font-medium">
             {currentStep.description}
           </p>
 
-          {/* Stepper Dots */}
-          <div className="flex items-center justify-center gap-2 pt-2">
+          {/* Progress Dots */}
+          <div className="flex items-center justify-center gap-1.5 pt-1">
             {TOUR_STEPS.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentStepIndex(idx)}
-                className={`h-2 rounded-full transition-all cursor-pointer ${
+                className={`h-1.5 rounded-full transition-all cursor-pointer ${
                   idx === currentStepIndex 
-                    ? 'w-8 bg-indigo-600' 
+                    ? 'w-6 bg-indigo-600' 
                     : idx < currentStepIndex 
-                    ? 'w-2 bg-emerald-500' 
-                    : 'w-2 bg-slate-200'
+                    ? 'w-1.5 bg-emerald-500' 
+                    : 'w-1.5 bg-slate-200'
                 }`}
                 title={`Go to step ${idx + 1}`}
               />
             ))}
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
             <button
               onClick={handleBack}
               disabled={currentStepIndex === 0}
-              className="px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-2 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
             >
-              <ArrowLeft size={15} /> Back
+              <ArrowLeft size={14} /> Back
             </button>
 
             <button
               onClick={handleComplete}
               className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer px-2"
             >
-              Skip Tour
+              Skip
             </button>
 
             <button
               onClick={handleNext}
-              className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-md flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
             >
               <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish Tour' : 'Next'}</span>
-              {currentStepIndex === TOUR_STEPS.length - 1 ? <CheckCircle2 size={15} /> : <ArrowRight size={15} />}
+              {currentStepIndex === TOUR_STEPS.length - 1 ? <CheckCircle2 size={14} /> : <ArrowRight size={14} />}
             </button>
           </div>
         </div>

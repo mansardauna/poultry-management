@@ -106,6 +106,7 @@ export function AiLogger() {
     <>
       {/* Floating Action Button */}
       <button
+        data-tour="ai-logger-btn"
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-white"
         title="AI Auto Log"
