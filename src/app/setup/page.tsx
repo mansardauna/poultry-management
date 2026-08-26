@@ -33,6 +33,23 @@ export default function SetupWizardPage() {
   const [isDbTesting, setIsDbTesting] = useState(false);
   const [dbStatus, setDbStatus] = useState<{ connected: boolean; message: string } | null>(null);
 
+  // Database Type Selector State
+  const [databaseType, setDatabaseType] = useState<'supabase' | 'postgres' | 'mysql'>('supabase');
+
+  // Postgres Fields State
+  const [postgresHost, setPostgresHost] = useState('localhost');
+  const [postgresPort, setPostgresPort] = useState(5432);
+  const [postgresDb, setPostgresDb] = useState('poultry_db');
+  const [postgresUser, setPostgresUser] = useState('postgres');
+  const [postgresPassword, setPostgresPassword] = useState('');
+
+  // MySQL Fields State
+  const [mysqlHost, setMysqlHost] = useState('localhost');
+  const [mysqlPort, setMysqlPort] = useState(3306);
+  const [mysqlDatabase, setMysqlDatabase] = useState('poultry_db');
+  const [mysqlUser, setMysqlUser] = useState('root');
+  const [mysqlPassword, setMysqlPassword] = useState('');
+
   // Form State
   const [platformName, setPlatformName] = useState('Poultry Farm Management System');
   const [currencySymbol, setCurrencySymbol] = useState('₦');
@@ -55,62 +72,67 @@ export default function SetupWizardPage() {
   const [enterprisePriceMonthly, setEnterprisePriceMonthly] = useState(45000);
   const [enterprisePriceAnnual, setEnterprisePriceAnnual] = useState(432000);
 
-  // 1. Fetch Existing Status on Load
-  useEffect(() => {
-    fetch('/api/setup')
-      .then(res => res.json())
-      .then(data => {
-        if (data.isDatabaseConnected) {
-          setDbStatus({ connected: true, message: 'Supabase Database connected successfully!' });
-        } else {
-          setDbStatus({ connected: false, message: 'Database connection check failed.' });
-        }
-
-        if (data.superAdminEmail) {
-          setSuperAdminEmail(data.superAdminEmail);
-        }
-
-        if (data.gateways) {
-          const g = data.gateways;
-          if (g.platformName) setPlatformName(g.platformName);
-          if (g.currencySymbol) setCurrencySymbol(g.currencySymbol);
-          if (g.fromEmail) setFromEmail(g.fromEmail);
-          if (g.paystackPublicKey) setPaystackPublicKey(g.paystackPublicKey);
-          if (g.paystackSecretKey) setPaystackSecretKey(g.paystackSecretKey);
-          if (g.stripePublicKey) setStripePublicKey(g.stripePublicKey);
-          if (g.stripeSecretKey) setStripeSecretKey(g.stripeSecretKey);
-          if (g.stripeWebhookSecret) setStripeWebhookSecret(g.stripeWebhookSecret);
-          if (g.resendApiKey) setResendApiKey(g.resendApiKey);
-          if (g.proPriceMonthly) setProPriceMonthly(g.proPriceMonthly);
-          if (g.proPriceAnnual) setProPriceAnnual(g.proPriceAnnual);
-          if (g.enterprisePriceMonthly) setEnterprisePriceMonthly(g.enterprisePriceMonthly);
-          if (g.enterprisePriceAnnual) setEnterprisePriceAnnual(g.enterprisePriceAnnual);
-        }
-      })
-      .catch(() => {
-        setDbStatus({ connected: false, message: 'Unable to reach setup status API.' });
-      })
-      .finally(() => setIsLoadingStatus(false));
-  }, []);
-
-  const handleTestDatabase = async () => {
+  // 1. Automatic Real-Time Database Connection Test
+  const testDatabaseConnectionAuto = async () => {
     setIsDbTesting(true);
     try {
       const res = await fetch('/api/setup');
       const data = await res.json();
+
       if (data.isDatabaseConnected) {
-        setDbStatus({ connected: true, message: 'Supabase Database connection verified 100%!' });
-        toast.success('Database connection verified successfully!');
+        setDbStatus({ connected: true, message: 'Database connection verified 100%! Connection is live.' });
       } else {
-        setDbStatus({ connected: false, message: data.error || 'Connection failed.' });
-        toast.error('Database connection failed. Please verify environment variables.');
+        setDbStatus({ 
+          connected: false, 
+          message: data.error || 'Database connection check failed. Please verify environment credentials.' 
+        });
+      }
+
+      if (data.superAdminEmail) {
+        setSuperAdminEmail(data.superAdminEmail);
+      }
+
+      if (data.databaseConfig) {
+        const dbConf = data.databaseConfig;
+        if (dbConf.databaseType) setDatabaseType(dbConf.databaseType);
+        if (dbConf.postgresHost) setPostgresHost(dbConf.postgresHost);
+        if (dbConf.postgresPort) setPostgresPort(dbConf.postgresPort);
+        if (dbConf.postgresDb) setPostgresDb(dbConf.postgresDb);
+        if (dbConf.postgresUser) setPostgresUser(dbConf.postgresUser);
+        if (dbConf.mysqlHost) setMysqlHost(dbConf.mysqlHost);
+        if (dbConf.mysqlPort) setMysqlPort(dbConf.mysqlPort);
+        if (dbConf.mysqlDatabase) setMysqlDatabase(dbConf.mysqlDatabase);
+        if (dbConf.mysqlUser) setMysqlUser(dbConf.mysqlUser);
+      }
+
+      if (data.gateways) {
+        const g = data.gateways;
+        if (g.platformName) setPlatformName(g.platformName);
+        if (g.currencySymbol) setCurrencySymbol(g.currencySymbol);
+        if (g.fromEmail) setFromEmail(g.fromEmail);
+        if (g.paystackPublicKey) setPaystackPublicKey(g.paystackPublicKey);
+        if (g.paystackSecretKey) setPaystackSecretKey(g.paystackSecretKey);
+        if (g.stripePublicKey) setStripePublicKey(g.stripePublicKey);
+        if (g.stripeSecretKey) setStripeSecretKey(g.stripeSecretKey);
+        if (g.stripeWebhookSecret) setStripeWebhookSecret(g.stripeWebhookSecret);
+        if (g.resendApiKey) setResendApiKey(g.resendApiKey);
+        if (g.proPriceMonthly) setProPriceMonthly(g.proPriceMonthly);
+        if (g.proPriceAnnual) setProPriceAnnual(g.proPriceAnnual);
+        if (g.enterprisePriceMonthly) setEnterprisePriceMonthly(g.enterprisePriceMonthly);
+        if (g.enterprisePriceAnnual) setEnterprisePriceAnnual(g.enterprisePriceAnnual);
       }
     } catch (_e) {
-      setDbStatus({ connected: false, message: 'Failed to test connection.' });
+      setDbStatus({ connected: false, message: 'Unable to test database connection.' });
     } finally {
       setIsDbTesting(false);
+      setIsLoadingStatus(false);
     }
   };
+
+  // Run automatic database connection check on mount and when databaseType changes
+  useEffect(() => {
+    testDatabaseConnectionAuto();
+  }, [databaseType]);
 
   const handleCompleteSetup = async () => {
     if (!superAdminEmail || !superAdminPassword) {
@@ -124,6 +146,15 @@ export default function SetupWizardPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          databaseType,
+          postgresHost,
+          postgresPort,
+          postgresDb,
+          postgresUser,
+          mysqlHost,
+          mysqlPort,
+          mysqlDatabase,
+          mysqlUser,
           superAdminEmail,
           superAdminPassword,
           platformName,
@@ -166,7 +197,7 @@ export default function SetupWizardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 sm:p-6 lg:p-10 flex flex-col justify-between">
-      {/* Top Header without logo */}
+      {/* Top Header */}
       <div className="max-w-5xl mx-auto w-full flex items-center justify-between pb-6 border-b border-slate-200">
         <div>
           <h1 className="text-xl font-extrabold tracking-tight text-slate-900">{platformName}</h1>
@@ -180,7 +211,7 @@ export default function SetupWizardPage() {
         </div>
       </div>
 
-      {/* Main Wizard Card - rounded-sm & shadow-sm */}
+      {/* Main Wizard Card */}
       <div className="max-w-5xl mx-auto w-full my-8 bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden flex flex-col">
         {/* Stepper Navigation Header */}
         <div className="bg-slate-50/80 border-b border-slate-200 p-4 sm:p-6 grid grid-cols-5 gap-2 sm:gap-4">
@@ -192,6 +223,11 @@ export default function SetupWizardPage() {
               <div 
                 key={s.num}
                 onClick={() => {
+                  // Block jumping to step 2 if database connection is not verified
+                  if (s.num > 1 && !dbStatus?.connected) {
+                    toast.error('Database connection must be verified clean before proceeding.');
+                    return;
+                  }
                   if (isDone || s.num < currentStep) setCurrentStep(s.num);
                 }}
                 className={`flex flex-col sm:flex-row items-center gap-2.5 p-2.5 sm:p-3.5 rounded-sm transition-all cursor-pointer ${
@@ -222,7 +258,7 @@ export default function SetupWizardPage() {
 
         {/* Wizard Body Content */}
         <div className="p-6 sm:p-10 flex-1">
-          {/* STEP 1: Database & Environment */}
+          {/* STEP 1: Multi-Database Driver Selection & Auto-Connection Guard */}
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
@@ -230,53 +266,238 @@ export default function SetupWizardPage() {
                   Step 1 of 5
                 </span>
                 <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
-                  <Database className="text-indigo-600" size={24} /> Environment & Database Verification
+                  <Database className="text-indigo-600" size={24} /> Database Engine Selection & Credentials
                 </h2>
                 <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Verify your database connection and system environment parameters before configuring platform defaults.
+                  Choose your preferred database engine. Supabase is not compulsory — you can select Standard PostgreSQL or MySQL.
                 </p>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 p-6 rounded-sm space-y-4 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-sm bg-white border border-slate-200 flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
-                      <Server size={20} />
+              {/* 1. Database Driver Engine Selector */}
+              <div className="space-y-3">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Select Database Engine *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div
+                    onClick={() => setDatabaseType('supabase')}
+                    className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                      databaseType === 'supabase'
+                        ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
+                        : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-emerald-600">
+                        ⚡ Supabase
+                      </span>
+                      {databaseType === 'supabase' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">Supabase Cloud Database Status</h4>
-                      <p className="text-xs text-slate-500 font-medium">Reading credentials from <code className="text-indigo-700 bg-indigo-50 font-mono px-1.5 py-0.5 rounded-sm border border-indigo-100">.env.local</code></p>
-                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                      Cloud PostgreSQL DB with Auth & Storage API built-in.
+                    </p>
                   </div>
 
-                  <button
-                    onClick={handleTestDatabase}
-                    disabled={isDbTesting}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-sm shadow-sm transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
+                  <div
+                    onClick={() => setDatabaseType('postgres')}
+                    className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                      databaseType === 'postgres'
+                        ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
+                        : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
+                    }`}
                   >
-                    {isDbTesting ? 'Testing…' : 'Test Connection Again'}
-                  </button>
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-indigo-600">
+                        🐘 Standard PostgreSQL
+                      </span>
+                      {databaseType === 'postgres' && <CheckCircle2 size={16} className="text-indigo-600" />}
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                      Self-Hosted PostgreSQL, Neon, ElephantSQL, or AWS RDS.
+                    </p>
+                  </div>
+
+                  <div
+                    onClick={() => setDatabaseType('mysql')}
+                    className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                      databaseType === 'mysql'
+                        ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
+                        : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-blue-600">
+                        🐬 MySQL / MariaDB
+                      </span>
+                      {databaseType === 'mysql' && <CheckCircle2 size={16} className="text-indigo-600" />}
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                      Standard MySQL 8.0, MariaDB, PlanetScale, or AWS RDS.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Documentation Link Callout for Selected Engine */}
+              <div className="bg-indigo-50/70 border border-indigo-200/90 p-4 sm:p-5 rounded-sm space-y-2 text-xs text-indigo-950 font-medium">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-extrabold text-indigo-900 uppercase tracking-wider text-[11px]">
+                    <HelpCircle size={16} className="text-indigo-600" /> 
+                    {databaseType === 'supabase' && 'Supabase Setup Documentation Guide'}
+                    {databaseType === 'postgres' && 'Standard PostgreSQL Setup & Connection Guide'}
+                    {databaseType === 'mysql' && 'MySQL / MariaDB Database Connection Guide'}
+                  </div>
+
+                  <a
+                    href={
+                      databaseType === 'supabase'
+                        ? 'https://supabase.com/docs/guides/database'
+                        : databaseType === 'postgres'
+                        ? 'https://www.postgresql.org/docs/current/tutorial-start.html'
+                        : 'https://dev.mysql.com/doc/refman/8.0/en/connecting.html'
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 underline text-[11px]"
+                  >
+                    View Official Setup Docs <ExternalLink size={12} />
+                  </a>
                 </div>
 
+                <p className="text-slate-600 leading-relaxed">
+                  {databaseType === 'supabase' && 'Supply your Supabase Project URL and Service Role Key in .env.local to manage multi-tenant tables automatically.'}
+                  {databaseType === 'postgres' && 'Configure your PostgreSQL server host, port 5432, database name, and user credentials below.'}
+                  {databaseType === 'mysql' && 'Configure your MySQL / MariaDB server host, port 3306, database name, and root user credentials below.'}
+                </p>
+              </div>
+
+              {/* 3. Database Credentials Input Form */}
+              <div className="bg-slate-50 border border-slate-200 p-6 rounded-sm space-y-4 shadow-sm">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-2">
+                  {databaseType === 'supabase' && 'Supabase Credentials (.env.local)'}
+                  {databaseType === 'postgres' && 'PostgreSQL Connection Parameters'}
+                  {databaseType === 'mysql' && 'MySQL Connection Parameters'}
+                </h4>
+
+                {databaseType === 'supabase' && (
+                  <div className="space-y-3">
+                    <p className="text-xs text-slate-500 font-medium">
+                      Supabase credentials are read automatically from your environment variables:
+                    </p>
+                    <div className="font-mono text-xs bg-white p-3 rounded-sm border border-slate-200 space-y-1">
+                      <p className="text-slate-700">NEXT_PUBLIC_SUPABASE_URL: <span className="text-indigo-600 font-bold">Configured in .env.local</span></p>
+                      <p className="text-slate-700">SUPABASE_SERVICE_ROLE_KEY: <span className="text-emerald-600 font-bold">Configured in .env.local</span></p>
+                    </div>
+                  </div>
+                )}
+
+                {databaseType === 'postgres' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Host Server</label>
+                      <input
+                        type="text"
+                        value={postgresHost}
+                        onChange={(e) => setPostgresHost(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="localhost or db.example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Port</label>
+                      <input
+                        type="number"
+                        value={postgresPort}
+                        onChange={(e) => setPostgresPort(Number(e.target.value))}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="5432"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database Name</label>
+                      <input
+                        type="text"
+                        value={postgresDb}
+                        onChange={(e) => setPostgresDb(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="poultry_db"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database User</label>
+                      <input
+                        type="text"
+                        value={postgresUser}
+                        onChange={(e) => setPostgresUser(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="postgres"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {databaseType === 'mysql' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Host Server</label>
+                      <input
+                        type="text"
+                        value={mysqlHost}
+                        onChange={(e) => setMysqlHost(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="localhost or 127.0.0.1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Port</label>
+                      <input
+                        type="number"
+                        value={mysqlPort}
+                        onChange={(e) => setMysqlPort(Number(e.target.value))}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="3306"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database Name</label>
+                      <input
+                        type="text"
+                        value={mysqlDatabase}
+                        onChange={(e) => setMysqlDatabase(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="poultry_db"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database User</label>
+                      <input
+                        type="text"
+                        value={mysqlUser}
+                        onChange={(e) => setMysqlUser(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="root"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Real-Time Connection Test Status Banner (No manual test button) */}
                 {dbStatus && (
-                  <div className={`p-4 rounded-sm text-xs font-semibold flex items-center gap-3 border ${
+                  <div className={`p-4 rounded-sm text-xs font-semibold flex items-center justify-between border ${
                     dbStatus.connected 
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
                       : 'bg-red-50 text-red-800 border-red-200'
                   }`}>
-                    {dbStatus.connected ? <CheckCircle2 size={18} className="text-emerald-600" /> : <AlertCircle size={18} className="text-red-600" />}
-                    <span>{dbStatus.message}</span>
+                    <div className="flex items-center gap-2">
+                      {dbStatus.connected ? <CheckCircle2 size={18} className="text-emerald-600" /> : <AlertCircle size={18} className="text-red-600" />}
+                      <span>{dbStatus.message}</span>
+                    </div>
+
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white border border-slate-200">
+                      {isDbTesting ? 'Testing Auto…' : 'Real-Time Auto Check'}
+                    </span>
                   </div>
                 )}
-              </div>
-
-              <div className="bg-indigo-50/60 border border-indigo-200/80 p-4 rounded-sm text-xs text-indigo-900 leading-relaxed space-y-1.5 font-medium shadow-sm">
-                <div className="flex items-center gap-2 font-extrabold text-indigo-950 uppercase tracking-wider text-[11px]">
-                  <HelpCircle size={15} className="text-indigo-600" /> Buyer Installation Note:
-                </div>
-                <p>
-                  Ensure your <code className="bg-white px-1.5 py-0.5 rounded-sm text-indigo-700 font-mono border border-indigo-200">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-white px-1.5 py-0.5 rounded-sm text-indigo-700 font-mono border border-indigo-200">SUPABASE_SERVICE_ROLE_KEY</code> environment variables are configured before running setup.
-                </p>
               </div>
             </div>
           )}
@@ -603,6 +824,7 @@ export default function SetupWizardPage() {
                   Master Super Admin Credentials Summary
                 </h4>
                 <div className="text-xs font-mono space-y-1">
+                  <p className="text-slate-700">Database Driver: <strong className="text-indigo-600 uppercase">{databaseType}</strong></p>
                   <p className="text-slate-700">Super Admin Email: <strong className="text-indigo-600">{superAdminEmail}</strong></p>
                   <p className="text-slate-700">Platform Brand: <strong className="text-indigo-600">{platformName}</strong></p>
                   <p className="text-slate-700">Default Currency: <strong className="text-emerald-600">{currencySymbol}</strong></p>
@@ -627,7 +849,7 @@ export default function SetupWizardPage() {
           )}
         </div>
 
-        {/* Wizard Footer Controls */}
+        {/* Wizard Footer Controls with Connection Guard */}
         {currentStep < 5 && (
           <div className="bg-slate-50/80 border-t border-slate-200 p-4 sm:p-6 flex items-center justify-between">
             <button
@@ -640,8 +862,15 @@ export default function SetupWizardPage() {
 
             {currentStep < 4 ? (
               <button
-                onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+                onClick={() => {
+                  if (currentStep === 1 && !dbStatus?.connected) {
+                    toast.error('Database connection test must pass clean before proceeding to Step 2.');
+                    return;
+                  }
+                  setCurrentStep(prev => Math.min(4, prev + 1));
+                }}
+                disabled={currentStep === 1 && !dbStatus?.connected}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm"
               >
                 <span>Continue to Step {currentStep + 1}</span>
                 <ArrowRight size={16} />

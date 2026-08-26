@@ -2,10 +2,9 @@
 
 import { NextResponse } from 'next/server';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
-import { getAuthUser } from '@/lib/auth';
 
 /**
- * GET Handler: Check system setup status and existing gateway configurations
+ * GET Handler: Check system setup status, database connectivity, and gateway configurations
  */
 export async function GET() {
   try {
@@ -48,7 +47,33 @@ export async function GET() {
       } catch (_e) {}
     }
 
-    // 3. Check Super Admin exists
+    // 3. Fetch Database Driver Configuration
+    const { data: dbDriverData } = await serviceRoleClient
+      .from('systemSettings')
+      .select('adminName')
+      .eq('id', 'database_config')
+      .maybeSingle();
+
+    let databaseConfig = {
+      databaseType: 'supabase',
+      postgresHost: '',
+      postgresPort: 5432,
+      postgresDb: '',
+      postgresUser: '',
+      mysqlHost: '',
+      mysqlPort: 3306,
+      mysqlDatabase: '',
+      mysqlUser: '',
+    };
+
+    if (dbDriverData?.adminName) {
+      try {
+        const parsed = JSON.parse(dbDriverData.adminName);
+        databaseConfig = { ...databaseConfig, ...parsed };
+      } catch (_e) {}
+    }
+
+    // 4. Check Super Admin exists
     const { data: superAdmin } = await serviceRoleClient
       .from('users')
       .select('id, username, email, role')
@@ -62,6 +87,7 @@ export async function GET() {
       superAdminExists: Boolean(superAdmin),
       superAdminEmail: superAdmin?.email || superAdmin?.username || 'owner@poultry.com',
       gateways,
+      databaseConfig,
     });
   } catch (err: any) {
     return NextResponse.json({
@@ -80,6 +106,15 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const {
+      databaseType = 'supabase',
+      postgresHost = '',
+      postgresPort = 5432,
+      postgresDb = '',
+      postgresUser = '',
+      mysqlHost = '',
+      mysqlPort = 3306,
+      mysqlDatabase = '',
+      mysqlUser = '',
       superAdminEmail,
       superAdminPassword,
       platformName = 'Poultry Farm Management System',
@@ -111,7 +146,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Provision / Update Super Admin in Supabase Auth
+    // 1. Provision / Update Super Admin in Auth
     let userId = '';
     const cleanEmail = superAdminEmail.trim().toLowerCase();
 
@@ -171,7 +206,27 @@ export async function POST(request: Request) {
       ownerUsername: cleanEmail.split('@')[0]
     }]);
 
-    // 3. Save Gateways & System Configurations to systemSettings Table
+    // 3. Save Database Driver Config
+    const databaseDriverConfig = {
+      databaseType,
+      postgresHost: postgresHost.trim(),
+      postgresPort: Number(postgresPort),
+      postgresDb: postgresDb.trim(),
+      postgresUser: postgresUser.trim(),
+      mysqlHost: mysqlHost.trim(),
+      mysqlPort: Number(mysqlPort),
+      mysqlDatabase: mysqlDatabase.trim(),
+      mysqlUser: mysqlUser.trim(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await serviceRoleClient.from('systemSettings').upsert([{
+      id: 'database_config',
+      workspaceId: 'global',
+      adminName: JSON.stringify(databaseDriverConfig)
+    }]);
+
+    // 4. Save Gateways & System Configurations to systemSettings Table
     const gatewayConfig = {
       paystackPublicKey: paystackPublicKey.trim(),
       paystackSecretKey: paystackSecretKey.trim(),
@@ -202,7 +257,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Failed to save gateway config: ${saveGatewaysErr.message}` }, { status: 500 });
     }
 
-    // 4. Update SaaS Pricing Configuration
+    // 5. Update SaaS Pricing Configuration
     const updatedPlans = [
       {
         id: 'free',
