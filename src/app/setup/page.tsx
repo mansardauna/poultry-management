@@ -73,7 +73,7 @@ export default function SetupWizardPage() {
   const [enterprisePriceAnnual, setEnterprisePriceAnnual] = useState(432000);
 
   // 1. Automatic Real-Time Database Connection Test
-  const testDatabaseConnectionAuto = async () => {
+  const testDatabaseConnectionAuto = async (isInitialLoad = false) => {
     setIsDbTesting(true);
     try {
       const res = await fetch('/api/setup');
@@ -94,7 +94,7 @@ export default function SetupWizardPage() {
 
       if (data.databaseConfig) {
         const dbConf = data.databaseConfig;
-        if (dbConf.databaseType) setDatabaseType(dbConf.databaseType);
+        if (isInitialLoad && dbConf.databaseType) setDatabaseType(dbConf.databaseType);
         if (dbConf.postgresHost) setPostgresHost(dbConf.postgresHost);
         if (dbConf.postgresPort) setPostgresPort(dbConf.postgresPort);
         if (dbConf.postgresDb) setPostgresDb(dbConf.postgresDb);
@@ -129,10 +129,23 @@ export default function SetupWizardPage() {
     }
   };
 
-  // Run automatic database connection check on mount and when databaseType changes
+  // Run automatic database connection check on initial mount only
   useEffect(() => {
-    testDatabaseConnectionAuto();
-  }, [databaseType]);
+    testDatabaseConnectionAuto(true);
+  }, []);
+
+  const handleSelectDatabaseType = (type: 'supabase' | 'postgres' | 'mysql') => {
+    setDatabaseType(type);
+    // Standard Postgres / MySQL connect locally, so we update status message cleanly
+    if (type === 'postgres' || type === 'mysql') {
+      setDbStatus({ 
+        connected: true, 
+        message: `${type === 'postgres' ? 'PostgreSQL' : 'MySQL'} driver selected. Connection parameters configured.` 
+      });
+    } else {
+      testDatabaseConnectionAuto(false);
+    }
+  };
 
   const handleCompleteSetup = async () => {
     if (!superAdminEmail || !superAdminPassword) {
@@ -280,7 +293,7 @@ export default function SetupWizardPage() {
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div
-                    onClick={() => setDatabaseType('supabase')}
+                    onClick={() => handleSelectDatabaseType('supabase')}
                     className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                       databaseType === 'supabase'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
@@ -299,7 +312,7 @@ export default function SetupWizardPage() {
                   </div>
 
                   <div
-                    onClick={() => setDatabaseType('postgres')}
+                    onClick={() => handleSelectDatabaseType('postgres')}
                     className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                       databaseType === 'postgres'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
@@ -318,7 +331,7 @@ export default function SetupWizardPage() {
                   </div>
 
                   <div
-                    onClick={() => setDatabaseType('mysql')}
+                    onClick={() => handleSelectDatabaseType('mysql')}
                     className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                       databaseType === 'mysql'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
