@@ -1,17 +1,11 @@
 'use strict';
 
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({ 
-  subsets: ["latin"], 
-  weight: ["400", "500", "600", "700"],
+const dmSans = {
   variable: "--font-dm-sans",
-  display: "swap",
-  adjustFontFallback: false,
-  fallback: ["system-ui", "sans-serif"],
-});
+};
 
 export const metadata: Metadata = {
   title: "PFMS | Poultry Farm Management System",
