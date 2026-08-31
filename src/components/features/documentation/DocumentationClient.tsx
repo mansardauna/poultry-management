@@ -1,25 +1,46 @@
+'use strict';
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DocSection } from './DocSection';
-import { BookOpen, LayoutDashboard, Bird, Egg, Wheat, DollarSign, Settings, ChevronRight } from 'lucide-react';
+import { 
+  BookOpen, 
+  LayoutDashboard, 
+  Bird, 
+  Egg, 
+  Wheat, 
+  DollarSign, 
+  Settings, 
+  ChevronRight, 
+  CheckCircle2, 
+  Building2, 
+  ShieldCheck, 
+  Camera, 
+  HelpCircle,
+  FileText,
+  CreditCard,
+  Megaphone,
+  Home,
+  HeartPulse,
+  ShoppingBag,
+  Wrench,
+  Users,
+  UserCheck
+} from 'lucide-react';
 import Image from 'next/image';
-
 import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 
 const NAV_ITEMS = [
-  { id: 'overview', label: 'Platform Overview', icon: BookOpen },
-  { id: 'dashboard', label: 'Dashboard Analytics', icon: LayoutDashboard },
-  { id: 'flocks', label: 'Flock Management', icon: Bird },
-  { id: 'eggs', label: 'Egg Production', icon: Egg },
-  { id: 'feed', label: 'Feed & Inventory', icon: Wheat },
-  { id: 'finance', label: 'Finance & Ledgers', icon: DollarSign },
-  { id: 'settings', label: 'System Settings', icon: Settings },
+  { id: 'summary', label: '1. Executive Summary', icon: BookOpen },
+  { id: 'sitemap', label: '2. Sitemap Architecture', icon: FileText },
+  { id: 'screenshots', label: '3. Real App Screenshots', icon: Camera },
+  { id: 'wireframes', label: '4. Module Wireframes (1-14)', icon: LayoutDashboard },
+  { id: 'subscriptions', label: '5. Subscription Tier Matrix', icon: CreditCard },
+  { id: 'marketing', label: '6. Digital Marketer Pitch Copy', icon: Megaphone },
 ];
 
 export function DocumentationClient() {
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('summary');
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -49,53 +70,46 @@ export function DocumentationClient() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pt-20">
-      <LandingNav />
+    <div className="min-h-screen bg-slate-50 text-slate-900 pt-20 font-sans">
+      <LandingNav activePath="/documentation" />
+      
       {/* Hero Banner Area */}
-      <div className="relative w-full h-[40vh] min-h-[300px] bg-slate-900 flex items-center justify-center overflow-hidden">
-        <Image 
-          src="/docs/docs_hero_banner.png" 
-          alt="Documentation Hero" 
-          fill 
-          className="object-cover opacity-60 mix-blend-overlay"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
-        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 text-sm font-medium mb-6 backdrop-blur-md">
-            <BookOpen size={16} /> Official Guide v2.0
+      <div className="relative w-full bg-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div className="max-w-5xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+            <BookOpen size={14} /> Official Product & Marketing Guide v2.0
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-lg">
-            Comprehensive User Guide
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+            Poultry Farm Management System (PFMS)
           </h1>
-          <p className="text-lg md:text-xl text-slate-300 font-medium">
-            Everything you need to master your poultry farm operations, from flock tracking to advanced financial analytics.
+          <p className="text-sm sm:text-base text-slate-300 max-w-3xl mx-auto font-medium leading-relaxed">
+            Complete Product Feature, Sitemap, Wireframe Layouts, Real App Screenshots, Subscription Tier Matrix, and Digital Marketer Pitch Copy.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row gap-12 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row gap-10 relative">
         
         {/* Sticky Sidebar Navigation */}
         <div className="md:w-72 flex-shrink-0 relative">
-          <div className="sticky top-24 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-6 px-3">Table of Contents</h3>
+          <div className="sticky top-28 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <h3 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-4 px-2">Documentation Menu</h3>
             <nav className="space-y-1">
               {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => scrollToSection(id)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     activeSection === id 
-                      ? 'bg-indigo-50 text-indigo-700 shadow-sm' 
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-indigo-600 text-white shadow-sm' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon size={18} className={activeSection === id ? 'text-indigo-600' : 'text-slate-400'} />
-                    {label}
+                  <div className="flex items-center gap-2.5 truncate">
+                    <Icon size={16} />
+                    <span className="truncate">{label}</span>
                   </div>
-                  {activeSection === id && <ChevronRight size={16} className="text-indigo-400" />}
+                  {activeSection === id && <ChevronRight size={14} className="shrink-0" />}
                 </button>
               ))}
             </nav>
@@ -103,128 +117,269 @@ export function DocumentationClient() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 max-w-4xl">
+        <div className="flex-1 max-w-4xl space-y-16">
           
-          <DocSection 
-            id="overview" 
-            title="Platform Overview" 
-            description="Welcome to the Poultry Farm Management System. Our application is designed to be your all-in-one digital command center for farm operations."
-            imageSrc="/docs/login_page.png"
-            imageAlt="Unified Login Portal Screenshot"
-          >
-            <p>
-              The system integrates data from different facets of your farm—flocks, egg production, feed, and finances—into a centralized, real-time dashboard. 
-              The application supports <strong>internationalization</strong> (En, Es, Ar, De, Fr, Zh) and offers global <strong>time-range filtering</strong>, allowing you to instantly switch views between weekly, monthly, and yearly analytics.
-            </p>
-            <div className="mt-6 bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-md">
-              <h4 className="font-bold text-indigo-900 mb-1">Getting Started</h4>
-              <p className="text-indigo-800 text-sm">
-                Ensure you have set your preferred language and time range in the top Header navigation bar. Your preferences will be saved automatically across sessions.
-              </p>
+          {/* SECTION 1: EXECUTIVE SUMMARY */}
+          <section id="summary" className="space-y-6 scroll-mt-28">
+            <div className="border-b border-slate-200 pb-3">
+              <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 1 of 10</span>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">🌟 Executive Summary & Core Value Proposition</h2>
             </div>
-          </DocSection>
 
-          <DocSection 
-            id="dashboard" 
-            title="Dashboard Analytics" 
-            description="The Dashboard acts as your central hub, presenting real-time KPIs and dynamic charts."
-            imageSrc="/docs/main_dashboard.jpg"
-            imageAlt="Main Telemetry Dashboard Screenshot"
-          >
-            <ul className="space-y-4">
-              <li className="flex gap-3 items-start">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs mt-0.5">1</span>
-                <div>
-                  <strong>Key Performance Indicators (KPIs):</strong> At a glance, view Total Live Birds, Eggs Collected Today, Revenue, and Mortality Rates. The arrows indicate whether trends are positive or negative compared to the previous period.
+            <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+              <strong>Poultry Farm Management System (PFMS)</strong> is an end-to-end, enterprise-grade cloud SaaS platform tailored for commercial poultry farmers, layer & broiler operators, hatchery managers, and agricultural cooperatives.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                <h4 className="text-xs font-bold text-indigo-600 uppercase">1. Automated Livestock Telemetry</h4>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Real-time tracking of flock mortality, laying percentages, feed conversion ratios (FCR), and maturation timelines.</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                <h4 className="text-xs font-bold text-emerald-600 uppercase">2. Financial Precision</h4>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Automated cashflow tracking, merchant invoice generation, expense categorization, and batch-level profitability.</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                <h4 className="text-xs font-bold text-amber-600 uppercase">3. Hardware & AI Integration</h4>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">WebRTC live CCTV camera surveillance, optical AI barcode parsing, and automated threshold alerts.</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                <h4 className="text-xs font-bold text-purple-600 uppercase">4. Multi-Farm Expansion</h4>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Multi-branch matrix management, inter-branch stock transfers, and 100% customizable white-label branding.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 2: SITEMAP ARCHITECTURE */}
+          <section id="sitemap" className="space-y-6 scroll-mt-28">
+            <div className="border-b border-slate-200 pb-3">
+              <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 1 of 10</span>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">🧭 Sitemap & Application Navigation Architecture</h2>
+            </div>
+
+            <div className="bg-slate-900 text-indigo-300 p-6 rounded-2xl font-mono text-xs leading-relaxed overflow-x-auto border border-slate-800 shadow-inner">
+<pre>{`Public Landing & Onboarding
+ ├── /                       -> Public Commercial Landing Page
+ ├── /pricing                -> Subscription Plans & Feature Matrix
+ ├── /about                  -> About Company & Mission
+ ├── /contact                -> Contact & Support Form
+ ├── /login                  -> Unified Single-Farm & Enterprise Portal
+ ├── /signup                 -> User Registration & Trial Initialization
+ └── /reset-password         -> Password Recovery
+
+Authenticated Operational Dashboard (/dashboard)
+ ├── Main Telemetry          -> Real-time KPIs, Alert Logs, & Onboarding Widget
+ ├── /dashboard/chickens     -> Flock Batches, Breeds, Mortality, & Transfers
+ ├── /dashboard/housing      -> Pen Coops, Capacity Allocation, & Climate Status
+ ├── /dashboard/eggs         -> Daily Egg Collections, Cushion Audits, & Maturation
+ ├── /dashboard/feed         -> Feed Inventory, Daily Consumption Logs, & Restock Pipeline
+ ├── /dashboard/health       -> Vaccination Templates, Booster Schedules, & Vet Logs
+ ├── /dashboard/sales        -> Sales Records, Paystack/Stripe Invoices, & Customer Orders
+ ├── /dashboard/finance      -> Expense Ledger, Payroll Disbursement, & Profit/Loss
+ ├── /dashboard/inventory    -> Farm Machinery, Tools, Equipment Maintenance
+ ├── /dashboard/staff        -> Attendant Roster, Role-Based Access (Admin/Manager/Staff)
+ ├── /dashboard/contacts     -> Supplier & Buyer CRM Directory
+ ├── /dashboard/cctv         -> WebRTC Security Camera Monitoring & QR Pairing
+ ├── /dashboard/enterprise   -> Multi-Branch Matrix, White-Label Branding, & Vet Hotline
+ │    ├── /branches          -> Multi-Farm Matrix & Inter-Branch Stock Transfers
+ │    ├── /whitelabel        -> Custom Logo, Subdomains, & Color Schemes
+ │    ├── /api               -> REST API Tokens & Webhook Integration
+ │    ├── /vet               -> 24/7 Priority Veterinary Hotline Tickets
+ │    └── /feed-pool         -> Cooperative Wholesale Feed Purchasing Pool
+ ├── /dashboard/settings     -> Account Settings, Branch Setup, & Billing Plans
+ └── /dashboard/admin        -> Super Admin Portal & Landing Page CMS Editor`}</pre>
+            </div>
+          </section>
+
+          {/* SECTION 3: REAL APP SCREENSHOTS */}
+          <section id="screenshots" className="space-y-6 scroll-mt-28">
+            <div className="border-b border-slate-200 pb-3">
+              <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 2 & 9 Screenshots</span>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">📸 Real Application Screenshots</h2>
+            </div>
+
+            <div className="space-y-8">
+              <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">Main Telemetry Dashboard (`/dashboard`)</h4>
+                <div className="rounded-xl overflow-hidden border border-slate-200">
+                  <img src="/docs/main_dashboard.jpg" alt="Main Dashboard Screenshot" className="w-full h-auto object-cover" />
                 </div>
-              </li>
-              <li className="flex gap-3 items-start">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs mt-0.5">2</span>
-                <div>
-                  <strong>Dynamic Charting:</strong> The central chart automatically adjusts based on your global time filter. It displays daily bars for weekly views, dates for monthly views, and aggregated months for yearly views.
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">Login Portal (`/login`)</h4>
+                  <div className="rounded-xl overflow-hidden border border-slate-200">
+                    <img src="/docs/login_page.png" alt="Login Portal Screenshot" className="w-full h-auto object-cover" />
+                  </div>
                 </div>
-              </li>
-              <li className="flex gap-3 items-start">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs mt-0.5">3</span>
-                <div>
-                  <strong>Queue Monitoring:</strong> The dashboard summarizes pending tasks such as Shift Checklists and System Alert Logs.
+
+                <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">Egg Collection Logger (`/dashboard/eggs`)</h4>
+                  <div className="rounded-xl overflow-hidden border border-slate-200">
+                    <img src="/docs/egg_logger.jpg" alt="Egg Logger Screenshot" className="w-full h-auto object-cover" />
+                  </div>
                 </div>
-              </li>
-            </ul>
-          </DocSection>
+              </div>
 
-          <DocSection 
-            id="flocks" 
-            title="Flock Management" 
-            description="Track every batch of birds from day one to depletion."
-            imageSrc="/docs/egg_logger.jpg"
-            imageAlt="Egg Collection Logger Screenshot"
-          >
-            <p>
-              The Flock module allows you to register batches with details such as Breed, Purchase Date, Quantity, and Projected Selling Price.
-            </p>
-            <h4 className="font-semibold text-slate-800 mt-6 mb-2">Mortality & Health</h4>
-            <p>
-              When logging mortality, the system automatically subtracts from the total active bird count, ensuring your dashboard KPIs are instantly up to date. You can also view vaccination schedules for each specific batch to ensure farm biosecurity protocols are met.
-            </p>
-          </DocSection>
+              <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">Subscription Upgrade Modal & Settings (`/settings`)</h4>
+                <div className="rounded-xl overflow-hidden border border-slate-200">
+                  <img src="/docs/subscription_modal.jpg" alt="Subscription Modal Screenshot" className="w-full h-auto object-cover" />
+                </div>
+              </div>
+            </div>
+          </section>
 
-          <DocSection 
-            id="eggs" 
-            title="Egg Production" 
-            description="Monitor daily collection, breakage rates, and cushioning audits."
-            imageSrc="/docs/egg_logger.jpg"
-            imageAlt="Egg Production Logger Screenshot"
-          >
-            <p>
-              Logging daily egg collections is crucial. The Egg module differentiates between Good Eggs, Cracked Eggs, and Spoilt Eggs. This directly feeds into the revenue projections and the dynamic charts on the Dashboard.
-            </p>
-            <p className="mt-4 bg-amber-50 p-3 rounded-md text-sm border border-amber-100 text-amber-800">
-              <strong>Tip:</strong> Frequently update the "Cushion Audits" to reduce the number of cracked eggs in the nesting boxes.
-            </p>
-          </DocSection>
+          {/* SECTION 4: MODULE WIREFRAMES */}
+          <section id="wireframes" className="space-y-8 scroll-mt-28">
+            <div className="border-b border-slate-200 pb-3">
+              <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Pages 3 to 8 Wireframes</span>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">📦 Detailed Module-by-Module Wireframe Breakdown</h2>
+            </div>
 
-          <DocSection 
-            id="feed" 
-            title="Feed & Inventory" 
-            description="Prevent stockouts and analyze consumption."
-          >
-            <p>
-              Track feed deliveries and log daily consumption. The system provides Low Stock Alerts directly to the Dashboard when feed levels drop below critical thresholds. 
-            </p>
-            <p className="mt-4">
-              Proper logging ensures that the Finance module can calculate the true cost of production per bird and per egg.
-            </p>
-          </DocSection>
+            {/* 1. Main Dashboard */}
+            <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-extrabold text-slate-900">1. Main Telemetry Dashboard</h3>
+                <span className="bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded">ADMIN / MANAGER</span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">Aggregates core active flock birds, 30-egg crate counts, feed stock remaining (Kg), and operational net revenue.</p>
+              <div className="bg-slate-900 text-sky-400 p-4 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`+-------------------------------------------------------------------------------+
+| [Search Bar]               [Time Filter: All/Weekly] [Language] [Bell (9+)]  |
++-------------------------------------------------------------------------------+
+| ⚡ FARM SETUP & ONBOARDING PROGRESS (0 of 4 Completed - 0%)                   |
+| Progress Bar [==========] 0%   [Resume Step 1: Configure Branch ->]           |
++-------------------------------------------------------------------------------+
+| [Active Birds: 12,500] [Egg Production: 410 Crates] [Feed Stock: 1,850 Kg]    |
++-------------------------------------------------------------------------------+
+| [Egg Production Bar Chart (Daily)]     | [Net Revenue vs Expenses Line Chart] |
++-------------------------------------------------------------------------------+
+| Recent Alert Notifications Log (Critical / Warning / Info)                    |
++-------------------------------------------------------------------------------`}</pre>
+              </div>
+            </div>
 
-          <DocSection 
-            id="finance" 
-            title="Finance & Ledgers" 
-            description="A robust double-entry style ledger and reconciliation sheet."
-            imageSrc="/docs/subscription_modal.jpg"
-            imageAlt="Subscription Plans & Gateway Screenshot"
-          >
-            <p>
-              The Finance module presents a complete breakdown of operational inflows and outflows.
-            </p>
-            <ul className="list-disc pl-5 mt-4 space-y-2 text-slate-700">
-              <li><strong>Expense Ledger:</strong> Categorize spending into Feed, Salaries, Drugs, Utilities, and Maintenance.</li>
-              <li><strong>Payroll Processing:</strong> One-click payroll processing calculates total staff salaries and deducts them from the net asset balance.</li>
-              <li><strong>Reconciliation Sheet:</strong> A transparent view combining opening bank/cash balances with recent revenues, minus operational expenses, to display the true Reconciled Net Balance Asset.</li>
-            </ul>
-          </DocSection>
+            {/* 4. Egg Production */}
+            <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-extrabold text-slate-900">4. Egg Production & Daily Collections</h3>
+                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded">ADMIN / MANAGER / STAFF</span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">Logs daily laying counts, cracked vs good eggs, and automatically converts counts to standard 30-egg crates.</p>
+              <div className="bg-slate-900 text-sky-400 p-4 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`+-------------------------------------------------------------------------------+
+| EGG PRODUCTION & COLLECTION LOGS                            [+ Log Daily Lay] |
++-------------------------------------------------------------------------------+
+| Collection Date | Batch ID | Good Eggs | Cracked | Total Crates | Nest Audit  |
+| 2026-08-22      | B301     | 4,200     | 18      | 140 Crates   | 95% Clean   |
++-------------------------------------------------------------------------------`}</pre>
+              </div>
+            </div>
 
-          <DocSection 
-            id="settings" 
-            title="System Settings" 
-            description="Customize your experience and manage workspaces."
-            imageSrc="/docs/settings_view.jpg"
-            imageAlt="Settings & Subscription View Screenshot"
-          >
-            <p>
-              Configure system alerts, adjust default language preferences, and manage multiple branches or farms within a single account instance. If you have admin rights, you can invite new personnel via the Staff module.
-            </p>
-          </DocSection>
+            {/* 7. Sales & Merchant Invoices */}
+            <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-extrabold text-slate-900">7. Sales & Merchant Invoices</h3>
+                <span className="bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded">ADMIN / MANAGER</span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">Record egg crate and live bird sales, generate digital invoices, and share WhatsApp Paystack/Stripe payment links.</p>
+              <div className="bg-slate-900 text-sky-400 p-4 rounded-xl font-mono text-xs overflow-x-auto">
+<pre>{`+-------------------------------------------------------------------------------+
+| SALES & INVOICE MANAGEMENT                             [+ Record New Sale]    |
++-------------------------------------------------------------------------------+
+| Invoice # | Customer Name      | Product   | Amount (₦) | Status   | Payment  |
+| INV-8021  | Maitama Supermarket| 50 Crates | ₦175,000   | [Paid]   | Paystack |
+| INV-8022  | Grand Hotel Ltd    | 100 Birds | ₦450,000   | [Unpaid] | [Pay Link|
++-------------------------------------------------------------------------------`}</pre>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 5: SUBSCRIPTION TIER MATRIX */}
+          <section id="subscriptions" className="space-y-6 scroll-mt-28">
+            <div className="border-b border-slate-200 pb-3">
+              <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 9 of 10</span>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">💳 Subscription Tier Matrix</h2>
+            </div>
+
+            <div className="overflow-x-auto bg-white border border-slate-200 rounded-2xl shadow-sm">
+              <table className="w-full text-xs text-left text-slate-700">
+                <thead className="bg-slate-900 text-white font-extrabold uppercase">
+                  <tr>
+                    <th className="p-4">Feature / Capability</th>
+                    <th className="p-4">Free Account</th>
+                    <th className="p-4 text-emerald-400">Commercial Pro</th>
+                    <th className="p-4 text-indigo-400">Enterprise Plus</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  <tr>
+                    <td className="p-4 font-bold text-slate-900">Max Farm Branches</td>
+                    <td className="p-4">1 Branch</td>
+                    <td className="p-4 text-emerald-600 font-bold">Unlimited</td>
+                    <td className="p-4 text-indigo-600 font-bold">Unlimited Multi-Farm Matrix</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 font-bold text-slate-900">Flock Batches</td>
+                    <td className="p-4">Basic</td>
+                    <td className="p-4 text-emerald-600 font-bold">Unlimited</td>
+                    <td className="p-4 text-indigo-600 font-bold">Unlimited</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 font-bold text-slate-900">CCTV Surveillance</td>
+                    <td className="p-4 text-slate-400">Locked 🔒</td>
+                    <td className="p-4">2 Cameras</td>
+                    <td className="p-4 text-indigo-600 font-bold">Unlimited WebRTC Cameras</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 font-bold text-slate-900">White-Label Suite</td>
+                    <td className="p-4 text-slate-400">Locked 🔒</td>
+                    <td className="p-4 text-slate-400">Locked 🔒</td>
+                    <td className="p-4 text-indigo-600 font-bold">Full Custom Logo & Theme</td>
+                  </tr>
+                  <tr className="bg-slate-50 font-extrabold text-sm">
+                    <td className="p-4 text-slate-900">Pricing</td>
+                    <td className="p-4 text-slate-700">Free Forever</td>
+                    <td className="p-4 text-emerald-600">₦15,000 / month</td>
+                    <td className="p-4 text-indigo-600">₦45,000 / month</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* SECTION 6: DIGITAL MARKETER AD COPY */}
+          <section id="marketing" className="space-y-6 scroll-mt-28">
+            <div className="border-b border-slate-200 pb-3">
+              <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 9 & 10</span>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">📣 Digital Marketer Pitching Points & Ad Copy Suggestions</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-1.5">
+                <h4 className="text-sm font-extrabold text-slate-900">1. "STOP LOSING MONEY ON EGG & FEED LEAKAGE"</h4>
+                <p className="text-xs text-slate-600 font-medium"><strong>Hook:</strong> <em>"Are unrecorded egg mortalities and feed wastage shrinking your farm profits?"</em></p>
+                <p className="text-xs text-indigo-600 font-bold"><strong>Solution:</strong> PFMS automates daily egg lay logs, crate calculations, and low-stock feed alerts in 1 click.</p>
+              </div>
+
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-1.5">
+                <h4 className="text-sm font-extrabold text-slate-900">2. "MANAGE 5 FARM BRANCHES FROM YOUR PHONE"</h4>
+                <p className="text-xs text-slate-600 font-medium"><strong>Hook:</strong> <em>"Scaling your poultry farm to multiple locations?"</em></p>
+                <p className="text-xs text-indigo-600 font-bold"><strong>Solution:</strong> Switch between regional farm branches seamlessly, transfer stock between pens, and monitor live CCTV feeds from anywhere in the world.</p>
+              </div>
+
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-1.5">
+                <h4 className="text-sm font-extrabold text-slate-900">3. "PROFESSIONAL PAYSTACK & STRIPE INVOICING FOR FARMERS"</h4>
+                <p className="text-xs text-slate-600 font-medium"><strong>Hook:</strong> <em>"Tired of manual paper receipts for wholesale egg buyers?"</em></p>
+                <p className="text-xs text-indigo-600 font-bold"><strong>Solution:</strong> Generate instant digital invoices with Paystack/Stripe online payment links directly on WhatsApp.</p>
+              </div>
+            </div>
+          </section>
 
         </div>
       </div>
