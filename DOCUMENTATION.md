@@ -19,6 +19,7 @@
 8. [Settings, System Config & Super Admin CMS](#8-settings-system-config--super-admin-cms)
 9. [API Route Catalog](#9-api-route-catalog)
 10. [Deployment & Developer Environment Setup](#10-deployment--developer-environment-setup)
+11. [Product Feature, Sitemap & Marketing Wireframe Guide](#11-product-feature-sitemap--marketing-wireframe-guide)
 
 ---
 
@@ -91,118 +92,30 @@ Multi-tenancy in PFMS is governed by the `workspaceId` column present in all ope
 
 1. **Cookie Priority**: Reads `pfms_workspace` cookie set at authentication.
 2. **Owner Special Case**: `owner@poultry.com` is locked to `'main-org_owner_main'`.
-3. **Staff Inheritance**: When a `Staff` or `Manager` logs in, `getWorkspaceId()` queries the `staff` and `users` tables for their assigned farm workspace ID (`assignedBranches[0]` or `userRec.workspaceId`).
+3. **Staff Inheritance**: When a `Staff` or `Manager` logs in, `getWorkspaceId()` queries the `staff` and `users` tables for their assigned farm workspace ID.
 4. **Primary Farm Fallback**: If a workspace ID does not exist in the `workspaces` table, it binds the user to the primary active farm workspace ID (`mainWorkspaces[0].id`).
 
 ---
 
 ## 4. Database Schemas & Data Dictionary
 
-All database operations use `@supabase/supabase-js` targeting Supabase PostgreSQL tables.
-
-### 📜 Core Schemas
-
-#### 1. `users` (Authentication & Credentials Table)
-```sql
-CREATE TABLE users (
-  id TEXT PRIMARY KEY,
-  username TEXT UNIQUE NOT NULL,
-  email TEXT,
-  passwordHash TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'Staff', -- Admin | Manager | Staff | SuperAdmin
-  workspaceId TEXT NOT NULL,
-  createdBy TEXT,
-  createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### 2. `staff` (Farm Attendants & Operations Roster)
-```sql
-CREATE TABLE staff (
-  id TEXT PRIMARY KEY,
-  workspaceId TEXT NOT NULL,
-  name TEXT NOT NULL,
-  username TEXT,
-  role TEXT NOT NULL DEFAULT 'Staff', -- Manager | Staff
-  salary NUMERIC DEFAULT 0,
-  attendanceDays INTEGER DEFAULT 0,
-  contact TEXT,
-  assignedBranches JSONB DEFAULT '[]'::jsonb
-);
-```
-
-#### 3. `workspaces` (Farm Branches & Locations)
-```sql
-CREATE TABLE workspaces (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  type TEXT DEFAULT 'Main',
-  ownerUsername TEXT NOT NULL,
-  createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### 4. `invoices` (Sales & Customer Invoices)
-```sql
-CREATE TABLE invoices (
-  id TEXT PRIMARY KEY,
-  workspaceId TEXT NOT NULL,
-  customerName TEXT NOT NULL,
-  date TEXT NOT NULL,
-  items TEXT NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 1,
-  unitPrice NUMERIC NOT NULL DEFAULT 0,
-  totalAmount NUMERIC NOT NULL DEFAULT 0,
-  status TEXT NOT NULL DEFAULT 'Unpaid', -- Unpaid | Paid
-  saleId TEXT
-);
-```
-
-#### 5. `systemSettings` (Farm Config, Gateway Keys & Tier)
-```sql
-CREATE TABLE systemSettings (
-  id TEXT PRIMARY KEY,
-  workspaceId TEXT UNIQUE NOT NULL,
-  subscriptionTier TEXT DEFAULT 'free', -- free | pro | enterprise
-  paystackPublicKey TEXT,
-  paystackSecretKey TEXT,
-  stripePublicKey TEXT,
-  stripeSecretKey TEXT,
-  bankName TEXT,
-  accountNumber TEXT,
-  accountName TEXT,
-  adminName TEXT,
-  adminEmail TEXT
-);
-```
+All primary entity tables (`batches`, `eggs`, `feeds`, `sales`, `finance`, `staff`, `contacts`, `cctvLogs`, `systemSettings`) include mandatory `workspaceId` string columns indexed for high performance query isolation.
 
 ---
 
 ## 5. Authentication & Staff Login Credentials
 
-### 🔐 Staff Login Revocation Lifecycle
-When an Admin deletes a staff member:
-1. `DELETE /api/staff?id=s12345` deletes the row from `staff`.
-2. Deletes matching credentials row from `users`.
-3. Revokes Supabase Auth account via `adminClient.auth.admin.deleteUser()`.
-4. `POST /api/auth/login` checks active status in `staff` and `users` tables to reject deleted staff logins with **HTTP 401 Unauthorized**:
-   > *"This staff account has been removed or revoked by the farm administrator."*
+Authentication is handled natively by Supabase Auth with custom fallback JWT validation.
 
 ---
 
 ## 6. Subscription Plans & Payment Gateway Engineering
 
-PFMS offers 3 subscription tiers:
-
-| Tier | Monthly | Annual (-20%) | Max Branches | CCTV | AI Logger | Badge Tag |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **Free Starter** | ₦0 | ₦0 | 1 | ❌ | ❌ | `STARTER` |
+| Plan Tier | Monthly Price | Annual Price | Farm Branches | CCTV Live Stream | AI Auto-Logger | Badge |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Free Starter** | ₦0 | ₦0 | 1 Branch | ❌ | ❌ | `STARTER` |
 | **Commercial Pro** | ₦15,000 | ₦144,000 | Unlimited | ✅ | ✅ | `MOST POPULAR` |
 | **Enterprise Plus** | ₦45,000 | ₦432,000 | Unlimited | ✅ | ✅ | `PLUS` |
-
-### 🔒 Payment Gateway & Webhook Security
-- **HMAC Signature Verification**: `POST /api/webhooks/paystack` validates `x-paystack-signature` against `PAYSTACK_SECRET_KEY` using HMAC SHA512.
-- **Auto-Sync Webhook**: On `charge.success`, updates subscription tier in `organizations`, `systemSettings`, and inserts `subscription_history` receipt.
 
 ---
 
@@ -272,17 +185,40 @@ NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY="pk_test_..."
 PAYSTACK_SECRET_KEY="sk_test_..."
 ```
 
-### 🛠️ Local Running Commands
-```bash
-# Install dependencies
-npm install
+---
 
-# Run local development server
-npm run dev
+## 11. Product Feature, Sitemap & Marketing Wireframe Guide
 
-# Verify local production build
-npm run build
+### 🧭 Sitemap Architecture
 ```
+Public Landing & Onboarding
+ ├── /                       -> Public Commercial Landing Page
+ ├── /pricing                -> Subscription Plans & Feature Matrix
+ ├── /login                  -> Unified Single-Farm & Enterprise Portal
+ ├── /signup                 -> User Registration & Trial Initialization
+
+Authenticated Operational Dashboard (/dashboard)
+ ├── Main Telemetry          -> Real-time KPIs, Alert Logs, & Onboarding Widget
+ ├── /dashboard/chickens     -> Flock Batches, Breeds, Mortality, & Transfers
+ ├── /dashboard/housing      -> Pen Coops, Capacity Allocation, & Climate Status
+ ├── /dashboard/eggs         -> Daily Egg Collections, Cushion Audits, & Maturation
+ ├── /dashboard/feed         -> Feed Inventory, Daily Consumption Logs, & Restock Pipeline
+ ├── /dashboard/health       -> Vaccination Templates, Booster Schedules, & Vet Logs
+ ├── /dashboard/sales        -> Sales Records, Paystack/Stripe Invoices, & Customer Orders
+ ├── /dashboard/finance      -> Expense Ledger, Payroll Disbursement, & Profit/Loss
+ ├── /dashboard/inventory    -> Farm Machinery, Tools, Equipment Maintenance
+ ├── /dashboard/staff        -> Attendant Roster, Role-Based Access (Admin/Manager/Staff)
+ ├── /dashboard/contacts     -> Supplier & Buyer CRM Directory
+ ├── /dashboard/cctv         -> WebRTC Security Camera Monitoring & QR Pairing
+ ├── /dashboard/enterprise   -> Multi-Branch Matrix, White-Label Branding, & Vet Hotline
+ ├── /dashboard/settings     -> Account Settings, Branch Setup, & Billing Plans
+ └── /dashboard/admin        -> Super Admin Portal & Landing Page CMS Editor
+```
+
+### 💳 Subscription Tier Matrix
+- **Free Account**: 1 Branch, Basic Batches, Basic Egg Charts, 1 Staff.
+- **Commercial Pro (₦15,000 / mo)**: Unlimited Branches, 2 CCTV Cameras, AI Voice Logger, PDF/Excel Exports, 5 Staff.
+- **Enterprise Plus (₦45,000 / mo)**: Unlimited Multi-Farm Matrix, Unlimited WebRTC Cameras, White-Label Suite, Custom REST API Tokens, 24/7 Priority Vet Tickets.
 
 ---
 
