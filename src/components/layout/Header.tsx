@@ -1,7 +1,7 @@
 'use strict';
 'use client';
 
-import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar } from 'lucide-react';
+import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar, BookOpen } from 'lucide-react';
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSidebar } from './SidebarContext';
@@ -360,6 +360,16 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
             <option value="zh" className="hidden sm:block">中文 (ZH)</option>
           </select>
         </div>
+
+        {/* User Guide & Documentation Link */}
+        <button
+          onClick={() => router.push('/documentation')}
+          className="hidden sm:flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold px-2.5 py-1.5 rounded-md transition-colors cursor-pointer"
+          title="Open User Guide & Documentation"
+        >
+          <BookOpen size={14} className="text-indigo-600" />
+          <span>Docs</span>
+        </button>
 
         {/* Notification Bell */}
         <div className="relative" ref={dropdownRef}>
