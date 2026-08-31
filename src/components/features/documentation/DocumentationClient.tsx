@@ -109,6 +109,8 @@ export function DocumentationClient() {
             id="overview" 
             title="Platform Overview" 
             description="Welcome to the Poultry Farm Management System. Our application is designed to be your all-in-one digital command center for farm operations."
+            imageSrc="/docs/login_page.png"
+            imageAlt="Unified Login Portal Screenshot"
           >
             <p>
               The system integrates data from different facets of your farm—flocks, egg production, feed, and finances—into a centralized, real-time dashboard. 
@@ -126,8 +128,8 @@ export function DocumentationClient() {
             id="dashboard" 
             title="Dashboard Analytics" 
             description="The Dashboard acts as your central hub, presenting real-time KPIs and dynamic charts."
-            imageSrc="/docs/docs_dashboard.png"
-            imageAlt="Dashboard Overview Illustration"
+            imageSrc="/docs/main_dashboard.jpg"
+            imageAlt="Main Telemetry Dashboard Screenshot"
           >
             <ul className="space-y-4">
               <li className="flex gap-3 items-start">
@@ -155,8 +157,8 @@ export function DocumentationClient() {
             id="flocks" 
             title="Flock Management" 
             description="Track every batch of birds from day one to depletion."
-            imageSrc="/docs/docs_flock.png"
-            imageAlt="Flock Management Illustration"
+            imageSrc="/docs/egg_logger.jpg"
+            imageAlt="Egg Collection Logger Screenshot"
           >
             <p>
               The Flock module allows you to register batches with details such as Breed, Purchase Date, Quantity, and Projected Selling Price.
@@ -171,6 +173,8 @@ export function DocumentationClient() {
             id="eggs" 
             title="Egg Production" 
             description="Monitor daily collection, breakage rates, and cushioning audits."
+            imageSrc="/docs/egg_logger.jpg"
+            imageAlt="Egg Production Logger Screenshot"
           >
             <p>
               Logging daily egg collections is crucial. The Egg module differentiates between Good Eggs, Cracked Eggs, and Spoilt Eggs. This directly feeds into the revenue projections and the dynamic charts on the Dashboard.
@@ -197,8 +201,8 @@ export function DocumentationClient() {
             id="finance" 
             title="Finance & Ledgers" 
             description="A robust double-entry style ledger and reconciliation sheet."
-            imageSrc="/docs/docs_finance.png"
-            imageAlt="Financial Analytics Illustration"
+            imageSrc="/docs/subscription_modal.jpg"
+            imageAlt="Subscription Plans & Gateway Screenshot"
           >
             <p>
               The Finance module presents a complete breakdown of operational inflows and outflows.
@@ -214,6 +218,8 @@ export function DocumentationClient() {
             id="settings" 
             title="System Settings" 
             description="Customize your experience and manage workspaces."
+            imageSrc="/docs/settings_view.jpg"
+            imageAlt="Settings & Subscription View Screenshot"
           >
             <p>
               Configure system alerts, adjust default language preferences, and manage multiple branches or farms within a single account instance. If you have admin rights, you can invite new personnel via the Staff module.
