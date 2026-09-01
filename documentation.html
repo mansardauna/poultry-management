@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poultry Farm Management System (PFMS) - Complete Step-by-Step Core Features, Setup & User Guide</title>
+    <title>PMS Guide - Comprehensive Usage Guide for the Web Version</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #090d16;
-            color: #f8fafc;
+            background-color: #f8fafc;
+            color: #1e293b;
             line-height: 1.65;
         }
         code, pre {
             font-family: 'JetBrains Mono', monospace;
+        }
+        .nav-active {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            font-weight: 700;
         }
         .wireframe-box {
             background-color: #0f172a;
@@ -26,409 +31,188 @@
             padding: 1.25rem;
             border-radius: 0.75rem;
             overflow-x: auto;
-            border: 1px solid #1e293b;
+            border: 1px solid #e2e8f0;
         }
-        .nav-link {
-            transition: all 0.2s ease;
-        }
-        .nav-link:hover {
-            color: #6366f1;
-            padding-left: 0.5rem;
-        }
-        .role-badge {
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            padding: 0.15rem 0.5rem;
-            border-radius: 0.25rem;
-            letter-spacing: 0.05em;
-        }
-        .role-admin { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-        .role-manager { background-color: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
-        .role-staff { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-        .role-super { background-color: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
         .scrollbar-custom::-webkit-scrollbar {
             width: 6px;
         }
         .scrollbar-custom::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #f1f5f9;
         }
         .scrollbar-custom::-webkit-scrollbar-thumb {
-            background-color: #4f46e5;
+            background-color: #6366f1;
             border-radius: 10px;
         }
     </style>
 </head>
-<body class="scrollbar-custom bg-slate-950 text-slate-100 antialiased">
+<body class="scrollbar-custom bg-slate-50 text-slate-800 antialiased min-h-screen">
 
     <div class="flex flex-col md:flex-row min-h-screen">
         
-        <!-- Sidebar Navigation -->
-        <aside class="w-full md:w-80 bg-slate-900/90 border-r border-slate-800 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block">
-            <div class="mb-8 border-b border-slate-800 pb-5">
-                <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md">v2.0 Production Guide</span>
-                <h2 class="text-xl font-extrabold text-white mt-3 tracking-tight">PFMS User Manual</h2>
-                <p class="text-xs text-slate-400 font-medium mt-1">Step-by-Step Operational Handbook</p>
+        <!-- Left Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-white border-r border-slate-200/80 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block shrink-0">
+            <!-- Brand Header -->
+            <div class="flex items-center gap-2.5 mb-8">
+                <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">P</div>
+                <span class="font-extrabold text-lg tracking-tight text-indigo-700">PMS Guide</span>
             </div>
             
-            <nav class="space-y-6">
-                <div>
-                    <h3 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-widest mb-3">1. Easy Setup Onboarding</h3>
-                    <ul class="space-y-2 text-xs font-semibold text-slate-300">
-                        <li><a href="#quickstart" class="nav-link block">6-Step Onboarding Protocol</a></li>
-                        <li><a href="#page1-summary" class="nav-link block">Executive Summary & Values</a></li>
-                        <li><a href="#page1-sitemap" class="nav-link block">Sitemap Navigation Tree</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-widest mb-3">2. Core Modules & Screenshots</h3>
-                    <ul class="space-y-2 text-xs font-semibold text-slate-300">
-                        <li><a href="#mod1-dashboard" class="nav-link block">1. Main Telemetry Dashboard</a></li>
-                        <li><a href="#mod2-chickens" class="nav-link block">2. Chicken Batches & Livestock</a></li>
-                        <li><a href="#mod3-housing" class="nav-link block">3. Housing & Pen Facilities</a></li>
-                        <li><a href="#mod4-eggs" class="nav-link block">4. Egg Production & Collections</a></li>
-                        <li><a href="#mod5-feed" class="nav-link block">5. Feed Inventory & Consumption</a></li>
-                        <li><a href="#mod6-health" class="nav-link block">6. Health & Vaccination Protocols</a></li>
-                        <li><a href="#mod7-sales" class="nav-link block">7. Sales & Merchant Invoices</a></li>
-                        <li><a href="#mod8-finance" class="nav-link block">8. Finance & Expense Ledger</a></li>
-                        <li><a href="#mod9-inventory" class="nav-link block">9. Equipment & Inventory</a></li>
-                        <li><a href="#mod10-staff" class="nav-link block">10. Staff Management & Access</a></li>
-                        <li><a href="#mod11-contacts" class="nav-link block">11. Farm Contacts Directory</a></li>
-                        <li><a href="#mod12-cctv" class="nav-link block">12. CCTV Camera Surveillance</a></li>
-                        <li><a href="#mod13-enterprise" class="nav-link block">13. Enterprise Hub & Suite</a></li>
-                        <li><a href="#mod14-admin" class="nav-link block">14. Super Admin & CMS Portal</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-widest mb-3">3. Billing & Marketing</h3>
-                    <ul class="space-y-2 text-xs font-semibold text-slate-300">
-                        <li><a href="#subscription-matrix" class="nav-link block">Subscription Tier Matrix</a></li>
-                        <li><a href="#marketer-pitch" class="nav-link block">Digital Marketer Pitch Copy</a></li>
-                    </ul>
-                </div>
+            <!-- Navigation Links -->
+            <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
+                <a href="#getting-started" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
+                    Getting Started
+                </a>
+                <a href="#dashboard" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Dashboard
+                </a>
+                <a href="#flock-management" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Flock Management
+                </a>
+                <a href="#egg-production" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Egg Production
+                </a>
+                <a href="#feed-inventory" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Feed & Inventory
+                </a>
+                <a href="#financial-tracking" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Financial Tracking
+                </a>
+                <a href="#health-cctv" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Health & CCTV
+                </a>
+                <a href="#staff-contacts" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Staff & Contacts
+                </a>
             </nav>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 space-y-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Master Guides</span>
+                <a href="/documentation/setup-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Setup Guide →</a>
+                <a href="/documentation/administration-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Admin Guide →</a>
+                <a href="/documentation/usage-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Usage Guide →</a>
+            </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 p-6 md:p-12 lg:p-16 max-w-5xl space-y-16">
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-8">
             
-            <!-- Page Header -->
-            <header class="border-b border-slate-800 pb-8 bg-slate-900/90 border border-slate-800 text-white p-8 rounded-2xl shadow-lg">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-extrabold uppercase px-3 py-1 rounded">Poultry Farm Management System (PFMS)</span>
-                    <span class="text-xs text-slate-400 font-semibold">Official Product & User Guide</span>
-                </div>
-                <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-3">
-                    Step-by-Step User Manual & Core Feature Breakdown
+            <!-- Hero Banner Box -->
+            <div class="bg-gradient-to-r from-indigo-600 via-indigo-600 to-indigo-500 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Poultry Management System
                 </h1>
-                <p class="text-sm md:text-base text-slate-300 font-medium">
-                    Complete operational guide covering database configuration, flock tracking, egg lay crate conversion, sales invoicing, wireframes, and live app screenshots.
+                <p class="text-sm md:text-base text-indigo-100 font-medium">
+                    Comprehensive Usage Guide for the Web Version
                 </p>
-            </header>
+            </div>
 
-            <!-- SECTION: EASY SETUP ONBOARDING PROTOCOL -->
-            <section id="quickstart" class="space-y-6">
-                <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
-                    Easy Setup & Quickstart Onboarding Protocol
-                </h2>
-                
+            <!-- Getting Started Card -->
+            <div id="getting-started" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Getting Started</h2>
+                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
+                        Welcome to the Poultry Management System! This guide will walk you through the core functionalities of the application, helping you to efficiently manage your farm's daily operations.
+                    </p>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                        <span class="text-[10px] font-extrabold text-indigo-400 uppercase bg-indigo-500/10 px-2.5 py-0.5 rounded border border-indigo-500/20">Step 1: Sign Up & Authentication</span>
-                        <h4 class="text-sm font-bold text-white">Create Account & Initialize Workspace</h4>
-                        <p class="text-xs text-slate-400">Register your farm account at `/signup`. Select your operating region and log in at `/login` to access your new farm dashboard.</p>
+                    <div class="bg-indigo-50/50 border border-indigo-100/80 p-5 rounded-xl space-y-2">
+                        <h4 class="text-sm font-bold text-indigo-900">Navigation</h4>
+                        <p class="text-xs text-slate-600 font-medium leading-relaxed">
+                            Use the left-hand sidebar to navigate between different modules like Dashboard, Flocks, Eggs, and Finance.
+                        </p>
                     </div>
 
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                        <span class="text-[10px] font-extrabold text-emerald-400 uppercase bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">Step 2: Database Setup</span>
-                        <h4 class="text-sm font-bold text-white">Select Database Driver & Connection Test</h4>
-                        <p class="text-xs text-slate-400">Navigate to `/setup`. Choose Supabase PostgreSQL, Standard PostgreSQL, or MySQL/MariaDB. The system automatically tests the connection.</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                        <span class="text-[10px] font-extrabold text-amber-400 uppercase bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">Step 3: Housing Setup</span>
-                        <h4 class="text-sm font-bold text-white">Configure Farm Pens & Environmental Coops</h4>
-                        <p class="text-xs text-slate-400">Under `/dashboard/housing`, create your layer houses, broiler brooders, and specify bird capacity limits and climate controls.</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                        <span class="text-[10px] font-extrabold text-purple-400 uppercase bg-purple-500/10 px-2.5 py-0.5 rounded border border-purple-500/20">Step 4: Register Flocks</span>
-                        <h4 class="text-sm font-bold text-white">Register Batches & Assign Pens</h4>
-                        <p class="text-xs text-slate-400">Under `/dashboard/chickens`, add layer/broiler batches with breed IDs, initial count, age in weeks, and assign them to housing pens.</p>
+                    <div class="bg-indigo-50/50 border border-indigo-100/80 p-5 rounded-xl space-y-2">
+                        <h4 class="text-sm font-bold text-indigo-900">Workspaces</h4>
+                        <p class="text-xs text-slate-600 font-medium leading-relaxed">
+                            If you manage multiple farms, you can switch between them using the Workspace switcher in the top navigation bar.
+                        </p>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- PAGE 1: Executive Summary -->
-            <section id="page1-summary" class="space-y-6">
-                <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
-                    Executive Summary & Core Value Proposition
-                </h2>
-                
-                <p class="text-sm text-slate-300 font-medium leading-relaxed">
-                    <strong>Poultry Farm Management System (PFMS)</strong> is an end-to-end, enterprise-grade cloud SaaS platform tailored for commercial poultry farmers, layer & broiler operators, hatchery managers, and agricultural cooperatives.
-                </p>
-
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-400">Core Value Drivers for Digital Marketing & Sales:</h3>
-                <ol class="space-y-3 text-xs text-slate-300 font-medium list-decimal pl-5">
-                    <li><strong>Automated Livestock Telemetry:</strong> Real-time tracking of flock mortality, laying percentages, feed conversion ratios (FCR), and maturation timelines.</li>
-                    <li><strong>Financial Precision:</strong> Automated cashflow tracking, merchant invoice generation, expense categorization, and batch-level profitability.</li>
-                    <li><strong>Hardware & AI Integration:</strong> WebRTC live CCTV camera surveillance, optical AI barcode parsing, and automated threshold alerts.</li>
-                    <li><strong>Multi-Farm Enterprise Expansion:</strong> Multi-branch matrix management, inter-branch stock transfers, and 100% customizable white-label branding for agricultural cooperatives.</li>
-                </ol>
-            </section>
-
-            <!-- PAGE 1: Sitemap Architecture -->
-            <section id="page1-sitemap" class="space-y-6">
-                <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
-                    Sitemap & Application Navigation Architecture
-                </h2>
-                
-                <div class="wireframe-box text-xs">
-<pre>Public Landing & Onboarding
- ├── /                       -> Public Commercial Landing Page
- ├── /pricing                -> Subscription Plans & Feature Matrix
- ├── /about                  -> About Company & Mission
- ├── /contact                -> Contact & Support Form
- ├── /login                  -> Unified Single-Farm & Enterprise Portal
- ├── /signup                 -> User Registration & Trial Initialization
- └── /reset-password         -> Password Recovery
-
-Authenticated Operational Dashboard (/dashboard)
- ├── Main Telemetry          -> Real-time KPIs, Alert Logs, & Onboarding Widget
- ├── /dashboard/chickens     -> Flock Batches, Breeds, Mortality, & Transfers
- ├── /dashboard/housing      -> Pen Coops, Capacity Allocation, & Climate Status
- ├── /dashboard/eggs         -> Daily Egg Collections, Cushion Audits, & Maturation
- ├── /dashboard/feed         -> Feed Inventory, Daily Consumption Logs, & Restock Pipeline
- ├── /dashboard/health       -> Vaccination Templates, Booster Schedules, & Vet Logs
- ├── /dashboard/sales        -> Sales Records, Paystack/Stripe Invoices, & Customer Orders
- ├── /dashboard/finance      -> Expense Ledger, Payroll Disbursement, & Profit/Loss
- ├── /dashboard/inventory    -> Farm Machinery, Tools, Equipment Maintenance
- ├── /dashboard/staff        -> Attendant Roster, Role-Based Access (Admin/Manager/Staff)
- ├── /dashboard/contacts     -> Supplier & Buyer CRM Directory
- ├── /dashboard/cctv         -> WebRTC Security Camera Monitoring & QR Pairing
- ├── /dashboard/enterprise   -> Multi-Branch Matrix, White-Label Branding, & Vet Hotline
- │    ├── /branches          -> Multi-Farm Matrix & Inter-Branch Stock Transfers
- │    ├── /whitelabel        -> Custom Logo, Subdomains, & Color Schemes
- │    ├── /api               -> REST API Tokens & Webhook Integration
- │    ├── /vet               -> 24/7 Priority Veterinary Hotline Tickets
- │    └── /feed-pool         -> Cooperative Wholesale Feed Purchasing Pool
- ├── /dashboard/settings     -> Account Settings, Branch Setup, & Billing Plans
- └── /dashboard/admin        -> Super Admin Portal & Landing Page CMS Editor</pre>
-                </div>
-            </section>
-
-            <!-- PAGE 2: Authentication & Landing Screenshots -->
-            <section id="page2-screenshots" class="space-y-6">
-                <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
-                    Key Portal Interfaces & Login Screenshots
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
-                        <img src="./public/docs/login_page.png" alt="Unified Login Portal" class="w-full rounded-lg border border-slate-800 mb-3" onError="this.src='/docs/login_page.png'" />
-                        <p class="text-xs font-bold text-slate-300">Unified Single-Farm & Enterprise Login Portal ( <code>/login</code> )</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
-                        <img src="./public/docs/signup_page.png" alt="User Registration" class="w-full rounded-lg border border-slate-800 mb-3" onError="this.src='/docs/signup_page.png'" />
-                        <p class="text-xs font-bold text-slate-300">User Registration & Account Initialization ( <code>/signup</code> )</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- PAGE 3-8: MODULE-BY-MODULE WIREFRAME & FEATURE BREAKDOWN -->
-            <section id="detailed-wireframes" class="space-y-12">
-                <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
-                    Detailed Module-by-Module Wireframe & Feature Breakdown
-                </h2>
-
-                <!-- 1. Main Telemetry Dashboard -->
-                <div id="mod1-dashboard" class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-extrabold text-white">1. Main Telemetry Dashboard</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-400 font-mono">/dashboard</span>
-                            <span class="role-badge role-admin">ADMIN</span>
-                            <span class="role-badge role-manager">MANAGER</span>
-                        </div>
-                    </div>
-
-                    <div class="space-y-1">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400">CORE CAPABILITIES:</h4>
-                        <ul class="list-disc pl-5 text-xs text-slate-300 space-y-1 font-medium">
-                            <li>Aggregate KPI cards showing Total Active Birds, Daily Egg Collection (Crates), Feed Stock Remaining (Kg), and Net Revenue (₦).</li>
-                            <li>Onboarding Progress Widget (4-Step Guided Setup for brand new accounts).</li>
-                            <li>Recent System Alert Logs (Feed threshold warnings, mortality alerts, invoice settlements).</li>
-                            <li>Fast Quick-Jump Command Palette (global search across all 13 modules).</li>
-                        </ul>
-                    </div>
-
-                    <div class="space-y-1">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400">WIREFRAME LAYOUT STRUCTURE:</h4>
-                        <div class="wireframe-box">
-<pre>+-------------------------------------------------------------------------------+
-| [Search Bar]               [Time Filter: All/Weekly] [Language] [Bell (9+)]  |
-+-------------------------------------------------------------------------------+
-| FARM SETUP & ONBOARDING PROGRESS (0 of 4 Completed - 0%)                      |
-| Progress Bar [==========] 0%   [Resume Step 1: Configure Branch ->]           |
-+-------------------------------------------------------------------------------+
-| [Active Birds: 12,500] [Egg Production: 410 Crates] [Feed Stock: 1,850 Kg]    |
-+-------------------------------------------------------------------------------+
-| [Egg Production Bar Chart (Daily)]     | [Net Revenue vs Expenses Line Chart] |
-+-------------------------------------------------------------------------------+
-| Recent Alert Notifications Log (Critical / Warning / Info)                    |
-+-------------------------------------------------------------------------------+</pre>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 pt-4 border-t border-slate-800">
-                        <img src="./public/docs/main_dashboard.jpg" alt="Main Dashboard Screenshot" class="w-full rounded-lg border border-slate-800" onError="this.src='/docs/main_dashboard.jpg'" />
-                        <p class="text-[11px] text-slate-400 font-bold text-center mt-2">Screenshot: Main Dashboard overview with KPI cards and alert log table</p>
-                    </div>
+            <!-- Dashboard Card -->
+            <div id="dashboard" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Dashboard</h2>
+                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
+                        The Dashboard provides a high-level, real-time overview of your farm's performance.
+                    </p>
+                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
+                        <li><strong>Key Metrics:</strong> View total active birds, daily egg production rates, and recent feed consumption.</li>
+                        <li><strong>Guided Onboarding:</strong> Track setup progress for newly created farm workspaces.</li>
+                        <li><strong>System Alerts:</strong> Monitor critical notifications for low feed stock, mortality spikes, and uncollected invoices.</li>
+                    </ul>
                 </div>
 
-                <!-- 4. Egg Production -->
-                <div id="mod4-eggs" class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-extrabold text-white">4. Egg Production & Daily Collections</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-400 font-mono">/dashboard/eggs</span>
-                            <span class="role-badge role-admin">ADMIN</span>
-                            <span class="role-badge role-manager">MANAGER</span>
-                            <span class="role-badge role-staff">STAFF</span>
-                        </div>
+                <div class="pt-2">
+                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="./public/docs/main_dashboard.jpg" alt="Dashboard Screenshot" class="w-full h-auto object-cover" onError="this.src='/docs/main_dashboard.jpg'" />
                     </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Main Telemetry Dashboard Overview</p>
+                </div>
+            </div>
 
-                    <div class="space-y-1">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400">CORE CAPABILITIES:</h4>
-                        <ul class="list-disc pl-5 text-xs text-slate-300 space-y-1 font-medium">
-                            <li>Log daily good eggs, cracked eggs, and dirty eggs per batch.</li>
-                            <li>Automatic conversion from individual eggs to crates (30 eggs/crate).</li>
-                            <li>Cushioning audit scores for nesting box cleanliness.</li>
-                            <li>Maturation tracking for pullets entering first lay stage.</li>
-                        </ul>
-                    </div>
+            <!-- Flock Management Card -->
+            <div id="flock-management" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Flock Management</h2>
+                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
+                        Track every batch of birds from day one to depletion.
+                    </p>
+                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
+                        <li><strong>Batches & Flocks:</strong> Register layers, broilers, and pullets with unique batch IDs and breeds.</li>
+                        <li><strong>Mortality Logger:</strong> Record daily mortality count with root-cause analysis (heat stress, disease, natural).</li>
+                        <li><strong>Pen Transfers:</strong> Reassign flocks between housing coops and pens seamlessly.</li>
+                    </ul>
+                </div>
+            </div>
 
-                    <div class="space-y-1">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400">WIREFRAME LAYOUT STRUCTURE:</h4>
-                        <div class="wireframe-box">
-<pre>+-------------------------------------------------------------------------------+
-| EGG PRODUCTION & COLLECTION LOGS                            [+ Log Daily Lay] |
-+-------------------------------------------------------------------------------+
-| Collection Date | Batch ID | Good Eggs | Cracked | Total Crates | Nest Audit  |
-| 2026-08-22      | B301     | 4,200     | 18      | 140 Crates   | 95% Clean   |
-+-------------------------------------------------------------------------------+</pre>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 pt-4 border-t border-slate-800">
-                        <img src="./public/docs/egg_logger.jpg" alt="Daily Egg Lay Logger" class="w-full rounded-lg border border-slate-800" onError="this.src='/docs/egg_logger.jpg'" />
-                        <p class="text-[11px] text-slate-400 font-bold text-center mt-2">Screenshot: Daily egg lay logger and crate calculator</p>
-                    </div>
+            <!-- Egg Production Card -->
+            <div id="egg-production" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Egg Production</h2>
+                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
+                        Monitor daily collection, breakage rates, and cushioning audits.
+                    </p>
+                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
+                        <li><strong>Daily Collections:</strong> Log good eggs, cracked eggs, and spoilt eggs per batch.</li>
+                        <li><strong>30-Egg Crate Conversion:</strong> Automatically converts total good eggs to standard 30-egg crates.</li>
+                        <li><strong>Cushion Audits:</strong> Track nesting box padding cleanliness to reduce cracked shell occurrences.</li>
+                    </ul>
                 </div>
 
-                <!-- 15. Settings & Subscription -->
-                <div id="mod15-settings" class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-extrabold text-white">15. Account Settings, Subscriptions & Gateways</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-400 font-mono">/dashboard/settings</span>
-                            <span class="role-badge role-admin">ADMIN</span>
-                        </div>
+                <div class="pt-2">
+                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="./public/docs/egg_logger.jpg" alt="Egg Logger Screenshot" class="w-full h-auto object-cover" onError="this.src='/docs/egg_logger.jpg'" />
                     </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Egg Collection & Maturation Logger</p>
+                </div>
+            </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                        <div class="space-y-2">
-                            <img src="./public/docs/settings_view.jpg" alt="Settings View Screenshot" class="w-full rounded-lg border border-slate-800" onError="this.src='/docs/settings_view.jpg'" />
-                            <p class="text-[11px] text-slate-400 font-bold text-center">Settings view & workspace status</p>
-                        </div>
-                        <div class="space-y-2">
-                            <img src="./public/docs/subscription_modal.jpg" alt="Subscription Modal Screenshot" class="w-full rounded-lg border border-slate-800" onError="this.src='/docs/subscription_modal.jpg'" />
-                            <p class="text-[11px] text-slate-400 font-bold text-center">Subscription Upgrade Modal</p>
-                        </div>
+            <!-- Financial Tracking Card -->
+            <div id="financial-tracking" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Financial Tracking</h2>
+                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
+                        Complete expense ledgers, sales invoicing, and profit & loss statements.
+                    </p>
+                </div>
+
+                <div class="pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="./public/docs/settings_view.jpg" alt="Settings View Screenshot" class="w-full h-auto object-cover" onError="this.src='/docs/settings_view.jpg'" />
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="./public/docs/subscription_modal.jpg" alt="Subscription Modal Screenshot" class="w-full h-auto object-cover" onError="this.src='/docs/subscription_modal.jpg'" />
                     </div>
                 </div>
-            </section>
-
-            <!-- PAGE 9: Subscription Tier Matrix -->
-            <section id="subscription-matrix" class="space-y-6">
-                <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
-                    Subscription Tier Matrix (Page 9)
-                </h2>
-
-                <div class="overflow-x-auto bg-slate-900 border border-slate-800 rounded-xl">
-                    <table class="w-full text-xs text-left text-slate-300">
-                        <thead class="bg-slate-950 text-white font-extrabold uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-3.5">Feature / Capability</th>
-                                <th class="p-3.5">Free Account</th>
-                                <th class="p-3.5 text-emerald-400">Commercial Pro</th>
-                                <th class="p-3.5 text-indigo-400">Enterprise Plus</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800 font-medium">
-                            <tr>
-                                <td class="p-3.5 font-bold text-white">Max Farm Branches</td>
-                                <td class="p-3.5">1 Branch</td>
-                                <td class="p-3.5 text-emerald-400 font-bold">Unlimited</td>
-                                <td class="p-3.5 text-indigo-400 font-bold">Unlimited Multi-Farm Matrix</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3.5 font-bold text-white">Flock Batches</td>
-                                <td class="p-3.5">Basic</td>
-                                <td class="p-3.5 text-emerald-400 font-bold">Unlimited</td>
-                                <td class="p-3.5 text-indigo-400 font-bold">Unlimited</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3.5 font-bold text-white">CCTV Surveillance</td>
-                                <td class="p-3.5 text-slate-500">Locked</td>
-                                <td class="p-3.5">2 Cameras</td>
-                                <td class="p-3.5 text-indigo-400 font-bold">Unlimited WebRTC Cameras</td>
-                            </tr>
-                            <tr class="bg-slate-950 font-extrabold text-sm">
-                                <td class="p-3.5 text-white">Pricing</td>
-                                <td class="p-3.5 text-slate-400">Free Forever</td>
-                                <td class="p-3.5 text-emerald-400">₦15,000 / month</td>
-                                <td class="p-3.5 text-indigo-400">₦45,000 / month</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- PAGE 9-10: Digital Marketer Pitching Points -->
-            <section id="marketer-pitch" class="space-y-6">
-                <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
-                    Digital Marketer Pitching Points & Ad Copy Suggestions (Page 9 & 10)
-                </h2>
-
-                <div class="space-y-4">
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-2">
-                        <h4 class="text-sm font-extrabold text-white">1. "STOP LOSING MONEY ON EGG & FEED LEAKAGE"</h4>
-                        <p class="text-xs text-slate-400 font-medium"><strong>Hook:</strong> <em>"Are unrecorded egg mortalities and feed wastage shrinking your farm profits?"</em></p>
-                        <p class="text-xs text-indigo-400 font-bold"><strong>Solution:</strong> PFMS automates daily egg lay logs, crate calculations, and low-stock feed alerts in 1 click.</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-2">
-                        <h4 class="text-sm font-extrabold text-white">2. "MANAGE 5 FARM BRANCHES FROM YOUR PHONE"</h4>
-                        <p class="text-xs text-slate-400 font-medium"><strong>Hook:</strong> <em>"Scaling your poultry farm to multiple locations?"</em></p>
-                        <p class="text-xs text-indigo-400 font-bold"><strong>Solution:</strong> Switch between regional farm branches seamlessly, transfer stock between pens, and monitor live CCTV feeds from anywhere in the world.</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-2">
-                        <h4 class="text-sm font-extrabold text-white">3. "PROFESSIONAL PAYSTACK & STRIPE INVOICING FOR FARMERS"</h4>
-                        <p class="text-xs text-slate-400 font-medium"><strong>Hook:</strong> <em>"Tired of manual paper receipts for wholesale egg buyers?"</em></p>
-                        <p class="text-xs text-indigo-400 font-bold"><strong>Solution:</strong> Generate instant digital invoices with Paystack/Stripe online payment links directly on WhatsApp.</p>
-                    </div>
-                </div>
-            </section>
+            </div>
 
             <!-- Footer -->
-            <footer class="border-t border-slate-800 pt-8 pb-12 text-center text-slate-500 text-xs font-medium">
-                <p>&copy; 2026 Poultry Farm Management System (PFMS). Document compiled for Marketing & Sales Collateral Generation.</p>
+            <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
+                <p>&copy; 2026 Poultry Management System (PMS). Official Usage Guide.</p>
             </footer>
 
         </main>
