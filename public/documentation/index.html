@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMS Guide - Comprehensive Usage & Technical Guide</title>
+    <title>PMS Guide - Comprehensive Usage & Administration Directory</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,17 +21,6 @@
             background-color: #e0e7ff;
             color: #4338ca;
             font-weight: 700;
-        }
-        .wireframe-box {
-            background-color: #0f172a;
-            color: #38bdf8;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            line-height: 1.45;
-            padding: 1.25rem;
-            border-radius: 0.75rem;
-            overflow-x: auto;
-            border: 1px solid #e2e8f0;
         }
         .scrollbar-custom::-webkit-scrollbar {
             width: 6px;
@@ -62,34 +51,18 @@
                 <a href="#getting-started" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
                     Getting Started
                 </a>
-                <a href="#dashboard" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Dashboard
+                <a href="#staff-guide-card" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Staff Usage Guide
                 </a>
-                <a href="#flock-management" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Flock Management
-                </a>
-                <a href="#egg-production" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Egg Production
-                </a>
-                <a href="#feed-inventory" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Feed & Inventory
-                </a>
-                <a href="#financial-tracking" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Financial Tracking
-                </a>
-                <a href="#health-cctv" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Health & CCTV
-                </a>
-                <a href="#staff-contacts" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Staff & Contacts
+                <a href="#admin-guide-card" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Admin Governance Guide
                 </a>
             </nav>
 
             <div class="mt-8 pt-6 border-t border-slate-100 space-y-2">
-                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Master Guides</span>
-                <a href="/documentation/setup-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Setup Guide →</a>
-                <a href="/documentation/administration-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Admin Guide →</a>
-                <a href="/documentation/usage-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Usage Guide →</a>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Role Manuals</span>
+                <a href="/documentation/usage-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Staff Usage Guide →</a>
+                <a href="/documentation/administration-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Admin & Superadmin Guide →</a>
             </div>
         </aside>
 
@@ -102,165 +75,68 @@
                     Poultry Management System
                 </h1>
                 <p class="text-sm md:text-base text-indigo-100 font-medium">
-                    Comprehensive Usage Guide for the Web Version
+                    Role-Based Documentation & Visual Operations Manual
                 </p>
             </div>
 
-            <!-- Getting Started Card -->
+            <!-- Getting Started Overview -->
             <div id="getting-started" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
                 <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Getting Started</h2>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Select Your Role Manual</h2>
                     <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
-                        Welcome to the Poultry Management System! This guide will walk you through the core functionalities of the application, helping you to efficiently manage your farm's daily operations.
+                        Welcome to the Poultry Management System documentation portal. Choose your role guide below to view step-by-step visual button click instructions with screenshots.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-indigo-50/50 border border-indigo-100/80 p-5 rounded-xl space-y-2">
-                        <h4 class="text-sm font-bold text-indigo-900">Navigation</h4>
-                        <p class="text-xs text-slate-600 font-medium leading-relaxed">
-                            Use the left-hand sidebar to navigate between different modules like Dashboard, Flocks, Eggs, and Finance.
-                        </p>
-                    </div>
+                <!-- 2 MASTER CARDS ONLY -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Card 1: Staff Usage Guide -->
+                    <a id="staff-guide-card" href="/documentation/usage-guide.html" class="bg-amber-50/60 border border-amber-200/80 p-6 rounded-2xl hover:border-amber-500 transition-all block group shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-100 px-2.5 py-1 rounded">Role Manual 01</span>
+                            <span class="text-xs font-bold text-amber-700 group-hover:translate-x-1 transition-transform">Open Guide →</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-extrabold text-slate-900 group-hover:text-amber-700 transition-colors">Staff Usage Guide</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
+                                Tailored specifically for farm attendants & workers. Step-by-step instructions with circled screenshots for daily egg collection, flock mortality logs, and feed stock entries.
+                            </p>
+                        </div>
+                        <div class="pt-2 border-t border-amber-200/60 flex items-center gap-2 text-xs font-bold text-amber-800">
+                            <span>Includes:</span>
+                            <span class="bg-white px-2 py-0.5 rounded text-[11px] border border-amber-200">Egg Logger</span>
+                            <span class="bg-white px-2 py-0.5 rounded text-[11px] border border-amber-200">Mortality</span>
+                            <span class="bg-white px-2 py-0.5 rounded text-[11px] border border-amber-200">Feed Stock</span>
+                        </div>
+                    </a>
 
-                    <div class="bg-indigo-50/50 border border-indigo-100/80 p-5 rounded-xl space-y-2">
-                        <h4 class="text-sm font-bold text-indigo-900">Workspaces</h4>
-                        <p class="text-xs text-slate-600 font-medium leading-relaxed">
-                            If you manage multiple farms, you can switch between them using the Workspace switcher in the top navigation bar.
-                        </p>
-                    </div>
-                </div>
-            </div>
+                    <!-- Card 2: Admin & Superadmin Guide -->
+                    <a id="admin-guide-card" href="/documentation/administration-guide.html" class="bg-purple-50/60 border border-purple-200/80 p-6 rounded-2xl hover:border-purple-500 transition-all block group shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 bg-purple-100 px-2.5 py-1 rounded">Role Manual 02</span>
+                            <span class="text-xs font-bold text-purple-700 group-hover:translate-x-1 transition-transform">Open Guide →</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-extrabold text-slate-900 group-hover:text-purple-700 transition-colors">Admin & Super Admin Guide</h3>
+                            <p class="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
+                                Complete governance manual for Farm Owners & Super Admins. Adding staff, assigning roles, managing payroll, finance ledgers, multi-branch matrix, and Superadmin CMS.
+                            </p>
+                        </div>
+                        <div class="pt-2 border-t border-purple-200/60 flex items-center gap-2 text-xs font-bold text-purple-800">
+                            <span>Includes:</span>
+                            <span class="bg-white px-2 py-0.5 rounded text-[11px] border border-purple-200">Add Staff</span>
+                            <span class="bg-white px-2 py-0.5 rounded text-[11px] border border-purple-200">Payroll</span>
+                            <span class="bg-white px-2 py-0.5 rounded text-[11px] border border-purple-200">Super Admin CMS</span>
+                        </div>
+                    </a>
 
-            <!-- Dashboard Card -->
-            <div id="dashboard" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Dashboard</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        The Dashboard provides a high-level, real-time overview of your farm's performance.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li><strong>Key Metrics:</strong> View total active birds, daily egg production rates, and recent feed consumption.</li>
-                        <li><strong>Guided Onboarding:</strong> Track setup progress for newly created farm workspaces.</li>
-                        <li><strong>System Alerts:</strong> Monitor critical notifications for low feed stock, mortality spikes, and uncollected invoices.</li>
-                    </ul>
-                </div>
-
-                <div class="pt-2">
-                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/main_dashboard.jpg" alt="Dashboard Screenshot" class="w-full h-auto object-cover" />
-                    </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Main Telemetry Dashboard Overview</p>
-                </div>
-            </div>
-
-            <!-- Flock Management Card -->
-            <div id="flock-management" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Flock Management</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        Track every batch of birds from day one to depletion.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li><strong>Batches & Flocks:</strong> Register layers, broilers, and pullets with unique batch IDs and breeds.</li>
-                        <li><strong>Mortality Logger:</strong> Record daily mortality count with root-cause analysis (heat stress, disease, natural).</li>
-                        <li><strong>Pen Transfers:</strong> Reassign flocks between housing coops and pens seamlessly.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Egg Production Card -->
-            <div id="egg-production" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Egg Production</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        Monitor daily collection, breakage rates, and cushioning audits.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li><strong>Daily Collections:</strong> Log good eggs, cracked eggs, and spoilt eggs per batch.</li>
-                        <li><strong>30-Egg Crate Conversion:</strong> Automatically converts total good eggs to standard 30-egg crates.</li>
-                        <li><strong>Cushion Audits:</strong> Track nesting box padding cleanliness to reduce cracked shell occurrences.</li>
-                    </ul>
-                </div>
-
-                <div class="pt-2">
-                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/egg_logger.jpg" alt="Egg Logger Screenshot" class="w-full h-auto object-cover" />
-                    </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Egg Collection & Maturation Logger</p>
-                </div>
-            </div>
-
-            <!-- Feed & Inventory Card -->
-            <div id="feed-inventory" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Feed & Inventory</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        Prevent stockouts and analyze feed conversion ratios.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li><strong>Feed Types:</strong> Manage Layer Mash, Broiler Starter, Grower, and Finisher inventory.</li>
-                        <li><strong>Consumption Logging:</strong> Log daily feed usage in Kilograms per batch.</li>
-                        <li><strong>Low Stock Alerts:</strong> Receive automatic warnings when feed reserves drop below safety thresholds.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Financial Tracking Card -->
-            <div id="financial-tracking" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Financial Tracking</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        Complete expense ledgers, sales invoicing, and profit & loss statements.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li><strong>Sales & Invoicing:</strong> Generate digital invoices with Paystack/Stripe payment links.</li>
-                        <li><strong>Expense Ledgers:</strong> Categorize spending on Feed, Salaries, Medication, Utilities, and Maintenance.</li>
-                        <li><strong>Payroll Disbursement:</strong> One-click staff salary processing.</li>
-                    </ul>
-                </div>
-
-                <div class="pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/settings_view.jpg" alt="Settings View Screenshot" class="w-full h-auto object-cover" />
-                    </div>
-                    <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/subscription_modal.jpg" alt="Subscription Modal Screenshot" class="w-full h-auto object-cover" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Health & CCTV Card -->
-            <div id="health-cctv" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Health & CCTV</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        Vaccination schedules, biosecurity protocols, and WebRTC security surveillance.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li><strong>Vaccination Templates:</strong> Apply Newcastle, Gumboro, Marek's booster schedules.</li>
-                        <li><strong>CCTV Surveillance:</strong> Pair IP or mobile cameras via QR code for live video streaming.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Staff & Contacts Card -->
-            <div id="staff-contacts" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Staff & Contacts</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        Team management, role-based access, and CRM directory.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li><strong>Role Access (RBAC):</strong> Assign permissions for Admin, Manager, and Staff.</li>
-                        <li><strong>Supplier & Buyer Directory:</strong> Maintain contacts for feed suppliers, buyers, and vet doctors.</li>
-                    </ul>
                 </div>
             </div>
 
             <!-- Footer -->
             <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
-                <p>&copy; 2026 Poultry Management System (PMS). Official Usage Guide.</p>
+                <p>&copy; 2026 Poultry Management System (PMS). Official Role Documentation.</p>
             </footer>
 
         </main>
