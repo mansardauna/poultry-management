@@ -16,8 +16,8 @@ const fs = require('fs');
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 900 });
 
-    console.log('Navigating to http://localhost:3000/documentation/index.html...');
-    await page.goto('http://localhost:3000/documentation/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    console.log('Navigating to http://localhost:3000/documentation/setup-guide.html...');
+    await page.goto('http://localhost:3000/documentation/setup-guide.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await new Promise(r => setTimeout(r, 2000));
 
     const targetPath1 = path.join(__dirname, '..', 'public', 'docs', 'documentation_category_index.png');
