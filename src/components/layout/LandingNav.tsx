@@ -29,7 +29,7 @@ export function LandingNav({ activePath }: { activePath?: string }) {
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
             <Link href="/about" className={`hover:text-indigo-600 transition-colors ${activePath === '/about' ? 'text-indigo-600 font-semibold' : ''}`}>About</Link>
             <Link href="/pricing" className={`hover:text-indigo-600 transition-colors ${activePath === '/pricing' ? 'text-indigo-600 font-semibold' : ''}`}>Pricing</Link>
-            <Link href="/documentation" className={`hover:text-indigo-600 transition-colors ${activePath === '/documentation' ? 'text-indigo-600 font-semibold' : ''}`}>Documentation</Link>
+            <a href="/documentation/index.html" className={`hover:text-indigo-600 transition-colors ${activePath === '/documentation' || activePath === '/documentation/index.html' ? 'text-indigo-600 font-semibold' : ''}`}>Documentation</a>
             <Link href="/contact" className={`hover:text-indigo-600 transition-colors ${activePath === '/contact' ? 'text-indigo-600 font-semibold' : ''}`}>Contact</Link>
           </div>
           
