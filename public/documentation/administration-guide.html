@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMS Guide - Administration Guide</title>
+    <title>PMS Guide - Administration & Enterprise Governance</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,6 +21,21 @@
             background-color: #e0e7ff;
             color: #4338ca;
             font-weight: 700;
+        }
+        .click-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #ef4444;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+            line-height: 1;
+            margin-right: 6px;
         }
         .role-badge {
             font-size: 0.65rem;
@@ -66,8 +81,8 @@
                 <a href="#enterprise-hub" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
                     Enterprise Hub
                 </a>
-                <a href="#cctv-hardware" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    CCTV Surveillance
+                <a href="#cctv-milestone" class="flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-all">
+                    CCTV (Coming Soon)
                 </a>
             </nav>
 
@@ -88,7 +103,7 @@
                     Administration Guide
                 </h1>
                 <p class="text-sm md:text-base text-purple-100 font-medium">
-                    System Governance, Role Permissions, CCTV Surveillance & Enterprise Matrix
+                    System Governance, Role Permissions & Enterprise Multi-Branch Matrix
                 </p>
             </div>
 
@@ -134,22 +149,27 @@
                                 <td class="p-3.5 text-emerald-600 font-bold">Full Access</td>
                                 <td class="p-3.5 text-slate-400">Denied</td>
                             </tr>
-                            <tr>
-                                <td class="p-3.5 font-bold text-slate-900">CCTV WebRTC Live Video Stream</td>
-                                <td class="p-3.5 text-emerald-600 font-bold">Full Access</td>
-                                <td class="p-3.5 text-emerald-600 font-bold">Full Access</td>
-                                <td class="p-3.5 text-slate-400">Denied</td>
-                                <td class="p-3.5 text-slate-400">Denied</td>
-                            </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Screenshot for Admin Settings -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/settings_view.jpg" alt="Admin Settings Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Admin Governance Settings
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1: Workspace administration controls.</p>
                 </div>
             </div>
 
             <!-- Enterprise Hub Card -->
             <div id="enterprise-hub" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
                 <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Enterprise Hub (`/dashboard/enterprise`)</h2>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Enterprise Hub</h2>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,16 +187,33 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- Screenshot for Enterprise Upgrade -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/subscription_modal.jpg" alt="Enterprise Subscriptions Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Enterprise Upgrade Controls
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 2: Enterprise multi-farm tier selection.</p>
+                </div>
             </div>
 
-            <!-- CCTV Card -->
-            <div id="cctv-hardware" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">CCTV WebRTC Surveillance (`/dashboard/cctv`)</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
-                        Scan the WebRTC QR code to pair IP or smartphone cameras as live video security feeds for coop theft prevention and predator detection alerts.
-                    </p>
+            <!-- MILESTONE: CCTV SURVEILLANCE (COMING SOON) -->
+            <div id="cctv-milestone" class="step-box space-y-6 scroll-mt-6 border-dashed border-2 border-slate-300 bg-slate-50/80">
+                <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-extrabold text-amber-700 uppercase tracking-widest bg-amber-100 px-2.5 py-1 rounded">Milestone Roadmap</span>
+                        <h2 class="text-2xl font-extrabold text-slate-700 mt-2">CCTV WebRTC Camera Surveillance</h2>
+                    </div>
+                    <span class="bg-amber-500 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">Coming Soon (Phase 3)</span>
                 </div>
+
+                <p class="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">
+                    Live WebRTC CCTV surveillance, predator alerts, and smartphone IP camera pairing are currently under development on our Phase 3 Milestone Roadmap.
+                </p>
             </div>
 
             <!-- Footer -->

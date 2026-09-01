@@ -25,7 +25,7 @@
         .click-badge {
             display: inline-flex;
             align-items: center;
-            justify-center: center;
+            justify-content: center;
             width: 24px;
             height: 24px;
             border-radius: 9999px;
@@ -73,9 +73,6 @@
                 <a href="#wizard-guide" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
                     4-Step Setup Wizard
                 </a>
-                <a href="#db-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Database Selection
-                </a>
             </nav>
 
             <div class="mt-8 pt-6 border-t border-slate-100 space-y-2">
@@ -95,7 +92,7 @@
                     Easy Setup & Initial Farm Setup
                 </h1>
                 <p class="text-sm md:text-base text-emerald-100 font-medium">
-                    Simple Visual Guide to Setting Up Your Farm Account
+                    Visual Setup Instructions with Circled Button Screenshots
                 </p>
             </div>
 
@@ -104,41 +101,51 @@
                 <div class="border-b border-slate-100 pb-4">
                     <span class="text-xs font-extrabold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded">Onboarding</span>
                     <h2 class="text-2xl font-extrabold text-slate-900 mt-2">4-Step Guided Setup Wizard</h2>
-                    <p class="text-xs text-slate-500 font-medium mt-1">When you open your account for the first time, follow these simple button clicks.</p>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Follow the red target badges on the screenshots below.</p>
                 </div>
 
                 <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
                     <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
                         <span class="click-badge">1</span>
                         <div>
-                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Sign Up' or 'Log In'</strong>
-                            Click the purple <strong>Sign Up</strong> button at the top right of the landing page to register your farm.
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Sign Up' to Register</strong>
+                            Click the purple <strong>Sign Up Free</strong> button at the top right of the screen.
                         </div>
                     </div>
+                </div>
 
+                <!-- Screenshot for Sign Up -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/signup_page.png" alt="Registration Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Click Sign Up Free
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Registration screen click location.</p>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium pt-4">
                     <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
                         <span class="click-badge">2</span>
                         <div>
-                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Select your Database Type</strong>
-                            Click on your preferred database card (Supabase Cloud PostgreSQL or Standard Postgres).
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Log In' to Access Workspace</strong>
+                            Input your farm admin credentials and click the purple <strong>Log In</strong> button.
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
-                        <span class="click-badge">3</span>
-                        <div>
-                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Test Connection'</strong>
-                            Click the blue <strong>Test Connection</strong> button. The system verifies your database automatically.
+                <!-- Screenshot for Log In -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/login_page.png" alt="Login Portal Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute bottom-6 right-12 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Click Log In
                         </div>
                     </div>
-
-                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
-                        <span class="click-badge">4</span>
-                        <div>
-                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Enter Farm Name & Click 'Finish Setup'</strong>
-                            Type your farm business name (e.g. Grand Valley Poultry) and click <strong>Finish Setup</strong> to open your main dashboard!
-                        </div>
-                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.2: Login portal click target.</p>
                 </div>
             </div>
 
