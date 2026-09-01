@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMS Guide - Usage & Operational Guide</title>
+    <title>PMS Guide - Easy Step-by-Step Usage & Farm Operations Guide</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,6 +21,28 @@
             background-color: #e0e7ff;
             color: #4338ca;
             font-weight: 700;
+        }
+        .click-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #ef4444;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+            line-height: 1;
+            margin-right: 6px;
+        }
+        .step-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
         .scrollbar-custom::-webkit-scrollbar {
             width: 6px;
@@ -48,17 +70,17 @@
             
             <!-- Navigation Links -->
             <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
-                <a href="#egg-workflow" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
-                    Egg Collections
+                <a href="#egg-guide" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
+                    Logging Eggs
                 </a>
-                <a href="#flock-workflow" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                <a href="#flock-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
                     Flock Mortality
                 </a>
-                <a href="#feed-workflow" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Feed Inventory
+                <a href="#feed-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Feed Stock
                 </a>
-                <a href="#sales-invoices" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Sales Invoicing
+                <a href="#sales-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Customer Invoices
                 </a>
             </nav>
 
@@ -76,64 +98,159 @@
             <!-- Hero Banner Box -->
             <div class="bg-gradient-to-r from-amber-600 via-amber-600 to-indigo-600 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
                 <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Usage & Operational Guide
+                    Everyday Farm Operations Guide
                 </h1>
                 <p class="text-sm md:text-base text-amber-100 font-medium">
-                    Step-by-Step Daily Workflows for Farm Attendants & Supervisors
+                    Simple Visual Step-by-Step Instructions (No Technical Knowledge Required)
                 </p>
             </div>
 
-            <!-- Egg Workflow Card -->
-            <div id="egg-workflow" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">1. Daily Egg Collection Logging (`/dashboard/eggs`)</h2>
-                    <ol class="list-decimal pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li>Navigate to `/dashboard/eggs` and click <strong>'+ Log Daily Lay'</strong>.</li>
-                        <li>Select collection date and choose layer flock batch ID (e.g. `B301`).</li>
-                        <li>Input total <strong>Good Eggs</strong>, <strong>Cracked Eggs</strong>, and <strong>Spoilt Eggs</strong>.</li>
-                        <li>System automatically calculates crate count using `Math.floor(Good Eggs / 30)` and logs remaining loose eggs.</li>
-                        <li>Log <strong>Cushion Audits</strong> to track nesting box cleanliness and reduce breakage rates.</li>
-                    </ol>
+            <!-- EGG LOGGING GUIDE -->
+            <div id="egg-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Daily Task 1</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Record Daily Egg Collections</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Follow these simple button clicks on your screen to log your farm's daily egg production.</p>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Egg Production' on your Left Menu</strong>
+                            Look at the navigation menu on the left side of your screen and click on <strong>Egg Production</strong>.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click the purple '+ Log Daily Lay' Button</strong>
+                            At the top-right corner of the Egg Production screen, click the purple button marked <strong>+ Log Daily Lay</strong>.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">3</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Enter your Egg Counts & Click 'Save Log'</strong>
+                            Type in the total number of Good Eggs and Cracked Eggs. The system automatically calculates your 30-egg crate totals for you! Click <strong>Save Log</strong> when done.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Screenshot with Highlight Target -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/egg_logger.jpg" alt="Egg Logger Screenshot" class="w-full h-auto object-cover" />
+                        <!-- Red Circled Highlight Callout Overlay -->
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Click Here to Log Lay
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1: Click location for logging daily egg crates.</p>
                 </div>
             </div>
 
-            <!-- Flock Workflow Card -->
-            <div id="flock-workflow" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">2. Flock Mortality & Pen Transfers (`/dashboard/chickens`)</h2>
-                    <ul class="list-disc pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li>Register layer, broiler, or pullet batches with unique batch IDs.</li>
-                        <li>Log daily mortality with cause (Heat Stress, Disease, Culling, Natural).</li>
-                        <li>System automatically subtracts mortality from live active bird KPI cards.</li>
-                    </ul>
+            <!-- FLOCK MORTALITY GUIDE -->
+            <div id="flock-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Daily Task 2</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Record Dead Birds (Mortality)</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Keep your active bird counts 100% accurate without doing manual math.</p>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Flock Management' on your Left Menu</strong>
+                            On the left menu bar, click <strong>Flock Management</strong> (or <strong>Chickens</strong>).
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Log Mortality' next to your Flock Batch</strong>
+                            Find your bird batch (e.g., Layer Batch 1) and click the red button marked <strong>Log Mortality</strong>.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">3</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Select Reason & Click 'Save'</strong>
+                            Enter the number of dead birds and choose the cause (Heat, Disease, or Natural). Click <strong>Save</strong> to automatically update your dashboard live bird total.
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Feed Workflow Card -->
-            <div id="feed-workflow" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">3. Feed Inventory & Low Stock Alerts (`/dashboard/feed`)</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
-                        Log daily Kg consumption per batch. Automatic red low-stock alert banners trigger on the main telemetry dashboard when feed reserves drop below safety thresholds.
-                    </p>
+            <!-- FEED STOCK GUIDE -->
+            <div id="feed-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Daily Task 3</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Record Feed Usage & Restock</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Feed & Inventory' on your Left Menu</strong>
+                            Click <strong>Feed & Inventory</strong> on the left side of your screen.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click '+ Record Feed Usage'</strong>
+                            Select your feed type (Layer Mash, Broiler Starter), type in the number of bags or Kilograms fed to your birds today, and click <strong>Submit</strong>.
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Sales Invoices Card -->
-            <div id="sales-invoices" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">4. Sales Invoices & WhatsApp Pay Links (`/dashboard/sales`)</h2>
-                    <ol class="list-decimal pl-5 space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <li>Click <strong>'+ Record New Sale'</strong> under `/dashboard/sales`. Select customer and product line.</li>
-                        <li>Click <strong>'Generate Pay Link'</strong> to create hosted Paystack/Stripe checkout URL (`/pay-invoice/[id]`).</li>
-                        <li>Click <strong>'Share to WhatsApp'</strong> to send invoice payment links directly to customer phones.</li>
-                    </ol>
+            <!-- SALES INVOICES GUIDE -->
+            <div id="sales-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Daily Task 4</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Send Invoices to Customers on WhatsApp</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Financial Tracking' (or Sales)</strong>
+                            Click <strong>Financial Tracking</strong> on the left sidebar menu.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click '+ Record New Sale'</strong>
+                            Enter customer name, number of egg crates sold, and price.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
+                        <span class="click-badge">3</span>
+                        <div>
+                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Share to WhatsApp'</strong>
+                            Click the green <strong>Share to WhatsApp</strong> button to send a digital payment link directly to your customer's mobile phone!
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Footer -->
             <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
-                <p>&copy; 2026 Poultry Management System (PMS). Usage Guide.</p>
+                <p>&copy; 2026 Poultry Management System (PMS). Everyday Farm Operations Guide.</p>
             </footer>
 
         </main>

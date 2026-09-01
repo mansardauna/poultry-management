@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMS Guide - Setup & Deployment Guide</title>
+    <title>PMS Guide - Easy Setup & Initial Configuration</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,16 +22,27 @@
             color: #4338ca;
             font-weight: 700;
         }
-        .wireframe-box {
-            background-color: #0f172a;
-            color: #38bdf8;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            line-height: 1.45;
-            padding: 1.25rem;
-            border-radius: 0.75rem;
-            overflow-x: auto;
+        .click-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-center: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #059669;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
+            line-height: 1;
+            margin-right: 6px;
+        }
+        .step-box {
+            background-color: #ffffff;
             border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
         .scrollbar-custom::-webkit-scrollbar {
             width: 6px;
@@ -59,14 +70,11 @@
             
             <!-- Navigation Links -->
             <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
-                <a href="#prerequisites" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
-                    Prerequisites & Env
+                <a href="#wizard-guide" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
+                    4-Step Setup Wizard
                 </a>
-                <a href="#database-drivers" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Database Drivers
-                </a>
-                <a href="#wizard-steps" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Setup Wizard Steps
+                <a href="#db-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Database Selection
                 </a>
             </nav>
 
@@ -84,105 +92,52 @@
             <!-- Hero Banner Box -->
             <div class="bg-gradient-to-r from-emerald-600 via-emerald-600 to-indigo-600 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
                 <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Setup & Deployment Guide
+                    Easy Setup & Initial Farm Setup
                 </h1>
                 <p class="text-sm md:text-base text-emerald-100 font-medium">
-                    Installation, Multi-Database Engine Drivers & Environment Setup
+                    Simple Visual Guide to Setting Up Your Farm Account
                 </p>
             </div>
 
-            <!-- Prerequisites Card -->
-            <div id="prerequisites" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Prerequisites & Environment Variables</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        Before deploying the application, create a `.env.local` file in your root project directory using the schema below:
-                    </p>
+            <!-- WIZARD GUIDE -->
+            <div id="wizard-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded">Onboarding</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">4-Step Guided Setup Wizard</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">When you open your account for the first time, follow these simple button clicks.</p>
                 </div>
 
-                <div class="wireframe-box">
-<pre># Core Next.js Configuration
-NODE_ENV=production
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# Database Connection (Supported Drivers: Supabase, Postgres, MySQL)
-DATABASE_TYPE=supabase # Options: supabase | postgresql | mysql
-DATABASE_URL=postgresql://postgres:yourpassword@db.yourhost.supabase.co:5432/postgres
-
-# Supabase Credentials (Required for Managed Supabase Storage & Realtime)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-# Payment Gateways (Optional for Online Merchant Invoicing)
-PAYSTACK_SECRET_KEY=sk_live_...
-NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_live_...
-STRIPE_SECRET_KEY=sk_live_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...</pre>
-                </div>
-            </div>
-
-            <!-- Database Drivers Card -->
-            <div id="database-drivers" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Multi-Database Engine Drivers</h2>
-                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed mb-4">
-                        PFMS features an engine-agnostic database abstraction layer supporting 3 major relational database drivers:
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-indigo-50/50 border border-indigo-100/80 p-5 rounded-xl space-y-2">
-                        <span class="text-[10px] font-extrabold uppercase text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">Driver 1</span>
-                        <h4 class="text-sm font-bold text-indigo-950">Supabase PostgreSQL</h4>
-                        <p class="text-xs text-slate-600 font-medium leading-relaxed">
-                            Fully managed cloud PostgreSQL database with row-level security (RLS) and instant REST API generators.
-                        </p>
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Sign Up' or 'Log In'</strong>
+                            Click the purple <strong>Sign Up</strong> button at the top right of the landing page to register your farm.
+                        </div>
                     </div>
 
-                    <div class="bg-indigo-50/50 border border-indigo-100/80 p-5 rounded-xl space-y-2">
-                        <span class="text-[10px] font-extrabold uppercase text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Driver 2</span>
-                        <h4 class="text-sm font-bold text-emerald-950">Standard PostgreSQL</h4>
-                        <p class="text-xs text-slate-600 font-medium leading-relaxed">
-                            Self-hosted PostgreSQL 14/15/16 instances (AWS RDS, DigitalOcean, or local Docker containers).
-                        </p>
+                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Select your Database Type</strong>
+                            Click on your preferred database card (Supabase Cloud PostgreSQL or Standard Postgres).
+                        </div>
                     </div>
 
-                    <div class="bg-indigo-50/50 border border-indigo-100/80 p-5 rounded-xl space-y-2">
-                        <span class="text-[10px] font-extrabold uppercase text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Driver 3</span>
-                        <h4 class="text-sm font-bold text-amber-950">MySQL / MariaDB</h4>
-                        <p class="text-xs text-slate-600 font-medium leading-relaxed">
-                            MySQL 8.0+ or MariaDB 10.6+ instances hosted on cPanel or Linux VPS servers.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Setup Wizard Card -->
-            <div id="wizard-steps" class="bg-white border border-slate-200/80 p-6 md:p-8 rounded-2xl shadow-sm space-y-6 scroll-mt-6">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Step-by-Step Setup Wizard Instructions</h2>
-                </div>
-
-                <div class="space-y-4 text-xs md:text-sm text-slate-600 font-medium">
-                    <div class="bg-slate-50 border border-slate-100 p-5 rounded-xl space-y-1">
-                        <h4 class="text-sm font-bold text-slate-900">Step 1: Access `/setup`</h4>
-                        <p>Open your browser and navigate to `/setup`. The app automatically redirects uninitialized databases to the setup wizard.</p>
+                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
+                        <span class="click-badge">3</span>
+                        <div>
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Test Connection'</strong>
+                            Click the blue <strong>Test Connection</strong> button. The system verifies your database automatically.
+                        </div>
                     </div>
 
-                    <div class="bg-slate-50 border border-slate-100 p-5 rounded-xl space-y-1">
-                        <h4 class="text-sm font-bold text-slate-900">Step 2: Choose Database Engine Driver</h4>
-                        <p>Click on your preferred database driver card. Input host, port, database name, username, and password.</p>
-                    </div>
-
-                    <div class="bg-slate-50 border border-slate-100 p-5 rounded-xl space-y-1">
-                        <h4 class="text-sm font-bold text-slate-900">Step 3: Automated Connection Guard Ping Test</h4>
-                        <p>The wizard executes an automated real-time ping test against the database server before allowing progression.</p>
-                    </div>
-
-                    <div class="bg-slate-50 border border-slate-100 p-5 rounded-xl space-y-1">
-                        <h4 class="text-sm font-bold text-slate-900">Step 4: Initialize Farm Profile & Superadmin User</h4>
-                        <p>Input main farm business name, create root Superadmin credentials (`owner@poultry.com`), and open the dashboard.</p>
+                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
+                        <span class="click-badge">4</span>
+                        <div>
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Enter Farm Name & Click 'Finish Setup'</strong>
+                            Type your farm business name (e.g. Grand Valley Poultry) and click <strong>Finish Setup</strong> to open your main dashboard!
+                        </div>
                     </div>
                 </div>
             </div>
