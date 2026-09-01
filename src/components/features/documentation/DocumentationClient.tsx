@@ -123,7 +123,7 @@ export function DocumentationClient() {
           <section id="summary" className="space-y-6 scroll-mt-28">
             <div className="border-b border-slate-200 pb-3">
               <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 1 of 10</span>
-              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">🌟 Executive Summary & Core Value Proposition</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">Executive Summary & Core Value Proposition</h2>
             </div>
 
             <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
@@ -157,7 +157,7 @@ export function DocumentationClient() {
           <section id="sitemap" className="space-y-6 scroll-mt-28">
             <div className="border-b border-slate-200 pb-3">
               <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 1 of 10</span>
-              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">🧭 Sitemap & Application Navigation Architecture</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">Sitemap & Application Navigation Architecture</h2>
             </div>
 
             <div className="bg-slate-900 text-indigo-300 p-6 rounded-2xl font-mono text-xs leading-relaxed overflow-x-auto border border-slate-800 shadow-inner">
@@ -198,7 +198,7 @@ Authenticated Operational Dashboard (/dashboard)
           <section id="screenshots" className="space-y-6 scroll-mt-28">
             <div className="border-b border-slate-200 pb-3">
               <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 2 & 9 Screenshots</span>
-              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">📸 Real Application Screenshots</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">Real Application Screenshots</h2>
             </div>
 
             <div className="space-y-8">
@@ -238,7 +238,7 @@ Authenticated Operational Dashboard (/dashboard)
           <section id="wireframes" className="space-y-8 scroll-mt-28">
             <div className="border-b border-slate-200 pb-3">
               <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Pages 3 to 8 Wireframes</span>
-              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">📦 Detailed Module-by-Module Wireframe Breakdown</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">Detailed Module-by-Module Wireframe Breakdown</h2>
             </div>
 
             {/* 1. Main Dashboard */}
@@ -304,7 +304,7 @@ Authenticated Operational Dashboard (/dashboard)
           <section id="subscriptions" className="space-y-6 scroll-mt-28">
             <div className="border-b border-slate-200 pb-3">
               <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 9 of 10</span>
-              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">💳 Subscription Tier Matrix</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">Subscription Tier Matrix</h2>
             </div>
 
             <div className="overflow-x-auto bg-white border border-slate-200 rounded-2xl shadow-sm">
@@ -332,14 +332,14 @@ Authenticated Operational Dashboard (/dashboard)
                   </tr>
                   <tr>
                     <td className="p-4 font-bold text-slate-900">CCTV Surveillance</td>
-                    <td className="p-4 text-slate-400">Locked 🔒</td>
+                    <td className="p-4 text-slate-400">Locked</td>
                     <td className="p-4">2 Cameras</td>
                     <td className="p-4 text-indigo-600 font-bold">Unlimited WebRTC Cameras</td>
                   </tr>
                   <tr>
                     <td className="p-4 font-bold text-slate-900">White-Label Suite</td>
-                    <td className="p-4 text-slate-400">Locked 🔒</td>
-                    <td className="p-4 text-slate-400">Locked 🔒</td>
+                    <td className="p-4 text-slate-400">Locked</td>
+                    <td className="p-4 text-slate-400">Locked</td>
                     <td className="p-4 text-indigo-600 font-bold">Full Custom Logo & Theme</td>
                   </tr>
                   <tr className="bg-slate-50 font-extrabold text-sm">
@@ -357,7 +357,7 @@ Authenticated Operational Dashboard (/dashboard)
           <section id="marketing" className="space-y-6 scroll-mt-28">
             <div className="border-b border-slate-200 pb-3">
               <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Page 9 & 10</span>
-              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">📣 Digital Marketer Pitching Points & Ad Copy Suggestions</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 mt-1">Digital Marketer Pitching Points & Ad Copy Suggestions</h2>
             </div>
 
             <div className="space-y-4">

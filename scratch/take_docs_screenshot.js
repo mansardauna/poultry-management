@@ -17,7 +17,8 @@ const fs = require('fs');
     await page.setViewport({ width: 1280, height: 900 });
 
     console.log('Navigating to http://localhost:3000/documentation/index.html...');
-    await page.goto('http://localhost:3000/documentation/index.html', { waitUntil: 'networkidle0' });
+    await page.goto('http://localhost:3000/documentation/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await new Promise(r => setTimeout(r, 2000));
 
     const targetPath1 = path.join(__dirname, '..', 'public', 'docs', 'documentation_category_index.png');
     const targetPath2 = 'C:\\Users\\USER\\.gemini\\antigravity\\brain\\9ad925d5-b8e3-4edf-a4fa-10347a434789\\documentation_category_index.png';
