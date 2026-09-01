@@ -67,16 +67,37 @@
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 w-full space-y-20">
         
         <!-- Hero Header -->
-        <div class="text-center max-w-4xl mx-auto space-y-4">
+        <div class="text-center max-w-4xl mx-auto mb-12 space-y-4">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-widest">
-                Official Step-by-Step Product & Operational Guide
+                Knowledge Base & Architecture Directory
             </div>
             <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                Poultry Farm Management System (PFMS) Documentation
+                Poultry Farm Management System Documentation
             </h1>
             <p class="text-xs md:text-sm text-slate-400 font-medium leading-relaxed max-w-3xl mx-auto">
-                Comprehensive step-by-step user onboarding, database driver configuration, core feature breakdown, operational workflows, structural wireframes, and live application screenshots.
+                Comprehensive technical, operational, and financial documentation index. Select a master guide below to inspect setup protocols, system governance, and operational workflows.
             </p>
+
+            <!-- 3 Master Guide Shortcut Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 text-left">
+                <a href="/documentation/setup-guide.html" class="bg-emerald-900/40 border border-emerald-500/30 p-5 rounded-2xl hover:border-emerald-500 transition-all block group">
+                    <span class="text-[10px] font-extrabold uppercase text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Master Guide 01</span>
+                    <h3 class="text-base font-extrabold text-white mt-2 group-hover:text-emerald-400">Setup & Deployment Guide</h3>
+                    <p class="text-xs text-slate-400 mt-1">Multi-DB drivers, environment variables, connection tests, and 4-step wizard setup.</p>
+                </a>
+
+                <a href="/documentation/administration-guide.html" class="bg-purple-900/40 border border-purple-500/30 p-5 rounded-2xl hover:border-purple-500 transition-all block group">
+                    <span class="text-[10px] font-extrabold uppercase text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">Master Guide 02</span>
+                    <h3 class="text-base font-extrabold text-white mt-2 group-hover:text-purple-400">Administration Guide</h3>
+                    <p class="text-xs text-slate-400 mt-1">RBAC permissions, superadmin CMS, multi-branch matrix, white-labeling, and CCTV WebRTC.</p>
+                </a>
+
+                <a href="/documentation/usage-guide.html" class="bg-amber-900/40 border border-amber-500/30 p-5 rounded-2xl hover:border-amber-500 transition-all block group">
+                    <span class="text-[10px] font-extrabold uppercase text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Master Guide 03</span>
+                    <h3 class="text-base font-extrabold text-white mt-2 group-hover:text-amber-400">Usage & Operational Guide</h3>
+                    <p class="text-xs text-slate-400 mt-1">Daily egg collections, 30-egg crates, feed consumption, mortality, and WhatsApp invoices.</p>
+                </a>
+            </div>
         </div>
 
         <!-- SECTION 1: EASY SETUP & QUICKSTART GUIDE -->

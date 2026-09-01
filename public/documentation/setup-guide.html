@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFMS Setup & Deployment Guide - Installation, Multi-DB Drivers & Environment Configuration</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #090d16;
+            color: #f8fafc;
+            line-height: 1.65;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .wireframe-box {
+            background-color: #0f172a;
+            color: #38bdf8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            border: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="/documentation/index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-emerald-600/30">S</div>
+                <div>
+                    <span class="font-extrabold text-xl tracking-tight text-white block leading-tight">Setup Guide</span>
+                    <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Deployment & Multi-DB Configuration</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-5 text-xs font-semibold">
+                <a href="/documentation/index.html" class="text-slate-300 hover:text-white transition-colors">← Directory Hub</a>
+                <a href="/documentation/administration-guide.html" class="text-slate-300 hover:text-white transition-colors">Admin Guide</a>
+                <a href="/documentation/usage-guide.html" class="text-slate-300 hover:text-white transition-colors">Usage Guide</a>
+                <a href="/setup" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-md shadow-emerald-600/20">
+                    Launch Setup Wizard
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 w-full space-y-16">
+        
+        <div class="space-y-4 border-b border-slate-800 pb-8">
+            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase px-3 py-1 rounded-full">Official Master Guide</span>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                Installation, Database Drivers & System Setup Guide
+            </h1>
+            <p class="text-sm text-slate-300 font-medium leading-relaxed">
+                Step-by-step master technical guide for buyers and system administrators to deploy the Poultry Farm Management System (PFMS), configure database drivers (Supabase, Standard PostgreSQL, MySQL), set environment variables, and run the setup wizard.
+            </p>
+        </div>
+
+        <!-- CHAPTER 1: PREREQUISITES & ENVIRONMENT VARIABLES -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                1. Prerequisites & Environment Variable Reference
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                Before deploying the application, ensure Node.js 18+ or 20+ is installed. Create a `.env.local` file in your root project directory using the schema below:
+            </p>
+            <div class="wireframe-box">
+<pre># Core Next.js Configuration
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Database Connection (Supported Drivers: Supabase, Postgres, MySQL)
+DATABASE_TYPE=supabase # Options: supabase | postgresql | mysql
+DATABASE_URL=postgresql://postgres:yourpassword@db.yourhost.supabase.co:5432/postgres
+
+# Supabase Credentials (Required for Managed Supabase Storage & Realtime)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Payment Gateways (Optional for Online Merchant Invoicing)
+PAYSTACK_SECRET_KEY=sk_live_...
+NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_live_...
+STRIPE_SECRET_KEY=sk_live_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...</pre>
+            </div>
+        </section>
+
+        <!-- CHAPTER 2: MULTI-DATABASE DRIVER SELECTION -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                2. Multi-Database Engine Driver Selection
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                PFMS features an engine-agnostic database abstraction layer supporting 3 major relational database drivers:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+                    <span class="text-[10px] font-extrabold uppercase text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded border border-indigo-500/20">Driver 01 (Recommended)</span>
+                    <h3 class="text-base font-extrabold text-white">Supabase PostgreSQL</h3>
+                    <p class="text-xs text-slate-400 font-medium">Fully managed cloud PostgreSQL database with built-in row-level security (RLS), instant REST API generators, and automatic database backups.</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+                    <span class="text-[10px] font-extrabold uppercase text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">Driver 02</span>
+                    <h3 class="text-base font-extrabold text-white">Standard PostgreSQL</h3>
+                    <p class="text-xs text-slate-400 font-medium">Self-hosted PostgreSQL 14/15/16 instances (AWS RDS, DigitalOcean Managed Database, or local Docker containers).</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+                    <span class="text-[10px] font-extrabold uppercase text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">Driver 03</span>
+                    <h3 class="text-base font-extrabold text-white">MySQL / MariaDB</h3>
+                    <p class="text-xs text-slate-400 font-medium">MySQL 8.0+ or MariaDB 10.6+ instances commonly hosted on standard cPanel or Linux VPS servers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAPTER 3: STEP-BY-STEP SETUP WIZARD INSTRUCTIONS -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                3. Step-by-Step Setup Wizard Instructions
+            </h2>
+            
+            <div class="space-y-4 text-xs sm:text-sm text-slate-300 font-medium">
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                    <h4 class="text-base font-extrabold text-white">Step 1: Access `/setup`</h4>
+                    <p>Open your browser and navigate to `http://localhost:3000/setup`. If the database is not yet initialized, the app automatically redirects administrators to the setup wizard.</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                    <h4 class="text-base font-extrabold text-white">Step 2: Choose Database Engine Driver</h4>
+                    <p>Click on your preferred database driver card. Input your database host, port (default 5432 for Postgres, 3306 for MySQL), database name, username, and password.</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                    <h4 class="text-base font-extrabold text-white">Step 3: Automated Connection Guard Ping Test</h4>
+                    <p>The setup wizard executes an automated real-time ping test against the database server. If the connection fails (e.g. invalid password or host unreachable), the wizard displays exact error diagnostics and disables the 'Next' button until resolved.</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                    <h4 class="text-base font-extrabold text-white">Step 4: Initialize Farm Profile & Superadmin User</h4>
+                    <p>Input your main farm business name (e.g., "Grand Valley Poultry Farm"), initial housing pens, and create the root Superadmin credentials (`owner@poultry.com`). Click 'Complete Setup' to seed database tables and open the dashboard.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-center text-slate-500 text-xs font-medium">
+        <p>&copy; 2026 Poultry Farm Management System (PFMS). Setup & Deployment Master Guide.</p>
+    </footer>
+
+</body>
+</html>

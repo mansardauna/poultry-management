@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFMS Administration Guide - System Governance, Roles, CCTV & Enterprise Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #090d16;
+            color: #f8fafc;
+            line-height: 1.65;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .role-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            letter-spacing: 0.05em;
+        }
+        .role-super { background-color: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
+        .role-admin { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .role-manager { background-color: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+        .role-staff { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="/documentation/index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-purple-600/30">A</div>
+                <div>
+                    <span class="font-extrabold text-xl tracking-tight text-white block leading-tight">Administration Guide</span>
+                    <span class="text-[10px] text-purple-400 font-bold uppercase tracking-wider block">System Governance & Roles</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-5 text-xs font-semibold">
+                <a href="/documentation/index.html" class="text-slate-300 hover:text-white transition-colors">← Directory Hub</a>
+                <a href="/documentation/setup-guide.html" class="text-slate-300 hover:text-white transition-colors">Setup Guide</a>
+                <a href="/documentation/usage-guide.html" class="text-slate-300 hover:text-white transition-colors">Usage Guide</a>
+                <a href="/dashboard/admin" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-md shadow-purple-600/20">
+                    Super Admin CMS
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 w-full space-y-16">
+        
+        <div class="space-y-4 border-b border-slate-800 pb-8">
+            <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-xs font-bold uppercase px-3 py-1 rounded-full">Official Master Guide</span>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                System Administration & Enterprise Management Guide
+            </h1>
+            <p class="text-sm text-slate-300 font-medium leading-relaxed">
+                Comprehensive governance manual for super administrators and farm business owners. Explains role-based permissions (RBAC), multi-branch matrix transfers, white-label branding, CCTV WebRTC camera pairing, and SaaS subscription billing.
+            </p>
+        </div>
+
+        <!-- CHAPTER 1: ROLE-BASED ACCESS CONTROL (RBAC) -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                1. Role-Based Access Control (RBAC) Permissions Matrix
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                PFMS enforces strict multi-tenant role-based security permissions to protect sensitive financial records and system configuration:
+            </p>
+
+            <div class="overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl">
+                <table class="w-full text-xs text-left text-slate-300">
+                    <thead class="bg-slate-950 text-white font-extrabold uppercase border-b border-slate-800">
+                        <tr>
+                            <th class="p-4">Permission / Operational Scope</th>
+                            <th class="p-4"><span class="role-badge role-super">SUPERADMIN</span></th>
+                            <th class="p-4"><span class="role-badge role-admin">ADMIN</span></th>
+                            <th class="p-4"><span class="role-badge role-manager">MANAGER</span></th>
+                            <th class="p-4"><span class="role-badge role-staff">STAFF</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 font-medium">
+                        <tr>
+                            <td class="p-4 font-bold text-white">Super Admin CMS & SaaS Tenants</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-slate-500">Denied</td>
+                            <td class="p-4 text-slate-500">Denied</td>
+                            <td class="p-4 text-slate-500">Denied</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold text-white">Finance Ledgers & Payroll Processing</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-slate-500">View Only</td>
+                            <td class="p-4 text-slate-500">Denied</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold text-white">Multi-Branch Matrix & Stock Transfers</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-slate-500">Denied</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold text-white">CCTV WebRTC Live Camera Stream</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-slate-500">Denied</td>
+                            <td class="p-4 text-slate-500">Denied</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold text-white">Daily Egg Laying & Feed Consumption Logs</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                            <td class="p-4 text-emerald-400 font-bold">Full Access</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- CHAPTER 2: ENTERPRISE HUB & WHITE-LABEL CUSTOMIZATION -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                2. Enterprise Hub & White-Label Suite (`/dashboard/enterprise`)
+            </h2>
+            <div class="space-y-4 text-xs sm:text-sm text-slate-300 font-medium">
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                    <h4 class="text-base font-extrabold text-white">Multi-Branch Matrix (`/branches`)</h4>
+                    <p>Aggregates real-time active flock count, daily egg crate output, and feed reserves across all regional farm branches. Allows seamless inter-branch stock transfers with automatic inventory adjustments.</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                    <h4 class="text-base font-extrabold text-white">White-Label Customization (`/whitelabel`)</h4>
+                    <p>Customize system identity for agricultural cooperatives and enterprise accounts. Upload custom farm logo, set custom subdomains, configure PDF report header watermarks, and select primary brand color themes.</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
+                    <h4 class="text-base font-extrabold text-white">REST API Keys & Webhooks (`/api`)</h4>
+                    <p>Generate bearer API tokens for external ERP integrations. Configure webhook listener URLs to receive real-time JSON event notifications for new sales, critical low-stock alerts, and batch mortality spikes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAPTER 3: HARDWARE INTEGRATION & CCTV WEBRTC SURVEILLANCE -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                3. CCTV WebRTC Camera Surveillance & QR Code Pairing (`/dashboard/cctv`)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                Connect IP cameras or old smartphones as live streaming security cameras inside coop houses. Scan the WebRTC pairing QR code under `/dashboard/cctv` to establish a secure peer-to-peer WebRTC video stream for coop theft prevention and predator detection alerts.
+            </p>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-center text-slate-500 text-xs font-medium">
+        <p>&copy; 2026 Poultry Farm Management System (PFMS). Administration Master Guide.</p>
+    </footer>
+
+</body>
+</html>

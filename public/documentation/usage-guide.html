@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFMS End-User Usage Guide - Daily Farm Operations, Eggs, Feed & Sales Workflows</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #090d16;
+            color: #f8fafc;
+            line-height: 1.65;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="/documentation/index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-amber-600/30">U</div>
+                <div>
+                    <span class="font-extrabold text-xl tracking-tight text-white block leading-tight">Usage Guide</span>
+                    <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider block">End-User Operational Workflows</span>
+                </div>
+            </a>
+            
+            <div class="flex items-center gap-5 text-xs font-semibold">
+                <a href="/documentation/index.html" class="text-slate-300 hover:text-white transition-colors">← Directory Hub</a>
+                <a href="/documentation/setup-guide.html" class="text-slate-300 hover:text-white transition-colors">Setup Guide</a>
+                <a href="/documentation/administration-guide.html" class="text-slate-300 hover:text-white transition-colors">Admin Guide</a>
+                <a href="/dashboard" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-md shadow-amber-600/20">
+                    Open Dashboard
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 w-full space-y-16">
+        
+        <div class="space-y-4 border-b border-slate-800 pb-8">
+            <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold uppercase px-3 py-1 rounded-full">Official Master Guide</span>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                End-User Operational & Farm Workflows Guide
+            </h1>
+            <p class="text-sm text-slate-300 font-medium leading-relaxed">
+                Step-by-step master operational guide for farm managers, supervisors, and attendants. Details daily egg collection logging, nesting box audits, feed stock tracking, health schedules, sales invoicing, and customer payment links.
+            </p>
+        </div>
+
+        <!-- WORKFLOW 1: EGG COLLECTION & CRATE CONVERSION -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                1. Daily Egg Laying Collections & 30-Egg Crate Calculator (`/dashboard/eggs`)
+            </h2>
+            <div class="space-y-3 text-xs sm:text-sm text-slate-300 font-medium">
+                <p>Logging daily egg collection is vital for calculating laying percentages and predicting farm revenue:</p>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li>Navigate to `/dashboard/eggs` and click <strong>'+ Log Daily Lay'</strong>.</li>
+                    <li>Select the collection date and select the target layer flock batch ID (e.g., `B301`).</li>
+                    <li>Input total <strong>Good Eggs</strong>, <strong>Broken/Cracked Eggs</strong>, and <strong>Spoilt Eggs</strong>.</li>
+                    <li>The system automatically computes the 30-egg crate count using `Total Crates = Math.floor(Good Eggs / 30)` and logs remaining loose eggs.</li>
+                    <li>Update <strong>Nesting Box Cushion Audits</strong> to track padding cleanliness and aggressively reduce shell breakage rates.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- WORKFLOW 2: FLOCK BATCHES & MORTALITY LOGGING -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                2. Livestock Batch Management & Mortality Logging (`/dashboard/chickens`)
+            </h2>
+            <div class="space-y-3 text-xs sm:text-sm text-slate-300 font-medium">
+                <p>Manage layer, broiler, and pullet flocks through their complete lifecycle:</p>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li>Register new batches under `/dashboard/chickens` with breed name (e.g. Isa Brown, Cobb 500), purchase date, initial count, and cost.</li>
+                    <li>When bird mortality occurs, click <strong>'Log Mortality'</strong>. Input date, mortality count, and select root cause (Heat Stress, Infectious Disease, Culling, or Natural Causes).</li>
+                    <li>The system automatically deducts mortality count from the live active bird KPI cards on the main dashboard.</li>
+                    <li>Execute inter-pen bird transfers to reassign flocks between coops when birds mature.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- WORKFLOW 3: FEED CONSUMPTION & RESTOCK ALERTS -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                3. Feed Inventory & Daily Consumption Logging (`/dashboard/feed`)
+            </h2>
+            <div class="space-y-3 text-xs sm:text-sm text-slate-300 font-medium">
+                <p>Prevent feed stockouts and track Feed Conversion Ratios (FCR):</p>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li>Log daily feed usage under `/dashboard/feed` by entering feed type (Layer Mash, Broiler Starter, Grower, Finisher) and bags/Kg consumed per batch.</li>
+                    <li>When inventory levels drop below safety stock thresholds, the system triggers a red low-stock alert banner on the main telemetry dashboard.</li>
+                    <li>View calculated FCR (Feed Conversion Ratio) metrics to evaluate feed efficiency per bird and per crate of eggs.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- WORKFLOW 4: SALES & WHATSAPP PAYSTACK / STRIPE INVOICING -->
+        <section class="space-y-6">
+            <h2 class="text-2xl font-extrabold text-white border-b border-slate-800 pb-3">
+                4. Sales Invoicing & Digital WhatsApp Payment Links (`/dashboard/sales`)
+            </h2>
+            <div class="space-y-3 text-xs sm:text-sm text-slate-300 font-medium">
+                <p>Create professional customer invoices and collect online payments:</p>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li>Click <strong>'+ Record New Sale'</strong> under `/dashboard/sales`. Select customer name, product type (e.g., 50 Crates Large Eggs), unit price, and total amount.</li>
+                    <li>The system generates a unique digital invoice with line-item breakdown.</li>
+                    <li>Click <strong>'Generate Pay Link'</strong> to create a hosted Paystack or Stripe checkout URL (`/pay-invoice/[id]`).</li>
+                    <li>Click <strong>'Share to WhatsApp'</strong> to send the invoice link directly to the customer's phone for immediate payment.</li>
+                </ol>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-center text-slate-500 text-xs font-medium">
+        <p>&copy; 2026 Poultry Farm Management System (PFMS). Usage & Operational Master Guide.</p>
+    </footer>
+
+</body>
+</html>
