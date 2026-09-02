@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMS Guide - Super Admin Setup & Onboarding Guide</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.65;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .nav-active {
+            background-color: #f3e8ff;
+            color: #7e22ce;
+            font-weight: 700;
+        }
+        .click-badge-purple {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #9333ea;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.25);
+            line-height: 1;
+            margin-right: 6px;
+        }
+        .step-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background-color: #9333ea;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="scrollbar-custom bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        
+        <!-- Left Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-white border-r border-slate-200/80 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block shrink-0">
+            <!-- Brand Header -->
+            <div class="flex items-center gap-2.5 mb-8">
+                <div class="w-6 h-6 rounded bg-purple-600 flex items-center justify-center text-white font-bold text-xs">P</div>
+                <span class="font-extrabold text-lg tracking-tight text-purple-800">PMS Guide</span>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
+                <a href="#step1-signup" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
+                    Step 1: Super Admin Signup
+                </a>
+                <a href="#step2-setup" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Step 2: Database Driver Ping
+                </a>
+                <a href="#step3-gateways" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Step 3: Merchant Keys & Plans
+                </a>
+                <a href="#step4-cms" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Step 4: Landing Page CMS Editor
+                </a>
+                <a href="#step5-tenants" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    Step 5: Tenant Matrix & MRR
+                </a>
+            </nav>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 space-y-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Directory</span>
+                <a href="/documentation/index.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-purple-600">← Back to Directory</a>
+                <a href="/documentation/administration-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-purple-600">Admin Governance Guide →</a>
+                <a href="/documentation/usage-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-purple-600">Staff Usage Guide →</a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-8">
+            
+            <!-- Hero Banner Box -->
+            <div class="bg-gradient-to-r from-purple-700 via-purple-700 to-indigo-600 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-widest">
+                    Post-Signup Super Admin Onboarding Protocol
+                </div>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Super Admin Setup & Onboarding Master Guide
+                </h1>
+                <p class="text-sm md:text-base text-purple-100 font-medium">
+                    What to do immediately after signing up as Platform Super Admin (`owner@poultry.com`)
+                </p>
+            </div>
+
+            <!-- STEP 1: SUPER ADMIN SIGNUP -->
+            <div id="step1-signup" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 1</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Super Admin Registration & Master Account Creation</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Initialize your SaaS platform owner credentials.</p>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Sign Up Free' on Top Nav Bar</strong>
+                            Click the purple <strong>Sign Up Free</strong> button on the landing page header.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Type Super Admin Email & Password</strong>
+                            Type your master superadmin email (`owner@poultry.com`), select your currency region (NGN or USD), set your password, and click <strong>Create Account</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_signup.png" alt="Superadmin Signup Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Click Sign Up Free
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Live Super Admin signup portal.</p>
+                </div>
+            </div>
+
+            <!-- STEP 2: DATABASE DRIVER SELECTION & PING -->
+            <div id="step2-setup" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 2</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Database Engine Driver Selection & Connection Test</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Select Database Driver (Supabase / Postgres / MySQL)</strong>
+                            If setting up a self-hosted instance, choose your database driver. Supabase PostgreSQL is recommended for automatic multi-tenant Row-Level Security.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Test Connection'</strong>
+                            Click <strong>Test Connection</strong> to run an automated connection guard ping verification.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: MERCHANT KEYS & PLANS -->
+            <div id="step3-gateways" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 3</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Configure Paystack / Stripe Keys & Pricing Plans</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Settings' on Left Sidebar</strong>
+                            Input your merchant payment keys (Paystack Secret Key & Stripe Secret Key) so customer invoices generate online checkout links.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_finance.png" alt="Merchant Keys Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-1.5 bg-purple-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-white">
+                            <span class="w-3.5 h-3.5 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[9px]">1</span>
+                            Merchant Keys
+                        </div>
+                    </div>
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/subscription_modal.jpg" alt="Pricing Plans Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-1.5 bg-purple-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-white">
+                            <span class="w-3.5 h-3.5 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[9px]">2</span>
+                            Plan Tiers
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: CMS CONTENT EDITOR -->
+            <div id="step4-cms" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 4</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Homepage CMS Content & Headlines Editor</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Super Admin CMS' on Top Nav</strong>
+                            Log in as Super Admin (`owner@poultry.com`) and click the purple <strong>Super Admin CMS</strong> button.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'CMS Content Editor'</strong>
+                            Edit your landing page hero headlines, feature highlights, and support email settings live!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_admin.png" alt="Super Admin CMS Portal Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Super Admin CMS Portal
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 4.1: Live Super Admin CMS Portal screen.</p>
+                </div>
+            </div>
+
+            <!-- STEP 5: TENANT MATRIX & MRR -->
+            <div id="step5-tenants" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 5</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Monitor Tenant Workspaces & MRR Telemetry</h2>
+                </div>
+
+                <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
+                    Inside the Super Admin CMS Portal, track Monthly Recurring Revenue (MRR), total active SaaS tenant farms, active global bird counts, and system health status.
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
+                <p>&copy; 2026 Poultry Management System (PMS). Super Admin Setup & Onboarding Guide.</p>
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>
