@@ -51,7 +51,7 @@ export default function SetupWizardPage() {
   const [mysqlPassword, setMysqlPassword] = useState('');
 
   // Form State
-  const [platformName, setPlatformName] = useState('Poultry Farm Management System');
+  const [platformName, setPlatformName] = useState('PFMS');
   const [currencySymbol, setCurrencySymbol] = useState('₦');
   const [superAdminEmail, setSuperAdminEmail] = useState('owner@poultry.com');
   const [superAdminPassword, setSuperAdminPassword] = useState('poultry2026');
@@ -213,12 +213,20 @@ export default function SetupWizardPage() {
       {/* Top Header */}
       <div className="max-w-5xl mx-auto w-full flex items-center justify-between pb-6 border-b border-slate-200">
         <div>
-          <h1 className="text-xl font-extrabold tracking-tight text-slate-900">{platformName}</h1>
-          <p className="text-xs text-indigo-600 font-medium">System Buyer Deployment & Installation Wizard</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">PFMS</h1>
+          <p className="text-xs text-indigo-600 font-medium">Poultry Farm Management System — Installation & Setup Wizard</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-3 py-1 rounded-sm">
+        <div className="flex items-center gap-3">
+          <a 
+            href="/documentation/superadmin-setup-guide.html"
+            target="_blank"
+            rel="noreferrer"
+            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-md shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <HelpCircle size={15} /> Super Admin Docs
+          </a>
+          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-md hidden sm:inline-block">
             Self-Hosted Production Mode
           </span>
         </div>
@@ -851,6 +859,14 @@ export default function SetupWizardPage() {
                 >
                   <ShieldCheck size={16} /> Open Super Admin Dashboard
                 </Link>
+                <a
+                  href="/documentation/superadmin-setup-guide.html"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                >
+                  <HelpCircle size={16} /> Super Admin Docs
+                </a>
                 <Link 
                   href="/login" 
                   className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 border border-slate-200"

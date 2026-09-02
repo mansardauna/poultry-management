@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { ShieldAlert, Save, RefreshCw, Layers, CheckCircle, Video, Sparkles, FileSpreadsheet, Building2 } from 'lucide-react';
+import { ShieldAlert, Save, RefreshCw, Layers, CheckCircle, Video, Sparkles, FileSpreadsheet, Building2, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
 export interface SaasPlanConfig {
@@ -140,14 +140,25 @@ export function AdminCmsClient({
           </p>
         </div>
 
-        <button
-          onClick={activeTab === 'cms' ? handleSaveCms : handleSaveAll}
-          disabled={isSaving}
-          className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
-        >
-          {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-          <span>{activeTab === 'cms' ? 'Publish Landing CMS' : 'Save Plan Features'}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <a
+            href="/documentation/superadmin-setup-guide.html"
+            target="_blank"
+            rel="noreferrer"
+            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+          >
+            <HelpCircle size={16} />
+            <span>Super Admin Docs</span>
+          </a>
+          <button
+            onClick={activeTab === 'cms' ? handleSaveCms : handleSaveAll}
+            disabled={isSaving}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+          >
+            {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
+            <span>{activeTab === 'cms' ? 'Publish Landing CMS' : 'Save Plan Features'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Portal Tabs */}
