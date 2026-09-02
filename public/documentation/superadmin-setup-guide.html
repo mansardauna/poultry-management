@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMS Guide - Super Admin Setup & Onboarding Guide</title>
+    <title>PMS Guide - Super Admin Setup & Installation Wizard Master Guide</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -70,20 +70,26 @@
             
             <!-- Navigation Links -->
             <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
-                <a href="#step1-signup" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
-                    Step 1: Super Admin Signup
+                <a href="#wizard-overview" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
+                    /setup Wizard Overview
                 </a>
-                <a href="#step2-setup" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Step 2: Database Driver Ping
+                <a href="#wizard-step1" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    1. DB Engine Selection
                 </a>
-                <a href="#step3-gateways" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Step 3: Merchant Keys & Plans
+                <a href="#wizard-step2" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    2. Master Super Admin Credentials
                 </a>
-                <a href="#step4-cms" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Step 4: Landing Page CMS Editor
+                <a href="#wizard-step3" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    3. Paystack & Stripe Gateways
                 </a>
-                <a href="#step5-tenants" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    Step 5: Tenant Matrix & MRR
+                <a href="#wizard-step4" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    4. Email API & Plan Pricing
+                </a>
+                <a href="#wizard-step5" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    5. Finish & Launch Platform
+                </a>
+                <a href="#post-setup-cms" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all font-bold text-purple-700 mt-2">
+                    Super Admin CMS Portal
                 </a>
             </nav>
 
@@ -99,40 +105,51 @@
         <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-8">
             
             <!-- Hero Banner Box -->
-            <div class="bg-gradient-to-r from-purple-700 via-purple-700 to-indigo-600 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
+            <div class="bg-gradient-to-r from-purple-800 via-purple-700 to-indigo-700 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-widest">
-                    Post-Signup Super Admin Onboarding Protocol
+                    Installer & Deployment Protocol
                 </div>
                 <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Super Admin Setup & Onboarding Master Guide
+                    Super Admin Installation & /setup Wizard Master Guide
                 </h1>
                 <p class="text-sm md:text-base text-purple-100 font-medium">
-                    What to do immediately after signing up as Platform Super Admin (`owner@poultry.com`)
+                    Exhaustive step-by-step visual instructions for deploying, configuring, and launching PFMS SaaS Platform.
                 </p>
             </div>
 
-            <!-- STEP 1: SUPER ADMIN SIGNUP -->
-            <div id="step1-signup" class="step-box space-y-6 scroll-mt-6">
+            <!-- OVERVIEW -->
+            <div id="wizard-overview" class="step-box space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Installer Wizard Scope</span>
+                    <h2 class="text-xl font-extrabold text-slate-900 mt-2">What the /setup Installation Wizard Does</h2>
+                </div>
+                <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
+                    When you deploy or self-host PFMS, navigating to <code>/setup</code> opens the 5-step Installation & Deployment Wizard. It automatically runs a real-time connection ping guard on your database, seeds master Super Admin credentials, configures Paystack & Stripe merchant keys, sets transactional email APIs, and initializes default subscription pricing tiers.
+                </p>
+            </div>
+
+            <!-- WIZARD STEP 1: DATABASE SELECTION & CREDENTIALS -->
+            <div id="wizard-step1" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 1</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Super Admin Registration & Master Account Creation</h2>
-                    <p class="text-xs text-slate-500 font-medium mt-1">Initialize your SaaS platform owner credentials.</p>
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Wizard Step 1 of 5</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Database Engine Selection & Real-Time Connection Guard</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Select your database engine and test live connectivity.</p>
                 </div>
 
                 <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
                     <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
                         <span class="click-badge-purple">1</span>
                         <div>
-                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Sign Up Free' on Top Nav Bar</strong>
-                            Click the purple <strong>Sign Up Free</strong> button on the landing page header.
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Select Database Engine Driver</strong>
+                            Choose between <strong>⚡ Supabase Cloud PostgreSQL</strong> (recommended for multi-tenant Row-Level Security), <strong>🐘 Standard PostgreSQL</strong> (AWS RDS / Neon), or <strong>🐬 MySQL / MariaDB</strong>.
                         </div>
                     </div>
 
                     <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
                         <span class="click-badge-purple">2</span>
                         <div>
-                            <strong class="text-purple-950 font-bold block text-sm mb-1">Type Super Admin Email & Password</strong>
-                            Type your master superadmin email (`owner@poultry.com`), select your currency region (NGN or USD), set your password, and click <strong>Create Account</strong>.
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Verify Real-Time Connection Status Banner</strong>
+                            The system automatically pings your database endpoint. Verify that the banner displays <code>Database connection verified 100%! Connection is live.</code> before clicking <strong>Continue to Step 2</strong>.
                         </div>
                     </div>
                 </div>
@@ -140,99 +157,67 @@
                 <!-- REAL SCREENSHOT -->
                 <div class="pt-2">
                     <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/screen_signup.png" alt="Superadmin Signup Screenshot" class="w-full h-auto object-cover" />
+                        <img src="/docs/screen_setup.png" alt="Setup Wizard Step 1 Screenshot" class="w-full h-auto object-cover" />
                         <div class="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
                             <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">1</span>
-                            Click Sign Up Free
+                            PFMS Setup Installer Header
+                        </div>
+                        <div class="absolute bottom-6 right-6 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Continue to Step 2
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Live Super Admin signup portal.</p>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Live /setup Installation Wizard Step 1 screen.</p>
                 </div>
             </div>
 
-            <!-- STEP 2: DATABASE DRIVER SELECTION & PING -->
-            <div id="step2-setup" class="step-box space-y-6 scroll-mt-6">
+            <!-- WIZARD STEP 2: SUPER ADMIN & BRAND IDENTITY -->
+            <div id="wizard-step2" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 2</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Database Engine Driver Selection & Connection Test</h2>
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Wizard Step 2 of 5</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Master Super Admin Account Credentials & Platform Identity</h2>
                 </div>
 
                 <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
                     <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
                         <span class="click-badge-purple">1</span>
                         <div>
-                            <strong class="text-purple-950 font-bold block text-sm mb-1">Select Database Driver (Supabase / Postgres / MySQL)</strong>
-                            If setting up a self-hosted instance, choose your database driver. Supabase PostgreSQL is recommended for automatic multi-tenant Row-Level Security.
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Set Master Super Admin Email & Password</strong>
+                            Type your master platform owner email (e.g. <code>owner@poultry.com</code> or <code>mansur@ankabit.com</code>) and set a secure password.
                         </div>
                     </div>
 
                     <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
                         <span class="click-badge-purple">2</span>
                         <div>
-                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Test Connection'</strong>
-                            Click <strong>Test Connection</strong> to run an automated connection guard ping verification.
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Customize Application Name & Currency Symbol</strong>
+                            Type your platform brand title (Default: <code>PFMS</code>) and select your currency symbol (<code>₦</code> NGN, <code>$</code> USD, <code>€</code> EUR, <code>£</code> GBP, <code>KSh</code> KES, <code>GH₵</code> GHS).
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- STEP 3: MERCHANT KEYS & PLANS -->
-            <div id="step3-gateways" class="step-box space-y-6 scroll-mt-6">
+            <!-- WIZARD STEP 3: PAYMENT GATEWAYS -->
+            <div id="wizard-step3" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 3</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Configure Paystack / Stripe Keys & Pricing Plans</h2>
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Wizard Step 3 of 5</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Payment Gateways Integration (Paystack & Stripe API Keys)</h2>
                 </div>
 
                 <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
                     <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
                         <span class="click-badge-purple">1</span>
                         <div>
-                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Settings' on Left Sidebar</strong>
-                            Input your merchant payment keys (Paystack Secret Key & Stripe Secret Key) so customer invoices generate online checkout links.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- REAL SCREENSHOT -->
-                <div class="pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/screen_finance.png" alt="Merchant Keys Screenshot" class="w-full h-auto object-cover" />
-                        <div class="absolute top-4 right-4 flex items-center gap-1.5 bg-purple-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-white">
-                            <span class="w-3.5 h-3.5 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[9px]">1</span>
-                            Merchant Keys
-                        </div>
-                    </div>
-                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/subscription_modal.jpg" alt="Pricing Plans Screenshot" class="w-full h-auto object-cover" />
-                        <div class="absolute top-4 right-4 flex items-center gap-1.5 bg-purple-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-white">
-                            <span class="w-3.5 h-3.5 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[9px]">2</span>
-                            Plan Tiers
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STEP 4: CMS CONTENT EDITOR -->
-            <div id="step4-cms" class="step-box space-y-6 scroll-mt-6">
-                <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 4</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Homepage CMS Content & Headlines Editor</h2>
-                </div>
-
-                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
-                        <span class="click-badge-purple">1</span>
-                        <div>
-                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Super Admin CMS' on Top Nav</strong>
-                            Log in as Super Admin (`owner@poultry.com`) and click the purple <strong>Super Admin CMS</strong> button.
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Configure Paystack Keys (African / NGN Checkouts)</strong>
+                            Enter <code>paystackPublicKey</code> (<code>pk_test/pk_live...</code>) and <code>paystackSecretKey</code> (<code>sk_test/sk_live...</code>).
                         </div>
                     </div>
 
                     <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
                         <span class="click-badge-purple">2</span>
                         <div>
-                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'CMS Content Editor'</strong>
-                            Edit your landing page hero headlines, feature highlights, and support email settings live!
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Configure Stripe Keys (Global / USD Card Payments)</strong>
+                            Enter <code>stripePublicKey</code> (<code>pk_test/pk_live...</code>) and <code>stripeSecretKey</code> (<code>sk_test/sk_live...</code>).
                         </div>
                     </div>
                 </div>
@@ -240,31 +225,91 @@
                 <!-- REAL SCREENSHOT -->
                 <div class="pt-2">
                     <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/screen_admin.png" alt="Super Admin CMS Portal Screen" class="w-full h-auto object-cover" />
-                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
-                            <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">2</span>
-                            Super Admin CMS Portal
+                        <img src="/docs/screen_finance.png" alt="Merchant Keys Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Merchant Gateway Keys
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 4.1: Live Super Admin CMS Portal screen.</p>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 3.1: Live Merchant Keys configuration screen.</p>
                 </div>
             </div>
 
-            <!-- STEP 5: TENANT MATRIX & MRR -->
-            <div id="step5-tenants" class="step-box space-y-6 scroll-mt-6">
+            <!-- WIZARD STEP 4: EMAILS & PRICING -->
+            <div id="wizard-step4" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Post-Signup Step 5</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Monitor Tenant Workspaces & MRR Telemetry</h2>
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Wizard Step 4 of 5</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Transactional Email Gateway & Plan Pricing Defaults</h2>
                 </div>
 
-                <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
-                    Inside the Super Admin CMS Portal, track Monthly Recurring Revenue (MRR), total active SaaS tenant farms, active global bird counts, and system health status.
-                </p>
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Set Resend API Key & System Sender Email</strong>
+                            Enter your Resend API Key (<code>re_...</code>) and System Sender Email (e.g. <code>support@pfms-poultry.com</code>).
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Configure Default SaaS Pricing Tiers</strong>
+                            Set default monthly & annual pricing for <strong>Commercial Pro Tier</strong> (₦15,000/mo) and <strong>Enterprise Plus Tier</strong> (₦45,000/mo).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WIZARD STEP 5: FINISH & LAUNCH -->
+            <div id="wizard-step5" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Wizard Step 5 of 5</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Complete Installation & Save Platform Configuration</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click '⚡ Complete Installation & Save Config'</strong>
+                            Review your master summary card and click the green button marked <strong>⚡ Complete Installation & Save Config</strong>.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge-purple">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Launch Super Admin Dashboard</strong>
+                            Click <strong>Open Super Admin Dashboard</strong> (`/dashboard/admin`) or <strong>Log In to Platform</strong> (`/login`).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- POST-SETUP: SUPER ADMIN CMS PORTAL -->
+            <div id="post-setup-cms" class="step-box space-y-6 scroll-mt-6 border-2 border-purple-500 bg-purple-50/20">
+                <div class="border-b border-purple-200 pb-4">
+                    <span class="text-xs font-extrabold text-white bg-purple-700 px-3 py-1 rounded-full uppercase tracking-wider">Post-Installation Super Admin Portal</span>
+                    <h2 class="text-2xl font-extrabold text-purple-950 mt-2">Super Admin Control Center & Landing Page CMS Editor</h2>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_admin.png" alt="Super Admin CMS Control Center Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Super Admin Control Center
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure S.1: Live Super Admin Control Center screen.</p>
+                </div>
             </div>
 
             <!-- Footer -->
             <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
-                <p>&copy; 2026 Poultry Management System (PMS). Super Admin Setup & Onboarding Guide.</p>
+                <p>&copy; 2026 Poultry Management System (PFMS). Super Admin Installation & Setup Master Guide.</p>
             </footer>
 
         </main>
