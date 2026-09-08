@@ -3,9 +3,15 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
+import { getAuthUser } from '@/lib/auth';
 
 export async function POST() {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const workspaceId = await getWorkspaceId();
 
     if (!workspaceId) {
@@ -43,6 +49,19 @@ export async function POST() {
           aiLoggerEnabled: false,
           exportReportsEnabled: false
         }]);
+    }
+
+    // 1b. Downgrade the organization record so tier checks stay consistent
+    const orgId = workspaceId.startsWith('main-') ? workspaceId.replace(/^main-/, '') : null;
+    if (orgId) {
+      await supabase
+        .from('organizations')
+        .update({
+          subscriptionTier: 'free',
+          subscriptionStatus: 'inactive',
+          subscriptionEndsAt: null
+        })
+        .eq('id', orgId);
     }
 
     // 2. Log cancellation in alertLogs

@@ -7,6 +7,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder'
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
 
 export async function POST(req: Request) {
+  if (webhookSecret === 'whsec_placeholder') {
+    return NextResponse.json({ error: 'Stripe webhook secret is not configured. Events cannot be verified.' }, { status: 400 });
+  }
+
   const body = await req.text();
   const signature = req.headers.get('stripe-signature') as string;
 
@@ -16,12 +20,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error(`Webhook Error: ${err.message}`);
-    // If webhook secret is a placeholder, we shouldn't fail completely during dev
-    if (webhookSecret === 'whsec_placeholder') {
-      event = JSON.parse(body);
-    } else {
-      return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
-    }
+    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
 
   // Handle the event
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
         const normTier = (targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') ? 'enterprise' : 'pro';
 
         const subAny = subscription as any;
-        await serviceRoleClient.from('subscriptions').insert({
+        await serviceRoleClient.from('subscriptions').upsert({
           id: subAny.id,
           orgId,
           stripeSubscriptionId: subAny.id,
@@ -55,7 +54,6 @@ export async function POST(req: Request) {
 
         const workspaceId = `main-${orgId}`;
         await serviceRoleClient.from('systemSettings').upsert([{
-          id: 'sys-' + Date.now().toString().slice(-6),
           workspaceId,
           subscriptionTier: normTier,
           plan: normTier,
@@ -63,7 +61,7 @@ export async function POST(req: Request) {
           aiLoggerEnabled: true,
           exportReportsEnabled: true,
           enterpriseHubEnabled: normTier === 'enterprise'
-        }]);
+        }], { onConflict: 'workspaceId' });
       }
       break;
     }
@@ -87,8 +85,19 @@ export async function POST(req: Request) {
           planId: subAny.items.data[0].price.id
         }).eq('stripeSubscriptionId', subAny.id);
 
-        const newTier = subscription.status === 'active' || subscription.status === 'trialing' ? 'pro' : 'free';
-        
+        // Only downgrade to free on definitive cancellation states. Transient states
+        // like past_due/paused keep the current tier, and enterprise stays unchanged.
+        const { data: orgRow } = await serviceRoleClient
+          .from('organizations')
+          .select('subscriptionTier')
+          .eq('id', dbSub.orgId)
+          .limit(1)
+          .maybeSingle();
+
+        const wasEnterprise = ['enterprise', 'entrepreneur', 'enterprise_plus'].includes(((orgRow?.subscriptionTier as string) || '').toLowerCase());
+        const isDefinitivelyCanceled = subscription.status === 'canceled' || subscription.status === 'unpaid';
+        const newTier = isDefinitivelyCanceled ? 'free' : (wasEnterprise ? 'enterprise' : 'pro');
+
         await serviceRoleClient.from('organizations').update({
           subscriptionTier: newTier,
           subscriptionStatus: subscription.status
@@ -96,14 +105,13 @@ export async function POST(req: Request) {
 
         const workspaceId = `main-${dbSub.orgId}`;
         await serviceRoleClient.from('systemSettings').upsert([{
-          id: 'sys-' + Date.now().toString().slice(-6),
           workspaceId,
           subscriptionTier: newTier,
           plan: newTier,
           cctvEnabled: newTier !== 'free',
           aiLoggerEnabled: newTier !== 'free',
           exportReportsEnabled: newTier !== 'free'
-        }]);
+        }], { onConflict: 'workspaceId' });
       }
       break;
     }

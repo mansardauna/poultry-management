@@ -45,12 +45,12 @@ export function useTableLogic<T>({ data, searchFields = [], initialPageSize = 20
       const bValue = b[sortConfig.key];
 
       if (aValue === bValue) return 0;
-      
+
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
       const aString = String(aValue).toLowerCase();
       const bString = String(bValue).toLowerCase();
-
-      if (aValue === null) return 1;
-      if (bValue === null) return -1;
 
       if (sortConfig.direction === 'asc') {
         return aString > bString ? 1 : -1;
@@ -60,18 +60,18 @@ export function useTableLogic<T>({ data, searchFields = [], initialPageSize = 20
     });
   }, [filteredData, sortConfig]);
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return sortedData.slice(startIndex, startIndex + pageSize);
-  }, [sortedData, currentPage, pageSize]);
-
   const totalPages = Math.ceil(sortedData.length / pageSize) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (safeCurrentPage - 1) * pageSize;
+    return sortedData.slice(startIndex, startIndex + pageSize);
+  }, [sortedData, safeCurrentPage, pageSize]);
 
   return {
     data: paginatedData,
     totalItems: sortedData.length,
-    currentPage,
+    currentPage: safeCurrentPage,
     totalPages,
     pageSize,
     searchTerm,

@@ -54,7 +54,7 @@ export default function SetupWizardPage() {
   const [platformName, setPlatformName] = useState('PFMS');
   const [currencySymbol, setCurrencySymbol] = useState('₦');
   const [superAdminEmail, setSuperAdminEmail] = useState('owner@poultry.com');
-  const [superAdminPassword, setSuperAdminPassword] = useState('poultry2026');
+  const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [fromEmail, setFromEmail] = useState('support@pfms-poultry.com');
 

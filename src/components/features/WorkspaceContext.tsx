@@ -55,17 +55,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch('/api/workspaces');
         const data = res.ok ? await res.json() : [];
 
-        // Decode role from pfms_auth cookie client-side
-        const token = Cookies.get('pfms_auth');
-        let role = 'Staff';
-        if (token) {
-          try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            role = payload.role || 'Staff';
-          } catch (e) {
-            console.error('Failed to decode cookie role client-side', e);
-          }
-        }
+        // Read role from the pfms_role cookie set at login
+        const role = Cookies.get('pfms_role') || 'Staff';
 
         const loadedWorkspaces = Array.isArray(data) && data.length > 0 
           ? data 

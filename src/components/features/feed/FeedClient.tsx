@@ -386,7 +386,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
     if (feed) weeklyByType[feed.type] = (weeklyByType[feed.type] || 0) + l.quantityConsumedKg;
   });
 
-  const divisor = timeRange === 'weekly' ? 7 : timeRange === 'monthly' ? 30 : timeRange === 'yearly' ? 365 : 30;
+  const allTimeDivisor = (() => {
+    if (filteredLogs.length === 0) return 1;
+    const timestamps = filteredLogs
+      .map(l => new Date(l.date).getTime())
+      .filter(t => !Number.isNaN(t));
+    if (timestamps.length === 0) return 1;
+    const spanDays = Math.max(1, Math.round((Math.max(...timestamps) - Math.min(...timestamps)) / 86400000));
+    return spanDays;
+  })();
+  const divisor = timeRange === 'weekly' ? 7 : timeRange === 'monthly' ? 30 : timeRange === 'yearly' ? 365 : allTimeDivisor;
   const dailyAvgConsumption = weeklyKgTotal / divisor;
   const daysOfSupply = dailyAvgConsumption > 0 ? Math.floor(totalFeedKg / dailyAvgConsumption) : null;
 

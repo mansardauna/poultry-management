@@ -66,29 +66,57 @@ export async function POST(request: Request) {
 
 /** Exported function PUT */
 export async function PUT(request: Request) {
-  const body = await request.json();
-  const { id, name, type } = body;
+  try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  if (!id || !name || !type) {
-    return NextResponse.json({ error: 'Missing id, name, or type' }, { status: 400 });
+    const body = await request.json();
+    const { id, name, type } = body;
+
+    if (!id || !name || !type) {
+      return NextResponse.json({ error: 'Missing id, name, or type' }, { status: 400 });
+    }
+
+    const tenantWorkspaces = await getTenantWorkspaces(user);
+    if (!tenantWorkspaces.some((ws) => ws.id === id)) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
+    }
+
+    await supabase.from('workspaces')
+      .update({ name, type })
+      .eq('id', id);
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Failed to update workspace' }, { status: 500 });
   }
-
-  await supabase.from('workspaces')
-    .update({ name, type })
-    .eq('id', id);
-
-  return NextResponse.json({ success: true });
 }
 
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  if (!id) {
-    return NextResponse.json({ error: 'Missing workspace id' }, { status: 400 });
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing workspace id' }, { status: 400 });
+    }
+
+    const tenantWorkspaces = await getTenantWorkspaces(user);
+    if (!tenantWorkspaces.some((ws) => ws.id === id)) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
+    }
+
+    await supabase.from('workspaces').delete().eq('id', id);
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete workspace' }, { status: 500 });
   }
-
-  await supabase.from('workspaces').delete().eq('id', id);
-  return NextResponse.json({ success: true });
 }

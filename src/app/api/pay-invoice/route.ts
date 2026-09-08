@@ -35,6 +35,11 @@ export async function POST(request: Request) {
 
     const secretKey = systemSettings?.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY;
 
+    // Demo mode only: when no real gateway key is configured, accept a reference
+    // string so the flow remains testable. With a real key configured, payment must
+    // be verified with the gateway before the invoice is marked as paid.
+    const isDemoMode = !secretKey || secretKey.includes('placeholder');
+
     let isVerified = false;
     let verifyData: any = null;
 
@@ -52,8 +57,8 @@ export async function POST(request: Request) {
       }
     }
 
-    // Accept valid reference if gateway returned success or if in reference format
-    if (!isVerified && reference && (reference.startsWith('PAY-') || reference.startsWith('T') || reference.length > 5)) {
+    // Accept valid reference if gateway returned success, or in demo mode accept the reference string
+    if (!isVerified && isDemoMode && reference) {
       isVerified = true;
     }
 

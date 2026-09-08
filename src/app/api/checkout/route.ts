@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         .select('orgId')
         .eq('userId', user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
       orgId = memberData?.orgId || null;
     }
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         .from('organizations')
         .select('id')
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (firstOrg?.id) {
         orgId = firstOrg.id;
@@ -144,9 +144,13 @@ export async function POST(request: Request) {
       .from('organizations')
       .select('*')
       .eq('id', orgId)
-      .single();
+      .maybeSingle();
 
-    let customerId = org?.stripeCustomerId;
+    if (!org) {
+      return NextResponse.json({ error: 'Organization not found for checkout' }, { status: 404 });
+    }
+
+    let customerId = org.stripeCustomerId;
 
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -213,7 +217,7 @@ export async function POST(request: Request) {
       mode: 'subscription',
       success_url: `${siteUrl}/dashboard?upgraded=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/pricing`,
-      metadata: { orgId, isAnnual: isAnnual ? 'true' : 'false' },
+      metadata: { orgId, planTier: targetTier, isAnnual: isAnnual ? 'true' : 'false' },
     });
 
     return NextResponse.json({ url: session.url });

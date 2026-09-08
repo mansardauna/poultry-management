@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
 
+const REDACTED_VALUE = '********';
+
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
@@ -14,9 +16,19 @@ export async function GET() {
     supabase.from('subscription_history').select('*').eq('workspaceId', workspaceId).order('createdAt', { ascending: false })
   ]);
 
+  const systemRow = systemSettingsRes.data?.[0];
+  const systemSettings = systemRow
+    ? {
+        ...systemRow,
+        paystackSecretKey: systemRow.paystackSecretKey && !systemRow.paystackSecretKey.includes('placeholder') ? REDACTED_VALUE : (systemRow.paystackSecretKey || ''),
+        stripeSecretKey: systemRow.stripeSecretKey && !systemRow.stripeSecretKey.includes('placeholder') ? REDACTED_VALUE : (systemRow.stripeSecretKey || ''),
+        flutterwaveSecretKey: systemRow.flutterwaveSecretKey && !systemRow.flutterwaveSecretKey.includes('placeholder') ? REDACTED_VALUE : (systemRow.flutterwaveSecretKey || '')
+      }
+    : {};
+
   return NextResponse.json({
     alertSettings: alertSettingsRes.data?.[0] || {},
-    systemSettings: systemSettingsRes.data?.[0] || {},
+    systemSettings,
     paymentMethods: paymentMethodsRes.data || [],
     subscriptionHistory: subscriptionHistoryRes.data || []
   });
@@ -28,31 +40,71 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     if (body.action === 'system') {
-      const newSystemSettings = {
-        id: body.id || 'sys-' + Date.now(),
+      const { data: existing } = await supabase
+        .from('systemSettings')
+        .select('*')
+        .eq('workspaceId', workspaceId)
+        .limit(1)
+        .maybeSingle();
+
+      // Merge updates over the existing row so subscription plan, enterprise features,
+      // and previously stored gateway keys are not wiped by a partial update.
+      const mergedSystemSettings: Record<string, unknown> = {
+        id: existing?.id || body.id || 'sys-' + Date.now(),
         workspaceId,
-        eggCratePriceSmall: Number(body.eggCratePriceSmall) || 4200,
-        eggCratePriceLarge: Number(body.eggCratePriceLarge) || 4400,
-        adminName: body.adminName || '',
-        adminEmail: body.adminEmail || '',
-        adminPhone: body.adminPhone || '',
-        farmName: body.farmName || '',
-        billingRegion: body.billingRegion || 'Nigeria & West Africa (NGN)',
-        ...(body.paystackPublicKey ? { paystackPublicKey: body.paystackPublicKey } : {}),
-        ...(body.paystackSecretKey ? { paystackSecretKey: body.paystackSecretKey } : {}),
-        ...(body.stripePublicKey ? { stripePublicKey: body.stripePublicKey } : {}),
-        ...(body.stripeSecretKey ? { stripeSecretKey: body.stripeSecretKey } : {}),
-        ...(body.flutterwavePublicKey ? { flutterwavePublicKey: body.flutterwavePublicKey } : {}),
-        ...(body.flutterwaveSecretKey ? { flutterwaveSecretKey: body.flutterwaveSecretKey } : {}),
-        ...(body.bankName ? { bankName: body.bankName } : {}),
-        ...(body.accountNumber ? { accountNumber: body.accountNumber } : {}),
-        ...(body.accountName ? { accountName: body.accountName } : {})
+        eggCratePriceSmall: existing?.eggCratePriceSmall ?? 4200,
+        eggCratePriceLarge: existing?.eggCratePriceLarge ?? 4400,
+        adminName: existing?.adminName || '',
+        adminEmail: existing?.adminEmail || '',
+        adminPhone: existing?.adminPhone || '',
+        farmName: existing?.farmName || '',
+        billingRegion: existing?.billingRegion || 'Nigeria & West Africa (NGN)',
+        paystackPublicKey: existing?.paystackPublicKey || '',
+        paystackSecretKey: existing?.paystackSecretKey || '',
+        stripePublicKey: existing?.stripePublicKey || '',
+        stripeSecretKey: existing?.stripeSecretKey || '',
+        flutterwavePublicKey: existing?.flutterwavePublicKey || '',
+        flutterwaveSecretKey: existing?.flutterwaveSecretKey || '',
+        bankName: existing?.bankName || '',
+        accountNumber: existing?.accountNumber || '',
+        accountName: existing?.accountName || ''
       };
 
-      await supabase.from('systemSettings').delete().eq('workspaceId', workspaceId);
-      await supabase.from('systemSettings').insert([newSystemSettings]);
+      const keepSecret = (next?: string, current?: string) => {
+        if (!next || next === REDACTED_VALUE) return current || '';
+        return next;
+      };
 
-      return NextResponse.json({ success: true, systemSettings: newSystemSettings });
+      if (body.eggCratePriceSmall !== undefined) {
+        mergedSystemSettings.eggCratePriceSmall = Number(body.eggCratePriceSmall) || existing?.eggCratePriceSmall || 4200;
+      }
+      if (body.eggCratePriceLarge !== undefined) {
+        mergedSystemSettings.eggCratePriceLarge = Number(body.eggCratePriceLarge) || existing?.eggCratePriceLarge || 4400;
+      }
+      if (body.adminName !== undefined) mergedSystemSettings.adminName = body.adminName;
+      if (body.adminEmail !== undefined) mergedSystemSettings.adminEmail = body.adminEmail;
+      if (body.adminPhone !== undefined) mergedSystemSettings.adminPhone = body.adminPhone;
+      if (body.farmName !== undefined) mergedSystemSettings.farmName = body.farmName;
+      if (body.billingRegion !== undefined) mergedSystemSettings.billingRegion = body.billingRegion;
+      if (body.paystackPublicKey !== undefined) mergedSystemSettings.paystackPublicKey = body.paystackPublicKey;
+      if (body.stripePublicKey !== undefined) mergedSystemSettings.stripePublicKey = body.stripePublicKey;
+      if (body.flutterwavePublicKey !== undefined) mergedSystemSettings.flutterwavePublicKey = body.flutterwavePublicKey;
+      if (body.bankName !== undefined) mergedSystemSettings.bankName = body.bankName;
+      if (body.accountNumber !== undefined) mergedSystemSettings.accountNumber = body.accountNumber;
+      if (body.accountName !== undefined) mergedSystemSettings.accountName = body.accountName;
+      mergedSystemSettings.paystackSecretKey = keepSecret(body.paystackSecretKey, existing?.paystackSecretKey);
+      mergedSystemSettings.stripeSecretKey = keepSecret(body.stripeSecretKey, existing?.stripeSecretKey);
+      mergedSystemSettings.flutterwaveSecretKey = keepSecret(body.flutterwaveSecretKey, existing?.flutterwaveSecretKey);
+
+      const { error: upsertErr } = await supabase
+        .from('systemSettings')
+        .upsert([mergedSystemSettings], { onConflict: 'workspaceId' });
+
+      if (upsertErr) {
+        return NextResponse.json({ error: upsertErr.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, systemSettings: mergedSystemSettings });
     }
 
     if (body.action === 'addPaymentMethod') {
@@ -76,14 +128,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, paymentMethod: data?.[0] || newMethod });
     }
 
-    // Default: Alert Settings
+    // Default: Alert Settings (merge so untouched flags are preserved)
+    const { data: existingAlert } = await supabase
+      .from('alertSettings')
+      .select('*')
+      .eq('workspaceId', workspaceId)
+      .limit(1)
+      .maybeSingle();
+
+    const currentAlert = existingAlert || {};
     const newSettings = {
       workspaceId,
-      feedThresholdKg: Number(body.feedThresholdKg) || 50,
-      eggDropPercentage: Number(body.eggDropPercentage) || 15,
-      notifySms: !!body.notifySms,
-      notifyEmail: !!body.notifyEmail,
-      notifyWhatsapp: !!body.notifyWhatsapp
+      feedThresholdKg: body.feedThresholdKg !== undefined ? Number(body.feedThresholdKg) || currentAlert.feedThresholdKg || 50 : currentAlert.feedThresholdKg,
+      eggDropPercentage: body.eggDropPercentage !== undefined ? Number(body.eggDropPercentage) || currentAlert.eggDropPercentage || 15 : currentAlert.eggDropPercentage,
+      notifySms: body.notifySms !== undefined ? !!body.notifySms : !!currentAlert.notifySms,
+      notifyEmail: body.notifyEmail !== undefined ? !!body.notifyEmail : !!currentAlert.notifyEmail,
+      notifyWhatsapp: body.notifyWhatsapp !== undefined ? !!body.notifyWhatsapp : !!currentAlert.notifyWhatsapp
     };
 
     await supabase.from('alertSettings').delete().eq('workspaceId', workspaceId);

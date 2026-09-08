@@ -87,7 +87,8 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
 
   let query = serviceRoleClient.from('workspaces').select('*');
   if (orgId) {
-    query = query.or(`id.like.%${orgId}%,ownerUsername.eq.${userClean}`);
+    const escapedOrgId = orgId.replace(/([\\%_])/g, '\\$1');
+    query = query.or(`id.like.%${escapedOrgId}%,ownerUsername.eq.${userClean}`);
   } else {
     query = query.eq('ownerUsername', userClean);
   }

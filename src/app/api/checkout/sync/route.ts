@@ -20,6 +20,31 @@ export async function POST(request: Request) {
 
     // Look up or create organization for authenticated user strictly
     if (user?.id) {
+      // Validate the org-id cookie only if it actually belongs to this user
+      if (orgId) {
+        const { data: memberCheck } = await serviceRoleClient
+          .from('organization_members')
+          .select('orgId')
+          .eq('orgId', orgId)
+          .eq('userId', user.id)
+          .limit(1)
+          .maybeSingle();
+
+        const { data: ownedCheck } = memberCheck
+          ? { data: null }
+          : await serviceRoleClient
+              .from('organizations')
+              .select('id')
+              .eq('id', orgId)
+              .eq('ownerId', user.id)
+              .limit(1)
+              .maybeSingle();
+
+        if (!memberCheck?.orgId && !ownedCheck?.id) {
+          orgId = '';
+        }
+      }
+
       if (!orgId) {
         const { data: memberData } = await serviceRoleClient
           .from('organization_members')
