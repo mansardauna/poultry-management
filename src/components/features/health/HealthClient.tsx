@@ -68,7 +68,7 @@ export function HealthClient({ role }: { role: string }) {
 
   useEffect(() => {
     refreshData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const handleSaveTemplate = async () => {

@@ -3,11 +3,14 @@
 
 import Link from 'next/link';
 import { Mail, Phone, MapPin, Send, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
 
 import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 
 export default function ContactPage() {
+  const [submitted, setSubmitted] = useState(false);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pt-20">
       {/* Top Navbar */}
@@ -67,7 +70,16 @@ export default function ContactPage() {
           {/* Interactive Contact Form */}
           <div className="lg:col-span-2 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
             <h2 className="text-xl font-semibold text-slate-900 mb-6">Send us a message</h2>
-            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Thank you! Your message has been sent to our support team.'); }}>
+            {submitted ? (
+              <div className="flex flex-col items-start gap-3">
+                <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
+                  <MessageSquare size={22} />
+                </div>
+                <p className="text-sm font-semibold text-slate-900">Message sent!</p>
+                <p className="text-sm text-slate-600">Thank you! Your message has been sent to our support team. We will get back to you shortly.</p>
+              </div>
+            ) : (
+            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Full Name</label>
@@ -93,6 +105,7 @@ export default function ContactPage() {
                 <Send size={16} /> Send Message
               </button>
             </form>
+            )}
           </div>
         </div>
       </section>

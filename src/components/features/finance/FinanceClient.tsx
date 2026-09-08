@@ -81,7 +81,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
 
   useEffect(() => {
     refreshData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const handleOpen = () => setOpen(true);

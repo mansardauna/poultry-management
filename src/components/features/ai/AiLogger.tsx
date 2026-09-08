@@ -38,7 +38,7 @@ export function AiLogger() {
     recognition.onstart = () => setIsListening(true);
     
     recognition.onresult = (event: any) => {
-      let currentTranscript = '';
+      const currentTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {

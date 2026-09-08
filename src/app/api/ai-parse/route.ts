@@ -64,11 +64,11 @@ function smartParsePoultryText(text: string, today: string) {
   // Expenses (e.g. "spent 250000 on drugs")
   const expenseMatch = textLower.match(/(spent|bought|paid|purchased|expense)\s*(₦|\$|naira)?\s*(\d+[\d,]*)(k)?\s*(on|for)?\s*([a-z\s]+)?/i);
   if (expenseMatch) {
-    let rawAmt = expenseMatch[3].replace(/,/g, '');
+    const rawAmt = expenseMatch[3].replace(/,/g, '');
     let amt = parseInt(rawAmt, 10);
     if (expenseMatch[4] && expenseMatch[4].toLowerCase() === 'k') amt *= 1000;
     
-    let desc = expenseMatch[6] ? expenseMatch[6].trim() : 'Farm Maintenance';
+    const desc = expenseMatch[6] ? expenseMatch[6].trim() : 'Farm Maintenance';
     let cat = 'Maintenance';
     if (desc.includes('drug') || desc.includes('med') || desc.includes('vaccine')) cat = 'Drugs';
     else if (desc.includes('feed')) cat = 'Feed';
@@ -85,7 +85,7 @@ function smartParsePoultryText(text: string, today: string) {
   // Sales (e.g. "sold eggs for 600000")
   const salesMatch = textLower.match(/(sold|sales)\s*([a-z\s]+)?\s*(for|at|of)?\s*(₦|\$|naira)?\s*(\d+[\d,]*)(k)?/i);
   if (salesMatch) {
-    let rawAmt = salesMatch[5].replace(/,/g, '');
+    const rawAmt = salesMatch[5].replace(/,/g, '');
     let amt = parseInt(rawAmt, 10);
     if (salesMatch[6] && salesMatch[6].toLowerCase() === 'k') amt *= 1000;
 

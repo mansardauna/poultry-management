@@ -156,7 +156,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
 
   useEffect(() => {
     refreshData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const handleOpenCollect = () => setOpenCollect(true);

@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
+import { getAuthUser } from '@/lib/auth';
 
 /**
  * GET Handler: Check system setup status, database connectivity, and gateway configurations
@@ -81,6 +82,17 @@ export async function GET() {
       .limit(1)
       .maybeSingle();
 
+    // Never return secret gateway keys to the browser — only indicate whether they are configured.
+    if (gateways.isSetupCompleted) {
+      gateways = {
+        ...gateways,
+        paystackSecretKey: '',
+        stripeSecretKey: '',
+        stripeWebhookSecret: '',
+        resendApiKey: '',
+      };
+    }
+
     return NextResponse.json({
       isDatabaseConnected,
       isSetupCompleted: gateways.isSetupCompleted || Boolean(superAdmin),
@@ -89,11 +101,11 @@ export async function GET() {
       gateways,
       databaseConfig,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json({
       isDatabaseConnected: false,
       isSetupCompleted: false,
-      error: err?.message || 'Failed to check system setup status',
+      error: err instanceof Error ? err.message : 'Failed to check system setup status',
     }, { status: 500 });
   }
 }
@@ -144,6 +156,39 @@ export async function POST(request: Request) {
         { error: 'Super Admin Password must be at least 6 characters long.' },
         { status: 400 }
       );
+    }
+
+    // Once installation has completed, only an authenticated Super Admin may re-run it.
+    // This prevents unauthenticated callers from resetting the Super Admin credentials.
+    const { data: existingConfig } = await serviceRoleClient
+      .from('systemSettings')
+      .select('adminName')
+      .eq('id', 'gateways_config')
+      .maybeSingle();
+
+    let isSetupCompleted = false;
+    if (existingConfig?.adminName) {
+      try {
+        const parsed = JSON.parse(existingConfig.adminName);
+        isSetupCompleted = Boolean(parsed.isSetupCompleted);
+      } catch (_e) {}
+    }
+
+    if (isSetupCompleted) {
+      const authUser = await getAuthUser();
+      const isSuperAdmin = Boolean(
+        authUser &&
+        (authUser.role === 'SuperAdmin' ||
+          authUser.email === 'superadmin@pfms.com' ||
+          authUser.email === 'owner@poultry.com')
+      );
+
+      if (!isSuperAdmin) {
+        return NextResponse.json(
+          { error: 'Installation has already been completed. Please log in and use the Admin settings to manage the platform.' },
+          { status: 403 }
+        );
+      }
     }
 
     // 1. Provision / Update Super Admin in Auth
@@ -318,8 +363,8 @@ export async function POST(request: Request) {
     response.cookies.set('pfms_installation_completed', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
 
     return response;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Setup API Error:', err);
-    return NextResponse.json({ error: err?.message || 'Internal server error during setup' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error during setup' }, { status: 500 });
   }
 }

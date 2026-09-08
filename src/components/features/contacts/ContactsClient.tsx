@@ -50,7 +50,7 @@ export function ContactsClient({ role }: { role: string }) {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     refreshData();
   }, []);
 

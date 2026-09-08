@@ -134,7 +134,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
   useEffect(() => {
     refreshData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const handleOpenUsage = () => setOpenUsage(true);

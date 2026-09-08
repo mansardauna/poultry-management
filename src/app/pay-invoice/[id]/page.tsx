@@ -59,10 +59,10 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
 
   // Fallback to platform public keys if farm admin has not specified custom keys
   if (!paystackPublicKey) {
-    paystackPublicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_3793f0a514d7924ef937e0e47089eeaa1a15f019';
+    paystackPublicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || null;
   }
   if (!stripePublicKey) {
-    stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51OaL9pDjqS5IbRFu2ph5BzeDGGJ523QU4qr26XoSffgUqMySKyRsOvtsQzz47bPxmXzGytICrR9mlEIEvKL8KhML00bAJVhjNL';
+    stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null;
   }
 
   return (

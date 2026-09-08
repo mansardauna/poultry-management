@@ -1,15 +1,19 @@
-# Poultry Management System
+# Poultry Farm Management System
 
-A Next.js-based poultry farm management dashboard with a backend API and LibSQL/SQLite support.
+A multi-tenant poultry farm management dashboard built with **Next.js 16**, **React 19**, and **Supabase** (PostgreSQL + Auth). It covers flocks/batches, egg production, feed inventory, housing, health, sales & invoicing, staff & payroll, finance, CCTV, notifications, and enterprise features (white-label portals, custom API keys, cooperative hubs) with online payment via **Paystack** and **Stripe** and AI-powered logging via **Google Gemini**.
 
-## What this project contains
+## Tech stack
 
-- Next.js 16 app with app router and dashboard pages
-- `src/app/api/*` backend routes for staff, eggs, sales, inventory, health, housing, finance, contacts, CCTV, notifications, and more
-- DB connection in `src/lib/drizzle.ts` using `@libsql/client` and `drizzle-orm`
-- Local SQLite fallback at `src/data/database.sqlite.`
-- Remote SQL support via `DATABASE_URL` and optional `DATABASE_AUTH_TOKEN`
-- Client-side demo login with `pfms_auth` cookie protection
+- **Framework**: Next.js 16 (App Router, Turbopack) + TypeScript
+- **UI**: Tailwind CSS v4, Material UI, Lucide + Iconsax icons, Recharts
+- **Database & Auth**: Supabase PostgreSQL + Supabase Auth, multi-tenant via workspace isolation
+- **Payments**: Paystack (NGN) & Stripe (USD), webhook-based subscription management
+- **PWA**: `@ducanh2912/next-pwa`
+
+## Requirements
+
+- Node.js 20.9+ (Node 22 LTS recommended)
+- A Supabase project (database + auth). See `supabase_subscription_schema.md` for the SQL schema and `DOCUMENTATION.md` for the full developer handbook.
 
 ## Local setup
 
@@ -19,19 +23,22 @@ A Next.js-based poultry farm management dashboard with a backend API and LibSQL/
 npm install
 ```
 
-2. Copy environment variables:
+2. Create your environment file:
 
 ```bash
 cp .env.example .env.local
 ```
 
-3. Update `.env.local` if you want to use a remote SQL database:
+3. Fill in `.env.local`. The minimum you need is a Supabase project:
 
 ```env
-DATABASE_URL=https://<your-libsql-instance>.libsql.net
-DATABASE_AUTH_TOKEN=<your_secret_token>
-DATABASE_DIALECT=turso
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+
+Optional keys for Stripe, Paystack, and the Gemini AI logger can be added later — see `.env.example`.
 
 4. Run the app locally:
 
@@ -41,53 +48,42 @@ npm run dev
 
 Open `http://localhost:3000` in your browser.
 
-## Database notes
+## First-run installation
 
-- The app currently defaults to `file:src/data/database.sqlite` when `DATABASE_URL` is not set.
-- Remote SQL is supported through `DATABASE_URL` in `src/lib/drizzle.ts`.
-- `drizzle.config.ts` also uses the same environment vars for migrations.
+On first launch, visit `/setup` and complete the installation wizard. It provisions the Supabase tables/settings, creates the **Super Admin** account (email + password), and lets you configure your farm name, currency, and payment gateways. After setup completes you will be redirected to log in.
 
-### Test the DB connection
+## Commands
 
 ```bash
-npx tsx -e "import { createClient } from '@libsql/client'; async function main(){ const url=process.env.DATABASE_URL ?? 'file:src/data/database.sqlite'; const auth=process.env.DATABASE_AUTH_TOKEN; const client=createClient({ url, ...(auth?{ authToken: auth }:{} ) }); const res=await client.execute('SELECT 1 AS ok'); console.log('URL=' + url); console.log('AUTH=' + (!!auth)); console.log('RESULT=' + JSON.stringify(res.rows)); await client.close(); } main().catch(err=>{ console.error(err); process.exit(1); });"
+npm run dev      # start the dev server on http://localhost:3000
+npm run build    # production build
+npm run start    # serve the production build
+npm run lint     # run ESLint
 ```
 
 ## Authentication
 
-- The app now uses a server-side auth route at `src/app/api/auth/login/route.ts`.
-- Credentials are configured using environment variables in `.env.local`:
-  - `PFMS_ADMIN_USERNAME` / `PFMS_ADMIN_PASSWORD`
-  - `PFMS_MANAGER_USERNAME` / `PFMS_MANAGER_PASSWORD`
-  - `PFMS_STAFF_USERNAME` / `PFMS_STAFF_PASSWORD`
-- A logout endpoint is available at `POST /api/auth/logout`.
-- Production should still replace these values with a secure identity provider or secure session storage.
-
-## Launch readiness checklist
-
-- [x] App runs locally
-- [x] Backend routes exist
-- [x] DB connection works locally
-- [ ] Configure remote SQL env vars
-- [ ] Run migrations and verify remote schema
-- [ ] Replace demo auth with real authentication
-- [ ] Test production build: `npm run build`
+- Authentication is handled by **Supabase Auth** (email/password).
+- Roles: `SuperAdmin`, `Admin`, `Manager`, `Staff`.
+- `src/proxy.ts` is the Next.js 16 proxy (middleware) file — it redirects unauthenticated visitors to `/login` and injects the user's role/org headers, while API routes and the public `/pay-invoice/:id` page are exempt.
+- API routes resolve the current tenant via `getWorkspaceId()` in `src/lib/workspace.ts`.
 
 ## Deployment
 
+### Docker
+
+See the [Docker deployment](#docker-deployment) section below.
+
 ### Vercel
 
-1. Create a new Vercel project and connect your repo.
-2. Set environment variables in Vercel:
-   - `DATABASE_URL`
-   - `DATABASE_AUTH_TOKEN` (if needed)
-   - `DATABASE_DIALECT=turso`
+1. Create a Vercel project and connect your repo.
+2. Add the environment variables from `.env.example` (Supabase keys are required).
 3. Build command: `npm run build`
 4. Output directory: default (Next.js handles it automatically)
 
 ### Other hosts
 
-- Ensure Node.js 20+ is available.
+- Ensure Node.js 20.9+ is available.
 - Install dependencies with `npm install`.
 - Set the same environment variables used locally.
 - Build with `npm run build`.
@@ -174,7 +170,7 @@ docker compose up -d --build
 
 ## Notes
 
-- This project uses a cookie proxy guard in `src/proxy.ts` to redirect unauthenticated users to `/login`.
-- The `src/lib/drizzle.ts` file is the single DB connection entry point.
-- `src/data/database.sqlite` is the local SQLite fallback file.
+- This project uses the Next.js 16 proxy file convention (`src/proxy.ts`) to redirect unauthenticated users to `/login`.
+- Database access is centralized in `src/lib/supabase.ts` (server, service-role) and `src/lib/supabaseServer.ts` (SSR auth client).
+- See `DOCUMENTATION.md` for the developer architecture handbook and `supabase_subscription_schema.md` for the database schema.
 #

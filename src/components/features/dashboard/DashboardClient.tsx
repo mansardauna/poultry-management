@@ -102,7 +102,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
   useEffect(() => {
     refreshData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const today = new Date();

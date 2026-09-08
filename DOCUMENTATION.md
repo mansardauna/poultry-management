@@ -3,7 +3,7 @@
 > **Version**: 2.0.0-Production  
 > **Framework**: Next.js 16.2.6 (App Router & Turbopack)  
 > **Database & Auth**: Supabase PostgreSQL & Supabase Auth (`@supabase/supabase-js`)  
-> **UI Architecture**: TailwindCSS, Material UI (MUI v6), Lucide Icons, Framer Motion  
+> **UI Architecture**: TailwindCSS, Material UI (MUI v9), Lucide Icons, Framer Motion  
 > **Payment Gateways**: Paystack (NGN/Local) & Stripe (USD/Global)  
 
 ---
@@ -69,7 +69,7 @@ PFMS enforces strict Role-Based Access Control (RBAC) across 4 distinct user tie
 | :--- | :---: | :---: | :---: | :---: |
 | **Super Admin Control Center** | ✅ Exclusive Access | ❌ Hidden | ❌ Hidden | ❌ Hidden |
 | **CMS & SaaS Plan Configurator** | ✅ Exclusive Access | ❌ Hidden | ❌ Hidden | ❌ Hidden |
-| **Dashboard Analytics & KPIs** | ❌ (Redirected to `/admin`) | ✅ Full Access | ✅ Operations View | ❌ Restracted |
+| **Dashboard Analytics & KPIs** | ❌ (Redirected to `/admin`) | ✅ Full Access | ✅ Operations View | ❌ Restricted |
 | **Flock Batches & Mortality** | ❌ Hidden | ✅ Full Access | ✅ Operational Log | ✅ Daily Log Entry |
 | **Egg Production & Grading** | ❌ Hidden | ✅ Full Access | ✅ Operational Log | ✅ Daily Log Entry |
 | **Feed Inventory & Thresholds**| ❌ Hidden | ✅ Full Access | ✅ Operational Log | ✅ Daily Log Entry |
