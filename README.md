@@ -93,6 +93,85 @@ npx tsx -e "import { createClient } from '@libsql/client'; async function main()
 - Build with `npm run build`.
 - Start with `npm run start`.
 
+## Docker deployment
+
+A `Dockerfile` is included for containerized production deployment.
+
+### Prerequisites
+
+- Docker (with BuildKit enabled, which is the default on modern Docker versions)
+- A Supabase project (database + auth) and any optional third-party keys (Stripe, Paystack, Gemini)
+
+### Build the image
+
+```bash
+docker build -t pms:latest .
+```
+
+### Run with environment variables
+
+Pass the same environment variables the app needs at runtime, e.g.:
+
+```bash
+docker run -d \
+  --name pms \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co \
+  -e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your-anon-key> \
+  -e SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key> \
+  -e NEXT_PUBLIC_SITE_URL=http://localhost:3000 \
+  -e NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=<key> \
+  -e STRIPE_SECRET_KEY=<key> \
+  -e STRIPE_WEBHOOK_SECRET=<secret> \
+  -e STRIPE_PRO_MONTHLY_PRICE_ID=<id> \
+  -e STRIPE_PRO_ANNUAL_PRICE_ID=<id> \
+  -e NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=<key> \
+  -e PAYSTACK_SECRET_KEY=<key> \
+  -e GEMINI_API_KEY=<key> \
+  pms:latest
+```
+
+> Any variable you don't use (e.g. Stripe/Paystack/Gemini) can be omitted.
+
+### Use a `.env` file
+
+Instead of a long `-e` list, put your variables in a `.env` file and pass it to the container:
+
+```bash
+docker run -d --name pms -p 3000:3000 --env-file .env pms:latest
+```
+
+### docker-compose
+
+Example `docker-compose.yml`:
+
+```yaml
+services:
+  pms:
+    build: .
+    image: pms:latest
+    container_name: pms
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+```
+
+Start it with:
+
+```bash
+docker compose up -d --build
+```
+
+### Notes
+
+- The container listens on port `3000` and serves the production build (`next start`).
+- The image runs as a non-root `nextjs` user (uid 1001) by default.
+- Environment variables are injected at runtime; the build stage does not require them.
+- The app requires a Supabase project at runtime — see the deployment section of `DOCUMENTATION.md` for the full list of supported variables.
+
 ## Notes
 
 - This project uses a cookie proxy guard in `src/proxy.ts` to redirect unauthenticated users to `/login`.
