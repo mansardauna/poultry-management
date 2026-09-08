@@ -1,0 +1,101 @@
+# Poultry Management System
+
+A Next.js-based poultry farm management dashboard with a backend API and LibSQL/SQLite support.
+
+## What this project contains
+
+- Next.js 16 app with app router and dashboard pages
+- `src/app/api/*` backend routes for staff, eggs, sales, inventory, health, housing, finance, contacts, CCTV, notifications, and more
+- DB connection in `src/lib/drizzle.ts` using `@libsql/client` and `drizzle-orm`
+- Local SQLite fallback at `src/data/database.sqlite.`
+- Remote SQL support via `DATABASE_URL` and optional `DATABASE_AUTH_TOKEN`
+- Client-side demo login with `pfms_auth` cookie protection
+
+## Local setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy environment variables:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Update `.env.local` if you want to use a remote SQL database:
+
+```env
+DATABASE_URL=https://<your-libsql-instance>.libsql.net
+DATABASE_AUTH_TOKEN=<your_secret_token>
+DATABASE_DIALECT=turso
+```
+
+4. Run the app locally:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000` in your browser.
+
+## Database notes
+
+- The app currently defaults to `file:src/data/database.sqlite` when `DATABASE_URL` is not set.
+- Remote SQL is supported through `DATABASE_URL` in `src/lib/drizzle.ts`.
+- `drizzle.config.ts` also uses the same environment vars for migrations.
+
+### Test the DB connection
+
+```bash
+npx tsx -e "import { createClient } from '@libsql/client'; async function main(){ const url=process.env.DATABASE_URL ?? 'file:src/data/database.sqlite'; const auth=process.env.DATABASE_AUTH_TOKEN; const client=createClient({ url, ...(auth?{ authToken: auth }:{} ) }); const res=await client.execute('SELECT 1 AS ok'); console.log('URL=' + url); console.log('AUTH=' + (!!auth)); console.log('RESULT=' + JSON.stringify(res.rows)); await client.close(); } main().catch(err=>{ console.error(err); process.exit(1); });"
+```
+
+## Authentication
+
+- The app now uses a server-side auth route at `src/app/api/auth/login/route.ts`.
+- Credentials are configured using environment variables in `.env.local`:
+  - `PFMS_ADMIN_USERNAME` / `PFMS_ADMIN_PASSWORD`
+  - `PFMS_MANAGER_USERNAME` / `PFMS_MANAGER_PASSWORD`
+  - `PFMS_STAFF_USERNAME` / `PFMS_STAFF_PASSWORD`
+- A logout endpoint is available at `POST /api/auth/logout`.
+- Production should still replace these values with a secure identity provider or secure session storage.
+
+## Launch readiness checklist
+
+- [x] App runs locally
+- [x] Backend routes exist
+- [x] DB connection works locally
+- [ ] Configure remote SQL env vars
+- [ ] Run migrations and verify remote schema
+- [ ] Replace demo auth with real authentication
+- [ ] Test production build: `npm run build`
+
+## Deployment
+
+### Vercel
+
+1. Create a new Vercel project and connect your repo.
+2. Set environment variables in Vercel:
+   - `DATABASE_URL`
+   - `DATABASE_AUTH_TOKEN` (if needed)
+   - `DATABASE_DIALECT=turso`
+3. Build command: `npm run build`
+4. Output directory: default (Next.js handles it automatically)
+
+### Other hosts
+
+- Ensure Node.js 20+ is available.
+- Install dependencies with `npm install`.
+- Set the same environment variables used locally.
+- Build with `npm run build`.
+- Start with `npm run start`.
+
+## Notes
+
+- This project uses a cookie proxy guard in `src/proxy.ts` to redirect unauthenticated users to `/login`.
+- The `src/lib/drizzle.ts` file is the single DB connection entry point.
+- `src/data/database.sqlite` is the local SQLite fallback file.
+#

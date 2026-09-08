@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poultry Management System - Usage Guide</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --secondary: #10b981;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 280px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar h2 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* Main Content Styling */
+        .content {
+            margin-left: 280px;
+            padding: 3rem 4rem;
+            max-width: 1000px;
+            flex: 1;
+        }
+
+        .header-banner {
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            padding: 3rem;
+            border-radius: 1rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-banner h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-banner p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .section {
+            background-color: var(--surface);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            scroll-margin-top: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.75rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .section p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background-color: var(--background);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <h2>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            </svg>
+            PMS Guide
+        </h2>
+        <ul class="sidebar-nav">
+            <li><a href="#getting-started" class="active">Getting Started</a></li>
+            <li><a href="#dashboard">Dashboard</a></li>
+            <li><a href="#chickens">Flock Management</a></li>
+            <li><a href="#eggs">Egg Production</a></li>
+            <li><a href="#feed">Feed & Inventory</a></li>
+            <li><a href="#finance">Financial Tracking</a></li>
+            <li><a href="#health">Health & CCTV</a></li>
+            <li><a href="#staff">Staff & Contacts</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+        <div class="header-banner">
+            <h1>Poultry Management System</h1>
+            <p>Comprehensive Usage Guide for the Web Version</p>
+        </div>
+
+        <!-- Getting Started -->
+        <section id="getting-started" class="section">
+            <h2>Getting Started</h2>
+            <p>Welcome to the Poultry Management System! This guide will walk you through the core functionalities of the application, helping you to efficiently manage your farm's daily operations.</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Navigation</h3>
+                    <p>Use the left-hand sidebar to navigate between different modules like Dashboard, Flocks, Eggs, and Finance.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Workspaces</h3>
+                    <p>If you manage multiple farms, you can switch between them using the Workspace switcher in the top navigation bar.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="section">
+            <h2>Dashboard</h2>
+            <p>The Dashboard provides a high-level, real-time overview of your farm's performance.</p>
+            <ul>
+                <li><strong>Key Metrics:</strong> View total active birds, daily egg production rates, and recent feed consumption.</li>
+                <li><strong>Financial Summary:</strong> Quickly check revenue vs. expenses for the current month.</li>
+                <li><strong>Quick Actions:</strong> Use the dashboard shortcuts to log eggs or feed quickly without navigating away.</li>
+            </ul>
+        </section>
+
+        <!-- Flock Management -->
+        <section id="chickens" class="section">
+            <h2>Flock (Chicken) Management</h2>
+            <p>Keep a detailed record of your birds, organized by batches or houses.</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Add a Batch</h3>
+                    <p>Click "Add Batch" to register a new group of day-old chicks or pullets. Specify breed, quantity, and arrival date.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Mortality Logging</h3>
+                    <p>Record daily mortality to keep your live bird count accurate, which automatically adjusts feed calculation needs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Egg Production -->
+        <section id="eggs" class="section">
+            <h2>Egg Production Tracking</h2>
+            <p>Monitor your daily collection to ensure optimal laying percentages.</p>
+            <ul>
+                <li><strong>Log Collection:</strong> Enter the number of good eggs, cracked, and broken eggs daily.</li>
+                <li><strong>Production Rate:</strong> The system automatically calculates the laying percentage based on your active bird count.</li>
+                <li><strong>Grading:</strong> Categorize eggs by size (Small, Medium, Jumbo) for better pricing.</li>
+            </ul>
+        </section>
+
+        <!-- Feed & Inventory -->
+        <section id="feed" class="section">
+            <h2>Feed & Inventory Management</h2>
+            <p>Never run out of essential supplies with automated tracking.</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Feed Consumption</h3>
+                    <p>Log daily feed given to each batch. The system tracks grams per bird to help spot underfeeding or waste.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Inventory Alerts</h3>
+                    <p>Set low-stock thresholds for feed types and medications. The system will alert you when it's time to reorder.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Finance -->
+        <section id="finance" class="section">
+            <h2>Financial Tracking & Sales</h2>
+            <p>Manage your farm's profitability with integrated accounting.</p>
+            <ul>
+                <li><strong>Record Sales:</strong> Log sales of eggs, mature birds, or manure. Generate invoices for your customers.</li>
+                <li><strong>Track Expenses:</strong> Record purchases of feed, medication, equipment, and staff salaries.</li>
+                <li><strong>Profit/Loss Reports:</strong> Generate automated P&L statements over custom date ranges.</li>
+            </ul>
+        </section>
+
+        <!-- Health & CCTV -->
+        <section id="health" class="section">
+            <h2>Health Records & CCTV</h2>
+            <p>Ensure bio-security and bird welfare.</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Vaccination Schedule</h3>
+                    <p>Log administered vaccines and set reminders for upcoming boosters.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>CCTV Monitoring</h3>
+                    <p>If integrated, view live feeds from your poultry houses directly from the dashboard to monitor bird behavior remotely.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Staff -->
+        <section id="staff" class="section">
+            <h2>Staff & Contact Management</h2>
+            <p>Organize your team and external relationships.</p>
+            <ul>
+                <li><strong>Staff Directory:</strong> Keep track of employees, their roles, and attendance.</li>
+                <li><strong>Contacts:</strong> Maintain a database of your suppliers (feed, meds) and regular customers for quick access during sales.</li>
+            </ul>
+        </section>
+        
+    </main></div>
+
+<script>
+    'use strict';
+    // Simple smooth scrolling and active state toggling
+    document.querySelectorAll('.sidebar-nav a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>

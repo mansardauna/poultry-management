@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMS Guide - Easy Setup & Initial Configuration</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.65;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .nav-active {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            font-weight: 700;
+        }
+        .click-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #059669;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
+            line-height: 1;
+            margin-right: 6px;
+        }
+        .step-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background-color: #6366f1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="scrollbar-custom bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        
+        <!-- Left Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-white border-r border-slate-200/80 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block shrink-0">
+            <!-- Brand Header -->
+            <div class="flex items-center gap-2.5 mb-8">
+                <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">P</div>
+                <span class="font-extrabold text-lg tracking-tight text-indigo-700">PMS Guide</span>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
+                <a href="#wizard-guide" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
+                    4-Step Setup Wizard
+                </a>
+            </nav>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 space-y-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Directory</span>
+                <a href="/documentation/index.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">← Back to Directory</a>
+                <a href="/documentation/administration-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Admin Guide →</a>
+                <a href="/documentation/usage-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Usage Guide →</a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-8">
+            
+            <!-- Hero Banner Box -->
+            <div class="bg-gradient-to-r from-emerald-600 via-emerald-600 to-indigo-600 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Easy Setup & Initial Farm Setup
+                </h1>
+                <p class="text-sm md:text-base text-emerald-100 font-medium">
+                    Visual Setup Instructions with Circled Button Screenshots
+                </p>
+            </div>
+
+            <!-- WIZARD GUIDE -->
+            <div id="wizard-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded">Onboarding</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">4-Step Guided Setup Wizard</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Follow the red target badges on the screenshots below.</p>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Sign Up' to Register</strong>
+                            Click the purple <strong>Sign Up Free</strong> button at the top right of the screen.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Screenshot for Sign Up -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/signup_page.png" alt="Registration Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Click Sign Up Free
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Registration screen click location.</p>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium pt-4">
+                    <div class="flex items-start gap-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-emerald-950 font-bold block text-sm mb-1">Click 'Log In' to Access Workspace</strong>
+                            Input your farm admin credentials and click the purple <strong>Log In</strong> button.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Screenshot for Log In -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/login_page.png" alt="Login Portal Screenshot" class="w-full h-auto object-cover" />
+                        <div class="absolute bottom-6 right-12 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Click Log In
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.2: Login portal click target.</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
+                <p>&copy; 2026 Poultry Management System (PMS). Setup Guide.</p>
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>

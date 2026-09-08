@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMS Guide - Admin & Super Admin Governance Manual</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.65;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .nav-active {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            font-weight: 700;
+        }
+        .click-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #ef4444;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+            line-height: 1;
+            margin-right: 6px;
+        }
+        .click-badge-purple {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: #9333ea;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.25);
+            line-height: 1;
+            margin-right: 6px;
+        }
+        .step-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background-color: #6366f1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="scrollbar-custom bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        
+        <!-- Left Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-white border-r border-slate-200/80 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block shrink-0">
+            <!-- Brand Header -->
+            <div class="flex items-center gap-2.5 mb-8">
+                <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">P</div>
+                <span class="font-extrabold text-lg tracking-tight text-indigo-700">PMS Guide</span>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
+                <a href="#admin-overview" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
+                    Admin Capabilities Overview
+                </a>
+                <a href="#add-staff-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    1. Adding & Managing Staff
+                </a>
+                <a href="#payroll-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    2. Finance & Payroll
+                </a>
+                <a href="#sales-admin-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    3. Sales & Merchant Invoices
+                </a>
+                <a href="#health-admin-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    4. Health & Vaccination
+                </a>
+                <a href="#enterprise-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
+                    5. Multi-Branch Enterprise
+                </a>
+                <a href="#superadmin-onboarding" class="flex items-center px-3 py-2.5 rounded-lg font-bold text-purple-700 bg-purple-50 transition-all mt-4">
+                    Super Admin Portal & CMS
+                </a>
+                <a href="/documentation/superadmin-setup-guide.html" class="flex items-center px-3 py-2.5 rounded-lg font-bold text-purple-900 bg-purple-100 hover:bg-purple-200 transition-all">
+                    Super Admin Setup Guide →
+                </a>
+            </nav>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 space-y-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Directory</span>
+                <a href="/documentation/index.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">← Back to Directory</a>
+                <a href="/documentation/usage-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Staff Usage Guide →</a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-8">
+            
+            <!-- Hero Banner Box -->
+            <div class="bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-widest">
+                    Admin & Super Admin Governance Manual
+                </div>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Farm Owner, Admin & Super Admin Governance Guide
+                </h1>
+                <p class="text-sm md:text-base text-purple-100 font-medium">
+                    Step-by-step instructions for adding staff, approving payroll, managing multi-branches, and Superadmin SaaS portal.
+                </p>
+            </div>
+
+            <!-- ADMIN CAPABILITIES OVERVIEW -->
+            <div id="admin-overview" class="step-box space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-100 px-2.5 py-1 rounded">Admin Privileges</span>
+                    <h2 class="text-xl font-extrabold text-slate-900 mt-2">What an Admin Can Do (That Staff Cannot)</h2>
+                </div>
+                <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
+                    As a <strong>Farm Admin</strong> or <strong>Business Owner</strong>, you have full control over your farm workspace. Unlike regular Staff members who can only enter daily counts, Admins can add and delete workers, assign passwords, approve salary payroll, manage customer invoicing, configure payment gateways, and manage multi-farm branches.
+                </p>
+            </div>
+
+            <!-- ADMIN TASK 1: ADDING STAFF MEMBERS -->
+            <div id="add-staff-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Admin Action 1</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Add & Manage Staff Workers</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Staff Management' on Left Menu</strong>
+                            Look at your left sidebar menu and click <strong>Staff Management</strong>.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click '+ Add New Staff' Button</strong>
+                            Click the purple button marked <strong>+ Add New Staff</strong> at the top right corner.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge">3</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Enter Details & Assign Role</strong>
+                            Type worker's name, email, assign their role (Admin, Manager, or Staff), set initial password, and click <strong>Save Staff Member</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_staff.png" alt="Staff Management Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Click + Add New Staff
+                        </div>
+                        <div class="absolute top-36 left-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Staff Management Menu
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Live Staff Management screen for adding workers and setting roles.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN TASK 2: FINANCE & PAYROLL -->
+            <div id="payroll-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Admin Action 2</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Finance Ledgers & 1-Click Staff Payroll</h2>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Financial Tracking'</strong>
+                            Click <strong>Financial Tracking</strong> on the left sidebar.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-purple-50/50 p-4 rounded-xl border border-purple-100/80">
+                        <span class="click-badge">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Click 'Process Payroll'</strong>
+                            Review monthly expense ledgers and click <strong>Process 1-Click Payroll</strong> to record staff salary disbursements.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_finance.png" alt="Financial Ledger Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Click Process Payroll
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 2.1: Live Finance & Payroll Ledger screen.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN TASK 3: SALES & MERCHANT INVOICES -->
+            <div id="sales-admin-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Admin Action 3</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Customer Sales & Merchant Gateways</h2>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_sales.png" alt="Sales Orders Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Click + Record Sale
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 3.1: Live Sales & Invoice Management screen.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN TASK 4: HEALTH VACCINATIONS -->
+            <div id="health-admin-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Admin Action 4</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Flock Vaccination & Vet Schedules</h2>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_health.png" alt="Health & Vaccines Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Health Vaccination Schedule
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 4.1: Live Health & Vaccination protocol screen.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN TASK 5: ENTERPRISE HUB -->
+            <div id="enterprise-guide" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-purple-700 uppercase tracking-widest bg-purple-50 px-2.5 py-1 rounded">Admin Action 5</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Multi-Branch Enterprise Matrix</h2>
+                </div>
+
+                <!-- REAL SCREENSHOT -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_enterprise.png" alt="Enterprise Matrix Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                            Multi-Branch Control
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 5.1: Multi-Branch Farm Matrix screen.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 2: SUPER ADMIN ONBOARDING & GOVERNANCE GUIDE -->
+            <div id="superadmin-onboarding" class="step-box space-y-6 scroll-mt-6 border-2 border-purple-500 bg-purple-50/20">
+                <div class="border-b border-purple-200 pb-4">
+                    <span class="text-xs font-extrabold text-white bg-purple-700 px-3 py-1 rounded-full uppercase tracking-wider">Super Admin Portal Guide</span>
+                    <h2 class="text-2xl font-extrabold text-purple-950 mt-2">Super Admin SaaS Onboarding & Platform Governance</h2>
+                    <p class="text-xs text-purple-800 font-medium mt-1">Dedicated 4-step onboarding guide for Platform Owners & Super Administrators (`owner@poultry.com`).</p>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                    <div class="flex items-start gap-3 bg-white p-4 rounded-xl border border-purple-200 shadow-sm">
+                        <span class="click-badge-purple">1</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Step 1: Super Admin Registration & Login</strong>
+                            Click <strong>Sign Up Free</strong> or <strong>Log In</strong> using your master superadmin account (`owner@poultry.com`).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCREENSHOT FOR SUPERADMIN LOGIN -->
+                <div class="pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_signup.png" alt="Registration Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-1.5 bg-purple-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-white">
+                            <span class="w-3.5 h-3.5 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[9px]">1</span>
+                            Sign Up Master Account
+                        </div>
+                    </div>
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_login.png" alt="Login Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute bottom-4 right-8 flex items-center gap-1.5 bg-purple-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-white">
+                            <span class="w-3.5 h-3.5 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[9px]">1</span>
+                            Log In Superadmin
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium pt-4">
+                    <div class="flex items-start gap-3 bg-white p-4 rounded-xl border border-purple-200 shadow-sm">
+                        <span class="click-badge-purple">2</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Step 2: Access Super Admin CMS & SaaS Tenant Matrix</strong>
+                            Click the purple <strong>Super Admin CMS</strong> button on the top navigation bar to manage all tenant farm accounts, track MRR subscriptions, and approve plan upgrades.
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-white p-4 rounded-xl border border-purple-200 shadow-sm">
+                        <span class="click-badge-purple">3</span>
+                        <div>
+                            <strong class="text-purple-950 font-bold block text-sm mb-1">Step 3: Edit Homepage Content & Pricing Tiers</strong>
+                            Click <strong>CMS Editor</strong> to update public hero headlines, pricing cards (Starter ₦0, Pro ₦15k, Enterprise ₦45k), and customer support settings.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCREENSHOT FOR SUPERADMIN CMS -->
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_admin.png" alt="Super Admin CMS Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-purple-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
+                            <span class="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                            Super Admin CMS Portal
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure S.1: Live Super Admin CMS Portal for SaaS tenant & content governance.</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
+                <p>&copy; 2026 Poultry Management System (PMS). Admin & Super Admin Governance Manual.</p>
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>
