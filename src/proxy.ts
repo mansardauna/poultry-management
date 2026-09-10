@@ -34,6 +34,7 @@ export async function proxy(request: NextRequest) {
     '/', 
     '/login', 
     '/signup', 
+    '/setup', 
     '/pricing', 
     '/about', 
     '/contact', 
