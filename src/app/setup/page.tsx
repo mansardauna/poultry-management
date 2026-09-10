@@ -1,8 +1,7 @@
 'use strict';
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   Database, 
@@ -25,16 +24,13 @@ import {
 import toast from 'react-hot-toast';
 
 export default function SetupWizardPage() {
-  const router = useRouter();
-
   const [currentStep, setCurrentStep] = useState(1);
-  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDbTesting, setIsDbTesting] = useState(false);
   const [dbStatus, setDbStatus] = useState<{ connected: boolean; message: string } | null>(null);
 
   // Database Type Selector State
-  const [databaseType, setDatabaseType] = useState<'supabase' | 'postgres' | 'mysql'>('supabase');
+  const [databaseType, setDatabaseType] = useState<'supabase' | 'postgres' | 'mysql'>('mysql');
 
   // Postgres Fields State
   const [postgresHost, setPostgresHost] = useState('localhost');
@@ -72,79 +68,55 @@ export default function SetupWizardPage() {
   const [enterprisePriceMonthly, setEnterprisePriceMonthly] = useState(45000);
   const [enterprisePriceAnnual, setEnterprisePriceAnnual] = useState(432000);
 
-  // 1. Automatic Real-Time Database Connection Test
-  const testDatabaseConnectionAuto = async (isInitialLoad = false) => {
+  // Runs the database connection check against the deployed backend config.
+  // Triggered only when the user leaves the DB step (Next), never on page load.
+  const runDatabaseCheck = async (): Promise<boolean> => {
     setIsDbTesting(true);
     try {
       const res = await fetch('/api/setup');
       const data = await res.json();
-
-      if (data.isDatabaseConnected) {
-        setDbStatus({ connected: true, message: 'Database connection verified 100%! Connection is live.' });
-      } else {
-        setDbStatus({ 
-          connected: false, 
-          message: data.error || 'Database connection check failed. Please verify environment credentials.' 
-        });
-      }
-
+      const connected = Boolean(data.isDatabaseConnected);
+      setDbStatus({
+        connected,
+        message: connected
+          ? 'Database connection verified — connection is live.'
+          : data.error || 'Database connection check failed. Please verify your environment credentials.',
+      });
       if (data.superAdminEmail) {
         setSuperAdminEmail(data.superAdminEmail);
       }
-
-      if (data.databaseConfig) {
-        const dbConf = data.databaseConfig;
-        if (isInitialLoad && dbConf.databaseType) setDatabaseType(dbConf.databaseType);
-        if (dbConf.postgresHost) setPostgresHost(dbConf.postgresHost);
-        if (dbConf.postgresPort) setPostgresPort(dbConf.postgresPort);
-        if (dbConf.postgresDb) setPostgresDb(dbConf.postgresDb);
-        if (dbConf.postgresUser) setPostgresUser(dbConf.postgresUser);
-        if (dbConf.mysqlHost) setMysqlHost(dbConf.mysqlHost);
-        if (dbConf.mysqlPort) setMysqlPort(dbConf.mysqlPort);
-        if (dbConf.mysqlDatabase) setMysqlDatabase(dbConf.mysqlDatabase);
-        if (dbConf.mysqlUser) setMysqlUser(dbConf.mysqlUser);
-      }
-
-      if (data.gateways) {
-        const g = data.gateways;
-        if (g.platformName) setPlatformName(g.platformName);
-        if (g.currencySymbol) setCurrencySymbol(g.currencySymbol);
-        if (g.fromEmail) setFromEmail(g.fromEmail);
-        if (g.paystackPublicKey) setPaystackPublicKey(g.paystackPublicKey);
-        if (g.paystackSecretKey) setPaystackSecretKey(g.paystackSecretKey);
-        if (g.stripePublicKey) setStripePublicKey(g.stripePublicKey);
-        if (g.stripeSecretKey) setStripeSecretKey(g.stripeSecretKey);
-        if (g.stripeWebhookSecret) setStripeWebhookSecret(g.stripeWebhookSecret);
-        if (g.resendApiKey) setResendApiKey(g.resendApiKey);
-        if (g.proPriceMonthly) setProPriceMonthly(g.proPriceMonthly);
-        if (g.proPriceAnnual) setProPriceAnnual(g.proPriceAnnual);
-        if (g.enterprisePriceMonthly) setEnterprisePriceMonthly(g.enterprisePriceMonthly);
-        if (g.enterprisePriceAnnual) setEnterprisePriceAnnual(g.enterprisePriceAnnual);
-      }
+      return connected;
     } catch (_e) {
       setDbStatus({ connected: false, message: 'Unable to test database connection.' });
+      return false;
     } finally {
       setIsDbTesting(false);
-      setIsLoadingStatus(false);
     }
   };
 
-  // Run automatic database connection check on initial mount only
-  useEffect(() => {
-    testDatabaseConnectionAuto(true);
-  }, []);
-
   const handleSelectDatabaseType = (type: 'supabase' | 'postgres' | 'mysql') => {
     setDatabaseType(type);
-    // Standard Postgres / MySQL connect locally, so we update status message cleanly
-    if (type === 'postgres' || type === 'mysql') {
-      setDbStatus({ 
-        connected: true, 
-        message: `${type === 'postgres' ? 'PostgreSQL' : 'MySQL'} driver selected. Connection parameters configured.` 
+    if (dbStatus) {
+      setDbStatus({
+        connected: false,
+        message: 'Database selection changed — click Next to re-test the connection.',
       });
-    } else {
-      testDatabaseConnectionAuto(false);
     }
+  };
+
+  // Advances the wizard; database configuration is validated when leaving Step 1.
+  const handleContinue = async () => {
+    if (currentStep === 1) {
+      if (isDbTesting) {
+        return;
+      }
+      const ok = await runDatabaseCheck();
+      if (!ok) {
+        toast.error('Database configuration failed the connection test. Please verify your credentials and try again.');
+        return;
+      }
+    }
+    setCurrentStep(prev => Math.min(4, prev + 1));
   };
 
   const handleCompleteSetup = async () => {
@@ -301,21 +273,21 @@ export default function SetupWizardPage() {
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div
-                    onClick={() => handleSelectDatabaseType('supabase')}
+                    onClick={() => handleSelectDatabaseType('mysql')}
                     className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
-                      databaseType === 'supabase'
+                      databaseType === 'mysql'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
                         : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-emerald-600">
-                        ⚡ Supabase
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-blue-600">
+                        🐬 MySQL / MariaDB
                       </span>
-                      {databaseType === 'supabase' && <CheckCircle2 size={16} className="text-indigo-600" />}
+                      {databaseType === 'mysql' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
                     <p className="text-[11px] text-slate-500 font-medium leading-tight">
-                      Cloud PostgreSQL DB with Auth & Storage API built-in.
+                      Standard MySQL 8.0, MariaDB, PlanetScale, or AWS RDS.
                     </p>
                   </div>
 
@@ -339,21 +311,21 @@ export default function SetupWizardPage() {
                   </div>
 
                   <div
-                    onClick={() => handleSelectDatabaseType('mysql')}
+                    onClick={() => handleSelectDatabaseType('supabase')}
                     className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
-                      databaseType === 'mysql'
+                      databaseType === 'supabase'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
                         : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-blue-600">
-                        🐬 MySQL / MariaDB
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-emerald-600">
+                        ⚡ Supabase
                       </span>
-                      {databaseType === 'mysql' && <CheckCircle2 size={16} className="text-indigo-600" />}
+                      {databaseType === 'supabase' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
                     <p className="text-[11px] text-slate-500 font-medium leading-tight">
-                      Standard MySQL 8.0, MariaDB, PlanetScale, or AWS RDS.
+                      Cloud PostgreSQL DB with Auth & Storage API built-in.
                     </p>
                   </div>
                 </div>
@@ -515,7 +487,7 @@ export default function SetupWizardPage() {
                     </div>
 
                     <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white border border-slate-200">
-                      {isDbTesting ? 'Testing Auto…' : 'Real-Time Auto Check'}
+                      {isDbTesting ? 'Testing…' : 'Connection Status'}
                     </span>
                   </div>
                 )}
@@ -891,17 +863,11 @@ export default function SetupWizardPage() {
 
             {currentStep < 4 ? (
               <button
-                onClick={() => {
-                  if (currentStep === 1 && !dbStatus?.connected) {
-                    toast.error('Database connection test must pass clean before proceeding to Step 2.');
-                    return;
-                  }
-                  setCurrentStep(prev => Math.min(4, prev + 1));
-                }}
-                disabled={currentStep === 1 && !dbStatus?.connected}
+                onClick={handleContinue}
+                disabled={isDbTesting || isSubmitting}
                 className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm"
               >
-                <span>Continue to Step {currentStep + 1}</span>
+                <span>{currentStep === 1 && isDbTesting ? 'Testing Database…' : `Continue to Step ${currentStep + 1}`}</span>
                 <ArrowRight size={16} />
               </button>
             ) : (
