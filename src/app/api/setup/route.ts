@@ -1,7 +1,8 @@
 'use strict';
 
 import { NextResponse } from 'next/server';
-import { supabase as serviceRoleClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { supabase as envServiceRoleClient } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 
 /**
@@ -10,7 +11,7 @@ import { getAuthUser } from '@/lib/auth';
 export async function GET() {
   try {
     // 1. Verify database connection
-    const { data: dbCheck, error: dbError } = await serviceRoleClient
+    const { data: dbCheck, error: dbError } = await envServiceRoleClient
       .from('systemSettings')
       .select('id')
       .limit(1);
@@ -18,7 +19,7 @@ export async function GET() {
     const isDatabaseConnected = !dbError;
 
     // 2. Fetch existing Gateway Configurations
-    const { data: gatewayData } = await serviceRoleClient
+    const { data: gatewayData } = await envServiceRoleClient
       .from('systemSettings')
       .select('adminName')
       .eq('id', 'gateways_config')
@@ -49,7 +50,7 @@ export async function GET() {
     }
 
     // 3. Fetch Database Driver Configuration
-    const { data: dbDriverData } = await serviceRoleClient
+    const { data: dbDriverData } = await envServiceRoleClient
       .from('systemSettings')
       .select('adminName')
       .eq('id', 'database_config')
@@ -75,7 +76,7 @@ export async function GET() {
     }
 
     // 4. Check Super Admin exists
-    const { data: superAdmin } = await serviceRoleClient
+    const { data: superAdmin } = await envServiceRoleClient
       .from('users')
       .select('id, username, email, role')
       .or('role.eq.SuperAdmin,username.eq.superadmin@pfms.com,email.eq.owner@poultry.com')
@@ -163,6 +164,69 @@ export async function POST(request: Request) {
       );
     }
 
+    const cleanEmail = superAdminEmail.trim().toLowerCase();
+    const engine = databaseType === 'mysql' || databaseType === 'postgres' ? databaseType : 'supabase';
+
+    // ---- Local database install (MySQL / PostgreSQL): fully independent of Supabase ----
+    if (engine !== 'supabase') {
+      try {
+        const { ensureAuthSchema, upsertSuperAdmin, saveDatabaseConfig, resetDatabaseConfigCache } =
+          await import('@/lib/authdb');
+
+        const dbHost = engine === 'mysql' ? mysqlHost.trim() : postgresHost.trim();
+        const dbName = engine === 'mysql' ? mysqlDatabase.trim() : postgresDb.trim();
+        const dbUser = engine === 'mysql' ? mysqlUser.trim() : postgresUser.trim();
+        const dbPassword = engine === 'mysql' ? mysqlPassword || '' : postgresPassword || '';
+
+        if (!dbHost || !dbName || !dbUser) {
+          return NextResponse.json(
+            { error: `${engine === 'mysql' ? 'MySQL' : 'PostgreSQL'} connection details are required in the Database step.` },
+            { status: 400 }
+          );
+        }
+
+        const localConfig = engine === 'mysql'
+          ? {
+              engine: 'mysql' as const,
+              mysql: { host: dbHost, port: Number(mysqlPort), database: dbName, user: dbUser, password: dbPassword },
+            }
+          : {
+              engine: 'postgres' as const,
+              postgres: { host: dbHost, port: Number(postgresPort), database: dbName, user: dbUser, password: dbPassword },
+            };
+
+        await ensureAuthSchema(localConfig);
+        await upsertSuperAdmin(localConfig, cleanEmail, superAdminPassword);
+        await saveDatabaseConfig(localConfig);
+        resetDatabaseConfigCache();
+
+        const localResponse = NextResponse.json({
+          success: true,
+          message: 'Platform Installation & Setup Completed Successfully!',
+          superAdminEmail: cleanEmail,
+          loginUrl: '/login',
+          dashboardUrl: '/dashboard/admin',
+        });
+        localResponse.cookies.set('pfms_installation_completed', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+        localResponse.cookies.set('pms_db_mode', '1', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+        return localResponse;
+      } catch (err: unknown) {
+        console.error('Local Database Setup Error:', err);
+        return NextResponse.json(
+          { error: err instanceof Error ? err.message : 'Installation failed while configuring the local database.' },
+          { status: 500 }
+        );
+      }
+    }
+
+    const supabaseUrlValue = supabaseUrl.trim();
+    const supabaseRoleKeyValue = supabaseServiceRoleKey.trim();
+
+    // Prefer the wizard-provided credentials; fall back to the .env client otherwise.
+    const serviceRoleClient = supabaseUrlValue && supabaseRoleKeyValue
+      ? createClient(supabaseUrlValue, supabaseRoleKeyValue, { auth: { persistSession: false } })
+      : envServiceRoleClient;
+
     // Once installation has completed, only an authenticated Super Admin may re-run it.
     // This prevents unauthenticated callers from resetting the Super Admin credentials.
     const { data: existingConfig } = await serviceRoleClient
@@ -198,7 +262,6 @@ export async function POST(request: Request) {
 
     // 1. Provision / Update Super Admin in Auth
     let userId = '';
-    const cleanEmail = superAdminEmail.trim().toLowerCase();
 
     try {
       const { data: usersData } = await serviceRoleClient.auth.admin.listUsers();

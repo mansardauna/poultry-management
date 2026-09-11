@@ -405,7 +405,7 @@ export default function SetupWizardPage() {
                 </h4>
 
                 {databaseType === 'supabase' && (
-                  <div className="space-y-3">
+                <div className="space-y-3">
                     <p className="text-xs text-slate-500 font-medium">
                       Enter your Supabase Project details — the credentials you provide here are tested directly.
                     </p>

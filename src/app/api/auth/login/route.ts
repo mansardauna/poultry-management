@@ -17,6 +17,42 @@ export async function POST(request: Request) {
     );
   }
 
+  const { isSupabaseMode, loadDatabaseConfig, findUserByLogin, verifyPassword, ensureAuthSchema, createSession } =
+    await import('@/lib/authdb');
+
+  // Local mode: authenticates entirely against the wizard-selected MySQL/Postgres DB.
+  if (!(await isSupabaseMode())) {
+    const cfg = await loadDatabaseConfig();
+    if (!cfg) {
+      return NextResponse.json(
+        { error: 'No database configured. Please complete the setup wizard first.' },
+        { status: 400 },
+      );
+    }
+
+    await ensureAuthSchema(cfg).catch(() => {});
+    const user = await findUserByLogin(cfg, emailInput);
+    if (!user || !verifyPassword(password, user.passwordHash)) {
+      return NextResponse.json(
+        { error: 'Invalid username/email or password.' },
+        { status: 401 },
+      );
+    }
+
+    const token = await createSession(cfg, user);
+    const isSuperAdmin = user.role === 'SuperAdmin';
+
+    const response = NextResponse.json({ ok: true, role: user.role });
+    response.cookies.set('pms_session', token, { path: '/', httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 7 });
+    response.cookies.set('pms_db_mode', '1', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+    response.cookies.set('pms_session_user', user.email, { path: '/' });
+    response.cookies.set('pfms_workspace', 'main-org_owner_main', { path: '/' });
+    response.cookies.set('pfms_org_id', 'org_owner_main', { path: '/' });
+    response.cookies.set('pfms_tier', isSuperAdmin ? 'pro' : 'free', { path: '/' });
+    response.cookies.set('pfms_role', user.role, { path: '/' });
+    return response;
+  }
+
   try {
     const supabase = await createClient();
     const { supabase: adminClient } = await import('@/lib/supabase');

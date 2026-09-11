@@ -39,6 +39,9 @@ yarn-error.log*
 # local screenshot / scraping scripts (may contain credentials)
 /scratch
 
+# runtime database config written by the setup wizard (contains credentials)
+/data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
