@@ -23,8 +23,8 @@ export type QueryOp =
   | { t: 'range'; from: number; to: number }
   | { t: 'maybeSingle' }
   | { t: 'single' }
-  | { t: 'insert'; rows: Record<string, unknown>[] }
-  | { t: 'upsert'; rows: Record<string, unknown>[] }
+  | { t: 'insert'; rows: Record<string, unknown> | Record<string, unknown>[] }
+  | { t: 'upsert'; rows: Record<string, unknown> | Record<string, unknown>[] }
   | { t: 'update'; obj: Record<string, unknown> }
   | { t: 'delete' };
 
@@ -43,14 +43,45 @@ function encodeValue(v: unknown): unknown {
 }
 
 function decodeValue(v: unknown): unknown {
-  if (typeof v === 'string' && JSON_LIKE.test(v)) {
-    try {
-      return JSON.parse(v);
-    } catch {
-      return v;
+  if (typeof v === 'string') {
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+    if (JSON_LIKE.test(v)) {
+      try {
+        return JSON.parse(v);
+      } catch {
+        return v;
+      }
     }
   }
   return v;
+}
+
+const numericCols = new Map<string, Set<string>>();
+
+function recordNumericCols(table: string, row: Row): void {
+  for (const [k, v] of Object.entries(row)) {
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      let s = numericCols.get(table);
+      if (!s) {
+        s = new Set();
+        numericCols.set(table, s);
+      }
+      s.add(k);
+    }
+  }
+}
+
+function decodeRow(row: Row, numSet?: Set<string>): Row {
+  const out: Row = {};
+  for (const [k, v] of Object.entries(row)) {
+    if (numSet?.has(k) && typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v)) {
+      out[k] = Number(v);
+    } else {
+      out[k] = decodeValue(v);
+    }
+  }
+  return out;
 }
 
 export function createDataChain(table: string, executor: Executor) {
@@ -113,11 +144,11 @@ export function createDataChain(table: string, executor: Executor) {
       ops.push({ t: 'single' });
       return chain;
     },
-    insert(rows: Record<string, unknown>[]) {
+    insert(rows: Record<string, unknown> | Record<string, unknown>[]) {
       ops.push({ t: 'insert', rows });
       return chain;
     },
-    upsert(rows: Record<string, unknown>[]) {
+    upsert(rows: Record<string, unknown> | Record<string, unknown>[]) {
       ops.push({ t: 'upsert', rows });
       return chain;
     },
@@ -179,10 +210,18 @@ async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
   const rangeOp = ops.find((o) => o.t === 'range') as { t: 'range'; from: number; to: number } | undefined;
   const maybeSingle = ops.some((o) => o.t === 'maybeSingle');
   const single = ops.some((o) => o.t === 'single');
+  const likeKw = engine === 'postgres' ? 'ILIKE' : 'LIKE';
 
   // ---- Writes ----
   if (writeOp) {
-    const rows: Row[] = writeOp.rows;
+    const rawRows = Array.isArray(writeOp.rows) ? writeOp.rows : [writeOp.rows];
+    const rows: Row[] = rawRows
+      .filter((r) => r && typeof r === 'object')
+      .map((r) => ({ ...r, id: typeof r.id === 'string' && r.id !== '' ? r.id : `r_${crypto.randomUUID()}` }));
+    if (rows.length === 0) {
+      return { data: null, error: null };
+    }
+    for (const r of rows) recordNumericCols(table, r);
     await ensureShapes(engine, pool, table, rows);
     const cols = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
     const placeholders = rows.map(() => `(${cols.map(ph).join(',')})`).join(',');
@@ -208,10 +247,14 @@ async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
   }
 
   if (updateOp) {
-    await ensureShapes(engine, pool, table, [updateOp.obj]);
     const entries = Object.entries(updateOp.obj);
+    if (entries.length === 0) {
+      return { data: null, error: null };
+    }
+    await ensureShapes(engine, pool, table, [updateOp.obj]);
+    recordNumericCols(table, updateOp.obj);
     const setSql = entries.map(([c]) => `${qi(c)}=${ph()}`).join(',');
-    const whereSql = buildWhere(filters, params, ph, qi);
+    const whereSql = buildWhere(filters, params, ph, qi, likeKw);
     const sql = `UPDATE ${qi(table)} SET ${setSql}${whereSql ? ` WHERE ${whereSql}` : ''}`;
     const values = entries.map(([, v]) => encodeValue(v)).concat(params);
     await run(engine, pool, sql, values);
@@ -219,7 +262,7 @@ async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
   }
 
   if (deleteOp) {
-    const whereSql = buildWhere(filters, params, ph, qi);
+    const whereSql = buildWhere(filters, params, ph, qi, likeKw);
     const sql = `DELETE FROM ${qi(table)}${whereSql ? ` WHERE ${whereSql}` : ''}`;
     await run(engine, pool, sql, []);
     return { data: null, error: null };
@@ -229,7 +272,7 @@ async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
   try {
     const cols = selectOp?.cols && selectOp.cols !== '*' ? selectOp.cols.split(',').map((c) => c.trim()) : ['*'];
     const selectSql = cols.length === 1 && cols[0] === '*' ? '*' : cols.map(qi).join(',');
-    const whereSql = buildWhere(filters, params, ph, qi);
+    const whereSql = buildWhere(filters, params, ph, qi, likeKw);
     let sql = `SELECT ${selectSql} FROM ${qi(table)}${whereSql ? ` WHERE ${whereSql}` : ''}`;
     if (orderOp) sql += ` ORDER BY ${qi(orderOp.col)} ${orderOp.asc ? 'ASC' : 'DESC'}`;
     if (limitOp) sql += ` LIMIT ${Number(limitOp.n)}`;
@@ -241,11 +284,12 @@ async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
     }
 
     const rows = await run(engine, pool, sql, params);
+    const numSet = numericCols.get(table);
     if (maybeSingle || single) {
       const first = rows.length > 0 ? rows[0] : null;
-      return { data: first ? decodeRow(first) : null, error: null };
+      return { data: first ? decodeRow(first, numSet) : null, error: null };
     }
-    return { data: rows.map(decodeRow), error: null };
+    return { data: rows.map((r) => decodeRow(r, numSet)), error: null };
   } catch (err) {
     // Missing table on a fresh database behaves like an empty dataset.
     const msg = (err as Error).message || '';
@@ -256,13 +300,7 @@ async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
   }
 }
 
-function decodeRow(row: Row): Row {
-  const out: Row = {};
-  for (const [k, v] of Object.entries(row)) out[k] = decodeValue(v);
-  return out;
-}
-
-function buildWhere(filters: QueryOp[], params: unknown[], ph: () => string, qi: (c: string) => string): string {
+function buildWhere(filters: QueryOp[], params: unknown[], ph: () => string, qi: (c: string) => string, ilikeKw: string): string {
   const parts: string[] = [];
   for (const f of filters) {
     if (f.t === 'or') {
@@ -274,7 +312,7 @@ function buildWhere(filters: QueryOp[], params: unknown[], ph: () => string, qi:
             return `${qi(col)} LIKE ${ph()}`;
           case 'ilike': {
             params.push(value);
-            return `${qi(col)} LIKE ${ph()}`;
+            return `${qi(col)} ${ilikeKw} ${ph()}`;
           }
           case 'is':
             return value === 'null' ? `${qi(col)} IS NULL` : `${qi(col)} IS NOT NULL`;
@@ -327,7 +365,7 @@ function buildWhere(filters: QueryOp[], params: unknown[], ph: () => string, qi:
         parts.push(`${qi(c.col)} LIKE ${ph()}`);
         break;
       case 'ilike':
-        parts.push(`${qi(c.col)} LIKE ${ph()}`);
+        parts.push(`${qi(c.col)} ${ilikeKw} ${ph()}`);
         break;
     }
   }
