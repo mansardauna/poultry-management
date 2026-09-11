@@ -32,6 +32,11 @@ export default function SetupWizardPage() {
   // Database Type Selector State
   const [databaseType, setDatabaseType] = useState<'supabase' | 'postgres' | 'mysql'>('mysql');
 
+  // Supabase Fields State
+  const [supabaseUrl, setSupabaseUrl] = useState('');
+  const [supabaseAnonKey, setSupabaseAnonKey] = useState('');
+  const [supabaseServiceRoleKey, setSupabaseServiceRoleKey] = useState('');
+
   // Postgres Fields State
   const [postgresHost, setPostgresHost] = useState('localhost');
   const [postgresPort, setPostgresPort] = useState(5432);
@@ -68,23 +73,45 @@ export default function SetupWizardPage() {
   const [enterprisePriceMonthly, setEnterprisePriceMonthly] = useState(45000);
   const [enterprisePriceAnnual, setEnterprisePriceAnnual] = useState(432000);
 
-  // Runs the database connection check against the deployed backend config.
-  // Triggered only when the user leaves the DB step (Next), never on page load.
+  // Runs the database connection check against the credentials entered in the
+  // wizard (NOT .env). Triggered only when the user leaves the DB step (Next).
   const runDatabaseCheck = async (): Promise<boolean> => {
     setIsDbTesting(true);
     try {
-      const res = await fetch('/api/setup');
+      const res = await fetch('/api/setup/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          databaseType,
+          postgres: {
+            host: postgresHost,
+            port: postgresPort,
+            database: postgresDb,
+            user: postgresUser,
+            password: postgresPassword,
+          },
+          mysql: {
+            host: mysqlHost,
+            port: mysqlPort,
+            database: mysqlDatabase,
+            user: mysqlUser,
+            password: mysqlPassword,
+          },
+          supabase: {
+            url: supabaseUrl,
+            anonKey: supabaseAnonKey,
+            serviceRoleKey: supabaseServiceRoleKey,
+          },
+        }),
+      });
       const data = await res.json();
-      const connected = Boolean(data.isDatabaseConnected);
+      const connected = Boolean(data.connected);
       setDbStatus({
         connected,
         message: connected
-          ? 'Database connection verified — connection is live.'
-          : data.error || 'Database connection check failed. Please verify your environment credentials.',
+          ? data.message || 'Database connection verified — connection is live.'
+          : data.error || data.message || 'Database connection check failed. Please verify your credentials.',
       });
-      if (data.superAdminEmail) {
-        setSuperAdminEmail(data.superAdminEmail);
-      }
       return connected;
     } catch (_e) {
       setDbStatus({ connected: false, message: 'Unable to test database connection.' });
@@ -136,10 +163,15 @@ export default function SetupWizardPage() {
           postgresPort,
           postgresDb,
           postgresUser,
+          postgresPassword,
           mysqlHost,
           mysqlPort,
           mysqlDatabase,
           mysqlUser,
+          mysqlPassword,
+          supabaseUrl,
+          supabaseAnonKey,
+          supabaseServiceRoleKey,
           superAdminEmail,
           superAdminPassword,
           platformName,
@@ -375,11 +407,37 @@ export default function SetupWizardPage() {
                 {databaseType === 'supabase' && (
                   <div className="space-y-3">
                     <p className="text-xs text-slate-500 font-medium">
-                      Supabase credentials are read automatically from your environment variables:
+                      Enter your Supabase Project details — the credentials you provide here are tested directly.
                     </p>
-                    <div className="font-mono text-xs bg-white p-3 rounded-sm border border-slate-200 space-y-1">
-                      <p className="text-slate-700">NEXT_PUBLIC_SUPABASE_URL: <span className="text-indigo-600 font-bold">Configured in .env.local</span></p>
-                      <p className="text-slate-700">SUPABASE_SERVICE_ROLE_KEY: <span className="text-emerald-600 font-bold">Configured in .env.local</span></p>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Supabase project URL</label>
+                      <input
+                        type="text"
+                        value={supabaseUrl}
+                        onChange={(e) => setSupabaseUrl(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="https://your-project.supabase.co"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Anon / publishable key</label>
+                      <input
+                        type="password"
+                        value={supabaseAnonKey}
+                        onChange={(e) => setSupabaseAnonKey(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="eyJhbGciOi... (anon key)"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Service role key</label>
+                      <input
+                        type="password"
+                        value={supabaseServiceRoleKey}
+                        onChange={(e) => setSupabaseServiceRoleKey(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="eyJhbGciOi... (service role key)"
+                      />
                     </div>
                   </div>
                 )}
@@ -426,6 +484,16 @@ export default function SetupWizardPage() {
                         placeholder="postgres"
                       />
                     </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Database password</label>
+                      <input
+                        type="password"
+                        value={postgresPassword}
+                        onChange={(e) => setPostgresPassword(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="postgres password"
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -469,6 +537,16 @@ export default function SetupWizardPage() {
                         onChange={(e) => setMysqlUser(e.target.value)}
                         className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
                         placeholder="root"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Database password</label>
+                      <input
+                        type="password"
+                        value={mysqlPassword}
+                        onChange={(e) => setMysqlPassword(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        placeholder="mysql password"
                       />
                     </div>
                   </div>
