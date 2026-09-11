@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         // Also update the Supabase Auth password for the matching auth account
         try {
           const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
-          const authAccount = authUsers?.find((u) => u.email?.toLowerCase() === cleanEmail);
+          const authAccount = authUsers?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
           if (authAccount?.id) {
             await supabase.auth.admin.updateUserById(authAccount.id, { password: newPassword });
           }

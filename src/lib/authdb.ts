@@ -337,3 +337,38 @@ export async function deleteSession(cfg: DatabaseConfig, token: string): Promise
     await pool.query('DELETE FROM sessions WHERE token = $1', [token]).catch(() => {});
   }
 }
+
+export async function findUserById(cfg: DatabaseConfig, id: string): Promise<AuthUser | null> {
+  if (cfg.engine === 'mysql') {
+    const pool = await getMysqlPool(cfg);
+    const [rows] = await pool.query<mysql.RowDataPacket[]>(
+      'SELECT id, username, email, role FROM users WHERE id = ? LIMIT 1',
+      [id],
+    );
+    const r = rows[0] as { id: string; username: string; email: string | null; role: string } | undefined;
+    if (!r) return null;
+    return { id: r.id, email: r.email || r.username, role: r.role, username: r.username };
+  }
+  if (cfg.engine === 'postgres') {
+    const pool = await getPgPool(cfg);
+    const { rows } = await pool.query<{ id: string; username: string; email: string | null; role: string }>(
+      'SELECT id, username, email, role FROM users WHERE id = $1 LIMIT 1',
+      [id],
+    );
+    const r = rows[0];
+    if (!r) return null;
+    return { id: r.id, email: r.email || r.username, role: r.role, username: r.username };
+  }
+  return null;
+}
+
+export async function updateUserPasswordById(cfg: DatabaseConfig, id: string, newPassword: string): Promise<void> {
+  const passwordHash = hashPassword(newPassword);
+  if (cfg.engine === 'mysql') {
+    const pool = await getMysqlPool(cfg);
+    await pool.query('UPDATE users SET passwordHash = ? WHERE id = ?', [passwordHash, id]);
+  } else if (cfg.engine === 'postgres') {
+    const pool = await getPgPool(cfg);
+    await pool.query('UPDATE users SET "passwordHash" = $1 WHERE id = $2', [passwordHash, id]);
+  }
+}

@@ -265,7 +265,7 @@ export async function POST(request: Request) {
 
     try {
       const { data: usersData } = await serviceRoleClient.auth.admin.listUsers();
-      const existingUser = usersData?.users.find(u => u.email?.toLowerCase() === cleanEmail);
+      const existingUser = usersData?.users.find((u: any) => u.email?.toLowerCase() === cleanEmail);
 
       if (existingUser) {
         userId = existingUser.id;

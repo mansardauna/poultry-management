@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     // 2. Handle unconfirmed email auto-confirmation if needed
     if (authError && authError.message.toLowerCase().includes('email not confirmed')) {
       const { data: usersData } = await adminClient.auth.admin.listUsers();
-      const unconfirmedUser = usersData?.users.find(u => 
+      const unconfirmedUser = usersData?.users.find((u: any) => 
         u.email?.toLowerCase() === emailInput.toLowerCase() || 
         u.email?.toLowerCase() === `${emailInput.toLowerCase()}@farm.local`
       );
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
           // Auto-sync into Supabase Auth so standard session cookies work
           try {
             const { data: usersData } = await adminClient.auth.admin.listUsers();
-            const existingAuth = usersData?.users.find(u => u.email?.toLowerCase() === staffEmail.toLowerCase());
+            const existingAuth = usersData?.users.find((u: any) => u.email?.toLowerCase() === staffEmail.toLowerCase());
 
             if (existingAuth) {
               await adminClient.auth.admin.updateUserById(existingAuth.id, {

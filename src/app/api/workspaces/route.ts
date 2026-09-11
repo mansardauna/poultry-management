@@ -80,7 +80,7 @@ export async function PUT(request: Request) {
     }
 
     const tenantWorkspaces = await getTenantWorkspaces(user);
-    if (!tenantWorkspaces.some((ws) => ws.id === id)) {
+    if (!tenantWorkspaces.some((ws: any) => ws.id === id)) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
     }
 
@@ -110,7 +110,7 @@ export async function DELETE(request: Request) {
     }
 
     const tenantWorkspaces = await getTenantWorkspaces(user);
-    if (!tenantWorkspaces.some((ws) => ws.id === id)) {
+    if (!tenantWorkspaces.some((ws: any) => ws.id === id)) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
     }
 
