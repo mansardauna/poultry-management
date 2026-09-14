@@ -2,8 +2,6 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { Client } from 'pg';
-import mysql from 'mysql2/promise';
 
 /**
  * POST /api/setup/test — Validates the database credentials entered in the
@@ -40,12 +38,28 @@ interface TestBody {
   postgres?: PostgresConfig;
   mysql?: MysqlConfig;
   supabase?: SupabaseConfig;
+  postgresHost?: string;
+  postgresPort?: number;
+  postgresDb?: string;
+  postgresUser?: string;
+  mysqlHost?: string;
+  mysqlPort?: number;
+  mysqlDatabase?: string;
+  mysqlUser?: string;
 }
 
 function rejectAfter(ms: number): Promise<never> {
   return new Promise((_, reject) => {
     setTimeout(() => reject(new Error('Connection attempt timed out')), ms);
   });
+}
+
+function dynamicRequire(moduleName: string) {
+  try {
+    return eval('require')(moduleName);
+  } catch (_e) {
+    return null;
+  }
 }
 
 export async function POST(request: Request) {
@@ -56,16 +70,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ connected: false, error: 'Invalid JSON body.' }, { status: 400 });
   }
 
-  const type = body.databaseType || 'postgres';
+  const type = body.databaseType || 'supabase';
 
   if (type === 'postgres') {
+    const pgModule = dynamicRequire('pg');
+    if (!pgModule) {
+      return NextResponse.json({
+        connected: false,
+        databaseType: 'postgres',
+        error: 'PostgreSQL driver (pg) is not installed in runtime environment. Install pg package to test Postgres connection.'
+      });
+    }
+
     const cfg = body.postgres || {};
+    const host = body.postgresHost || cfg.host || 'localhost';
+    const port = body.postgresPort || cfg.port || 5432;
+    const database = body.postgresDb || cfg.database || 'postgres';
+    const user = body.postgresUser || cfg.user || 'postgres';
+    const password = cfg.password || '';
+
+    const { Client } = pgModule;
     const client = new Client({
-      host: cfg.host || 'localhost',
-      port: Number(cfg.port || 5432),
-      database: cfg.database || 'postgres',
-      user: cfg.user || 'postgres',
-      password: cfg.password || '',
+      host,
+      port: Number(port),
+      database,
+      user,
+      password,
       connectionTimeoutMillis: TEST_TIMEOUT_MS,
     });
 
@@ -89,16 +119,31 @@ export async function POST(request: Request) {
   }
 
   if (type === 'mysql') {
+    const mysqlModule = dynamicRequire('mysql2/promise');
+    if (!mysqlModule) {
+      return NextResponse.json({
+        connected: false,
+        databaseType: 'mysql',
+        error: 'MySQL driver (mysql2) is not installed in runtime environment. Install mysql2 package to test MySQL connection.'
+      });
+    }
+
     const cfg = body.mysql || {};
-    let conn: mysql.Connection | null = null;
+    const host = body.mysqlHost || cfg.host || 'localhost';
+    const port = body.mysqlPort || cfg.port || 3306;
+    const database = body.mysqlDatabase || cfg.database || 'poultry_db';
+    const user = body.mysqlUser || cfg.user || 'root';
+    const password = cfg.password || '';
+
+    let conn: any = null;
     try {
       conn = await Promise.race([
-        mysql.createConnection({
-          host: cfg.host || 'localhost',
-          port: Number(cfg.port || 3306),
-          database: cfg.database || 'poultry_db',
-          user: cfg.user || 'root',
-          password: cfg.password || '',
+        mysqlModule.createConnection({
+          host,
+          port: Number(port),
+          database,
+          user,
+          password,
           connectTimeout: TEST_TIMEOUT_MS,
         }),
         rejectAfter(TEST_TIMEOUT_MS),
@@ -120,38 +165,38 @@ export async function POST(request: Request) {
     }
   }
 
-  // Supabase: validates the project URL + keys entered in the wizard.
-  // Anon key (or service role key) is used to read the settings table.
-  const s = body.supabase || {};
-  const url = s.url?.trim();
-  const anonKey = s.anonKey?.trim();
-  const serviceRoleKey = s.serviceRoleKey?.trim();
+  // Supabase (Default / Fallback)
+  const cfg = body.supabase || {};
+  const url = cfg.url || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const key = cfg.serviceRoleKey || cfg.anonKey || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-  if (!url) {
-    return NextResponse.json({ connected: false, databaseType: 'supabase', error: 'Supabase project URL is required.' });
-  }
-  if (!anonKey && !serviceRoleKey) {
+  if (!url || !key) {
     return NextResponse.json({
       connected: false,
       databaseType: 'supabase',
-      error: 'Anon (publishable) key or service role key is required.',
+      error: 'Supabase URL or Key is missing. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are configured.',
     });
   }
 
-  const client = createClient(url, serviceRoleKey || anonKey || '');
   try {
-    const { data, error } = await Promise.race([
+    const client = createClient(url, key, { auth: { persistSession: false } });
+    const { error } = await Promise.race([
       client.from('systemSettings').select('id').limit(1),
-      rejectAfter(TEST_TIMEOUT_MS).then(() => ({ data: null, error: { message: 'Supabase request timed out' } })),
+      rejectAfter(TEST_TIMEOUT_MS),
     ]);
+
     if (error) {
-      return NextResponse.json({ connected: false, databaseType: 'supabase', error: error.message });
+      return NextResponse.json({
+        connected: false,
+        databaseType: 'supabase',
+        error: error.message || 'Supabase connectivity check failed.',
+      });
     }
+
     return NextResponse.json({
       connected: true,
       databaseType: 'supabase',
-      message: 'Supabase connection verified — credentials are valid.',
-      data: Boolean(data),
+      message: 'Supabase database connection verified — connection is live.',
     });
   } catch (err: unknown) {
     return NextResponse.json({
