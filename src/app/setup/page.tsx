@@ -415,7 +415,7 @@ export default function SetupWizardPage() {
                 {databaseType === 'postgres' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Host Server</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Host server</label>
                       <input
                         type="text"
                         value={postgresHost}
@@ -425,7 +425,7 @@ export default function SetupWizardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Port</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Port</label>
                       <input
                         type="number"
                         value={postgresPort}
@@ -435,7 +435,7 @@ export default function SetupWizardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database Name</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Database name</label>
                       <input
                         type="text"
                         value={postgresDb}
@@ -445,7 +445,7 @@ export default function SetupWizardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database User</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Database user</label>
                       <input
                         type="text"
                         value={postgresUser}
@@ -460,7 +460,7 @@ export default function SetupWizardPage() {
                 {databaseType === 'mysql' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Host Server</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Host server</label>
                       <input
                         type="text"
                         value={mysqlHost}
@@ -470,7 +470,7 @@ export default function SetupWizardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Port</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Port</label>
                       <input
                         type="number"
                         value={mysqlPort}
@@ -480,7 +480,7 @@ export default function SetupWizardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database Name</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Database name</label>
                       <input
                         type="text"
                         value={mysqlDatabase}
@@ -490,7 +490,7 @@ export default function SetupWizardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Database User</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Database user</label>
                       <input
                         type="text"
                         value={mysqlUser}
@@ -545,8 +545,8 @@ export default function SetupWizardPage() {
                   </h3>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                      Super Admin Email *
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                      Super admin email *
                     </label>
                     <input
                       type="email"
@@ -559,8 +559,8 @@ export default function SetupWizardPage() {
                   </div>
 
                   <div className="relative">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                      Super Admin Password *
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                      Super admin password *
                     </label>
                     <input
                       type={showPassword ? "text" : "password"}
@@ -581,13 +581,13 @@ export default function SetupWizardPage() {
                 </div>
 
                 <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
+                  <h3 className="text-xs font-semibold text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Building2 size={16} className="text-indigo-600" /> Platform Brand & Currency
                   </h3>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                      Platform Application Name
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                      Platform application name
                     </label>
                     <input
                       type="text"
@@ -599,8 +599,8 @@ export default function SetupWizardPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                      Primary Currency Symbol
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                      Primary currency symbol
                     </label>
                     <select
                       value={currencySymbol}

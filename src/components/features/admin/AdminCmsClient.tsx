@@ -633,7 +633,7 @@ export function AdminCmsClient({
             {databaseType === 'postgres' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Postgres Host</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Postgres host</label>
                   <input
                     type="text"
                     value={postgresHost}
@@ -642,7 +642,7 @@ export function AdminCmsClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Postgres Port</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Postgres port</label>
                   <input
                     type="number"
                     value={postgresPort}
@@ -651,7 +651,7 @@ export function AdminCmsClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Database Name</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Database name</label>
                   <input
                     type="text"
                     value={postgresDb}
@@ -660,7 +660,7 @@ export function AdminCmsClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Database User</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Database user</label>
                   <input
                     type="text"
                     value={postgresUser}
@@ -674,7 +674,7 @@ export function AdminCmsClient({
             {databaseType === 'mysql' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">MySQL Host</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">MySQL host</label>
                   <input
                     type="text"
                     value={mysqlHost}
@@ -683,7 +683,7 @@ export function AdminCmsClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">MySQL Port</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">MySQL port</label>
                   <input
                     type="number"
                     value={mysqlPort}
@@ -692,7 +692,7 @@ export function AdminCmsClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Database Name</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Database name</label>
                   <input
                     type="text"
                     value={mysqlDatabase}
@@ -701,7 +701,7 @@ export function AdminCmsClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Database User</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Database user</label>
                   <input
                     type="text"
                     value={mysqlUser}
@@ -721,7 +721,7 @@ export function AdminCmsClient({
               </h3>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Application Title</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Application title</label>
                 <input
                   type="text"
                   value={platformName}
@@ -731,7 +731,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Primary Currency Symbol</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Primary currency symbol</label>
                 <select
                   value={currencySymbol}
                   onChange={(e) => setCurrencySymbol(e.target.value)}
@@ -753,7 +753,7 @@ export function AdminCmsClient({
               </h3>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Super Admin Email</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Super admin email</label>
                 <input
                   type="email"
                   value={superAdminEmailState}
@@ -803,7 +803,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Paystack Public Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack public key</label>
                 <input
                   type="text"
                   value={paystackPublicKey}
@@ -814,7 +814,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Paystack Secret Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack secret key</label>
                 <input
                   type={showPaystackSecret ? 'text' : 'password'}
                   value={paystackSecretKey}
@@ -842,7 +842,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Stripe Publishable Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe publishable key</label>
                 <input
                   type="text"
                   value={stripePublicKey}
@@ -853,7 +853,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Stripe Secret Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe secret key</label>
                 <input
                   type={showStripeSecret ? 'text' : 'password'}
                   value={stripeSecretKey}
@@ -987,7 +987,7 @@ export function AdminCmsClient({
 
             <div className="space-y-4 pt-2">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Hero Headline</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero headline</label>
                 <input
                   type="text"
                   value={heroHeading}
@@ -997,7 +997,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Hero Subtitle</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero subtitle</label>
                 <textarea
                   rows={3}
                   value={heroSubtitle}
@@ -1007,7 +1007,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Top Announcement Banner</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Top announcement banner</label>
                 <input
                   type="text"
                   value={announcementBanner}
@@ -1018,7 +1018,7 @@ export function AdminCmsClient({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Support Phone</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Support phone</label>
                   <input
                     type="text"
                     value={supportPhone}
@@ -1028,7 +1028,7 @@ export function AdminCmsClient({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">Support Email</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Support email</label>
                   <input
                     type="email"
                     value={supportEmail}

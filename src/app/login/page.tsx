@@ -109,9 +109,9 @@ export default function LoginPage() {
         <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
           <div>
             <div className="mb-10 text-center md:text-left">
-              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">Enterprise Control Portal</span>
-              <h1 className="text-3xl lg:text-4xl font-extrabold uppercase tracking-tight text-slate-900 mt-1 mb-2">
-                Welcome Back
+              <span className="text-xs font-semibold text-indigo-600">Enterprise control portal</span>
+              <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mt-1 mb-2">
+                Welcome back
               </h1>
               <p className="text-sm font-medium text-slate-500">Sign in to manage your farm branches & operations.</p>
             </div>
@@ -125,7 +125,7 @@ export default function LoginPage() {
               
               <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2">Email Address or Username</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
                   <input 
                     type="text" 
                     value={email}
@@ -136,13 +136,13 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="relative">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700">Password</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-sm font-medium text-slate-700">Password</label>
                     <Link
                       href={email ? `/reset-password?email=${encodeURIComponent(email)}` : '/reset-password'}
-                      className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                     >
-                      Forgot Password?
+                      Forgot password?
                     </Link>
                   </div>
                   <input 
@@ -166,9 +166,9 @@ export default function LoginPage() {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm py-4 mt-4 rounded-xl uppercase tracking-wider transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
               >
-                {isSubmitting ? 'Authenticating…' : 'Secure Login'}
+                {isSubmitting ? 'Authenticating…' : 'Sign in'}
               </button>
             </form>
             
@@ -219,7 +219,7 @@ export default function LoginPage() {
               </p>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Account Email *</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Account email *</label>
                 <input 
                   type="email"
                   value={resetEmail}
@@ -231,7 +231,7 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">New Password (Optional)</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">New password (optional)</label>
                 <input 
                   type="password"
                   value={newPassword}

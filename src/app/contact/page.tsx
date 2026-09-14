@@ -70,27 +70,27 @@ export default function ContactPage() {
             <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Thank you! Your message has been sent to our support team.'); }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Full Name</label>
-                  <input type="text" required placeholder="John Doe" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Full name</label>
+                  <input type="text" required placeholder="John Doe" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Email Address</label>
-                  <input type="email" required placeholder="john@example.com" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
+                  <input type="email" required placeholder="john@example.com" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Subject</label>
-                <input type="text" required placeholder="Enterprise Portal Inquiry" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Subject</label>
+                <input type="text" required placeholder="Enterprise Portal Inquiry" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium" />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Message</label>
-                <textarea rows={5} required placeholder="Tell us how we can help your farm operation..." className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Message</label>
+                <textarea rows={5} required placeholder="Tell us how we can help your farm operation..." className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"></textarea>
               </div>
 
-              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-6 py-3 rounded-xl shadow-sm transition-colors flex items-center gap-2">
-                <Send size={16} /> Send Message
+              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-6 py-3 rounded-xl shadow-sm transition-colors flex items-center gap-2 cursor-pointer">
+                <Send size={16} /> Send message
               </button>
             </form>
           </div>

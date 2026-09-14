@@ -64,8 +64,8 @@ function SignupForm() {
   return (
     <>
       <div className="mb-8 text-center md:text-left">
-        <h1 className="text-3xl font-bold uppercase tracking-wider text-slate-800 mb-2">
-          Create Account
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
+          Create account
         </h1>
         <p className="text-sm font-medium text-indigo-600">Join Poultry Farm Management</p>
       </div>
@@ -79,23 +79,23 @@ function SignupForm() {
             
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Email Address</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
             <input 
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
+              className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white font-medium"
               placeholder="Enter your email address"
               required
             />
           </div>
           <div className="relative">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
             <input 
               type={showPassword ? "text" : "password"} 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-2 border-slate-200 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white"
+              className="w-full border-2 border-slate-200 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white font-medium"
               placeholder="Choose a secure password"
               required
             />
@@ -112,9 +112,9 @@ function SignupForm() {
         <button 
           type="submit" 
           disabled={isSubmitting}
-          className="w-full bg-indigo-600 text-white font-bold text-sm py-3.5 mt-2 rounded-lg uppercase tracking-wider hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-md shadow-indigo-200"
+          className="w-full bg-indigo-600 text-white font-semibold text-sm py-3.5 mt-2 rounded-lg hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-indigo-400 shadow-md shadow-indigo-200 cursor-pointer"
         >
-          {isSubmitting ? 'Creating Account…' : 'Sign Up'}
+          {isSubmitting ? 'Creating account…' : 'Sign up'}
         </button>
         
         <div className="text-center mt-4">

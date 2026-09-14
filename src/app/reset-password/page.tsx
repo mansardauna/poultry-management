@@ -92,7 +92,7 @@ function ResetPasswordForm() {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Account Email *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Account email *</label>
             <input 
               type="email"
               value={email}
@@ -104,7 +104,7 @@ function ResetPasswordForm() {
           </div>
 
           <div className="relative">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">New Password *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">New password *</label>
             <input 
               type={showPassword ? "text" : "password"}
               value={newPassword}
@@ -123,7 +123,7 @@ function ResetPasswordForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Confirm New Password *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirm new password *</label>
             <input 
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
@@ -137,9 +137,9 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 mt-2 cursor-pointer"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 mt-2 cursor-pointer"
           >
-            {isSubmitting ? 'Updating Password…' : 'Update & Save Password'}
+            {isSubmitting ? 'Updating password…' : 'Update password'}
           </button>
 
           <div className="pt-3 text-center">
