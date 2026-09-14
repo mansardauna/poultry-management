@@ -109,11 +109,10 @@ export default function LoginPage() {
         <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
           <div>
             <div className="mb-10 text-center md:text-left">
-              <span className="text-xs font-semibold text-indigo-600">Enterprise control portal</span>
-              <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mt-1 mb-2">
+              <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
                 Welcome back
               </h1>
-              <p className="text-sm font-medium text-slate-500">Sign in to manage your farm branches & operations.</p>
+              <p className="text-sm font-medium text-slate-500">Sign in to manage your farm branches and operations.</p>
             </div>
             
             <form onSubmit={handleLogin} className="space-y-6">

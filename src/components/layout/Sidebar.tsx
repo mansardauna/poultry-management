@@ -307,8 +307,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
 
               {isDropdownOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-xl py-2 z-50 text-slate-800 max-h-64 overflow-y-auto scrollbar-sidebar">
-                  <div className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Your Farms
+                  <div className="px-3 py-1 text-xs font-semibold text-slate-500">
+                    Your farms
                   </div>
                   {workspaces.map((ws, index) => (
                     <div
@@ -519,10 +519,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         {!isCollapsed && role !== 'SuperAdmin' && currentTier === 'free' && (
           <div className="mx-3 mb-2 p-3 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 rounded-xl text-center">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">FREE STARTER</span>
-              <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded">1 Branch Limit</span>
+              <span className="text-[10px] font-semibold text-amber-300">Free Starter</span>
+              <span className="text-[10px] bg-amber-500 text-slate-950 font-semibold px-1.5 py-0.2 rounded">1 Branch Limit</span>
             </div>
-            <p className="text-[11px] text-indigo-200 mb-2 leading-tight">Unlock CCTV, Voice AI & Unlimited Branches!</p>
+            <p className="text-[11px] text-indigo-200 mb-2 leading-tight">Unlock CCTV, voice logging and unlimited branches</p>
             <button
               onClick={() => {
                 setIsMobileOpen(false);
@@ -538,7 +538,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         {!isCollapsed && role !== 'SuperAdmin' && currentTier !== 'free' && (
           <div className="mx-3 mb-2 px-3 py-2 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
-            <span className="text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider truncate">
+            <span className="text-xs font-semibold text-emerald-300 truncate">
               {currentTier === 'entrepreneur' ? 'Entrepreneur' : currentTier === 'enterprise' ? 'Enterprise' : 'Pro'}
             </span>
           </div>
@@ -548,8 +548,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           <div className="mx-3 mb-2 p-3 bg-indigo-950/80 border border-indigo-500/40 rounded-xl flex items-center gap-2.5">
             <ShieldCheck size={18} className="text-indigo-400 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-indigo-300 uppercase truncate">Super Admin Control</p>
-              <p className="text-[9px] text-indigo-400/80 truncate">Full System Management & CMS</p>
+              <p className="text-xs font-semibold text-indigo-300 truncate">Super admin control</p>
+              <p className="text-[10px] text-indigo-400/80 truncate">System management & CMS</p>
             </div>
           </div>
         )}

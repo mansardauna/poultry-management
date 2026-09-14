@@ -108,7 +108,7 @@ export function StatCard({
         <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{title}</p>
+            <p className="text-xs font-medium text-slate-500">{title}</p>
             <p className={`text-2xl sm:text-3xl font-bold ${styles.valueText}`}>{value}</p>
             {subtext && (
               <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1`}>

@@ -338,10 +338,10 @@ export function AdminCmsClient({
       {/* Top Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <span className="bg-purple-100 text-purple-800 border border-purple-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-purple-100 text-purple-800 border border-purple-200 text-xs font-semibold px-3 py-1 rounded-full">
             Super Admin Control Center ({currentUserEmail || superAdminEmailState || 'Super Admin'})
           </span>
-          <h1 className="text-2xl font-extrabold text-slate-900 mt-2">{platformName} Master Super Admin Portal</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mt-2">{platformName} Master Super Admin Portal</h1>
           <p className="text-sm text-slate-500 font-medium mt-1">
             Manage live platform setup parameters, database drivers, payment keys, SaaS plans, and landing CMS.
           </p>
@@ -352,20 +352,20 @@ export function AdminCmsClient({
             href="/documentation/superadmin-setup-guide.html"
             target="_blank"
             rel="noreferrer"
-            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
           >
             <HelpCircle size={16} />
-            <span>Super Admin Docs</span>
+            <span>Super admin docs</span>
           </a>
 
           {activeTab === 'setup' && (
             <button
               onClick={handleSaveSetupParams}
               disabled={isSaving}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Save & Apply Setup</span>
+              <span>Save & apply setup</span>
             </button>
           )}
 
@@ -373,10 +373,10 @@ export function AdminCmsClient({
             <button
               onClick={handleSaveCms}
               disabled={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Publish Landing CMS</span>
+              <span>Publish landing CMS</span>
             </button>
           )}
 
@@ -384,10 +384,10 @@ export function AdminCmsClient({
             <button
               onClick={handleSaveAllPlans}
               disabled={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Save Plan Features</span>
+              <span>Save plan features</span>
             </button>
           )}
         </div>
@@ -397,74 +397,74 @@ export function AdminCmsClient({
       <div className="flex border-b border-slate-200 overflow-x-auto gap-2 scrollbar-none pb-1">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'overview'
               ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
           }`}
         >
           <Activity size={16} />
-          <span>Platform Overview</span>
+          <span>Platform overview</span>
         </button>
 
         <button
           onClick={() => setActiveTab('setup')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'setup'
               ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
           }`}
         >
           <Settings size={16} />
-          <span>Setup & Gateways</span>
+          <span>Setup & gateways</span>
         </button>
 
         <button
           onClick={() => setActiveTab('plans')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'plans'
               ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
           }`}
         >
           <Layers size={16} />
-          <span>SaaS Plans & Entitlements</span>
+          <span>SaaS plans & entitlements</span>
         </button>
 
         <button
           onClick={() => setActiveTab('cms')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'cms'
               ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
           }`}
         >
           <Sparkles size={16} />
-          <span>Landing Page CMS</span>
+          <span>Landing page CMS</span>
         </button>
 
         <button
           onClick={() => setActiveTab('orgs')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'orgs'
               ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
           }`}
         >
           <Building2 size={16} />
-          <span>Tenant Farm Organizations ({allOrgs.length})</span>
+          <span>Tenant farm organizations ({allOrgs.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('settings')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'settings'
               ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
           }`}
         >
           <Server size={16} />
-          <span>System Governance</span>
+          <span>System governance</span>
         </button>
       </div>
 

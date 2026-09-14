@@ -32,7 +32,7 @@ export function BadgeStatus({ status, size = 'sm', className = '' }: BadgeStatus
   const paddingClasses = size === 'sm' ? 'px-2.5 py-0.5 text-[10px]' : 'px-3 py-1 text-xs';
 
   return (
-    <span className={`inline-flex items-center font-extrabold uppercase tracking-wider border rounded-full ${colorClasses} ${paddingClasses} ${className}`}>
+    <span className={`inline-flex items-center font-semibold border rounded-full ${colorClasses} ${paddingClasses} ${className}`}>
       {status}
     </span>
   );

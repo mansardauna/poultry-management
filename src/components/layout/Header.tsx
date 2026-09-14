@@ -257,8 +257,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         {/* Powerful Live Search Results Dropdown Overlay */}
         {isSearchFocused && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 max-h-[80vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
-              <span>{searchQuery ? `Search Results (${filteredSearchResults.length})` : 'Quick Jump Shortcuts'}</span>
+            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-600">
+              <span>{searchQuery ? `Search results (${filteredSearchResults.length})` : 'Quick jump shortcuts'}</span>
               <button 
                 onClick={() => setIsSearchFocused(false)} 
                 className="text-slate-400 hover:text-slate-600 p-1"
@@ -413,7 +413,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               <div className="flex border-b border-slate-100">
                 <button
                   onClick={() => setActiveTab('unread')}
-                  className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  className={`flex-1 py-2 text-xs font-semibold transition-colors ${
                     activeTab === 'unread'
                       ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
                       : 'text-slate-400 hover:text-slate-600'
@@ -423,7 +423,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 </button>
                 <button
                   onClick={() => setActiveTab('read')}
-                  className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  className={`flex-1 py-2 text-xs font-semibold transition-colors ${
                     activeTab === 'read'
                       ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50'
                       : 'text-slate-400 hover:text-slate-600'
@@ -455,7 +455,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded border ${severityStyles[n.severity]}`}>
+                            <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${severityStyles[n.severity]}`}>
                               {n.severity}
                             </span>
                             <span className="text-[10px] text-slate-400 font-mono">{n.date}</span>
@@ -490,8 +490,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         {/* Super Admin Badge or Upgrade CTA */}
         {role === 'SuperAdmin' ? (
           <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
-            <span className="bg-indigo-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">
-              Platform Super Admin
+            <span className="bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
+              Super Admin
             </span>
           </div>
         ) : (

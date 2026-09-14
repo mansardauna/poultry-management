@@ -108,8 +108,8 @@ export function HousingClient({ role }: { role: string }) {
 
       <Card>
         <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">
-          <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-            <Home size={18} className="text-indigo-600" /> Farm Pens
+          <CardTitle className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+            <Home size={18} className="text-indigo-600" /> Farm pens
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -124,7 +124,7 @@ export function HousingClient({ role }: { role: string }) {
                   <TableSortHeader label="Capacity" sortKey="capacity" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
                   <TableSortHeader label="Current Batch" sortKey="currentBatchId" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
                   <TableSortHeader label="Status" sortKey="status" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
-                  {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Actions</th>}
+                  {canEdit && <th className="px-4 py-3 text-slate-500 font-semibold">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
@@ -134,7 +134,7 @@ export function HousingClient({ role }: { role: string }) {
                     <td className="px-4 py-3 text-slate-600">{p.capacity.toLocaleString()} birds</td>
                     <td className="px-4 py-3 text-slate-600">{p.currentBatchId || 'Empty'}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-semibold ${p.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : p.status === 'Cleaning' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800'}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${p.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : p.status === 'Cleaning' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800'}`}>
                         {p.status}
                       </span>
                     </td>
@@ -168,7 +168,7 @@ export function HousingClient({ role }: { role: string }) {
       </Card>
 
       <Dialog open={open} onClose={() => { setOpen(false); setEditingPen(null); setFormData({ name: '', capacity: 1000, status: 'Active', currentBatchId: '' }); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>{editingPen ? 'Edit Farm Pen' : 'Add Farm Pen'}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>{editingPen ? 'Edit farm pen' : 'Add farm pen'}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField

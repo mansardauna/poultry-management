@@ -113,8 +113,8 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
           paper: { sx: { borderRadius: 2 } }
         }}
       >
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 600 }}>
-          {success ? "Report Processed" : "AI Log Parser"}
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>
+          {success ? "Report processed" : "Voice & text log parser"}
         </DialogTitle>
         <DialogContent className="flex flex-col gap-4">
           {success ? (

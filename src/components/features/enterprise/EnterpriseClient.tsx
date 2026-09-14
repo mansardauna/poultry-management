@@ -306,29 +306,29 @@ export function EnterpriseClient({
         {/* Aggregated Real Matrix Stat Chips */}
         <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3 w-full md:w-auto text-xs font-mono">
           <div className="bg-slate-800/90 border border-slate-700 p-3 rounded-2xl text-center">
-            <span className="text-[10px] text-slate-400 block font-sans uppercase font-bold">TOTAL BIRDS</span>
+            <span className="text-[10px] text-slate-400 block font-sans font-medium">Total birds</span>
             <span className="text-lg font-bold text-emerald-400">{totalBirdsAll.toLocaleString()}</span>
           </div>
           <div className="bg-slate-800/90 border border-slate-700 p-3 rounded-2xl text-center">
-            <span className="text-[10px] text-slate-400 block font-sans uppercase font-bold">TOTAL EGGS</span>
+            <span className="text-[10px] text-slate-400 block font-sans font-medium">Total eggs</span>
             <span className="text-lg font-bold text-indigo-300">{totalEggsAll.toLocaleString()}</span>
           </div>
           <div className="bg-slate-800/90 border border-slate-700 p-3 rounded-2xl text-center col-span-2 sm:col-span-1">
-            <span className="text-[10px] text-slate-400 block font-sans uppercase font-bold">NET REVENUE</span>
+            <span className="text-[10px] text-slate-400 block font-sans font-medium">Net revenue</span>
             <span className="text-lg font-bold text-amber-400">₦{totalRevenueAll.toLocaleString()}</span>
           </div>
         </div>
       </div>
 
       {/* Sub-Navigation Tabs */}
-      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold uppercase tracking-wider">
+      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-semibold">
         <button
           onClick={() => setActiveTab('matrix')}
           className={`px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'matrix' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Building2 size={16} /> Branch Matrix ({workspaces.length})
+          <Building2 size={16} /> Branch matrix ({workspaces.length})
         </button>
 
         <button
@@ -337,7 +337,7 @@ export function EnterpriseClient({
             activeTab === 'whitelabel' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Palette size={16} /> White-Label & Themes
+          <Palette size={16} /> White-label & themes
         </button>
 
         <button
@@ -420,19 +420,19 @@ export function EnterpriseClient({
                     {/* Real Database Telemetry Stats */}
                     <div className="pt-3 border-t border-slate-200/60 grid grid-cols-2 gap-3 text-xs font-semibold text-slate-700 font-mono">
                       <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">FLOCK SIZE</span>
+                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Flock size</span>
                         <span className="text-sm font-bold text-slate-900">{bm.totalBirds.toLocaleString()} Birds</span>
                       </div>
                       <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">EGG PRODUCTION</span>
+                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Egg production</span>
                         <span className="text-sm font-bold text-emerald-600">{Math.floor(bm.totalEggs / 30).toLocaleString()} Crates</span>
                       </div>
                       <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">FEED STOCK</span>
+                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Feed stock</span>
                         <span className="text-sm font-bold text-indigo-600">{bm.feedStockKg.toLocaleString()} Kg</span>
                       </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">REVENUE</span>
+                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Revenue</span>
                         <span className="text-sm font-bold text-amber-600">₦{bm.revenue.toLocaleString()}</span>
                       </div>
                     </div>
@@ -642,7 +642,7 @@ export function EnterpriseClient({
 
               {/* Active API Keys List */}
               <div className="space-y-3">
-                <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">Active API Keys ({apiKeys.length})</h4>
+                <h4 className="text-xs font-semibold text-slate-700">Active API keys ({apiKeys.length})</h4>
                 {apiKeys.length === 0 ? (
                   <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
                     No active Enterprise API Keys. Create a new key above to integrate ERP or accounting software.
@@ -653,7 +653,7 @@ export function EnterpriseClient({
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-slate-900 text-xs">{k.name}</span>
-                          <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase">
+                          <span className="bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded">
                             {k.status || 'Active'}
                           </span>
                         </div>
@@ -671,14 +671,14 @@ export function EnterpriseClient({
                             navigator.clipboard.writeText(k.secretKey);
                             toast.success('API Secret Key copied!');
                           }}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
                         >
                           <Copy size={14} /> Copy
                         </button>
 
                         <button
                           onClick={() => handleRevokeKey(k.id)}
-                          className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                          className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                           title="Revoke Key"
                         >
                           <Trash2 size={14} />
@@ -700,16 +700,16 @@ export function EnterpriseClient({
             <CardHeader className="border-b border-slate-100 bg-emerald-50/40 flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <PhoneCall size={20} className="text-emerald-600" /> 24/7 Priority Veterinarian Hotline & Tickets
+                  <PhoneCall size={20} className="text-emerald-600" /> 24/7 Priority veterinarian hotline & tickets
                 </CardTitle>
                 <p className="text-xs text-slate-500 mt-0.5">Direct line to certified poultry disease specialists & emergency farm audits</p>
               </div>
 
               <button
                 onClick={() => setOpenVetModal(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow cursor-pointer transition-colors flex items-center gap-1.5"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow cursor-pointer transition-colors flex items-center gap-1.5"
               >
-                <Plus size={16} /> Dispatch Emergency Ticket
+                <Plus size={16} /> Dispatch emergency ticket
               </button>
             </CardHeader>
 
@@ -717,29 +717,29 @@ export function EnterpriseClient({
               {/* Lead Doctor Card */}
               <div className="bg-slate-900 text-white p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <span className="text-[10px] bg-emerald-500 text-slate-950 font-black uppercase px-2.5 py-0.5 rounded font-mono">
-                    24/7 DEDICATED VET CONSULTANT
+                  <span className="text-[10px] bg-emerald-500 text-slate-950 font-semibold px-2.5 py-0.5 rounded font-mono">
+                    24/7 Dedicated vet consultant
                   </span>
-                  <h3 className="text-lg font-bold text-white">On-Call Certified Veterinary Specialist</h3>
-                  <p className="text-xs text-slate-300 font-mono">+234 800-POULTRY-VET (Direct Emergency Line)</p>
+                  <h3 className="text-lg font-bold text-white">On-call certified veterinary specialist</h3>
+                  <p className="text-xs text-slate-300 font-mono">+234 800-POULTRY-VET (Direct emergency line)</p>
                 </div>
 
                 <a 
                   href="https://wa.me/2348000000000?text=Hello%20Doctor,%20I%20need%20urgent%20consultation%20for%20my%20poultry%20farm" 
                   target="_blank" 
                   rel="noreferrer"
-                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-3 rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
+                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs px-5 py-3 rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
                 >
-                  <PhoneCall size={16} /> Call Vet Specialist
+                  <PhoneCall size={16} /> Call vet specialist
                 </a>
               </div>
 
               {/* Tickets List */}
               <div className="space-y-3">
-                <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">Dispatched Vet Tickets ({consultants.length})</h4>
+                <h4 className="text-xs font-semibold text-slate-700">Dispatched vet tickets ({consultants.length})</h4>
                 {consultants.length === 0 ? (
                   <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
-                    No active veterinarian inspection tickets. Click "Dispatch Emergency Ticket" to request a farm visit or audit.
+                    No active veterinarian inspection tickets. Click "Dispatch emergency ticket" to request a farm visit or audit.
                   </div>
                 ) : (
                   consultants.map((t) => (
@@ -747,7 +747,7 @@ export function EnterpriseClient({
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-slate-900">{t.ticketType}</span>
-                          <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase">
+                          <span className="bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded">
                             {t.status || 'Assigned'}
                           </span>
                         </div>
@@ -769,7 +769,7 @@ export function EnterpriseClient({
           <Card className="rounded-2xl border border-slate-200 shadow-sm">
             <CardHeader className="border-b border-slate-100">
               <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Wheat size={20} className="text-amber-600" /> Cooperative Bulk Feed & Wholesale Purchasing Pool
+                <Wheat size={20} className="text-amber-600" /> Cooperative bulk feed & wholesale purchasing pool
               </CardTitle>
             </CardHeader>
 
@@ -797,15 +797,15 @@ export function EnterpriseClient({
 
                 <button
                   onClick={handleCreateBulkOrder}
-                  className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-3 rounded-xl shadow cursor-pointer transition-colors flex items-center justify-center gap-1.5"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-4 py-3 rounded-xl shadow cursor-pointer transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <Wheat size={16} /> Join Wholesale Feed Pool
+                  <Wheat size={16} /> Join wholesale feed pool
                 </button>
               </div>
 
               {/* Bulk Orders List */}
               <div className="space-y-3">
-                <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">Active Bulk Orders ({bulkOrders.length})</h4>
+                <h4 className="text-xs font-semibold text-slate-700">Active bulk orders ({bulkOrders.length})</h4>
                 {bulkOrders.length === 0 ? (
                   <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
                     No active wholesale feed pool orders. Pool orders to unlock 15% discount on maize and feeds.
@@ -817,7 +817,7 @@ export function EnterpriseClient({
                         <span className="font-bold text-slate-900">{o.feedType} ({o.quantityBags} Bags)</span>
                         <p className="text-[10px] text-emerald-600 font-bold mt-0.5">Wholesale Discount: 15% Off (₦{(o.discountPrice || 12500).toLocaleString()}/bag)</p>
                       </div>
-                      <span className="bg-amber-100 text-amber-800 text-[9px] font-extrabold px-2.5 py-1 rounded uppercase">
+                      <span className="bg-amber-100 text-amber-800 text-[10px] font-semibold px-2.5 py-1 rounded">
                         {o.status || 'Processing Pool'}
                       </span>
                     </div>
@@ -834,7 +834,7 @@ export function EnterpriseClient({
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
-              <h3 className="font-extrabold text-sm uppercase">Dispatch Emergency Vet Ticket</h3>
+              <h3 className="font-bold text-sm">Dispatch emergency vet ticket</h3>
               <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-white cursor-pointer">✕</button>
             </div>
             <div className="p-5 space-y-4">

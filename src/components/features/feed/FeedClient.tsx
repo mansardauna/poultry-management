@@ -437,7 +437,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <div className="border-2 border-red-500 bg-red-50 p-4 flex items-center gap-4">
           <AlertTriangle size={36} className="text-red-600 animate-pulse flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-red-950 uppercase">Flock Nutrition Critical Shortage Alert</p>
+            <p className="text-sm font-semibold text-red-950">Flock nutrition critical shortage alert</p>
             <p className="text-xs text-red-800 mt-0.5">
               Layer bird feed stock has plummeted to <strong>{layerMash.quantityKg} kg</strong> (below 50kg safety baseline). Restocking required immediately!
             </p>
@@ -452,7 +452,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Stock</p>
+                <p className="text-xs font-semibold text-slate-500">Total stock</p>
                 <p className="text-3xl font-semibold text-slate-900 mt-1">{totalFeedKg.toLocaleString()} kg</p>
               </div>
               <div className="text-amber-500"><BarChart2 size={30} /></div>
@@ -471,7 +471,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">This Week Used</p>
+                <p className="text-xs font-semibold text-slate-500">This week used</p>
                 <p className="text-3xl font-semibold text-indigo-600 mt-1">{weeklyKgTotal.toFixed(1)} kg</p>
               </div>
               <div className="text-indigo-500"><BarChart2 size={30} /></div>
@@ -494,7 +494,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{feed.type}</p>
+                    <p className="text-xs font-semibold text-slate-500">{feed.type}</p>
                     <p className={`text-3xl font-semibold mt-1 ${isCritical ? 'text-red-600' : 'text-slate-900'}`}>
                       {feed.quantityKg.toLocaleString()} kg
                     </p>
@@ -503,7 +503,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                 </div>
                 <div className="mt-3 flex items-center text-xs gap-2">
                   <span className={`font-semibold px-2 py-0.5 ${isCritical ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-600'}`}>
-                    {isCritical ? '⚠ Critical' : 'Safe'}
+                    {isCritical ? 'Critical' : 'Safe'}
                   </span>
                   <span className="text-slate-400">{consumed.toFixed(1)} kg used this week</span>
                 </div>
@@ -517,8 +517,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {feeds.length > 0 && (
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
-              Weekly Consumption by Feed Type
+            <CardTitle className="text-sm font-semibold text-slate-800">
+              Weekly consumption by feed type
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
@@ -750,7 +750,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
       {/* Log Feed Usage Modal */}
       <Dialog open={openUsage} onClose={handleCloseUsage} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Feed Consumption</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Log feed consumption</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
@@ -804,7 +804,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
       {/* Receive Stock Modal */}
       <Dialog open={openRestock} onClose={handleCloseRestock} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Receive Stock (Restock)</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Receive stock (Restock)</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
@@ -863,7 +863,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
       {/* Logistics Procurement Pipeline Modal */}
       <Dialog open={openLogistics} onClose={handleCloseLogistics} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Logistics Procurement Step</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Log logistics procurement step</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
@@ -927,7 +927,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
       {/* Edit Consumption Log Modal */}
       <Dialog open={openEditLog} onClose={handleCloseEditLog} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Feed Consumption</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Edit feed consumption</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
@@ -955,7 +955,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
 
       {/* Edit Pipeline Modal */}
       <Dialog open={openEditPipeline} onClose={handleCloseEditPipeline} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Procurement Pipeline</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Edit procurement pipeline</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
