@@ -437,7 +437,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <div className="border-2 border-red-500 bg-red-50 p-4 flex items-center gap-4">
           <AlertTriangle size={36} className="text-red-600 animate-pulse flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-red-950 uppercase">🚨 FLOCK NUTRITION CRITICAL SHORTAGE ALERT</p>
+            <p className="text-sm font-semibold text-red-950 uppercase">Flock Nutrition Critical Shortage Alert</p>
             <p className="text-xs text-red-800 mt-0.5">
               Layer bird feed stock has plummeted to <strong>{layerMash.quantityKg} kg</strong> (below 50kg safety baseline). Restocking required immediately!
             </p>

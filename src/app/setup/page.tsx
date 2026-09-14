@@ -309,8 +309,8 @@ export default function SetupWizardPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-emerald-600">
-                        ⚡ Supabase
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-emerald-700">
+                        Supabase
                       </span>
                       {databaseType === 'supabase' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
@@ -328,8 +328,8 @@ export default function SetupWizardPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-indigo-600">
-                        🐘 Standard PostgreSQL
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-indigo-700">
+                        Standard PostgreSQL
                       </span>
                       {databaseType === 'postgres' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
@@ -347,8 +347,8 @@ export default function SetupWizardPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-blue-600">
-                        🐬 MySQL / MariaDB
+                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-blue-700">
+                        MySQL / MariaDB
                       </span>
                       {databaseType === 'mysql' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
@@ -910,7 +910,7 @@ export default function SetupWizardPage() {
                 disabled={isSubmitting}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
-                {isSubmitting ? 'Completing Setup…' : '⚡ Complete Installation & Save Config'}
+                {isSubmitting ? 'Completing Setup…' : 'Complete Installation & Save Config'}
                 <CheckCircle2 size={16} />
               </button>
             )}

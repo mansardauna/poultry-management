@@ -65,19 +65,19 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const SEARCH_ITEMS = [
-    { name: 'Staff Management', desc: 'Add staff, set access roles, view team roster', href: '/dashboard/staff', category: 'Team & Staff', icon: '👥' },
-    { name: 'Sales & Merchant Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: '🛒' },
-    { name: 'Chicken Batches & Flocks', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: '🐔' },
-    { name: 'Egg Production & Collections', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: '🥚' },
-    { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: '🌾' },
-    { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: '💲' },
-    { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: '💉' },
-    { name: 'CCTV Camera Surveillance', desc: 'Pair cameras via WebRTC phone scanner or QR image', href: '/dashboard/cctv', category: 'Security & CCTV', icon: '🎥' },
-    { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: '🏠' },
-    { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: '🔧' },
-    { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: '📞' },
-    { name: 'Enterprise Hub', desc: 'Cooperative management & multi-farm reports', href: '/dashboard/enterprise', category: 'Enterprise', icon: '🏢' },
-    { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: '⚙️' },
+    { name: 'Staff Management', desc: 'Add staff, set access roles, view team roster', href: '/dashboard/staff', category: 'Team & Staff', icon: '' },
+    { name: 'Sales & Merchant Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: '' },
+    { name: 'Chicken Batches & Flocks', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: '' },
+    { name: 'Egg Production & Collections', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: '' },
+    { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: '' },
+    { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: '' },
+    { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: '' },
+    { name: 'CCTV Camera Surveillance', desc: 'Pair cameras via WebRTC phone scanner or QR image', href: '/dashboard/cctv', category: 'Security & CCTV', icon: '' },
+    { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: '' },
+    { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: '' },
+    { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: '' },
+    { name: 'Enterprise Hub', desc: 'Cooperative management & multi-farm reports', href: '/dashboard/enterprise', category: 'Enterprise', icon: '' },
+    { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: '' },
   ];
 
   const filteredSearchResults = searchQuery.trim() === '' 

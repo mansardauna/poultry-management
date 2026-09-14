@@ -146,7 +146,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
-              ⚡ Upgrade to Enterprise & Cooperative (₦45,000/mo)
+              Upgrade to Enterprise & Cooperative (₦45,000/mo)
             </button>
           </div>
         </div>

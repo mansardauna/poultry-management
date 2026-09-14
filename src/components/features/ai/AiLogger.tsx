@@ -155,7 +155,7 @@ export function AiLogger() {
                       }}
                       className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition-all"
                     >
-                      ⚡ Upgrade to Commercial Pro (₦15,000/mo)
+                      Upgrade to Commercial Pro (₦15,000/mo)
                     </button>
                   </div>
                 </div>

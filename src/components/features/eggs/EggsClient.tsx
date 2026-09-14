@@ -514,7 +514,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <div className="border-2 border-red-500 bg-red-50 p-4 flex items-center gap-4">
           <AlertTriangle size={36} className="text-red-600 animate-pulse flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-red-950 uppercase">🚨 Nesting Box Quality Loss Alert</p>
+            <p className="text-sm font-semibold text-red-950 uppercase">Nesting Box Quality Loss Alert</p>
             <p className="text-xs text-red-800 mt-0.5">
               Quality control isolated <strong>{totalBrokenEggs} cracked/broken eggs</strong> during collection protocols. Audit laying box cushioning immediately to aggressively mitigate egg breakage rates.
             </p>

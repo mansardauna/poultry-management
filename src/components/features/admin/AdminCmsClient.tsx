@@ -78,9 +78,9 @@ export function AdminCmsClient({
   const [isSaving, setIsSaving] = useState(false);
 
   // Landing Page CMS State
-  const [heroHeading, setHeroHeading] = useState('AI-Driven poultry farms with human-level precision');
-  const [heroSubtitle, setHeroSubtitle] = useState('Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.');
-  const [announcementBanner, setAnnouncementBanner] = useState('🔥 New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now!');
+  const [heroHeading, setHeroHeading] = useState('Precision Poultry Farm Management Platform');
+  const [heroSubtitle, setHeroSubtitle] = useState('Empower farm managers with operational telemetry to track flock health, predict egg yields, and execute at peak efficiency.');
+  const [announcementBanner, setAnnouncementBanner] = useState('New Release: Voice Auto-Logger & Multi-Farm Enterprise Hub live now');
   const [supportPhone, setSupportPhone] = useState('+234 800 768 5879');
   const [supportEmail, setSupportEmail] = useState('support@pfms-poultry.com');
 
@@ -585,7 +585,7 @@ export function AdminCmsClient({
                 className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs px-4 py-2 rounded-lg transition-all flex items-center gap-2 cursor-pointer"
               >
                 {isDbTesting ? <RefreshCw className="animate-spin" size={14} /> : <Database size={14} />}
-                <span>⚡ Test Live Connection</span>
+                <span>Test Live Connection</span>
               </button>
             </div>
 
@@ -597,7 +597,7 @@ export function AdminCmsClient({
                 }`}
               >
                 <div className="flex items-center justify-between font-bold text-xs text-slate-900">
-                  <span className="text-emerald-600">⚡ Supabase Cloud</span>
+                  <span className="text-emerald-700">Supabase Cloud</span>
                   {databaseType === 'supabase' && <CheckCircle size={16} className="text-indigo-600" />}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium mt-1">Cloud PostgreSQL with Auth & Storage API</p>
@@ -610,7 +610,7 @@ export function AdminCmsClient({
                 }`}
               >
                 <div className="flex items-center justify-between font-bold text-xs text-slate-900">
-                  <span className="text-indigo-600">🐘 Standard PostgreSQL</span>
+                  <span className="text-indigo-700">Standard PostgreSQL</span>
                   {databaseType === 'postgres' && <CheckCircle size={16} className="text-indigo-600" />}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium mt-1">Self-hosted Postgres / AWS RDS / Neon</p>
@@ -623,7 +623,7 @@ export function AdminCmsClient({
                 }`}
               >
                 <div className="flex items-center justify-between font-bold text-xs text-slate-900">
-                  <span className="text-blue-600">🐬 MySQL / MariaDB</span>
+                  <span className="text-blue-700">MySQL / MariaDB</span>
                   {databaseType === 'mysql' && <CheckCircle size={16} className="text-indigo-600" />}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium mt-1">MySQL 8.0 / MariaDB / cPanel hosting</p>
@@ -873,7 +873,7 @@ export function AdminCmsClient({
               className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider px-8 py-4 rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>⚡ Save & Apply Setup Config</span>
+              <span>Save & Apply Setup Configuration</span>
             </button>
           </div>
         </div>
