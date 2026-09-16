@@ -3,7 +3,31 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
+import { isSupabaseMode } from '@/lib/authdb';
 import bcrypt from 'bcryptjs';
+
+function localIdentifierPart(email: string): string {
+  return email.split('@')[0].toLowerCase();
+}
+
+async function findLocalUser(identifier: string) {
+  const clean = identifier.trim().toLowerCase();
+  const { data: users } = await supabase
+    .from('users')
+    .select('*')
+    .or(`username.eq.${clean},username.eq.${localIdentifierPart(clean)}`)
+    .limit(1);
+  return (users && users.length > 0) ? users[0] : null;
+}
+
+async function updateLocalPassword(userId: string, newPassword: string): Promise<boolean> {
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  const { error } = await supabase
+    .from('users')
+    .update({ passwordHash })
+    .eq('id', userId);
+  return !error;
+}
 
 export async function POST(request: Request) {
   try {
@@ -11,28 +35,68 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, currentPassword, newPassword } = body;
 
+    // ---- Local database mode (MySQL/PostgreSQL): passwords live in the users table ----
+    if (!(await isSupabaseMode())) {
+      if (!newPassword || newPassword.length < 6) {
+        return NextResponse.json({ error: 'New password must be at least 6 characters' }, { status: 400 });
+      }
+
+      const identifier =
+        authUser?.email && authUser.email !== 'admin@poultry.local'
+          ? authUser.email
+          : typeof email === 'string' && email.trim()
+            ? email.trim()
+            : '';
+
+      if (!identifier) {
+        return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
+      }
+
+      const user = await findLocalUser(identifier);
+      if (!user) {
+        return NextResponse.json({ success: true, message: 'If an account matches, the password has been updated.' });
+      }
+
+      if (currentPassword) {
+        const valid = user.passwordHash ? bcrypt.compareSync(currentPassword, user.passwordHash) : false;
+        if (!valid) {
+          return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 });
+        }
+      }
+
+      const ok = await updateLocalPassword(user.id, newPassword);
+      if (!ok) {
+        return NextResponse.json({ error: 'Failed to update password in database' }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, message: 'Password updated successfully!' });
+    }
+
+    // ---- Supabase mode ----
     // Logged-in user updating password
     if (authUser && newPassword) {
       if (newPassword.length < 6) {
         return NextResponse.json({ error: 'New password must be at least 6 characters' }, { status: 400 });
       }
 
-      // If current password check is requested
+      // Verify the current password against the actual login store (Supabase Auth)
       if (currentPassword) {
-        const { data: userRecord } = await supabase
-          .from('users')
-          .select('passwordHash')
-          .eq('id', authUser.id)
-          .single();
-
-        if (userRecord?.passwordHash) {
-          const isValid = await bcrypt.compare(currentPassword, userRecord.passwordHash);
-          if (!isValid) {
-            return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 });
-          }
+        const { error: verifyErr } = await supabase.auth.signInWithPassword({
+          email: authUser.email,
+          password: currentPassword
+        });
+        if (verifyErr) {
+          return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 });
         }
       }
 
+      // Update Supabase Auth password (source of truth for real login)
+      const { error: authUpdateErr } = await supabase.auth.admin.updateUserById(authUser.id, { password: newPassword });
+      if (authUpdateErr) {
+        console.warn('Failed to update Supabase Auth password:', authUpdateErr.message);
+      }
+
+      // Keep legacy users-table hash in sync for fallback login paths
       const passwordHash = await bcrypt.hash(newPassword, 10);
       const { error: updateErr } = await supabase
         .from('users')
@@ -43,9 +107,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to update password in database' }, { status: 500 });
       }
 
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Password updated successfully!' 
+      return NextResponse.json({
+        success: true,
+        message: 'Password updated successfully!'
       });
     }
 
@@ -70,9 +134,20 @@ export async function POST(request: Request) {
           .update({ passwordHash })
           .eq('id', user.id);
 
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Your password has been reset successfully! You can now log in.' 
+        // Also update the Supabase Auth password for the matching auth account
+        try {
+          const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
+          const authAccount = authUsers?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
+          if (authAccount?.id) {
+            await supabase.auth.admin.updateUserById(authAccount.id, { password: newPassword });
+          }
+        } catch (listErr) {
+          console.warn('Failed to sync Supabase Auth password reset:', listErr);
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: 'Your password has been reset successfully! You can now log in.'
         });
       }
     }
