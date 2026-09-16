@@ -116,7 +116,7 @@ export async function POST(request: Request) {
       try {
         const { supabase: adminClient } = await import('@/lib/supabase');
         const { data: usersData } = await adminClient.auth.admin.listUsers();
-        const existingAuth = usersData?.users.find(u => u.email?.toLowerCase() === staffEmail.toLowerCase());
+        const existingAuth = usersData?.users.find((u: any) => u.email?.toLowerCase() === staffEmail.toLowerCase());
 
         if (existingAuth) {
           await adminClient.auth.admin.updateUserById(existingAuth.id, {
@@ -209,7 +209,7 @@ export async function DELETE(request: Request) {
           staffMember.name?.toLowerCase()
         ].filter(Boolean);
 
-        const authUserToDelete = usersData?.users?.find(u => 
+        const authUserToDelete = usersData?.users?.find((u: any) => 
           candidateEmails.includes(u.email?.toLowerCase())
         );
 

@@ -13,7 +13,7 @@ export async function GET() {
 
   // Fallback: If cctv_cameras table is empty, reconstruct paired cameras from audit logs
   if (cameras.length === 0 && cctvLogsData && cctvLogsData.length > 0) {
-    const pairedLogs = cctvLogsData.filter(l => l.event && l.event.includes('Paired new hardware camera'));
+    const pairedLogs = cctvLogsData.filter((l: any) => l.event && l.event.includes('Paired new hardware camera'));
     const cameraMap = new Map();
     for (const log of pairedLogs) {
       const match = log.event.match(/ID\/URL:\s*([^)]+)/);

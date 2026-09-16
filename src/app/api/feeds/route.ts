@@ -141,7 +141,7 @@ export async function POST(request: Request) {
           }]);
 
           const { data: taskResult } = await supabase.from('tasks').select('*').eq('status', 'Pending').eq('workspaceId', workspaceId);
-          const taskExists = taskResult?.some((t) => (t as { taskName: string }).taskName.includes(`Replenish ${feed.type}`));
+          const taskExists = taskResult?.some((t: any) => (t as { taskName: string }).taskName.includes(`Replenish ${feed.type}`));
           if (!taskExists) {
             await supabase.from('tasks').insert([{
               id: 't-' + Date.now(),

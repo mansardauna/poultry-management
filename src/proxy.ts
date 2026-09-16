@@ -1,35 +1,57 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+function isValidSupabaseUrl(url?: string): boolean {
+  if (!url) return false;
+  if (url.includes('placeholder')) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '',
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+  const isSupabaseValid = isValidSupabaseUrl(url) && Boolean(key && key !== 'placeholder-key');
+
+  let user: any = null;
+
+  if (isSupabaseValid) {
+    try {
+      const supabase = createServerClient(
+        url,
+        key,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                supabaseResponse.cookies.set(name, value, options)
+              )
+            },
+          },
+        }
+      )
+      const res = await supabase.auth.getUser();
+      user = res.data?.user || null;
+    } catch (_err) {
+      user = null;
     }
-  )
+  }
+
+  const roleCookie = request.cookies.get('pfms_role')?.value;
+  const orgIdCookie = request.cookies.get('pfms_org_id')?.value;
 
   const path = request.nextUrl.pathname
-  const { data: { user } } = await supabase.auth.getUser()
-
   const publicPaths = [
     '/', 
     '/login', 
@@ -40,7 +62,8 @@ export async function proxy(request: NextRequest) {
     '/privacy', 
     '/terms', 
     '/documentation', 
-    '/reset-password'
+    '/reset-password',
+    '/setup'
   ];
 
   const isPublicPath = 
@@ -49,21 +72,24 @@ export async function proxy(request: NextRequest) {
     path.startsWith('/pay-invoice') || 
     path.includes('.');
 
-  if (!user && !isPublicPath) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+  const isAuthenticated = Boolean(user || roleCookie);
+
+  if (!isAuthenticated && !isPublicPath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    return NextResponse.redirect(redirectUrl)
   }
 
-  if (user) {
-    const isSuperAdminEmail = user.email === 'superadmin@pfms.com';
-    const userRole = isSuperAdminEmail || user.user_metadata?.role === 'SuperAdmin' ? 'SuperAdmin' : (user.user_metadata?.role || 'Admin');
-    supabaseResponse.headers.set('x-user-role', userRole)
-    supabaseResponse.headers.set('x-user-email', user.email || '')
+  if (user || roleCookie) {
+    const email = user?.email || request.cookies.get('pfms_email')?.value || '';
+    const isSuperAdmin = email === 'superadmin@pfms.com' || roleCookie === 'SuperAdmin';
+    const userRole = isSuperAdmin ? 'SuperAdmin' : (roleCookie || user?.user_metadata?.role || 'Admin');
     
-    // Read organization details from cookies (set during login/signup)
+    supabaseResponse.headers.set('x-user-role', userRole)
+    supabaseResponse.headers.set('x-user-email', email)
+    
     const tier = request.cookies.get('pfms_tier')?.value || 'free'
-    const orgId = request.cookies.get('pfms_org_id')?.value || ''
+    const orgId = orgIdCookie || ''
     supabaseResponse.headers.set('x-user-tier', tier)
     supabaseResponse.headers.set('x-org-id', orgId)
   }

@@ -1,13 +1,26 @@
 'use strict';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { isValidSupabaseUrl } from './supabase';
+import { makeAuthStub } from './dataAdapter';
 
 export async function createClient() {
   const cookieStore = await cookies();
-  
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+
+  if (!isValidSupabaseUrl(url) || !key || key === 'placeholder-key') {
+    return {
+      auth: makeAuthStub(),
+      from: () => {
+        throw new Error('Supabase server client not configured');
+      },
+    } as any;
+  }
+
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '',
+    url,
+    key,
     {
       cookies: {
         getAll() {
@@ -19,8 +32,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            // Ignored when called from Server Components
           }
         },
       },
