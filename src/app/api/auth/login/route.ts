@@ -81,10 +81,11 @@ export async function POST(request: Request) {
 
     // 3. Fallback: Search `users` database table for Staff / Manager credentials
     if (authError || !authResult?.user) {
+      const userClean = emailInput.split('@')[0];
       const { data: userRecords } = await adminClient
         .from('users')
         .select('*')
-        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()}`)
+        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()},username.eq.${userClean}`)
         .limit(1);
 
       if (userRecords && userRecords.length > 0) {
@@ -132,7 +133,11 @@ export async function POST(request: Request) {
           if (!authResult) {
             const response = NextResponse.json({ ok: true, role: staffRole });
             response.cookies.set('pfms_role', staffRole, { path: '/' });
-            response.cookies.set('pfms_workspace', userRec.workspaceId || 'main-org_owner_main', { path: '/' });
+            response.cookies.set('pfms_email', userRec.username, { path: '/' });
+            const wsId = userRec.workspaceId || 'main-org_owner_main';
+            response.cookies.set('pfms_workspace', wsId, { path: '/' });
+            response.cookies.set('pfms_org_id', wsId.startsWith('main-') ? wsId.slice(5) : 'org_owner_main', { path: '/' });
+            response.cookies.set('pfms_tier', 'pro', { path: '/' });
             return response;
           }
         }
