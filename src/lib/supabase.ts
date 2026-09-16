@@ -13,10 +13,10 @@ export function isValidSupabaseUrl(url?: string): boolean {
   }
 }
 
-// 2.5s Strict Timeout Fetch for Supabase to prevent network hangs
+// 1.0s Strict Timeout Fetch for Supabase to prevent network hangs & retries
 function fastFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  const timeoutId = setTimeout(() => controller.abort(), 1000);
   const signal = init?.signal
     ? (AbortSignal as any).any([init.signal, controller.signal])
     : controller.signal;
@@ -30,7 +30,7 @@ const isConfigured = isValidSupabaseUrl(rawUrl) && Boolean(rawKey && rawKey !== 
 
 export const realSupabase = isConfigured
   ? createClient(rawUrl!, rawKey!, {
-      auth: { persistSession: false },
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
       global: { fetch: fastFetch },
     })
   : null;
