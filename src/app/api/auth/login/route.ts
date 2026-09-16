@@ -61,7 +61,7 @@ export async function POST(request: Request) {
         if (isPasswordValid) {
           const staffRole = userRec.role || 'Staff';
           const targetWorkspaceId = userRec.workspaceId || 'main-org_owner_main';
-          const orgId = userRec.orgId || 'org_owner_main';
+          const orgId = userRec.orgId || (targetWorkspaceId.startsWith('main-') ? targetWorkspaceId.slice(5) : 'org_owner_main');
           const tier = userRec.subscriptionTier || (emailInput === 'owner@poultry.com' ? 'pro' : 'free');
 
           const response = NextResponse.json({ ok: true, role: staffRole });
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
           response.cookies.set('pfms_org_id', orgId, { path: '/' });
           response.cookies.set('pfms_tier', tier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
           response.cookies.set('pfms_role', staffRole, { path: '/' });
-          response.cookies.set('pfms_email', emailInput, { path: '/' });
+          response.cookies.set('pfms_email', userRec.username || emailInput, { path: '/' });
           return response;
         }
       }
