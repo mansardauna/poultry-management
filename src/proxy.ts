@@ -21,36 +21,6 @@ export async function proxy(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
   const isSupabaseValid = isValidSupabaseUrl(url) && Boolean(key && key !== 'placeholder-key');
 
-  let user: any = null;
-
-  if (isSupabaseValid) {
-    try {
-      const supabase = createServerClient(
-        url,
-        key,
-        {
-          cookies: {
-            getAll() {
-              return request.cookies.getAll()
-            },
-            setAll(cookiesToSet) {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                supabaseResponse.cookies.set(name, value, options)
-              )
-            },
-          },
-        }
-      )
-      const res = await supabase.auth.getUser();
-      user = res.data?.user || null;
-    } catch (_err) {
-      user = null;
-    }
-  }
-
-  const roleCookie = request.cookies.get('pfms_role')?.value;
-  const orgIdCookie = request.cookies.get('pfms_org_id')?.value;
-
   const path = request.nextUrl.pathname
   const publicPaths = [
     '/', 
@@ -72,6 +42,45 @@ export async function proxy(request: NextRequest) {
     path.startsWith('/pay-invoice') || 
     path.includes('.');
 
+  const hasAuthCookies = request.cookies.getAll().some(
+    (c) => c.name.includes('auth-token') || c.name.startsWith('sb-') || c.name.startsWith('pfms_')
+  );
+
+  let user: any = null;
+
+  // Only perform network auth lookup if Supabase is valid AND auth cookies exist
+  if (isSupabaseValid && hasAuthCookies) {
+    try {
+      const supabase = createServerClient(
+        url,
+        key,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                supabaseResponse.cookies.set(name, value, options)
+              )
+            },
+          },
+        }
+      )
+      
+      const timeoutPromise = new Promise<{ data: { user: null } }>((resolve) =>
+        setTimeout(() => resolve({ data: { user: null } }), 1500)
+      );
+      
+      const res = await Promise.race([supabase.auth.getUser(), timeoutPromise]);
+      user = res.data?.user || null;
+    } catch (_err) {
+      user = null;
+    }
+  }
+
+  const roleCookie = request.cookies.get('pfms_role')?.value;
+  const orgIdCookie = request.cookies.get('pfms_org_id')?.value;
   const isAuthenticated = Boolean(user || roleCookie);
 
   if (!isAuthenticated && !isPublicPath) {

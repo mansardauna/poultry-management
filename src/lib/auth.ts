@@ -15,7 +15,14 @@ export async function getAuthUser(): Promise<AuthUser | null> {
   try {
     const supabase = await createClient();
     if (supabase.auth && typeof supabase.auth.getUser === 'function') {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const timeoutPromise = new Promise<{ data: { user: null }; error: null }>((resolve) =>
+        setTimeout(() => resolve({ data: { user: null }, error: null }), 1500)
+      );
+
+      const { data: { user }, error } = await Promise.race([
+        supabase.auth.getUser(),
+        timeoutPromise,
+      ]);
 
       if (!error && user) {
         return {
