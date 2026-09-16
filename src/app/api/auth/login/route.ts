@@ -126,8 +126,12 @@ export async function POST(request: Request) {
     }
 
     if (authError || !authResult?.user) {
+      const errorMsg =
+        authError?.message && !authError.message.includes('not used in local database mode')
+          ? authError.message
+          : 'Invalid username/email or password.';
       return NextResponse.json(
-        { error: authError?.message || 'Invalid username/email or password.' },
+        { error: errorMsg },
         { status: 401 },
       );
     }

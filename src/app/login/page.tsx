@@ -39,22 +39,29 @@ export default function LoginPage() {
     setError('');
     setIsSubmitting(true);
 
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    setIsSubmitting(false);
+      setIsSubmitting(false);
 
-    if (response.ok) {
-      router.push('/dashboard');
-      router.refresh();
-      return;
+      const body = await response.json().catch(() => null);
+
+      if (response.ok) {
+        router.push('/dashboard');
+        router.refresh();
+        return;
+      }
+
+      const displayError = body?.error || `Authentication failed (HTTP ${response.status}). Check your email/password.`;
+      setError(displayError);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setError(err?.message || 'Network connection failed while attempting to reach backend server.');
     }
-
-    const body = await response.json().catch(() => null);
-    setError(body?.error || 'Invalid email or password');
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {

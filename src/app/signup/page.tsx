@@ -33,32 +33,39 @@ function SignupForm() {
     setError('');
     setIsSubmitting(true);
 
-    const response = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    setIsSubmitting(false);
+      setIsSubmitting(false);
 
-    if (response.ok) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('pfms_onboarded_dismissed');
-        localStorage.removeItem('pfms_widget_dismissed');
-        localStorage.removeItem('pfms_starter_guide_read');
-        localStorage.removeItem('pfms_onboarding_draft');
-        localStorage.removeItem('pfms_branch_setup_completed');
-        localStorage.removeItem('pfms_white_label');
-        localStorage.removeItem('pfms_workspace');
+      const body = await response.json().catch(() => null);
+
+      if (response.ok) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('pfms_onboarded_dismissed');
+          localStorage.removeItem('pfms_widget_dismissed');
+          localStorage.removeItem('pfms_starter_guide_read');
+          localStorage.removeItem('pfms_onboarding_draft');
+          localStorage.removeItem('pfms_branch_setup_completed');
+          localStorage.removeItem('pfms_white_label');
+          localStorage.removeItem('pfms_workspace');
+        }
+        const targetUrl = plan === 'pro' ? '/dashboard?onboarding=true&plan=pro' : '/dashboard?onboarding=true';
+        router.push(targetUrl);
+        router.refresh();
+        return;
       }
-      const targetUrl = plan === 'pro' ? '/dashboard?onboarding=true&plan=pro' : '/dashboard?onboarding=true';
-      router.push(targetUrl);
-      router.refresh();
-      return;
-    }
 
-    const body = await response.json().catch(() => null);
-    setError(body?.error || 'Error creating account');
+      const displayError = body?.error || `Account creation failed (HTTP ${response.status}).`;
+      setError(displayError);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setError(err?.message || 'Network error while attempting to reach server.');
+    }
   };
 
   return (
