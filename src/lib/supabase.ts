@@ -13,12 +13,26 @@ export function isValidSupabaseUrl(url?: string): boolean {
   }
 }
 
+// 2.5s Strict Timeout Fetch for Supabase to prevent network hangs
+function fastFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  const signal = init?.signal
+    ? (AbortSignal as any).any([init.signal, controller.signal])
+    : controller.signal;
+
+  return fetch(input, { ...init, signal }).finally(() => clearTimeout(timeoutId));
+}
+
 const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const isConfigured = isValidSupabaseUrl(rawUrl) && Boolean(rawKey && rawKey !== 'placeholder-key');
 
 export const realSupabase = isConfigured
-  ? createClient(rawUrl!, rawKey!, { auth: { persistSession: false } })
+  ? createClient(rawUrl!, rawKey!, {
+      auth: { persistSession: false },
+      global: { fetch: fastFetch },
+    })
   : null;
 
 async function localExecutor(ops: any[], table: string) {
