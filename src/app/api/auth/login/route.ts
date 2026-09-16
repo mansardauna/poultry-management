@@ -1,8 +1,14 @@
 'use strict';
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabaseServer';
 import bcrypt from 'bcryptjs';
+
+const AUTH_TIMEOUT_MS = 1200;
+
+function withTimeout<T>(promise: Promise<T>, fallbackValue: T): Promise<T> {
+  const timeout = new Promise<T>((resolve) => setTimeout(() => resolve(fallbackValue), AUTH_TIMEOUT_MS));
+  return Promise.race([promise, timeout]);
+}
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -29,12 +35,14 @@ export async function POST(request: Request) {
     let authResult: any = null;
     let authError: any = null;
 
-    // 1. Try Supabase Auth sign in with provided input or normalized email
+    // 1. Try Supabase Auth sign in with 1.2s timeout per attempt
     for (const em of targetEmails) {
-      const res = await supabase.auth.signInWithPassword({
-        email: em,
-        password,
-      });
+      if (!supabase.auth || typeof supabase.auth.signInWithPassword !== 'function') break;
+
+      const res = await withTimeout(
+        supabase.auth.signInWithPassword({ email: em, password }).catch((e: any) => ({ data: { user: null }, error: e })),
+        { data: { user: null }, error: { message: 'Timeout' } }
+      );
 
       if (!res.error && res.data?.user) {
         authResult = res.data;
@@ -46,24 +54,29 @@ export async function POST(request: Request) {
     }
 
     // 2. Handle unconfirmed email auto-confirmation if needed
-    if (authError && authError.message.toLowerCase().includes('email not confirmed')) {
-      const { data: usersData } = await adminClient.auth.admin.listUsers();
-      const unconfirmedUser = usersData?.users.find((u: any) => 
-        u.email?.toLowerCase() === emailInput.toLowerCase() || 
-        u.email?.toLowerCase() === `${emailInput.toLowerCase()}@farm.local`
-      );
+    if (authError && authError.message?.toLowerCase().includes('email not confirmed')) {
+      try {
+        const usersData: any = await withTimeout<any>(
+          adminClient.auth.admin.listUsers().then((r: any) => r.data).catch(() => null),
+          null
+        );
+        const unconfirmedUser = usersData?.users?.find((u: any) => 
+          u.email?.toLowerCase() === emailInput.toLowerCase() || 
+          u.email?.toLowerCase() === `${emailInput.toLowerCase()}@farm.local`
+        );
 
-      if (unconfirmedUser) {
-        await adminClient.auth.admin.updateUserById(unconfirmedUser.id, { email_confirm: true });
-        const retryRes = await supabase.auth.signInWithPassword({
-          email: unconfirmedUser.email!,
-          password,
-        });
-        if (!retryRes.error && retryRes.data.user) {
-          authResult = retryRes.data;
-          authError = null;
+        if (unconfirmedUser) {
+          await adminClient.auth.admin.updateUserById(unconfirmedUser.id, { email_confirm: true }).catch(() => {});
+          const retryRes = await withTimeout(
+            supabase.auth.signInWithPassword({ email: unconfirmedUser.email!, password }).catch((e: any) => ({ data: { user: null }, error: e })),
+            { data: { user: null }, error: { message: 'Timeout' } }
+          );
+          if (!retryRes.error && retryRes.data?.user) {
+            authResult = retryRes.data;
+            authError = null;
+          }
         }
-      }
+      } catch (_e) {}
     }
 
     // 3. Fallback: Search `users` database table for Staff / Manager credentials
@@ -82,38 +95,39 @@ export async function POST(request: Request) {
           const staffRole = userRec.role || 'Staff';
           const staffEmail = userRec.username.includes('@') ? userRec.username : `${userRec.username}@farm.local`;
 
-          // Auto-sync into Supabase Auth so standard session cookies work
+          // Optional Auto-sync into Supabase Auth (capped with timeout)
           try {
-            const { data: usersData } = await adminClient.auth.admin.listUsers();
-            const existingAuth = usersData?.users.find((u: any) => u.email?.toLowerCase() === staffEmail.toLowerCase());
+            const usersData: any = await withTimeout<any>(
+              adminClient.auth.admin.listUsers().then((r: any) => r.data).catch(() => null),
+              null
+            );
+            const existingAuth = usersData?.users?.find((u: any) => u.email?.toLowerCase() === staffEmail.toLowerCase());
 
             if (existingAuth) {
               await adminClient.auth.admin.updateUserById(existingAuth.id, {
                 password: password,
                 email_confirm: true,
                 user_metadata: { role: staffRole }
-              });
+              }).catch(() => {});
             } else {
               await adminClient.auth.admin.createUser({
                 email: staffEmail,
                 password: password,
                 email_confirm: true,
                 user_metadata: { role: staffRole }
-              });
+              }).catch(() => {});
             }
 
-            const signInRes = await supabase.auth.signInWithPassword({
-              email: staffEmail,
-              password: password
-            });
+            const signInRes = await withTimeout(
+              supabase.auth.signInWithPassword({ email: staffEmail, password }).catch((e: any) => ({ data: { user: null }, error: e })),
+              { data: { user: null }, error: { message: 'Timeout' } }
+            );
 
             if (signInRes.data?.user) {
               authResult = signInRes.data;
               authError = null;
             }
-          } catch (_e) {
-            console.error('Auto auth sync error:', _e);
-          }
+          } catch (_e) {}
 
           if (!authResult) {
             const response = NextResponse.json({ ok: true, role: staffRole });
@@ -127,7 +141,7 @@ export async function POST(request: Request) {
 
     if (authError || !authResult?.user) {
       const errorMsg =
-        authError?.message && !authError.message.includes('not used in local database mode')
+        authError?.message && !authError.message.includes('not used in local database mode') && !authError.message.includes('Timeout')
           ? authError.message
           : 'Invalid username/email or password.';
       return NextResponse.json(
@@ -164,10 +178,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check metadata first for staff assigned workspace
     let targetWorkspaceId = user.user_metadata?.workspaceId || '';
-
-    // Look up staff member's assigned farm workspace ID from staff table
     if (!targetWorkspaceId) {
       const { data: staffMember } = await adminClient
         .from('staff')
@@ -183,7 +194,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Look up workspaceId from users table
     if (!targetWorkspaceId) {
       const { data: userRec } = await adminClient
         .from('users')
@@ -213,7 +223,6 @@ export async function POST(request: Request) {
       targetWorkspaceId = user.email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-${orgId}`;
     }
 
-    // Fallback: Verify that targetWorkspaceId exists in workspaces table
     const { data: validWs } = await adminClient.from('workspaces').select('id').eq('id', targetWorkspaceId).maybeSingle();
     if (!validWs) {
       const { data: mainWs } = await adminClient.from('workspaces').select('id').order('createdAt', { ascending: true }).limit(1);
