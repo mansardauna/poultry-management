@@ -26,9 +26,9 @@ function fastFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Respon
 
 const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const isConfigured = isValidSupabaseUrl(rawUrl) && Boolean(rawKey && rawKey !== 'placeholder-key');
+export const isSupabaseConfigured = isValidSupabaseUrl(rawUrl) && Boolean(rawKey && rawKey !== 'placeholder-key');
 
-export const realSupabase = isConfigured
+export const realSupabase = isSupabaseConfigured
   ? createClient(rawUrl!, rawKey!, {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
       global: { fetch: fastFetch },

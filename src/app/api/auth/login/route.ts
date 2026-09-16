@@ -1,14 +1,8 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabaseServer';
+import { isSupabaseConfigured, supabase as adminClient } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
-
-const AUTH_TIMEOUT_MS = 1200;
-
-function withTimeout<T>(promise: Promise<T>, fallbackValue: T): Promise<T> {
-  const timeout = new Promise<T>((resolve) => setTimeout(() => resolve(fallbackValue), AUTH_TIMEOUT_MS));
-  return Promise.race([promise, timeout]);
-}
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -24,67 +18,40 @@ export async function POST(request: Request) {
   }
 
   try {
-    const supabase = await createClient();
-    const { supabase: adminClient } = await import('@/lib/supabase');
-
-    const targetEmails = [
-      emailInput,
-      emailInput.includes('@') ? emailInput : `${emailInput}@farm.local`
-    ];
-
     let authResult: any = null;
     let authError: any = null;
 
-    // 1. Try Supabase Auth sign in with 1.2s timeout per attempt
-    for (const em of targetEmails) {
-      if (!supabase.auth || typeof supabase.auth.signInWithPassword !== 'function') break;
+    // 1. Try Supabase Auth sign in only if Supabase is valid & configured
+    if (isSupabaseConfigured) {
+      try {
+        const supabase = await createClient();
+        const targetEmails = [
+          emailInput,
+          emailInput.includes('@') ? emailInput : `${emailInput}@farm.local`
+        ];
 
-      const res = await withTimeout(
-        supabase.auth.signInWithPassword({ email: em, password }).catch((e: any) => ({ data: { user: null }, error: e })),
-        { data: { user: null }, error: { message: 'Timeout' } }
-      );
-
-      if (!res.error && res.data?.user) {
-        authResult = res.data;
-        authError = null;
-        break;
-      } else {
-        authError = res.error;
+        for (const em of targetEmails) {
+          const res = await supabase.auth.signInWithPassword({ email: em, password }).catch((e: any) => ({ data: { user: null }, error: e }));
+          if (!res.error && res.data?.user) {
+            authResult = res.data;
+            authError = null;
+            break;
+          } else {
+            authError = res.error;
+          }
+        }
+      } catch (err: any) {
+        authError = err;
       }
     }
 
-    // 2. Handle unconfirmed email auto-confirmation if needed
-    if (authError && authError.message?.toLowerCase().includes('email not confirmed')) {
-      try {
-        const usersData: any = await withTimeout<any>(
-          adminClient.auth.admin.listUsers().then((r: any) => r.data).catch(() => null),
-          null
-        );
-        const unconfirmedUser = usersData?.users?.find((u: any) => 
-          u.email?.toLowerCase() === emailInput.toLowerCase() || 
-          u.email?.toLowerCase() === `${emailInput.toLowerCase()}@farm.local`
-        );
-
-        if (unconfirmedUser) {
-          await adminClient.auth.admin.updateUserById(unconfirmedUser.id, { email_confirm: true }).catch(() => {});
-          const retryRes = await withTimeout(
-            supabase.auth.signInWithPassword({ email: unconfirmedUser.email!, password }).catch((e: any) => ({ data: { user: null }, error: e })),
-            { data: { user: null }, error: { message: 'Timeout' } }
-          );
-          if (!retryRes.error && retryRes.data?.user) {
-            authResult = retryRes.data;
-            authError = null;
-          }
-        }
-      } catch (_e) {}
-    }
-
-    // 3. Fallback: Search `users` database table for Staff / Manager credentials
-    if (authError || !authResult?.user) {
+    // 2. Database table lookup for users/staff credentials (runs in local DB mode or when Supabase Auth fails)
+    if (!authResult?.user) {
+      const userClean = emailInput.split('@')[0].toLowerCase();
       const { data: userRecords } = await adminClient
         .from('users')
         .select('*')
-        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()}`)
+        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()},username.eq.${userClean},email.eq.${emailInput}`)
         .limit(1);
 
       if (userRecords && userRecords.length > 0) {
@@ -93,183 +60,49 @@ export async function POST(request: Request) {
 
         if (isPasswordValid) {
           const staffRole = userRec.role || 'Staff';
-          const staffEmail = userRec.username.includes('@') ? userRec.username : `${userRec.username}@farm.local`;
+          const targetWorkspaceId = userRec.workspaceId || 'main-org_owner_main';
+          const orgId = userRec.orgId || 'org_owner_main';
+          const tier = userRec.subscriptionTier || (emailInput === 'owner@poultry.com' ? 'pro' : 'free');
 
-          // Optional Auto-sync into Supabase Auth (capped with timeout)
-          try {
-            const usersData: any = await withTimeout<any>(
-              adminClient.auth.admin.listUsers().then((r: any) => r.data).catch(() => null),
-              null
-            );
-            const existingAuth = usersData?.users?.find((u: any) => u.email?.toLowerCase() === staffEmail.toLowerCase());
-
-            if (existingAuth) {
-              await adminClient.auth.admin.updateUserById(existingAuth.id, {
-                password: password,
-                email_confirm: true,
-                user_metadata: { role: staffRole }
-              }).catch(() => {});
-            } else {
-              await adminClient.auth.admin.createUser({
-                email: staffEmail,
-                password: password,
-                email_confirm: true,
-                user_metadata: { role: staffRole }
-              }).catch(() => {});
-            }
-
-            const signInRes = await withTimeout(
-              supabase.auth.signInWithPassword({ email: staffEmail, password }).catch((e: any) => ({ data: { user: null }, error: e })),
-              { data: { user: null }, error: { message: 'Timeout' } }
-            );
-
-            if (signInRes.data?.user) {
-              authResult = signInRes.data;
-              authError = null;
-            }
-          } catch (_e) {}
-
-          if (!authResult) {
-            const response = NextResponse.json({ ok: true, role: staffRole });
-            response.cookies.set('pfms_role', staffRole, { path: '/' });
-            response.cookies.set('pfms_workspace', userRec.workspaceId || 'main-org_owner_main', { path: '/' });
-            return response;
-          }
+          const response = NextResponse.json({ ok: true, role: staffRole });
+          response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/' });
+          response.cookies.set('pfms_org_id', orgId, { path: '/' });
+          response.cookies.set('pfms_tier', tier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
+          response.cookies.set('pfms_role', staffRole, { path: '/' });
+          response.cookies.set('pfms_email', emailInput, { path: '/' });
+          return response;
         }
       }
     }
 
-    if (authError || !authResult?.user) {
-      const errorMsg =
-        authError?.message && !authError.message.includes('not used in local database mode') && !authError.message.includes('Timeout')
-          ? authError.message
-          : 'Invalid username/email or password.';
+    if (!authResult?.user) {
       return NextResponse.json(
-        { error: errorMsg },
+        { error: authError?.message || 'Invalid username/email or password.' },
         { status: 401 },
       );
     }
 
-    // 4. Successful Login - Set role and workspace cookies
+    // 3. Successful Supabase Auth Login - Set cookies & headers
     const user = authResult.user;
     const userId = user.id;
     const userRole = user.user_metadata?.role || (emailInput === 'owner@poultry.com' ? 'Admin' : 'Staff');
-    const userClean = emailInput.split('@')[0];
-
-    // Reject deleted staff/manager accounts
-    if (userRole === 'Staff' || userRole === 'Manager') {
-      const { data: userRecs } = await adminClient
-        .from('users')
-        .select('id')
-        .or(`username.eq.${emailInput},username.eq.${emailInput.toLowerCase()},username.eq.${userClean}`)
-        .limit(1);
-
-      const { data: staffRecs } = await adminClient
-        .from('staff')
-        .select('id')
-        .or(`name.eq.${emailInput},contact.eq.${emailInput},username.eq.${userClean}`)
-        .limit(1);
-
-      if ((!userRecs || userRecs.length === 0) && (!staffRecs || staffRecs.length === 0)) {
-        return NextResponse.json(
-          { error: 'This staff account has been removed or revoked by the farm administrator.' },
-          { status: 401 }
-        );
-      }
-    }
 
     let targetWorkspaceId = user.user_metadata?.workspaceId || '';
     if (!targetWorkspaceId) {
-      const { data: staffMember } = await adminClient
-        .from('staff')
-        .select('workspaceId, assignedBranches')
-        .or(`username.eq.${userClean},name.eq.${emailInput},contact.eq.${emailInput},name.eq.${userClean}`)
-        .limit(1)
-        .maybeSingle();
-
-      if (staffMember?.assignedBranches && Array.isArray(staffMember.assignedBranches) && staffMember.assignedBranches.length > 0) {
-        targetWorkspaceId = staffMember.assignedBranches[0];
-      } else if (staffMember?.workspaceId) {
-        targetWorkspaceId = staffMember.workspaceId;
-      }
-    }
-
-    if (!targetWorkspaceId) {
-      const { data: userRec } = await adminClient
-        .from('users')
-        .select('workspaceId')
-        .or(`username.eq.${userClean},username.eq.${emailInput},email.eq.${emailInput}`)
-        .limit(1)
-        .maybeSingle();
-
-      if (userRec?.workspaceId) {
-        targetWorkspaceId = userRec.workspaceId;
-      }
-    }
-
-    let orgId = 'org_owner_main';
-    if (user.email === 'owner@poultry.com') {
-      await adminClient.from('organization_members').upsert({ orgId, userId, role: 'Admin' });
-    } else {
-      const { data: memberData } = await adminClient.from('organization_members').select('orgId').eq('userId', userId).maybeSingle();
-      if (memberData?.orgId) {
-        orgId = memberData.orgId;
-      } else if (userRole === 'Admin') {
-        orgId = `org_${userId.replace(/-/g, '').slice(0, 10)}`;
-      }
-    }
-
-    if (!targetWorkspaceId) {
-      targetWorkspaceId = user.email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-${orgId}`;
-    }
-
-    const { data: validWs } = await adminClient.from('workspaces').select('id').eq('id', targetWorkspaceId).maybeSingle();
-    if (!validWs) {
-      const { data: mainWs } = await adminClient.from('workspaces').select('id').order('createdAt', { ascending: true }).limit(1);
-      if (mainWs && mainWs.length > 0) {
-        targetWorkspaceId = mainWs[0].id;
-      }
-    }
-
-    const { data: orgData } = await adminClient
-      .from('organizations')
-      .select('subscriptionTier')
-      .or(`id.eq.${orgId},ownerId.eq.${userId}`)
-      .limit(1)
-      .maybeSingle();
-
-    const { data: sysData } = await adminClient
-      .from('systemSettings')
-      .select('subscriptionTier, plan')
-      .or(`workspaceId.eq.${targetWorkspaceId},workspaceId.eq.${orgId}`)
-      .limit(1)
-      .maybeSingle();
-
-    let tier = orgData?.subscriptionTier || sysData?.subscriptionTier || sysData?.plan || (user.email === 'owner@poultry.com' ? 'pro' : 'free');
-    const normTier = (tier || '').toLowerCase();
-
-    if (normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus') {
-      tier = 'enterprise';
-      try {
-        if (orgId) {
-          await adminClient.from('organizations').update({ subscriptionTier: 'enterprise' }).eq('id', orgId);
-        }
-        if (targetWorkspaceId) {
-          await adminClient.from('systemSettings').update({ subscriptionTier: 'enterprise', plan: 'enterprise', enterpriseHubEnabled: true }).eq('workspaceId', targetWorkspaceId);
-        }
-      } catch (_e) {}
+      targetWorkspaceId = user.email === 'owner@poultry.com' ? 'main-org_owner_main' : `main-org_${userId.slice(0, 8)}`;
     }
 
     const response = NextResponse.json({ ok: true, role: userRole });
     response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/' });
-    response.cookies.set('pfms_org_id', orgId, { path: '/' });
-    response.cookies.set('pfms_tier', tier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
+    response.cookies.set('pfms_org_id', `org_${userId.slice(0, 8)}`, { path: '/' });
+    response.cookies.set('pfms_tier', 'free', { path: '/', maxAge: 60 * 60 * 24 * 365 });
     response.cookies.set('pfms_role', userRole, { path: '/' });
+    response.cookies.set('pfms_email', user.email || emailInput, { path: '/' });
     return response;
   } catch (error) {
     console.error('Login Error:', error);
     return NextResponse.json(
-      { error: 'Internal server error while communicating with the database.' },
+      { error: 'Internal server error while processing login.' },
       { status: 500 }
     );
   }
