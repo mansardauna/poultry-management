@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, ArrowLeft, X, CheckCircle2, Search, Egg, Mic, Printer, Building2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, X, CheckCircle2, Search, Egg, Mic, Printer, Building2 } from 'lucide-react';
 
 interface TourStep {
   title: string;
@@ -17,39 +17,39 @@ const TOUR_STEPS: TourStep[] = [
   {
     title: 'Egg Production & Collection Logs',
     subtitle: 'Daily Crate Audits & Laying Records',
-    description: 'This is the Eggs module navigation! Access daily egg lay logs, track good vs cracked eggs, and auto-convert laying counts into crates (30 eggs/crate).',
+    description: 'Access daily egg lay logs, track good vs cracked eggs, and convert laying counts into crates (30 eggs/crate).',
     highlightIcon: Egg,
     targetQuery: '[data-tour="eggs-nav"]',
     position: 'right'
   },
   {
-    title: 'AI Voice & Text Auto-Logger',
-    subtitle: 'Hands-Free Voice Log Entry',
-    description: 'This is the AI Auto-Log button! Speak or type raw notes like "We sold 12 crates today for 50k" and AI automatically parses & saves your records in 1 click.',
+    title: 'Voice & Quick Text Logger',
+    subtitle: 'Hands-Free Record Entry',
+    description: 'Speak or type raw operational notes like "We sold 12 crates today for 50k" and the system parses and records your entries instantly.',
     highlightIcon: Mic,
     targetQuery: '[data-tour="ai-logger-btn"]',
     position: 'top'
   },
   {
-    title: 'Print & Export Financial Reports',
-    subtitle: 'One-Click Financial & Stock PDF Export',
-    description: 'You can print or export comprehensive farm reports here! Click to print your dashboard analytics, revenue summaries, and expense ledgers instantly.',
+    title: 'Print & Export Reports',
+    subtitle: 'Financial & Inventory Document Export',
+    description: 'Export comprehensive farm reports. Print dashboard analytics, revenue summaries, and expense ledgers.',
     highlightIcon: Printer,
     targetQuery: '[data-tour="print-report-btn"]',
     position: 'bottom'
   },
   {
-    title: 'Global Search & Branch Switcher',
-    subtitle: 'Quick Module Search & Coop Access',
-    description: 'Use this top search bar to jump to any farm module instantly (Batches, Feed, Staff, Invoices) or switch active regional farm branches.',
+    title: 'Global Search & Module Access',
+    subtitle: 'Quick Navigation & Record Search',
+    description: 'Use the top search bar to jump to any farm module (Batches, Feed, Staff, Invoices) or search active branch records.',
     highlightIcon: Search,
     targetQuery: '[data-tour="search-bar"]',
     position: 'bottom'
   },
   {
-    title: 'Enterprise Hub & CCTV Surveillance',
-    subtitle: 'Multi-Farm Matrix & Security Gateway',
-    description: 'Access your multi-farm branch matrix, white-label cooperative branding, 24/7 priority vet hotline, and WebRTC CCTV live security streams here.',
+    title: 'Enterprise Hub & Operations Gateway',
+    subtitle: 'Multi-Farm Matrix & Security Oversight',
+    description: 'Access multi-farm branch management, cooperative branding, priority vet hotline, and WebRTC CCTV live security streams.',
     highlightIcon: Building2,
     targetQuery: '[data-tour="enterprise-nav"]',
     position: 'right'
@@ -61,13 +61,12 @@ export function FeatureTour() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
-  // 1. Strict localStorage check on load
+  // 1. Check localStorage on load
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tourCompleted = localStorage.getItem('pfms_guided_tour_completed');
-      // ONLY auto-open if explicitly not completed
       if (tourCompleted !== 'true') {
-        const timer = setTimeout(() => setIsOpen(true), 800);
+        const timer = setTimeout(() => setIsOpen(true), 600);
         return () => clearTimeout(timer);
       }
     }
@@ -135,23 +134,69 @@ export function FeatureTour() {
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-auto font-sans animate-in fade-in duration-200">
-      {/* Dynamic Cutout Spotlight Overlay: Box shadow 9999px creates dark backdrop around target without covering target itself */}
+      {/* Dynamic 4-Panel Cutout Spotlight Overlay (Clean 35% Opacity Backdrop, Target Area is 100% Transparent) */}
       {targetRect ? (
-        <div 
-          onClick={handleComplete}
-          className="absolute border-2 border-indigo-500 ring-4 ring-indigo-500/50 rounded-xl transition-all duration-300 pointer-events-auto z-[101] cursor-pointer"
-          style={{
-            top: `${Math.max(0, targetRect.top - 6)}px`,
-            left: `${Math.max(0, targetRect.left - 6)}px`,
-            width: `${targetRect.width + 12}px`,
-            height: `${targetRect.height + 12}px`,
-            boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.65)',
-          }}
-        />
+        <>
+          {/* Top Panel */}
+          <div 
+            onClick={handleComplete}
+            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              height: `${Math.max(0, targetRect.top - 6)}px`,
+            }}
+          />
+          {/* Bottom Panel */}
+          <div 
+            onClick={handleComplete}
+            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            style={{
+              top: `${Math.min(window.innerHeight, targetRect.bottom + 6)}px`,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+          {/* Left Panel */}
+          <div 
+            onClick={handleComplete}
+            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            style={{
+              top: `${Math.max(0, targetRect.top - 6)}px`,
+              left: 0,
+              width: `${Math.max(0, targetRect.left - 6)}px`,
+              height: `${targetRect.height + 12}px`,
+            }}
+          />
+          {/* Right Panel */}
+          <div 
+            onClick={handleComplete}
+            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            style={{
+              top: `${Math.max(0, targetRect.top - 6)}px`,
+              left: `${Math.min(window.innerWidth, targetRect.right + 6)}px`,
+              right: 0,
+              height: `${targetRect.height + 12}px`,
+            }}
+          />
+
+          {/* Highlight Ring around Target (Non-Obscuring) */}
+          <div 
+            className="fixed border-2 border-indigo-500 ring-4 ring-indigo-500/30 rounded-xl transition-all duration-300 pointer-events-none z-[101]"
+            style={{
+              top: `${Math.max(0, targetRect.top - 6)}px`,
+              left: `${Math.max(0, targetRect.left - 6)}px`,
+              width: `${targetRect.width + 12}px`,
+              height: `${targetRect.height + 12}px`,
+            }}
+          />
+        </>
       ) : (
         <div 
           onClick={handleComplete}
-          className="absolute inset-0 bg-slate-950/65 backdrop-blur-[1px] transition-opacity" 
+          className="fixed inset-0 bg-slate-950/35 backdrop-blur-[1px] transition-opacity z-[100] cursor-pointer" 
         />
       )}
 

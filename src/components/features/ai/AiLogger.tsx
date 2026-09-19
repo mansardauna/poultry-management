@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, X, Send, Loader2, CheckCircle, Mic, MicOff } from 'lucide-react';
+import { X, Send, Loader2, CheckCircle, Mic, MicOff, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-
 import { useRouter } from 'next/navigation';
 
 export function AiLogger() {
@@ -20,7 +19,6 @@ export function AiLogger() {
     if (match) setTier(match[1]);
   }, [isOpen]);
 
-  // Define SpeechRecognition dynamically to avoid SSR issues
   const startListening = () => {
     if (typeof window === 'undefined') return;
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -90,13 +88,13 @@ export function AiLogger() {
 
       if (res.ok && data.success) {
         setResult(data.parsed);
-        toast.success('Data logged successfully!');
+        toast.success('Data logged successfully');
         setText('');
       } else {
         toast.error(data.error || 'Failed to parse data');
       }
     } catch (err) {
-      toast.error('An error occurred while communicating with the AI.');
+      toast.error('An error occurred while logging record.');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,29 +106,29 @@ export function AiLogger() {
       <button
         data-tour="ai-logger-btn"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-white"
-        title="AI Auto Log"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-indigo-600 hover:bg-indigo-700 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-white cursor-pointer"
+        title="Voice & Text Logger"
       >
-        <Sparkles size={24} />
+        <Mic size={22} />
       </button>
 
       {/* Modal Overlay */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-[2px] animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col border border-slate-200">
             
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                <Sparkles size={20} />
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">AI Auto Logger</h3>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+              <div className="flex items-center gap-2 text-indigo-600">
+                <FileText size={20} />
+                <h3 className="font-extrabold text-base text-slate-900">Voice & Quick Text Logger</h3>
               </div>
               <button 
                 onClick={() => {
                   if (isListening) stopListening();
                   setIsOpen(false);
                 }}
-                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors"
+                className="p-1 rounded-full hover:bg-slate-200 text-slate-400 transition-colors"
               >
                 <X size={20} />
               </button>
@@ -140,11 +138,11 @@ export function AiLogger() {
             <div className="p-6 overflow-y-auto max-h-[70vh]">
               {tier === 'free' ? (
                 <div className="text-center py-6 space-y-4">
-                  <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-200 animate-pulse">
-                    <Sparkles size={32} />
+                  <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto border border-indigo-100">
+                    <Mic size={28} />
                   </div>
-                  <h4 className="text-xl font-extrabold text-slate-900">AI Voice & Text Auto-Logger is Locked</h4>
-                  <p className="text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
+                  <h4 className="text-lg font-extrabold text-slate-900">Voice & Quick Text Logger</h4>
+                  <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
                     Automatically parse voice recordings and raw notes into farm logs, sales, and feed records with Commercial Pro.
                   </p>
                   <div className="pt-2">
@@ -153,7 +151,7 @@ export function AiLogger() {
                         setIsOpen(false);
                         router.push('/dashboard/settings?tab=subscription');
                       }}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3.5 rounded-xl shadow-lg transition-all"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-md transition-all cursor-pointer"
                     >
                       Upgrade to Commercial Pro (₦15,000/mo)
                     </button>
@@ -161,9 +159,9 @@ export function AiLogger() {
                 </div>
               ) : !result ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-slate-500 font-medium">
                     Type or speak your daily logs. For example: <br/>
-                    <span className="italic text-gray-700 dark:text-gray-300">"We sold 12 crates today for 50k, bought feed for 20k, and collected 4 crates."</span>
+                    <span className="italic text-slate-700 font-semibold">&quot;We sold 12 crates today for 50k, bought feed for 20k, and collected 4 crates.&quot;</span>
                   </p>
                   
                   <div className="relative">
@@ -171,17 +169,17 @@ export function AiLogger() {
                       autoFocus
                       value={text}
                       onChange={(e) => setText(e.target.value)}
-                      placeholder="Enter your farm logs here..."
-                      className="w-full h-32 p-4 pb-12 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all outline-none"
+                      placeholder="Enter your farm operational logs here..."
+                      className="w-full h-32 p-4 pb-12 text-slate-800 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all outline-none font-medium text-sm"
                       disabled={isSubmitting}
                     />
                     <button
                       type="button"
                       onClick={toggleListening}
-                      className={`absolute bottom-3 left-3 p-2 rounded-full transition-colors ${
+                      className={`absolute bottom-3 left-3 p-2 rounded-xl transition-colors cursor-pointer ${
                         isListening 
-                          ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 animate-pulse' 
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                          ? 'bg-red-100 text-red-600 animate-pulse' 
+                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
                       }`}
                       title={isListening ? "Stop listening" : "Start speaking"}
                     >
@@ -193,16 +191,16 @@ export function AiLogger() {
                     <button
                       type="submit"
                       disabled={!text.trim() || isSubmitting}
-                      className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-xl transition-all"
+                      className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-sm cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>
-                          <Loader2 size={18} className="animate-spin" />
+                          <Loader2 size={16} className="animate-spin" />
                           Processing...
                         </>
                       ) : (
                         <>
-                          <Send size={18} />
+                          <Send size={16} />
                           Log Data
                         </>
                       )}
@@ -212,18 +210,18 @@ export function AiLogger() {
               ) : (
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center text-center space-y-2 py-4">
-                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mb-2">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-2">
                       <CheckCircle size={28} />
                     </div>
-                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">Successfully Logged</h4>
-                    <p className="text-sm text-gray-500">The AI has parsed and saved your data.</p>
+                    <h4 className="text-base font-extrabold text-slate-900">Successfully Logged</h4>
+                    <p className="text-xs text-slate-500">System parsed and recorded your operational data.</p>
                   </div>
                   
-                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3 text-sm">
+                  <div className="bg-slate-50 rounded-xl p-4 space-y-3 text-xs border border-slate-200">
                     {result.sales && result.sales.length > 0 && (
                       <div>
-                        <span className="font-semibold text-gray-700 dark:text-gray-300 block mb-1">🛒 Sales Logged:</span>
-                        <ul className="list-disc pl-5 text-gray-600 dark:text-gray-400">
+                        <span className="font-bold text-slate-800 block mb-1">Sales Logged:</span>
+                        <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
                           {result.sales.map((s: any, i: number) => (
                             <li key={i}>{s.quantity} {s.type} for ₦{s.totalAmount?.toLocaleString()} on {s.date}</li>
                           ))}
@@ -233,8 +231,8 @@ export function AiLogger() {
 
                     {result.expenses && result.expenses.length > 0 && (
                       <div>
-                        <span className="font-semibold text-gray-700 dark:text-gray-300 block mb-1">💸 Expenses Logged:</span>
-                        <ul className="list-disc pl-5 text-gray-600 dark:text-gray-400">
+                        <span className="font-bold text-slate-800 block mb-1">Expenses Logged:</span>
+                        <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
                           {result.expenses.map((e: any, i: number) => (
                             <li key={i}>{e.category}: ₦{e.amount?.toLocaleString()} on {e.date}</li>
                           ))}
@@ -244,8 +242,8 @@ export function AiLogger() {
 
                     {result.eggs && result.eggs.length > 0 && (
                       <div>
-                        <span className="font-semibold text-gray-700 dark:text-gray-300 block mb-1">🥚 Eggs Logged:</span>
-                        <ul className="list-disc pl-5 text-gray-600 dark:text-gray-400">
+                        <span className="font-bold text-slate-800 block mb-1">Eggs Logged:</span>
+                        <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
                           {result.eggs.map((e: any, i: number) => (
                             <li key={i}>{e.goodEggs} good, {e.crackedEggs || 0} cracked on {e.date}</li>
                           ))}
@@ -260,7 +258,7 @@ export function AiLogger() {
                         setResult(null);
                         setIsOpen(false);
                       }}
-                      className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-all"
+                      className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                     >
                       Done
                     </button>

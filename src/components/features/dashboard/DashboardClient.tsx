@@ -76,7 +76,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       const isOnboarding = searchParams.get('onboarding') === 'true';
       const hasDismissed = localStorage.getItem('pfms_onboarded_dismissed') === 'true';
 
-      if (userRole === 'Admin' && !hasDismissed && (isOnboarding || (data.batches.length === 0 && data.staff.length === 0))) {
+      if (userRole === 'Admin' && (!hasDismissed || isOnboarding)) {
         setOnboardingStep(1);
       }
     }

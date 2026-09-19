@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, ArrowRight, Sparkles, Box, Clipboard, User, GraduationCap, X } from 'lucide-react';
+import { ArrowRight, Box, Clipboard, User, GraduationCap, X, CheckCircle2 } from 'lucide-react';
 
 interface OnboardingWidgetProps {
   workspacesCount: number;
@@ -75,7 +75,6 @@ export function OnboardingWidget({
   const completedCount = steps.filter(s => s.isDone).length;
   const progressPercent = Math.round((completedCount / 4) * 100);
 
-  // Determine next pending step
   const nextPendingStep = steps.find(s => !s.isDone) || steps[3];
 
   const handleDismiss = () => {
@@ -88,22 +87,22 @@ export function OnboardingWidget({
   if (isDismissed && completedCount === 4) return null;
 
   return (
-    <div className="bg-slate-900 text-white rounded-sm p-6 border border-slate-800 mb-8 font-sans">
+    <div className="bg-slate-900 text-white rounded-2xl p-6 border border-slate-800 mb-8 font-sans shadow-xl">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-sm bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-            <Sparkles size={18} />
+          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <Box size={20} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white tracking-tight">Farm Setup & Onboarding Progress</h3>
-              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded-sm uppercase tracking-wider">
+              <h3 className="text-base font-extrabold text-white tracking-tight">Farm Setup & Onboarding Progress</h3>
+              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
                 {completedCount} of 4 Completed ({progressPercent}%)
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Complete initial setup steps to unlock automated AI logs, mortality alerts, and feed thresholds.
+            <p className="text-xs text-slate-400 mt-0.5 font-medium">
+              Complete initial setup steps to activate operational logs, mortality alerts, and feed thresholds.
             </p>
           </div>
         </div>
@@ -111,7 +110,7 @@ export function OnboardingWidget({
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
           <button
             onClick={() => onOpenStep(nextPendingStep.id)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-4 py-2.5 rounded-sm flex items-center gap-2 transition-all cursor-pointer"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-indigo-600/20"
           >
             <span>Resume Step {nextPendingStep.id}: {nextPendingStep.actionText}</span>
             <ArrowRight size={15} />
@@ -119,7 +118,7 @@ export function OnboardingWidget({
           
           <button
             onClick={handleDismiss}
-            className="text-slate-400 hover:text-white text-xs p-1.5 rounded-sm hover:bg-slate-800 transition-colors"
+            className="text-slate-400 hover:text-white text-xs p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
             title="Dismiss widget"
           >
             <X size={16} />
@@ -133,9 +132,9 @@ export function OnboardingWidget({
           <span>Overall Setup Progress</span>
           <span className="text-indigo-400 font-mono">{progressPercent}%</span>
         </div>
-        <div className="w-full bg-slate-800 rounded-sm h-2 overflow-hidden p-0.5 border border-slate-700">
+        <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5 border border-slate-700">
           <div 
-            className="bg-indigo-500 h-full rounded-sm transition-all duration-700"
+            className="bg-indigo-500 h-full rounded-full transition-all duration-700"
             style={{ width: `${progressPercent}%` }}
           />
         </div>

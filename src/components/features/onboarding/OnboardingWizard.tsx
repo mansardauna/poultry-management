@@ -125,6 +125,10 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     if (typeof window !== 'undefined') {
       localStorage.setItem('pfms_onboarded_dismissed', 'true');
       localStorage.setItem('pfms_starter_guide_read', 'true');
+      // Dispatch event to trigger the guided spotlight tour!
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('pfms_trigger_tour'));
+      }, 300);
     }
     onClose();
   };
@@ -139,7 +143,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         type: 'Mixed Use',
         createdAt: new Date().toISOString(),
       });
-      toast.success('Default farm initialized! Welcome to Poultry Farm Management.');
+      toast.success('Default farm initialized. Welcome to Poultry Management System.');
       handleClose();
     } catch (err) {
       console.error(err);
@@ -156,14 +160,12 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     }
     setIsSaving(true);
     try {
-      // If user is editing default un-named Main branch during initial onboarding:
       if (workspaces.length === 1 && (workspaces[0].name === 'Main' || workspaces[0].name === 'Main Farm' || workspaces[0].name.toLowerCase().includes('branch'))) {
         const primaryWs = workspaces[0];
         await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
         setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType });
         setCreatedBranchId(primaryWs.id);
       } else {
-        // Otherwise ALWAYS create a NEW branch workspace!
         const workspaceId = `farm-${Date.now()}`;
         const newWs = {
           id: workspaceId,
@@ -185,7 +187,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         }),
       }).catch(() => {});
 
-      toast.success('Farm branch profile saved!');
+      toast.success('Farm branch profile saved.');
       setStep(2);
     } catch (_e) {
       toast.error('Failed to save branch details');
@@ -211,7 +213,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
           ageInWeeks: Number(flockAge) || 1,
         }),
       });
-      toast.success('Flock batch saved!');
+      toast.success('Flock batch saved.');
       setStep(3);
     } catch (_e) {
       toast.error('Failed to save flock batch');
@@ -238,7 +240,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
           password: staffPassword.trim(),
         }),
       });
-      toast.success('Staff credentials saved!');
+      toast.success('Staff credentials saved.');
       setStep(4);
     } catch (_e) {
       toast.error('Failed to save staff credentials');
@@ -250,7 +252,6 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     try {
       let targetWsId = createdBranchId;
 
-      // 1. Save Branch Workspace & Farm Profile
       if (branchName.trim()) {
         if (workspaces.length > 0) {
           const primaryWs = workspaces[0];
@@ -279,7 +280,6 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         }).catch(() => {});
       }
 
-      // 2. Save Flock Batch (if provided)
       if (breed.trim() && flockQty) {
         await fetch('/api/batches', {
           method: 'POST',
@@ -295,7 +295,6 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         }).catch(() => {});
       }
 
-      // 3. Save Staff Member (if provided)
       if (staffName.trim() && staffUsername.trim() && staffPassword.trim()) {
         await fetch('/api/staff', {
           method: 'POST',
@@ -312,14 +311,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         }).catch(() => {});
       }
 
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('pfms_onboarding_draft');
-        localStorage.setItem('pfms_onboarded_dismissed', 'true');
-        localStorage.setItem('pfms_starter_guide_read', 'true');
-      }
-
-      toast.success('Farm onboarding setup submitted successfully!');
-      onClose();
+      toast.success('Farm onboarding setup submitted successfully.');
+      handleClose();
     } catch (err) {
       console.error(err);
       toast.error('Error submitting onboarding setup');
@@ -329,8 +322,8 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] sm:max-h-[88vh] overflow-hidden border border-slate-100 flex flex-col md:flex-row relative">
+    <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-[2px] z-[90] flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] sm:max-h-[88vh] overflow-hidden border border-slate-200 flex flex-col md:flex-row relative">
         
         {/* Close Button */}
         <button 
@@ -388,7 +381,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
               disabled={isSaving}
               className="mt-4 md:mt-6 text-xs font-semibold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors text-left cursor-pointer flex items-center gap-1 shrink-0"
             >
-              ⚡ Skip Setup & Start
+              Skip Setup & Start
             </button>
           )}
         </div>
@@ -472,7 +465,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 </div>
               </div>
 
-              {/* Always Visible Fixed Bottom Action Bar */}
+              {/* Fixed Bottom Action Bar */}
               <div className="pt-4 mt-3 border-t border-slate-100 flex justify-end bg-white shrink-0 z-10">
                 <button 
                   onClick={handleNextStep1}
@@ -540,7 +533,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 </div>
               </div>
 
-              {/* Always Visible Fixed Bottom Action Bar */}
+              {/* Fixed Bottom Action Bar */}
               <div className="pt-4 mt-3 border-t border-slate-100 flex justify-between items-center bg-white shrink-0 z-10">
                 <button 
                   onClick={() => setStep(3)}
@@ -623,7 +616,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 </div>
               </div>
 
-              {/* Always Visible Fixed Bottom Action Bar */}
+              {/* Fixed Bottom Action Bar */}
               <div className="pt-4 mt-3 border-t border-slate-100 flex justify-between items-center bg-white shrink-0 z-10">
                 <button 
                   onClick={() => setStep(4)}
@@ -648,34 +641,34 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
               <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
                   <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    <CheckCircle2 className="text-emerald-500" size={24} /> Farm Setup Complete!
+                    <CheckCircle2 className="text-emerald-500" size={24} /> Farm Setup Complete
                   </h2>
-                  <p className="text-xs text-slate-500 mt-1">Quick operational breakdown of your poultry management workspace.</p>
+                  <p className="text-xs text-slate-500 mt-1">Operational breakdown of your poultry management workspace.</p>
                 </div>
                 
                 <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
                   <div className="space-y-1">
-                    <p className="font-bold text-slate-900">🥚 Daily Egg Yield & Mortality Logs</p>
+                    <p className="font-bold text-slate-900">Daily Egg Yield & Mortality Logs</p>
                     <p className="text-slate-600 leading-relaxed">
-                      Log egg production and broken eggs under the **Eggs** dashboard. Automated alerts warn you if breakage or mortality spikes.
+                      Log egg production and broken eggs under the Eggs dashboard. Automated alerts warn you if breakage or mortality spikes.
                     </p>
                   </div>
                   <div className="space-y-1 border-t border-slate-200 pt-3">
-                    <p className="font-bold text-slate-900">🌾 Feed Stock Thresholds</p>
+                    <p className="font-bold text-slate-900">Feed Stock Thresholds</p>
                     <p className="text-slate-600 leading-relaxed">
-                      Track feed bags and daily consumption under **Feed**. Critical alerts notify management whenever feed falls below safety thresholds.
+                      Track feed bags and daily consumption under Feed. Critical alerts notify management whenever feed falls below safety thresholds.
                     </p>
                   </div>
                   <div className="space-y-1 border-t border-slate-200 pt-3">
-                    <p className="font-bold text-slate-900">💳 Financial Ledger & Invoicing</p>
+                    <p className="font-bold text-slate-900">Financial Ledger & Invoicing</p>
                     <p className="text-slate-600 leading-relaxed">
-                      Customer invoices automatically convert to confirmed revenue upon payment. Track feed buys and operational costs under **Finance**.
+                      Customer invoices automatically convert to confirmed revenue upon payment. Track feed buys and operational costs under Finance.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Always Visible Fixed Final Launch Button */}
+              {/* Fixed Final Launch Button */}
               <div className="pt-4 mt-3 border-t border-slate-100 bg-white shrink-0 z-10">
                 <button 
                   onClick={handleSubmitAll}
