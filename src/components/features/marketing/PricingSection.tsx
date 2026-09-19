@@ -129,7 +129,7 @@ export function PricingSection() {
                 <div>
                   {isFeatured && (
                     <div className="absolute top-0 right-8 transform -translate-y-1/2 bg-indigo-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                      <Zap size={14} /> Most Popular
+                      <CheckCircle2 size={14} /> Most Popular
                     </div>
                   )}
 

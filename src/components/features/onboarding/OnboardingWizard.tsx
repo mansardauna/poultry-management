@@ -1,8 +1,8 @@
 'use strict';
 'use client';
 
-import React, { useState } from 'react';
-import { Box, User, Clipboard, GraduationCap, ChevronRight, CheckCircle2, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Box, User, Clipboard, GraduationCap, ChevronRight, CheckCircle2, X, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspace } from '../WorkspaceContext';
 
@@ -11,12 +11,14 @@ interface OnboardingWizardProps {
   initialStep?: number;
 }
 
-export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardProps) {
+export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps) {
   const { addWorkspace, updateWorkspace, workspaces, setActiveWorkspace } = useWorkspace();
-  const [step, setStep] = useState(initialStep);
+  
+  // Step State with localStorage Persistence
+  const [step, setStepState] = useState<number>(initialStep || 1);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Step 1: Workspace/Branch & Farm Profile Details
+  // Form Field States
   const [branchName, setBranchName] = useState('');
   const [branchType, setBranchType] = useState('Layer Farm');
   const [ownerName, setOwnerName] = useState('');
@@ -25,51 +27,63 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
   const [estimatedCapacity, setEstimatedCapacity] = useState('5000');
   const [createdBranchId, setCreatedBranchId] = useState<string | null>(null);
 
-  // Step 2: First Flock Details
   const [breed, setBreed] = useState('');
   const [flockQty, setFlockQty] = useState('');
   const [flockType, setFlockType] = useState('Layers');
   const [flockAge, setFlockAge] = useState('');
 
-  // Step 3: First Staff Member
   const [staffName, setStaffName] = useState('');
   const [staffRole, setStaffRole] = useState('Attendant');
   const [staffSalary, setStaffSalary] = useState('45000');
   const [staffUsername, setStaffUsername] = useState('');
   const [staffPassword, setStaffPassword] = useState('');
 
-  // Pre-populate Step 1 from active workspace if available
-  React.useEffect(() => {
-    if (!branchName && workspaces.length > 0) {
-      setBranchName(workspaces[0].name || '');
-      setBranchType(workspaces[0].type || 'Layer Farm');
+  const setStep = (newStep: number) => {
+    setStepState(newStep);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pfms_onboarding_current_step', String(newStep));
+    }
+  };
+
+  // Restore saved step & pre-populate from localStorage or database
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedStep = localStorage.getItem('pfms_onboarding_current_step');
+      if (!initialStep && savedStep) {
+        const parsed = parseInt(savedStep, 10);
+        if (parsed >= 1 && parsed <= 4) setStepState(parsed);
+      } else if (initialStep) {
+        setStepState(initialStep);
+      }
+
+      try {
+        const draftStr = localStorage.getItem('pfms_onboarding_draft');
+        if (draftStr) {
+          const d = JSON.parse(draftStr);
+          if (d.branchName) setBranchName(d.branchName);
+          if (d.branchType) setBranchType(d.branchType);
+          if (d.ownerName) setOwnerName(d.ownerName);
+          if (d.ownerPhone) setOwnerPhone(d.ownerPhone);
+          if (d.farmLocation) setFarmLocation(d.farmLocation);
+          if (d.estimatedCapacity) setEstimatedCapacity(d.estimatedCapacity);
+          if (d.breed) setBreed(d.breed);
+          if (d.flockQty) setFlockQty(d.flockQty);
+          if (d.flockType) setFlockType(d.flockType);
+          if (d.flockAge) setFlockAge(d.flockAge);
+          if (d.staffName) setStaffName(d.staffName);
+          if (d.staffRole) setStaffRole(d.staffRole);
+          if (d.staffSalary) setStaffSalary(d.staffSalary);
+          if (d.staffUsername) setStaffUsername(d.staffUsername);
+          if (d.staffPassword) setStaffPassword(d.staffPassword);
+        }
+      } catch (_e) {}
+    }
+
+    if (workspaces.length > 0) {
+      setBranchName(prev => prev || workspaces[0].name || '');
+      setBranchType(prev => prev || workspaces[0].type || 'Layer Farm');
       setCreatedBranchId(workspaces[0].id);
     }
-  }, [workspaces]);
-
-  // Pre-populate Step 2 & Step 3 from database & localStorage draft
-  React.useEffect(() => {
-    try {
-      const draftStr = localStorage.getItem('pfms_onboarding_draft');
-      if (draftStr) {
-        const d = JSON.parse(draftStr);
-        if (d.branchName && !branchName) setBranchName(d.branchName);
-        if (d.branchType && !branchType) setBranchType(d.branchType);
-        if (d.ownerName && !ownerName) setOwnerName(d.ownerName);
-        if (d.ownerPhone && !ownerPhone) setOwnerPhone(d.ownerPhone);
-        if (d.farmLocation && !farmLocation) setFarmLocation(d.farmLocation);
-        if (d.estimatedCapacity && !estimatedCapacity) setEstimatedCapacity(d.estimatedCapacity);
-        if (d.breed && !breed) setBreed(d.breed);
-        if (d.flockQty && !flockQty) setFlockQty(d.flockQty);
-        if (d.flockType && !flockType) setFlockType(d.flockType);
-        if (d.flockAge && !flockAge) setFlockAge(d.flockAge);
-        if (d.staffName && !staffName) setStaffName(d.staffName);
-        if (d.staffRole && !staffRole) setStaffRole(d.staffRole);
-        if (d.staffSalary && !staffSalary) setStaffSalary(d.staffSalary);
-        if (d.staffUsername && !staffUsername) setStaffUsername(d.staffUsername);
-        if (d.staffPassword && !staffPassword) setStaffPassword(d.staffPassword);
-      }
-    } catch (_e) {}
 
     fetch('/api/batches')
       .then(res => res.json())
@@ -96,10 +110,10 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         }
       })
       .catch(() => {});
-  }, []);
+  }, [workspaces]);
 
-  // Save form drafts to localStorage continuously
-  React.useEffect(() => {
+  // Continuously persist form state to localStorage
+  useEffect(() => {
     try {
       localStorage.setItem('pfms_onboarding_draft', JSON.stringify({
         branchName,
@@ -125,7 +139,6 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     if (typeof window !== 'undefined') {
       localStorage.setItem('pfms_onboarded_dismissed', 'true');
       localStorage.setItem('pfms_starter_guide_read', 'true');
-      // Dispatch event to trigger the guided spotlight tour!
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('pfms_trigger_tour'));
       }, 300);
@@ -136,14 +149,16 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
   const handleSkipAll = async () => {
     setIsSaving(true);
     try {
-      const defaultId = `farm-${Date.now()}`;
-      await addWorkspace({
-        id: defaultId,
-        name: 'Main Farm',
-        type: 'Mixed Use',
-        createdAt: new Date().toISOString(),
-      });
-      toast.success('Default farm initialized. Welcome to Poultry Management System.');
+      if (workspaces.length === 0) {
+        const defaultId = `farm-${Date.now()}`;
+        await addWorkspace({
+          id: defaultId,
+          name: 'Main Farm',
+          type: 'Mixed Use',
+          createdAt: new Date().toISOString(),
+        });
+      }
+      toast.success('Setup initialized. Welcome to Poultry Management System.');
       handleClose();
     } catch (err) {
       console.error(err);
@@ -153,98 +168,20 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     }
   };
 
-  const handleNextStep1 = async () => {
+  const handleNextStep1 = () => {
     if (!branchName.trim()) {
       toast.error('Please enter a farm branch name');
       return;
     }
-    setIsSaving(true);
-    try {
-      if (workspaces.length === 1 && (workspaces[0].name === 'Main' || workspaces[0].name === 'Main Farm' || workspaces[0].name.toLowerCase().includes('branch'))) {
-        const primaryWs = workspaces[0];
-        await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
-        setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType });
-        setCreatedBranchId(primaryWs.id);
-      } else {
-        const workspaceId = `farm-${Date.now()}`;
-        const newWs = {
-          id: workspaceId,
-          name: branchName.trim(),
-          type: branchType,
-          createdAt: new Date().toISOString(),
-        };
-        await addWorkspace(newWs);
-        setCreatedBranchId(workspaceId);
-      }
-
-      await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          farmName: branchName.trim(),
-          adminName: ownerName.trim(),
-          adminPhone: ownerPhone.trim(),
-        }),
-      }).catch(() => {});
-
-      toast.success('Farm branch profile saved.');
-      setStep(2);
-    } catch (_e) {
-      toast.error('Failed to save branch details');
-    } finally { setIsSaving(false); }
+    setStep(2);
   };
 
-  const handleNextStep2 = async () => {
-    if (!breed.trim() || !flockQty) {
-      setStep(3);
-      return;
-    }
-    setIsSaving(true);
-    try {
-      await fetch('/api/batches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          breed: breed.trim(),
-          quantity: Number(flockQty),
-          type: flockType,
-          farmSection: 'Section A',
-          vaccinationStatus: 'Up to Date',
-          ageInWeeks: Number(flockAge) || 1,
-        }),
-      });
-      toast.success('Flock batch saved.');
-      setStep(3);
-    } catch (_e) {
-      toast.error('Failed to save flock batch');
-    } finally { setIsSaving(false); }
+  const handleNextStep2 = () => {
+    setStep(3);
   };
 
-  const handleNextStep3 = async () => {
-    if (!staffName.trim() || !staffUsername.trim() || !staffPassword.trim()) {
-      setStep(4);
-      return;
-    }
-    setIsSaving(true);
-    try {
-      await fetch('/api/staff', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: staffName.trim(),
-          role: staffRole,
-          salary: Number(staffSalary) || 45000,
-          contact: '',
-          assignedBranches: createdBranchId ? [createdBranchId] : [],
-          username: staffUsername.trim(),
-          password: staffPassword.trim(),
-        }),
-      });
-      toast.success('Staff credentials saved.');
-      setStep(4);
-    } catch (_e) {
-      toast.error('Failed to save staff credentials');
-    } finally { setIsSaving(false); }
+  const handleNextStep3 = () => {
+    setStep(4);
   };
 
   const handleSubmitAll = async () => {
@@ -252,6 +189,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
     try {
       let targetWsId = createdBranchId;
 
+      // 1. Commit Workspace & Settings
       if (branchName.trim()) {
         if (workspaces.length > 0) {
           const primaryWs = workspaces[0];
@@ -280,6 +218,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         }).catch(() => {});
       }
 
+      // 2. Commit Flock Batch (if provided)
       if (breed.trim() && flockQty) {
         await fetch('/api/batches', {
           method: 'POST',
@@ -295,6 +234,7 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
         }).catch(() => {});
       }
 
+      // 3. Commit Staff Member (if provided)
       if (staffName.trim() && staffUsername.trim() && staffPassword.trim()) {
         await fetch('/api/staff', {
           method: 'POST',
@@ -309,6 +249,11 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
             password: staffPassword.trim(),
           }),
         }).catch(() => {});
+      }
+
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('pfms_onboarding_draft');
+        localStorage.removeItem('pfms_onboarding_current_step');
       }
 
       toast.success('Farm onboarding setup submitted successfully.');
@@ -400,13 +345,14 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Farm / Organization Name</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Farm / Organization Name *</label>
                     <input 
                       type="text" 
                       value={branchName}
                       onChange={(e) => setBranchName(e.target.value)}
                       placeholder="e.g. Grand Poultry Farm - Main Branch"
                       className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                      required
                     />
                   </div>
                   <div>
@@ -469,10 +415,10 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
               <div className="pt-4 mt-3 border-t border-slate-100 flex justify-end bg-white shrink-0 z-10">
                 <button 
                   onClick={handleNextStep1}
-                  disabled={!branchName.trim() || isSaving}
+                  disabled={!branchName.trim()}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all w-full sm:w-auto justify-center"
                 >
-                  {isSaving ? 'Saving...' : 'Save Branch & Continue'} <ChevronRight size={16} />
+                  <span>Continue to Flock Setup</span> <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -536,17 +482,16 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
               {/* Fixed Bottom Action Bar */}
               <div className="pt-4 mt-3 border-t border-slate-100 flex justify-between items-center bg-white shrink-0 z-10">
                 <button 
-                  onClick={() => setStep(3)}
-                  className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                  onClick={() => setStep(1)}
+                  className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  Skip Step
+                  <ArrowLeft size={14} /> Back
                 </button>
                 <button 
                   onClick={handleNextStep2}
-                  disabled={isSaving}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer transition-all"
                 >
-                  {isSaving ? 'Saving...' : 'Save Flock & Continue'} <ChevronRight size={16} />
+                  <span>Continue to Staff Setup</span> <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -619,61 +564,68 @@ export function OnboardingWizard({ onClose, initialStep = 1 }: OnboardingWizardP
               {/* Fixed Bottom Action Bar */}
               <div className="pt-4 mt-3 border-t border-slate-100 flex justify-between items-center bg-white shrink-0 z-10">
                 <button 
-                  onClick={() => setStep(4)}
-                  className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                  onClick={() => setStep(2)}
+                  className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  Skip Step
+                  <ArrowLeft size={14} /> Back
                 </button>
                 <button 
                   onClick={handleNextStep3}
-                  disabled={isSaving}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer transition-all"
                 >
-                  {isSaving ? 'Saving...' : 'Save Staff & Continue'} <ChevronRight size={16} />
+                  <span>Continue to Final Review</span> <ChevronRight size={16} />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 4: Starter Pack */}
+          {/* Step 4: Starter Pack & Final Commit */}
           {step === 4 && (
             <div className="flex-1 flex flex-col justify-between overflow-hidden">
               <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
                   <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    <CheckCircle2 className="text-emerald-500" size={24} /> Farm Setup Complete
+                    <CheckCircle2 className="text-emerald-500" size={24} /> Review & Complete Setup
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">Operational breakdown of your poultry management workspace.</p>
                 </div>
                 
                 <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
                   <div className="space-y-1">
-                    <p className="font-bold text-slate-900">Daily Egg Yield & Mortality Logs</p>
-                    <p className="text-slate-600 leading-relaxed">
-                      Log egg production and broken eggs under the Eggs dashboard. Automated alerts warn you if breakage or mortality spikes.
-                    </p>
+                    <p className="font-bold text-slate-900">Farm Branch: <span className="text-indigo-600">{branchName || 'Main Farm'}</span> ({branchType})</p>
+                    <p className="text-slate-600 font-medium">Owner: {ownerName || 'Not specified'} | Location: {farmLocation || 'Default'} | Capacity: {estimatedCapacity} birds</p>
                   </div>
+                  {breed && (
+                    <div className="space-y-1 border-t border-slate-200 pt-3">
+                      <p className="font-bold text-slate-900">First Flock: <span className="text-indigo-600">{breed}</span> ({flockQty} birds, {flockAge || '1'} weeks old)</p>
+                    </div>
+                  )}
+                  {staffName && (
+                    <div className="space-y-1 border-t border-slate-200 pt-3">
+                      <p className="font-bold text-slate-900">First Staff: <span className="text-indigo-600">{staffName}</span> ({staffRole}, Username: {staffUsername})</p>
+                    </div>
+                  )}
                   <div className="space-y-1 border-t border-slate-200 pt-3">
-                    <p className="font-bold text-slate-900">Feed Stock Thresholds</p>
+                    <p className="font-bold text-slate-900">Daily Logs & Operational Rules</p>
                     <p className="text-slate-600 leading-relaxed">
-                      Track feed bags and daily consumption under Feed. Critical alerts notify management whenever feed falls below safety thresholds.
-                    </p>
-                  </div>
-                  <div className="space-y-1 border-t border-slate-200 pt-3">
-                    <p className="font-bold text-slate-900">Financial Ledger & Invoicing</p>
-                    <p className="text-slate-600 leading-relaxed">
-                      Customer invoices automatically convert to confirmed revenue upon payment. Track feed buys and operational costs under Finance.
+                      Egg collections, mortality alerts, feed thresholds, and staff task rosters are ready for immediate logging.
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Fixed Final Launch Button */}
-              <div className="pt-4 mt-3 border-t border-slate-100 bg-white shrink-0 z-10">
+              <div className="pt-4 mt-3 border-t border-slate-100 flex justify-between items-center bg-white shrink-0 z-10">
+                <button 
+                  onClick={() => setStep(3)}
+                  className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <ArrowLeft size={14} /> Back
+                </button>
                 <button 
                   onClick={handleSubmitAll}
                   disabled={isSaving}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider w-full py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 disabled:opacity-50 cursor-pointer transition-all"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-8 py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 disabled:opacity-50 cursor-pointer transition-all"
                 >
                   {isSaving ? 'Submitting Setup...' : 'Submit & Complete Setup'} <ChevronRight size={18} />
                 </button>

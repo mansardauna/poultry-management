@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Box, Clipboard, User, GraduationCap, X, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Box, Clipboard, User, GraduationCap, X } from 'lucide-react';
 
 interface OnboardingWidgetProps {
   workspacesCount: number;
@@ -84,7 +84,7 @@ export function OnboardingWidget({
     }
   };
 
-  if (isDismissed && completedCount === 4) return null;
+  if (isDismissed) return null;
 
   return (
     <div className="bg-slate-900 text-white rounded-2xl p-6 border border-slate-800 mb-8 font-sans shadow-xl">

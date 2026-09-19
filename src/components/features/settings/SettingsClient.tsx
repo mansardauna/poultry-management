@@ -19,7 +19,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap } from 'lucide-react';
+import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap, Crown, ShieldCheck } from 'lucide-react';
 import { useWorkspace } from '../WorkspaceContext';
 
 /**
@@ -747,9 +747,9 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         <div className="bg-slate-900 text-white p-6 flex items-center justify-between border-b border-slate-800">
           <div>
             <h2 className="text-xl font-bold tracking-wider flex items-center gap-2">
-              <Sparkles className="text-amber-400" size={20} /> Upgrade Your Subscription Plan
+              <Crown className="text-amber-400" size={20} /> Upgrade Your Subscription Plan
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">Scale your poultry farm operations with AI, CCTV, and enterprise hub tools.</p>
+            <p className="text-xs text-slate-400 mt-0.5 font-medium">Scale your poultry farm operations with voice logging, CCTV, and enterprise hub tools.</p>
           </div>
           <button 
             onClick={() => setShowUpgradeModal(false)}
