@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
 # deploy.sh — build, deploy, and launch the PFMS project on a remote
-# server using Docker Compose.
+# server using PM2 (no Docker).
 #
 # Requirements on the deploy machine:
 #   - bash, rsync (optional, tar fallback), scp, ssh
 # Requirements on the target server:
-#   - Docker Engine + Docker Compose v2, rsync (optional)
+#   - Node.js >=18, npm, pm2 (installed globally), curl
 #
 # Configuration:
 #   All options can be passed as flags (see --help) or via environment
@@ -15,10 +15,10 @@
 #   A local .deploy.conf (key=value lines) is sourced if present.
 #
 # Examples:
-#   ./deploy.sh -H 203.0.113.10 -u deploy -e .env
-#   ./deploy.sh -H 203.0.113.10 -e .env -p 2222 -P 8000 -k ~/.ssh/id_ed25519
-#   ./deploy.sh -H 203.0.113.10 --rollback          # go back to previous image
-#   ./deploy.sh -H 203.0.113.10 --skip-sync         # rebuild from current remote source
+#   ./deploy.sh -H 51.222.136.77 -e .env
+#   ./deploy.sh -H 51.222.136.77 -e .env -p 22 -k ~/.ssh/id_ed25519
+#   ./deploy.sh -H 51.222.136.77 --rollback          # restore previous .next
+#   ./deploy.sh -H 51.222.136.77 --skip-sync         # rebuild from current remote source
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -30,7 +30,6 @@ DEPLOY_REMOTE_DIR="${DEPLOY_REMOTE_DIR:-/var/www/pms.ngeggs.com}"
 DEPLOY_APP_PORT="${DEPLOY_APP_PORT:-3000}"
 DEPLOY_SSH_KEY="${DEPLOY_SSH_KEY:-}"
 ENV_SOURCE_FILE="${ENV_SOURCE_FILE:-}"
-IMAGE_TAG="latest"
 ROLLBACK=false
 SKIP_SYNC=false
 DRY_RUN=false
@@ -46,7 +45,7 @@ usage() {
   cat <<'EOF'
 Usage: ./deploy.sh [options]
 
-Deploy and launch the PFMS app on a remote server with Docker Compose.
+Deploy and launch the PFMS app on a remote server with PM2.
 
 Options:
   -H HOST    Remote server hostname/IP (required, or set DEPLOY_HOST)
@@ -56,10 +55,8 @@ Options:
   -P PORT    Host port the app is published on     [default: 3000]
   -k KEY     Path to SSH private key
   -e FILE    Local env file to ship to the server  [default: .env]
-  -c         Prune (delete) files on the server no longer present in the
-             source. OFF by default so nothing is ever removed from the
-             remote directory — recommended for production servers.
-  -r         Roll back to the previous image
+  -c         Prune (delete) remote files no longer present in source
+  -r         Roll back to the previous build
   -s         Skip source sync (rebuild from current remote source)
   -n         Dry run: print commands without executing
   -y         Assume yes (skip confirmation prompt)
@@ -70,11 +67,6 @@ Environment overrides:
   DEPLOY_APP_PORT, DEPLOY_SSH_KEY, ENV_SOURCE_FILE
 
 A local .deploy.conf (KEY=VALUE lines) is sourced if present.
-
-Examples:
-  ./deploy.sh -H 203.0.113.10 -e .env
-  ./deploy.sh -H 203.0.113.10 -e .env -p 2222 -P 8000 -k ~/.ssh/id_ed25519
-  ./deploy.sh -H 203.0.113.10 --rollback
 EOF
   exit 0
 }
@@ -113,7 +105,6 @@ if [ -n "$DEPLOY_SSH_KEY" ]; then
   SCP_BASE+=(-i "$DEPLOY_SSH_KEY")
 fi
 SSH_TARGET="${DEPLOY_USER}@${DEPLOY_HOST}"
-COMPOSE_CMD=""
 RSYNC_RSH="ssh -p $DEPLOY_PORT -oBatchMode=yes -oStrictHostKeyChecking=accept-new"
 if [ -n "$DEPLOY_SSH_KEY" ]; then
   RSYNC_RSH="$RSYNC_RSH -i $DEPLOY_SSH_KEY"
@@ -138,33 +129,28 @@ cmd_run() {
 
 prepare_remote() {
   log "Checking remote prerequisites on ${DEPLOY_HOST} ..."
-  local checks
   if $DRY_RUN; then
-    COMPOSE_CMD="docker compose"
-    log "Prerequisites OK ($COMPOSE_CMD). [dry-run]"
+    log "Prerequisites OK. [dry-run]"
     return
   fi
+  local checks
   checks="$(cmd_run '
     set -e
-    command -v docker >/dev/null 2>&1 || { echo "MISSING_DOCKER"; exit 1; }
-    if docker compose version >/dev/null 2>&1; then echo "compose-v2";
-    elif command -v docker-compose >/dev/null 2>&1; then echo "compose-v1";
-    else echo "MISSING_COMPOSE"; exit 1; fi
-    mkdir -p "'"$DEPLOY_REMOTE_DIR"'"
+    command -v node >/dev/null 2>&1 || { echo "MISSING_NODE"; exit 1; }
+    command -v npm  >/dev/null 2>&1 || { echo "MISSING_NPM";  exit 1; }
+    command -v pm2  >/dev/null 2>&1 || { echo "MISSING_PM2";  exit 1; }
+    mkdir -p "'"$DEPLOY_REMOTE_DIR"'/data" "'"$DEPLOY_REMOTE_DIR"'/logs"
   ')"
-  if echo "$checks" | grep -q MISSING_DOCKER; then
-    fail "Docker is not installed on the server. Install Docker Engine first."
+  if echo "$checks" | grep -q MISSING_NODE; then
+    fail "Node.js is not installed on the server. Install Node >= 18 first."
   fi
-  if echo "$checks" | grep -q MISSING_COMPOSE; then
-    fail "Docker Compose is not installed on the server. Install Compose v2."
+  if echo "$checks" | grep -q MISSING_NPM; then
+    fail "npm is not installed on the server."
   fi
-  if echo "$checks" | grep -q "compose-v1"; then
-    COMPOSE_CMD="docker-compose"
-    warn "Server uses docker-compose v1 (legacy). Consider upgrading to Compose v2."
-  else
-    COMPOSE_CMD="docker compose"
+  if echo "$checks" | grep -q MISSING_PM2; then
+    fail "pm2 is not installed on the server. Run: npm i -g pm2 && pm2 startup"
   fi
-  log "Prerequisites OK ($COMPOSE_CMD)."
+  log "Prerequisites OK (node + npm + pm2)."
 }
 
 sync_source() {
@@ -176,6 +162,7 @@ sync_source() {
   EXCLUDES=(
     --exclude='node_modules'
     --exclude='.next'
+    --exclude='.next.prev'
     --exclude='out'
     --exclude='.git'
     --exclude='.gitignore'
@@ -187,7 +174,6 @@ sync_source() {
     --exclude='*.md'
     --exclude='.env'
     --exclude='.env.*'
-    --exclude='docker-compose*.yml'
     --exclude='deploy.sh'
     --exclude='.deploy.conf'
     --exclude='npm-debug.log*'
@@ -208,11 +194,11 @@ sync_source() {
   fi
 
   if cmd_run "command -v rsync >/dev/null 2>&1"; then
-    log "rsync available on server — using incremental sync."
+    log "rsync available — using incremental sync."
     rsync -az ${PRUNE:+--delete} "${EXCLUDES[@]}" -e "$RSYNC_RSH" \
       "$SCRIPT_DIR/" "$SSH_TARGET:$DEPLOY_REMOTE_DIR/"
   else
-    warn "rsync not found on the server — falling back to tar pipe."
+    warn "rsync not found — falling back to tar pipe."
     TAR_EXCLUDES=()
     for e in "${EXCLUDES[@]}"; do
       TAR_EXCLUDES+=("--exclude=${e#--exclude=}")
@@ -228,7 +214,7 @@ ship_env() {
     ENV_SOURCE_FILE="$SCRIPT_DIR/.env"
   fi
   if ! $DRY_RUN && [ ! -f "$ENV_SOURCE_FILE" ]; then
-    fail "Env file '$ENV_SOURCE_FILE' not found. Create it from .env.example and fill in your values."
+    fail "Env file '$ENV_SOURCE_FILE' not found."
   fi
   log "Shipping environment file to ${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}/.env"
   if $DRY_RUN; then
@@ -238,77 +224,119 @@ ship_env() {
     "${SCP_BASE[@]}" "$ENV_SOURCE_FILE" "$SSH_TARGET:$DEPLOY_REMOTE_DIR/.env"
     cmd_run "chmod 600 '$DEPLOY_REMOTE_DIR/.env'"
   fi
-
-  if ! $DRY_RUN; then
-    for required_var in NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; do
-      if ! grep -Eq "^[[:space:]]*${required_var}[[:space:]]*=" "$ENV_SOURCE_FILE"; then
-        warn "Env file is missing '$required_var'. The app may fail at runtime."
-      fi
-    done
-  fi
 }
 
-write_compose() {
-  log "Writing docker-compose.yml on the server."
-  local compose
-  compose="services:
-  pms:
-    image: pms:${IMAGE_TAG}
-    build: .
-    pull_policy: build
-    container_name: pms
-    ports:
-      - \"${DEPLOY_APP_PORT}:3000\"
-    env_file:
-      - .env
-    restart: unless-stopped
-    stop_grace_period: 20s
+write_ecosystem() {
+  log "Writing ecosystem.config.js on the server."
+  local eco
+  eco="module.exports = {
+  apps: [
+    {
+      name: \"pms\",
+      script: \"npm\",
+      args: \"run start\",
+      cwd: \"${DEPLOY_REMOTE_DIR}\",
+      instances: 1,
+      exec_mode: \"fork\",
+      autorestart: true,
+      max_memory_restart: \"1G\",
+      restart_delay: 5000,
+      max_restarts: 20,
+      exp_backoff_restart_delay: 1000,
+      min_uptime: \"10s\",
+      kill_timeout: 15000,
+      listen_timeout: 30000,
+      time: true,
+      merge_logs: true,
+      out_file: \"${DEPLOY_REMOTE_DIR}/logs/pm2.out.log\",
+      err_file: \"${DEPLOY_REMOTE_DIR}/logs/pm2.err.log\",
+      env: {
+        NODE_ENV: \"production\",
+        PORT: \"${DEPLOY_APP_PORT}\",
+        HOSTNAME: \"0.0.0.0\",
+        NEXT_TELEMETRY_DISABLED: \"1\"
+      }
+    }
+  ]
+};
 "
   if $DRY_RUN; then
-    printf '%s\n' "$compose"
+    printf 'cat > %s/ecosystem.config.js\n' "$DEPLOY_REMOTE_DIR"
   else
-    printf '%s' "$compose" | cmd_run "cat > '$DEPLOY_REMOTE_DIR/docker-compose.yml'"
+    printf '%s' "$eco" | cmd_run "cat > '$DEPLOY_REMOTE_DIR/ecosystem.config.js'"
   fi
 }
 
-launch_container() {
-  log "Building image and launching on the server ..."
+snapshot_build() {
+  log "Snapshotting current .next to .next.prev for rollback ..."
   if $DRY_RUN; then
-    log "Would run on server:"
-    printf '  cd %s && %s up -d --build\n' "$DEPLOY_REMOTE_DIR" "$COMPOSE_CMD"
+    printf 'mv %s/.next %s/.next.prev 2>/dev/null || true\n' "$DEPLOY_REMOTE_DIR" "$DEPLOY_REMOTE_DIR"
     return
   fi
-  cmd_run "cd '$DEPLOY_REMOTE_DIR' && docker tag pms:${IMAGE_TAG} pms:previous 2>/dev/null || true"
-  cmd_run "cd '$DEPLOY_REMOTE_DIR' && $COMPOSE_CMD up -d --build"
+  cmd_run "cd '$DEPLOY_REMOTE_DIR' && rm -rf .next.prev && mv .next .next.prev 2>/dev/null || true"
 }
 
-rollback_container() {
-  log "Rolling back to the previous image (pms:previous) ..."
+restore_build() {
+  log "Restoring previous .next build ..."
   if $DRY_RUN; then
-    printf 'docker tag pms:previous pms:%s && %s -f %s/docker-compose.yml up -d --force-recreate\n' \
-      "$IMAGE_TAG" "$COMPOSE_CMD" "$DEPLOY_REMOTE_DIR"
+    printf 'mv %s/.next.prev %s/.next 2>/dev/null || true\n' "$DEPLOY_REMOTE_DIR" "$DEPLOY_REMOTE_DIR"
     return
   fi
-  cmd_run "docker tag pms:previous pms:${IMAGE_TAG}"
-  cmd_run "cd '$DEPLOY_REMOTE_DIR' && $COMPOSE_CMD up -d --force-recreate"
+  cmd_run "cd '$DEPLOY_REMOTE_DIR' && [ -d .next.prev ] && mv .next.prev .next || { echo 'No previous build to restore.'; exit 1; }"
+}
+
+install_deps() {
+  log "Installing npm dependencies on the server ..."
+  if $DRY_RUN; then
+    printf 'cd %s && npm ci --prefer-offline\n' "$DEPLOY_REMOTE_DIR"
+    return
+  fi
+  cmd_run "cd '$DEPLOY_REMOTE_DIR' && npm ci --prefer-offline 2>&1 | tail -5"
+}
+
+build_app() {
+  log "Building production bundle on the server ..."
+  if $DRY_RUN; then
+    printf 'cd %s && npm run build\n' "$DEPLOY_REMOTE_DIR"
+    return
+  fi
+  cmd_run "cd '$DEPLOY_REMOTE_DIR' && npm run build 2>&1 | tail -8"
+}
+
+restart_app() {
+  log "Restarting PM2 process ..."
+  if $DRY_RUN; then
+    printf 'cd %s && pm2 start ecosystem.config.js && pm2 save\n' "$DEPLOY_REMOTE_DIR"
+    return
+  fi
+  cmd_run "
+    cd '$DEPLOY_REMOTE_DIR'
+    if pm2 describe pms >/dev/null 2>&1; then
+      pm2 restart pms
+    else
+      pm2 start ecosystem.config.js
+      pm2 startup systemd -u root --hp /root 2>/dev/null || true
+    fi
+    pm2 save 2>/dev/null || true
+  "
 }
 
 wait_healthy() {
   log "Waiting for the app to respond on http://${DEPLOY_HOST}:${DEPLOY_APP_PORT} ..."
   local i
-  for i in $(seq 1 60); do
+  for i in $(seq 1 45); do
     if $DRY_RUN; then
       log "App is healthy. [dry-run]"
       return 0
     fi
-    if cmd_run "docker compose -f '$DEPLOY_REMOTE_DIR/docker-compose.yml' exec -T pms node -e \"fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"" >/dev/null 2>&1; then
+    if cmd_run "curl -sf http://127.0.0.1:${DEPLOY_APP_PORT}/login >/dev/null 2>&1"; then
       log "App is healthy (took ${i} checks)."
       return 0
     fi
     sleep 2
   done
-  warn "App did not become healthy within the timeout. Recent container logs:"
-  cmd_run "docker compose -f '$DEPLOY_REMOTE_DIR/docker-compose.yml' logs --tail=100 pms" || true
+  warn "App did not become healthy within the timeout. Recent logs:"
+  cmd_run "pm2 logs pms --lines 50 --nostream" || true
   fail "Deployment failed health check."
 }
 
@@ -316,7 +344,7 @@ confirm_or_abort() {
   if $ASSUME_YES; then
     return
   fi
-  printf "Deploy PFMS to %s (%s:%s) remote dir %s? [y/N] " "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" "$DEPLOY_REMOTE_DIR"
+  printf "Deploy PFMS to %s (%s:%s) remote dir %s via PM2? [y/N] " "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" "$DEPLOY_REMOTE_DIR"
   read -r answer
   case "$answer" in
     y|Y|yes|YES) ;;
@@ -325,7 +353,7 @@ confirm_or_abort() {
 }
 
 main() {
-  log "PFMS deployment to ${DEPLOY_HOST}"
+  log "PFMS deployment to ${DEPLOY_HOST} (PM2)"
   echo "  user:       ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PORT}"
   echo "  remote dir: ${DEPLOY_REMOTE_DIR}"
   echo "  app port:   ${DEPLOY_APP_PORT}"
@@ -336,7 +364,8 @@ main() {
   prepare_remote
 
   if $ROLLBACK; then
-    rollback_container
+    restore_build
+    restart_app
     wait_healthy
     log "Rollback complete. http://${DEPLOY_HOST}:${DEPLOY_APP_PORT}"
     exit 0
@@ -344,8 +373,11 @@ main() {
 
   sync_source
   ship_env
-  write_compose
-  launch_container
+  snapshot_build
+  write_ecosystem
+  install_deps
+  build_app
+  restart_app
   wait_healthy
 
   echo
@@ -355,7 +387,6 @@ main() {
   echo "  Remote:   ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_REMOTE_DIR}"
   echo "  Rollback: ./deploy.sh -H ${DEPLOY_HOST} --rollback"
   echo
-  warn "Set NEXT_PUBLIC_SITE_URL to http://${DEPLOY_HOST}:${DEPLOY_APP_PORT} in your env file so Stripe/Paystack redirects work."
 }
 
 main "$@"
