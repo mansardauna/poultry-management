@@ -101,8 +101,8 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
     fetch('/api/staff')
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          const s = data[0];
+        if (data?.staff && Array.isArray(data.staff) && data.staff.length > 0) {
+          const s = data.staff[0];
           setStaffName(prev => prev || s.name || '');
           setStaffRole(prev => prev || s.role || 'Attendant');
           setStaffSalary(prev => prev || String(s.salary || '45000'));
@@ -110,7 +110,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         }
       })
       .catch(() => {});
-  }, [workspaces]);
+  }, [workspaces, initialStep]);
 
   // Continuously persist form state to localStorage
   useEffect(() => {
@@ -211,6 +211,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            action: 'system',
             farmName: branchName.trim(),
             adminName: ownerName.trim(),
             adminPhone: ownerPhone.trim(),
@@ -254,6 +255,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
       if (typeof window !== 'undefined') {
         localStorage.removeItem('pfms_onboarding_draft');
         localStorage.removeItem('pfms_onboarding_current_step');
+        localStorage.setItem('pfms_branch_setup_completed', 'true');
       }
 
       toast.success('Farm onboarding setup submitted successfully.');
