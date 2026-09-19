@@ -15,7 +15,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-white to-slate-50 border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-6 text-center">
-          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold px-3 py-1 rounded-full tracking-wider">
             About Our Platform
           </span>
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mt-4 tracking-tight leading-tight">

@@ -549,7 +549,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         {/* Current Inventory Table */}
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
+            <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider">
               {texts.feed.currentInventory}
             </CardTitle>
           </CardHeader>
@@ -559,7 +559,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                   <tr>
                     <TableSortHeader label="Type" sortKey="type" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
                     <TableSortHeader label="Quantity (kg)" sortKey="quantityKg" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
@@ -580,7 +580,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                         <td className="px-4 py-3 text-slate-655 font-medium">{feed.supplier}</td>
                         <td className="px-4 py-3 text-slate-400 font-mono">{feed.lastRestock}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2.5 py-0.5 text-[9px] font-semibold uppercase ${
+                          <span className={`px-2.5 py-0.5 text-[9px] font-semibold ${
                             isCritical ? 'bg-red-100 text-red-800 animate-pulse' : 'bg-indigo-105 text-indigo-800'
                           }`}>
                             {isCritical ? 'Critical Stock' : 'Safe stock'}
@@ -608,8 +608,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         {/* Restructuring Procurement Pipeline Logs */}
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <Truck size="18" className="text-indigo-650" /> Restructured Logistics Procurement Pipeline (DB Roster)
+            <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider flex items-center gap-2">
+              <Truck size="18" className="text-indigo-655" /> Restructured Logistics Procurement Pipeline (DB Roster)
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -621,7 +621,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                   <tr>
                     <TableSortHeader label={texts.common.date} sortKey="date" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
                     <TableSortHeader label="Milestone Action" sortKey="milestone" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
@@ -638,7 +638,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                       <td className="px-4 py-3 text-slate-900 font-semibold">{pipe.milestone}</td>
                       <td className="px-4 py-3 text-slate-655 font-semibold">{pipe.supplier}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 text-[9px] font-semibold uppercase ${
+                        <span className={`px-2 py-0.5 text-[9px] font-semibold ${
                           pipe.status.includes('Secured') ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
                         }`}>{pipe.status}</span>
                       </td>
@@ -683,7 +683,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Consumption Logs */}
       <Card>
         <CardHeader className="border-b border-slate-100">
-          <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
+          <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider">
             {texts.feed.consumptionLogs}
           </CardTitle>
         </CardHeader>
@@ -693,7 +693,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
-              <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+              <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <TableSortHeader label={texts.common.date} sortKey="date" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
                   <th className="px-4 py-3">Feed Type</th>

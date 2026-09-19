@@ -52,7 +52,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
       <div className="space-y-6 max-w-4xl pb-16 font-sans">
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
-            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full">
+            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
               ENTERPRISE TIER REQUIRED
             </span>
             <h2 className="text-2xl font-extrabold text-slate-900 pt-1">24/7 Priority Veterinarian Hotline</h2>
@@ -77,7 +77,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
   return (
     <div className="space-y-8 max-w-6xl pb-16 font-sans">
       {/* Top Enterprise Sub-Navigation Bar */}
-      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold uppercase tracking-wider">
+      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold tracking-wider">
         <button
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
@@ -117,11 +117,11 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
               <Sparkles size={12} /> Enterprise Suite
             </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full">
-              24/7 VET HOTLINE
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
+              24/7 Vet Hotline
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">24/7 Priority Vet & Inspection Hotline</h1>
@@ -148,8 +148,8 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
         <CardContent className="p-6 space-y-6">
           <div className="bg-slate-900 text-white p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <span className="text-[10px] bg-emerald-500 text-slate-950 font-black uppercase px-2.5 py-0.5 rounded font-mono">
-                24/7 DEDICATED VET CONSULTANT
+              <span className="text-[10px] bg-emerald-500 text-slate-950 font-black px-2.5 py-0.5 rounded font-mono">
+                24/7 Dedicated Vet Consultant
               </span>
               <h3 className="text-lg font-bold text-white">On-Call Certified Veterinary Specialist</h3>
               <p className="text-xs text-slate-300 font-mono">+234 800-POULTRY-VET (Direct Emergency Line)</p>
@@ -166,7 +166,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">Dispatched Vet Tickets ({consultants.length})</h4>
+            <h4 className="text-xs font-extrabold text-slate-700 tracking-wider">Dispatched Vet Tickets ({consultants.length})</h4>
             {consultants.length === 0 ? (
               <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
                 No active veterinarian inspection tickets. Click "Dispatch Emergency Vet Ticket" to request an inspection.
@@ -177,7 +177,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900">{t.ticketType}</span>
-                      <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase font-mono">
+                      <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-2 py-0.5 rounded font-mono">
                         {t.status || 'Assigned'}
                       </span>
                     </div>
@@ -196,7 +196,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
-              <h3 className="font-extrabold text-sm uppercase">Dispatch Emergency Vet Ticket</h3>
+              <h3 className="font-extrabold text-sm">Dispatch Emergency Vet Ticket</h3>
               <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-white cursor-pointer">✕</button>
             </div>
             <div className="p-5 space-y-4 text-xs">

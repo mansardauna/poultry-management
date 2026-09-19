@@ -49,7 +49,7 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
       <div className="space-y-6 max-w-4xl pb-16 font-sans">
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
-            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full">
+            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
               ENTERPRISE TIER REQUIRED
             </span>
             <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Wholesale Feed & Procurement Pool</h2>
@@ -74,7 +74,7 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
   return (
     <div className="space-y-8 max-w-6xl pb-16 font-sans">
       {/* Top Enterprise Sub-Navigation Bar */}
-      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold uppercase tracking-wider">
+      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold tracking-wider">
         <button
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
@@ -114,11 +114,11 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
               <Sparkles size={12} /> Enterprise Suite
             </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full">
-              WHOLESALE FEED POOL
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
+              Wholesale Feed Pool
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Cooperative Wholesale Feed Purchasing Pool</h1>
@@ -165,7 +165,7 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider">Active Bulk Orders ({bulkOrders.length})</h4>
+            <h4 className="text-xs font-extrabold text-slate-700 tracking-wider">Active Bulk Orders ({bulkOrders.length})</h4>
             {bulkOrders.length === 0 ? (
               <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
                 No active wholesale feed pool orders. Pool orders to unlock 15% discount on maize and feeds.

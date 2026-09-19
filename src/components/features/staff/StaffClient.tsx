@@ -316,7 +316,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{TEXTS.staff.totalStaff}</p>
+                <p className="text-xs font-semibold text-slate-500 tracking-wider">{TEXTS.staff.totalStaff}</p>
                 <p className="text-3xl font-semibold text-slate-900 mt-2">{totalStaff}</p>
               </div>
               <div className="text-blue-500">
@@ -330,7 +330,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Staff Tasks</p>
+                <p className="text-xs font-semibold text-slate-500 tracking-wider">Active Staff Tasks</p>
                 <p className="text-3xl font-semibold text-indigo-600 mt-2">{pendingTasksCount}</p>
               </div>
               <div className="text-indigo-650">
@@ -352,7 +352,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             <TableControls searchTerm={staffTable.searchTerm} setSearchTerm={staffTable.setSearchTerm} placeholder="Search staff..." />
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                   <tr>
                     <TableSortHeader label="Name" sortKey="name" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
                     <TableSortHeader label="Role" sortKey="role" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
@@ -380,7 +380,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                       <td className="px-4 py-3 text-right">
                           <button 
                           onClick={() => handleMarkAttendance(employee.id)}
-                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[10px] font-semibold uppercase px-3 py-1.5 inline-flex items-center gap-1"
+                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[10px] font-semibold px-3 py-1.5 inline-flex items-center gap-1"
                         >
                           <Fingerprint size={12} /> Check-in Today
                         </button>
@@ -411,7 +411,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
         {/* Operational Tasks Roster */}
         <Card className="lg:col-span-1">
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
+            <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider">
               Shift Task List (Active Assignments)
             </CardTitle>
           </CardHeader>
@@ -424,7 +424,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                   <div key={task.id} className={`p-3 border ${task.status === 'Completed' ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'} space-y-2`}>
                     <div className="flex justify-between items-start">
                       <span className="font-semibold text-slate-800">{task.taskName}</span>
-                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 uppercase ${
+                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 ${
                         task.status === 'Completed' ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-100 text-amber-800 animate-pulse'
                       }`}>
                         {task.status}
@@ -437,7 +437,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                     {task.status === 'Pending' && (
                         <button 
                         onClick={() => handleCompleteTask(task.id)}
-                        className="w-full bg-indigo-650 hover:bg-indigo-700 text-white text-[10px] font-semibold uppercase py-1 mt-1 text-center flex items-center justify-center gap-1"
+                        className="w-full bg-indigo-650 hover:bg-indigo-700 text-white text-[10px] font-semibold py-1 mt-1 text-center flex items-center justify-center gap-1"
                       >
                         <CheckCircle size={12} /> Mark Completed
                       </button>
@@ -461,7 +461,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       {/* Payroll History */}
       <Card>
         <CardHeader className="border-b border-slate-100 flex flex-row justify-between items-center">
-          <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider">
+          <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider">
             Payroll & Disbursement History
           </CardTitle>
         </CardHeader>
@@ -476,7 +476,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                   <TableSortHeader label="Staff Member" sortKey="staffId" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
                   <TableSortHeader label="Period" sortKey="period" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
                   <TableSortHeader label="Amount Paid" sortKey="amount" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
-                  {canEdit && <th className="px-4 py-3 text-slate-500 uppercase text-right">Del</th>}
+                  {canEdit && <th className="px-4 py-3 text-slate-500 text-right">Del</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
@@ -523,7 +523,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
 
       {/* Add Staff Modal */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase' }}>Add Staff Member</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)' }}>Add Staff Member</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
@@ -622,7 +622,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
 
       {/* Assign Task Modal */}
       <Dialog open={openTaskModal} onClose={handleCloseTaskModal} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 600 }}>Assign Shift Task</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 600 }}>Assign Shift Task</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField

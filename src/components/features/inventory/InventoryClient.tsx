@@ -162,7 +162,7 @@ export function InventoryClient({ role }: { role: string }) {
       </Card>
 
       <Dialog open={open} onClose={() => { setOpen(false); setEditingItem(null); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>{editingItem ? 'Edit Equipment' : 'Add Equipment'}</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{editingItem ? 'Edit Equipment' : 'Add Equipment'}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField

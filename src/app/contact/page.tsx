@@ -16,7 +16,7 @@ export default function ContactPage() {
       {/* Main Content */}
       <section className="py-16 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold px-3 py-1 rounded-full tracking-wider">
             Get In Touch
           </span>
           <h1 className="text-4xl font-bold text-slate-900 mt-4 tracking-tight">

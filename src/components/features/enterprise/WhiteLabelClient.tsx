@@ -59,7 +59,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
       <div className="space-y-6 max-w-4xl pb-16 font-sans">
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
-            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full">
+            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
               ENTERPRISE TIER REQUIRED
             </span>
             <h2 className="text-2xl font-extrabold text-slate-900 pt-1">White-Label Portal & Custom Branding</h2>
@@ -84,7 +84,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
   return (
     <div className="space-y-8 max-w-6xl pb-16 font-sans">
       {/* Top Enterprise Sub-Navigation Bar */}
-      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold uppercase tracking-wider">
+      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold tracking-wider">
         <button
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
@@ -125,11 +125,11 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
               <Sparkles size={12} /> Enterprise Suite
             </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full">
-              GLOBAL WHITE-LABELING
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
+              Global White-Labeling
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">White-Label Portal & Branding</h1>
@@ -228,7 +228,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
             {/* Live Real-time Preview Box */}
             <div className="bg-slate-950 text-white p-6 rounded-2xl flex flex-col justify-between space-y-4 border border-slate-800 relative shadow-xl">
               <div>
-                <span className="text-[10px] text-purple-400 font-extrabold uppercase tracking-widest block mb-2 font-mono">
+                <span className="text-[10px] text-purple-400 font-extrabold block mb-2 font-mono">
                   LIVE PORTAL PREVIEW
                 </span>
 
@@ -261,7 +261,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
 
               <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
                 <span className="text-slate-400">Branded Invoices & PDF Reports:</span>
-                <span className="bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-[10px] uppercase tracking-wider">
+                <span className="bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-[10px] tracking-wider">
                   Enabled
                 </span>
               </div>

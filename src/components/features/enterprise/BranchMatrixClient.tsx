@@ -132,7 +132,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
       <div className="space-y-6 max-w-4xl pb-16 font-sans">
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
-            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full">
+            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
               ENTERPRISE TIER REQUIRED
             </span>
             <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Multi-Farm Matrix & Stock Transfers</h2>
@@ -161,7 +161,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
   return (
     <div className="space-y-8 max-w-6xl pb-16 font-sans">
       {/* Top Enterprise Sub-Navigation Bar */}
-      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold uppercase tracking-wider">
+      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1 text-xs font-bold tracking-wider">
         <button
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap bg-indigo-600 text-white shadow-md"
@@ -202,11 +202,11 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
               <Sparkles size={12} /> Enterprise Suite
             </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full">
-              BRANCH MATRIX & TRANSFERS
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
+              Branch Matrix & Transfers
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Multi-Farm Branch Matrix</h1>
@@ -260,10 +260,10 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded ${
+                    <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded ${
                       isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
                     }`}>
-                      {isActive ? 'ACTIVE WORKSPACE' : `Location #${i + 1}`}
+                      {isActive ? 'Active Workspace' : `Location #${i + 1}`}
                     </span>
 
                     <button
@@ -283,19 +283,19 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                   {/* Real Database Telemetry Stats */}
                   <div className="pt-3 border-t border-slate-200/60 grid grid-cols-2 gap-3 text-xs font-semibold text-slate-700 font-mono">
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">FLOCK SIZE</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Flock Size</span>
                       <span className="text-sm font-bold text-slate-900">{bm.totalBirds.toLocaleString()} Birds</span>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">EGG PRODUCTION</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Egg Production</span>
                       <span className="text-sm font-bold text-emerald-600">{Math.floor(bm.totalEggs / 30).toLocaleString()} Crates</span>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">FEED STOCK</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Feed Stock</span>
                       <span className="text-sm font-bold text-indigo-600">{bm.feedStockKg.toLocaleString()} Kg</span>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans uppercase">REVENUE</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Revenue</span>
                       <span className="text-sm font-bold text-amber-600">₦{bm.revenue.toLocaleString()}</span>
                     </div>
                   </div>
@@ -327,7 +327,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ArrowRightLeft size={18} className="text-indigo-400" />
-                <h3 className="font-extrabold text-sm uppercase">Cross-Branch Stock Transfer</h3>
+                <h3 className="font-extrabold text-sm">Cross-Branch Stock Transfer</h3>
               </div>
               <button onClick={() => setOpenTransferModal(false)} className="text-slate-400 hover:text-white cursor-pointer">✕</button>
             </div>
@@ -409,7 +409,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
             <div className="bg-red-600 text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle size={20} />
-                <h3 className="font-extrabold text-sm uppercase">Permanently Delete Branch</h3>
+                <h3 className="font-extrabold text-sm">Permanently Delete Branch</h3>
               </div>
               <button onClick={() => setDeletingBranch(null)} className="text-white hover:text-red-200 cursor-pointer">✕</button>
             </div>

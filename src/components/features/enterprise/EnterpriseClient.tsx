@@ -242,7 +242,7 @@ export function EnterpriseClient({
             <Building2 size={40} />
           </div>
           <div className="space-y-2 max-w-lg mx-auto">
-            <span className="bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">
+            <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-1 rounded-full shadow">
               ENTERPRISE TIER REQUIRED
             </span>
             <h2 className="text-3xl font-extrabold text-white">Enterprise Suite & White-Label Portal</h2>
@@ -290,11 +290,11 @@ export function EnterpriseClient({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
               <Sparkles size={12} /> Enterprise Suite
             </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full">
-              ACTIVE UNLIMITED TIER
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
+              Active Unlimited Tier
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{coopName}</h1>
@@ -402,10 +402,10 @@ export function EnterpriseClient({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded ${
+                      <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded ${
                         isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
                       }`}>
-                        {isActive ? 'ACTIVE WORKSPACE' : `Location #${i + 1}`}
+                        {isActive ? 'Active Workspace' : `Location #${i + 1}`}
                       </span>
                       <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 font-mono">
                         ● LIVE TELEMETRY
@@ -413,41 +413,41 @@ export function EnterpriseClient({
                     </div>
 
                     <div>
-                      <h4 className="font-extrabold text-slate-900 text-base">{ws.name}</h4>
-                      <p className="text-xs text-slate-500 font-medium">{ws.type || 'Commercial Farm Branch'}</p>
+                      <h4 className="font-extrabold text-slate-900 text-sm">{ws.name}</h4>
+                      <p className="text-xs text-slate-500 font-medium">{ws.type || 'Commercial Branch'}</p>
                     </div>
 
                     {/* Real Database Telemetry Stats */}
-                    <div className="pt-3 border-t border-slate-200/60 grid grid-cols-2 gap-3 text-xs font-semibold text-slate-700 font-mono">
-                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Flock size</span>
+                    <div className="pt-3 border-t border-slate-200 grid grid-cols-2 gap-2 text-xs font-semibold text-slate-700 font-mono">
+                      <div>
+                        <span className="text-[9px] text-slate-400 font-bold block font-sans">Flock Size</span>
                         <span className="text-sm font-bold text-slate-900">{bm.totalBirds.toLocaleString()} Birds</span>
                       </div>
-                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Egg production</span>
+                      <div>
+                        <span className="text-[9px] text-slate-400 font-bold block font-sans">Egg Production</span>
                         <span className="text-sm font-bold text-emerald-600">{Math.floor(bm.totalEggs / 30).toLocaleString()} Crates</span>
                       </div>
-                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Feed stock</span>
+                      <div>
+                        <span className="text-[9px] text-slate-400 font-bold block font-sans">Feed Stock</span>
                         <span className="text-sm font-bold text-indigo-600">{bm.feedStockKg.toLocaleString()} Kg</span>
                       </div>
-                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-medium block font-sans">Revenue</span>
+                      <div>
+                        <span className="text-[9px] text-slate-400 font-bold block font-sans">Revenue</span>
                         <span className="text-sm font-bold text-amber-600">₦{bm.revenue.toLocaleString()}</span>
                       </div>
                     </div>
 
-                    <div className="pt-2">
+                    <div className="pt-2 flex gap-2">
                       <button
                         onClick={() => {
                           setActiveWorkspace(ws);
                           toast.success(`Switched active workspace to "${ws.name}"`);
                         }}
-                        className={`w-full text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer ${
+                        className={`flex-1 text-xs font-bold py-2 rounded-xl transition-all cursor-pointer ${
                           isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
                         }`}
                       >
-                        {isActive ? 'Currently Active' : `Switch to ${ws.name}`}
+                        {isActive ? 'Currently Active' : 'Switch Workspace'}
                       </button>
                     </div>
                   </div>
@@ -460,148 +460,145 @@ export function EnterpriseClient({
 
       {/* TAB 2: White-Label Portal & Custom Themes & Report Builder */}
       {activeTab === 'whitelabel' && (
-        <div className="space-y-6">
-          <Card className="rounded-2xl border border-slate-200 shadow-sm">
-            <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Palette size={20} className="text-purple-600" /> Cooperative White-Label Portal & Custom Branding
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Form Controls */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Cooperative / Enterprise Name *</label>
+        <Card className="rounded-2xl border border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Sparkles size={20} className="text-purple-600" /> Cooperative White-Label Portal & Custom Branding
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Cooperative / Enterprise Name *</label>
+                  <input 
+                    type="text" 
+                    value={coopName} 
+                    onChange={(e) => setCoopName(e.target.value)} 
+                    className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Custom Portal Sub-Domain *</label>
+                  <div className="flex items-center">
                     <input 
                       type="text" 
-                      value={coopName} 
-                      onChange={(e) => setCoopName(e.target.value)} 
-                      className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
+                      value={subdomain} 
+                      onChange={(e) => setSubdomain(e.target.value)} 
+                      className="w-full p-3 border border-slate-200 rounded-l-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
                     />
+                    <span className="bg-slate-100 border border-l-0 border-slate-200 text-slate-500 text-xs px-3 py-3 rounded-r-xl font-mono">
+                      .poultryfarm.com
+                    </span>
                   </div>
+                </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Custom Portal Sub-Domain *</label>
-                    <div className="flex items-center">
-                      <input 
-                        type="text" 
-                        value={subdomain} 
-                        onChange={(e) => setSubdomain(e.target.value)} 
-                        className="w-full p-3 border border-slate-200 rounded-l-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Brand Logo Image URL</label>
+                  <input 
+                    type="text" 
+                    placeholder="https://example.com/logo.png"
+                    value={logoUrl} 
+                    onChange={(e) => setLogoUrl(e.target.value)} 
+                    className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Brand Theme Accent Color</label>
+                  <div className="flex items-center gap-3">
+                    {['indigo', 'emerald', 'purple', 'amber', 'slate'].map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setBrandColor(c)}
+                        className={`w-8 h-8 rounded-full border-2 transition-transform cursor-pointer ${
+                          c === 'indigo' ? 'bg-indigo-600' :
+                          c === 'emerald' ? 'bg-emerald-600' :
+                          c === 'purple' ? 'bg-purple-600' :
+                          c === 'amber' ? 'bg-amber-500' : 'bg-slate-900'
+                        } ${brandColor === c ? 'scale-125 border-white shadow-md' : 'border-transparent opacity-75 hover:opacity-100'}`}
                       />
-                      <span className="bg-slate-100 border border-l-0 border-slate-200 text-slate-500 text-xs px-3 py-3 rounded-r-xl font-mono">
-                        .poultryfarm.com
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Custom Report Header Title</label>
+                  <input 
+                    type="text" 
+                    value={customReportHeader} 
+                    onChange={(e) => setCustomReportHeader(e.target.value)} 
+                    className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Custom Invoice Footer Note</label>
+                  <input 
+                    type="text" 
+                    value={customInvoiceFooter} 
+                    onChange={(e) => setCustomInvoiceFooter(e.target.value)} 
+                    className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Live Real-time Preview Box */}
+              <div className="bg-slate-950 text-white p-6 rounded-2xl flex flex-col justify-between space-y-4 border border-slate-800 relative shadow-xl">
+                <div>
+                  <span className="text-[10px] text-purple-400 font-extrabold block mb-2 font-mono">
+                    LIVE PORTAL PREVIEW
+                  </span>
+
+                  <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <div className="flex items-center gap-2">
+                        {logoUrl ? (
+                          <img src={logoUrl} alt="Logo" className="w-8 h-8 rounded object-cover" />
+                        ) : (
+                          <div className="w-8 h-8 rounded bg-purple-600 text-white font-bold flex items-center justify-center text-xs">
+                            {coopName.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="text-sm font-bold text-white">{coopName}</h3>
+                          <p className="text-[10px] text-slate-400 font-mono">https://{subdomain}.poultryfarm.com</p>
+                        </div>
+                      </div>
+                      <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded font-mono">
+                        WHITE-LABEL ACTIVE
                       </span>
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Brand Logo Image URL</label>
-                    <input 
-                      type="text" 
-                      placeholder="https://example.com/logo.png"
-                      value={logoUrl} 
-                      onChange={(e) => setLogoUrl(e.target.value)} 
-                      className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Brand Theme Accent Color</label>
-                    <div className="flex items-center gap-3">
-                      {['indigo', 'emerald', 'purple', 'amber', 'slate'].map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setBrandColor(c)}
-                          className={`w-8 h-8 rounded-full border-2 transition-transform cursor-pointer ${
-                            c === 'indigo' ? 'bg-indigo-600' :
-                            c === 'emerald' ? 'bg-emerald-600' :
-                            c === 'purple' ? 'bg-purple-600' :
-                            c === 'amber' ? 'bg-amber-500' : 'bg-slate-900'
-                          } ${brandColor === c ? 'scale-125 border-white shadow-md' : 'border-transparent opacity-75 hover:opacity-100'}`}
-                        />
-                      ))}
+                    <div className="text-xs space-y-1 text-slate-300 pt-1">
+                      <p className="font-bold text-white text-[11px]">{customReportHeader}</p>
+                      <p className="text-[10px] text-slate-400 italic">"{customInvoiceFooter}"</p>
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Custom Report Header Title</label>
-                    <input 
-                      type="text" 
-                      value={customReportHeader} 
-                      onChange={(e) => setCustomReportHeader(e.target.value)} 
-                      className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Custom Invoice Footer Note</label>
-                    <input 
-                      type="text" 
-                      value={customInvoiceFooter} 
-                      onChange={(e) => setCustomInvoiceFooter(e.target.value)} 
-                      className="w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 outline-none"
-                    />
                   </div>
                 </div>
 
-                {/* Live Real-time Preview Box */}
-                <div className="bg-slate-950 text-white p-6 rounded-2xl flex flex-col justify-between space-y-4 border border-slate-800 relative shadow-xl">
-                  <div>
-                    <span className="text-[10px] text-purple-400 font-extrabold uppercase tracking-widest block mb-2 font-mono">
-                      LIVE PORTAL PREVIEW
-                    </span>
-
-                    <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <div className="flex items-center gap-2">
-                          {logoUrl ? (
-                            <img src={logoUrl} alt="Logo" className="w-8 h-8 rounded object-cover" />
-                          ) : (
-                            <div className="w-8 h-8 rounded bg-purple-600 text-white font-bold flex items-center justify-center text-xs">
-                              {coopName.slice(0, 2).toUpperCase()}
-                            </div>
-                          )}
-                          <div>
-                            <h3 className="text-sm font-bold text-white">{coopName}</h3>
-                            <p className="text-[10px] text-slate-400 font-mono">https://{subdomain}.poultryfarm.com</p>
-                          </div>
-                        </div>
-                        <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded font-mono">
-                          WHITE-LABEL ACTIVE
-                        </span>
-                      </div>
-
-                      <div className="text-xs space-y-1 text-slate-300 pt-1">
-                        <p className="font-bold text-white text-[11px]">{customReportHeader}</p>
-                        <p className="text-[10px] text-slate-400 italic">"{customInvoiceFooter}"</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Branded Invoices & PDF Reports:</span>
-                    <span className="bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-[10px] uppercase tracking-wider">
-                      Enabled
-                    </span>
-                  </div>
+                <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Branded Invoices & PDF Reports:</span>
+                  <span className="bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-[10px] tracking-wider">
+                    Enabled
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <div className="flex justify-end pt-2 border-t border-slate-100">
-                <button 
-                  onClick={handleSaveWhiteLabel}
-                  disabled={isSavingCoop}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <Sparkles size={16} /> {isSavingCoop ? 'Saving Settings...' : 'Save White-Label & Theme Settings'}
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <div className="flex justify-end pt-2 border-t border-slate-100">
+              <button 
+                onClick={handleSaveWhiteLabel}
+                disabled={isSavingCoop}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow transition-all cursor-pointer flex items-center gap-2"
+              >
+                <Sparkles size={16} /> {isSavingCoop ? 'Saving Settings...' : 'Save White-Label & Theme Settings'}
+              </button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* TAB 3: Enterprise API Keys & Webhooks Gateway */}

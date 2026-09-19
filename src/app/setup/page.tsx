@@ -226,11 +226,11 @@ export default function SetupWizardPage() {
             href="/documentation/superadmin-setup-guide.html"
             target="_blank"
             rel="noreferrer"
-            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-md shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold px-4 py-2 rounded-md shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <HelpCircle size={15} /> Super Admin Docs
           </a>
-          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-md hidden sm:inline-block">
+          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold px-3 py-1.5 rounded-md hidden sm:inline-block">
             Self-Hosted Production Mode
           </span>
         </div>
@@ -273,7 +273,7 @@ export default function SetupWizardPage() {
                   {isDone ? '✓' : s.num}
                 </div>
                 <div className="hidden sm:block text-left truncate">
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider leading-none text-slate-400">Step {s.num}</p>
+                  <p className="text-[10px] font-extrabold leading-none text-slate-400">Step {s.num}</p>
                   <p className="text-xs font-bold truncate mt-0.5 text-slate-800">{s.title}</p>
                 </div>
               </div>
@@ -287,7 +287,7 @@ export default function SetupWizardPage() {
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold px-2.5 py-0.5 rounded-sm">
                   Step 1 of 5
                 </span>
                 <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">

@@ -424,7 +424,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
 
       {/* Add Batch Modal */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Add Chicken Batch</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Add Chicken Batch</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
@@ -504,7 +504,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
 
       {/* Log Mortality Modal */}
       <Dialog open={openMortality} onClose={handleCloseMortality} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Record Flock Mortality</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Record Flock Mortality</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <SelectWithAdd
@@ -556,7 +556,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
 
       {/* Log Vaccination Modal */}
       <Dialog open={openVaccine} onClose={handleCloseVaccine} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Vaccination Event</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Log Vaccination Event</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <SelectWithAdd
@@ -598,7 +598,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
 
       {/* Transfer Birds Modal */}
       <Dialog open={openTransfer} onClose={handleCloseTransfer} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Log Bird Transfer</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Log Bird Transfer</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <SelectWithAdd
@@ -646,7 +646,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
 
       {/* Edit Batch Modal */}
       <Dialog open={openEdit} onClose={handleCloseEdit} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', textTransform: 'uppercase', fontWeight: 605 }}>Edit Chicken Batch</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Edit Chicken Batch</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField

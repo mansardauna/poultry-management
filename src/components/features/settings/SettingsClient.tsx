@@ -401,7 +401,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         {role !== 'Staff' && (
           <button
             onClick={() => setActiveTab('subscription')}
-            className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+            className={`py-3 px-5 font-bold text-xs border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'subscription' 
                 ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -412,7 +412,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         )}
         <button
           onClick={() => setActiveTab('profile')}
-          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+          className={`py-3 px-5 font-bold text-xs border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
             activeTab === 'profile' 
               ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -424,7 +424,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           <>
             <button
               onClick={() => setActiveTab('alerts')}
-              className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+              className={`py-3 px-5 font-bold text-xs border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                 activeTab === 'alerts' 
                   ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -434,7 +434,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
             </button>
             <button
               onClick={() => setActiveTab('gateways')}
-              className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+              className={`py-3 px-5 font-bold text-xs border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                 activeTab === 'gateways' 
                   ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -456,7 +456,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl font-bold text-slate-900">{farmName || activeWorkspace?.name || 'My Poultry Farm'}</h2>
-                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                       Billed Monthly
                     </span>
                   </div>
@@ -466,16 +466,16 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
               <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-4 rounded-xl text-xs">
                 <div>
-                  <p className="text-slate-400 font-bold uppercase tracking-wider">Account Admin</p>
+                  <p className="text-slate-400 font-bold">Account Admin</p>
                   <p className="font-semibold text-slate-800 mt-0.5">{adminName || 'Farm Owner'}</p>
                   <p className="text-slate-500">{adminEmail || 'Not Configured'}</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 font-bold uppercase tracking-wider">Phone Number</p>
+                  <p className="text-slate-400 font-bold">Phone Number</p>
                   <p className="font-semibold text-slate-800 mt-0.5">{adminPhone || 'Not Configured'}</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 font-bold uppercase tracking-wider">Billing Region</p>
+                  <p className="text-slate-400 font-bold">Billing Region</p>
                   <p className="font-semibold text-slate-800 mt-0.5">{billingRegion || 'Nigeria & West Africa (NGN)'}</p>
                 </div>
               </div>
@@ -485,9 +485,9 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           {/* Current Plan Summary Box */}
           <Card className="border-2 border-indigo-200 shadow-sm">
             <CardHeader className="border-b border-slate-100 bg-indigo-50/30">
-              <CardTitle className="text-sm font-bold uppercase text-slate-800 flex items-center justify-between">
+              <CardTitle className="text-sm font-bold text-slate-800 flex items-center justify-between">
                 <span>Current Active Subscription</span>
-                <span className={`text-xs px-3.5 py-1 rounded-full font-extrabold uppercase ${
+                <span className={`text-xs px-3.5 py-1 rounded-full font-extrabold ${
                   currentTier === 'enterprise' ? 'bg-purple-600 text-white shadow-sm' :
                   currentTier === 'pro' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-200 text-slate-800'
                 }`}>
@@ -516,7 +516,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                   <button
                     onClick={() => setShowUpgradeModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-3 rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
                   >
                     {currentTier === 'free' ? 'Upgrade Plan' : 'Manage / Change Tier'}
                   </button>
@@ -558,7 +558,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         <div className="space-y-6">
           <Card>
             <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <User size={18} className="text-green-500" /> Farm Profile & Pricing
               </CardTitle>
             </CardHeader>
@@ -571,7 +571,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <TextField label="Billing Region / Currency" fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText="e.g. Nigeria & West Africa (NGN)" />
                 
                 <div className="md:col-span-2 pt-4 border-t border-slate-100">
-                  <p className="text-xs font-semibold uppercase text-slate-500 mb-3 flex items-center gap-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-3 flex items-center gap-1">
                     <DollarSign size={14} /> Egg Pricing Configuration
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -591,7 +591,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           {/* Account Security & Change Password */}
           <Card>
             <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Shield size={18} className="text-indigo-600" /> Account Security & Change Password
               </CardTitle>
             </CardHeader>
@@ -642,7 +642,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       {activeTab === 'alerts' && (
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <BellRing size={18} className="text-blue-500" /> Thresholds & Alerts Rules
             </CardTitle>
           </CardHeader>
@@ -653,7 +653,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
             </div>
 
             <div className="pt-4 border-t border-slate-100">
-              <p className="text-xs font-semibold uppercase text-slate-500 mb-3">Automated Alert Dispatch Channels</p>
+              <p className="text-xs font-semibold text-slate-500 mb-3">Automated Alert Dispatch Channels</p>
               <div className="flex flex-col md:flex-row gap-4 md:gap-8">
                 <FormControlLabel control={<Checkbox checked={notifySms} onChange={(e) => setNotifySms(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">Instant SMS Alerts</span>} />
                 <FormControlLabel control={<Checkbox checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">Email Digest</span>} />
@@ -674,7 +674,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       {activeTab === 'gateways' && (
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm font-semibold uppercase text-slate-700 flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <DollarSign size={18} className="text-emerald-500" /> Multi-Payment Gateway & Billing Keys
             </CardTitle>
           </CardHeader>
@@ -746,7 +746,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       >
         <div className="bg-slate-900 text-white p-6 flex items-center justify-between border-b border-slate-800">
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wider flex items-center gap-2">
+            <h2 className="text-xl font-bold tracking-wider flex items-center gap-2">
               <Sparkles className="text-amber-400" size={20} /> Upgrade Your Subscription Plan
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">Scale your poultry farm operations with AI, CCTV, and enterprise hub tools.</p>
@@ -778,7 +778,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 }`}
               >
                 Billed Annually
-                <span className="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase">
+                <span className="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.2 rounded">
                   Save 20%
                 </span>
               </button>
@@ -796,7 +796,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
                   <div className="text-3xl font-extrabold text-slate-900">₦0</div>
-                  <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Free Forever</div>
+                  <div className="text-[10px] text-slate-400 font-bold mt-0.5">Free Forever</div>
                 </div>
 
                 <ul className="space-y-3 text-xs text-slate-700 mb-6">
@@ -837,7 +837,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
             {/* 2. Commercial Pro Plan (POPULAR BADGE - Screenshot 1 Style) */}
             <div className="bg-slate-900 text-white border-2 border-indigo-500 rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[10px] font-black uppercase px-3 py-1 rounded-full shadow">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full shadow">
                 MOST POPULAR
               </div>
 
@@ -849,7 +849,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   <div className="text-3xl font-extrabold text-white">
                     ₦{((isAnnual ? (proPlan?.priceAnnual || 144000) : (proPlan?.priceMonthly || 15000))).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-indigo-300 font-bold uppercase mt-0.5">
+                  <div className="text-[10px] text-indigo-300 font-bold mt-0.5">
                     {isAnnual ? 'Billed Annually' : 'Billed Monthly'}
                   </div>
                 </div>
@@ -884,7 +884,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
               <button
                 onClick={() => handleInitiateCheckout('pro', isAnnual)}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-xl transition-all cursor-pointer"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow-xl transition-all cursor-pointer"
               >
                 {currentTier === 'pro' ? 'Current Plan (Renew)' : 'Upgrade to Commercial Pro'}
               </button>
@@ -892,7 +892,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
             {/* 3. Enterprise Plus Plan */}
             <div className="bg-white border-2 border-purple-500/40 rounded-2xl p-6 flex flex-col justify-between shadow-md relative">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black uppercase px-3.5 py-1 rounded-full shadow-lg tracking-widest">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black px-3.5 py-1 rounded-full shadow-lg tracking-widest">
                 PLUS
               </div>
 
@@ -904,7 +904,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   <div className="text-3xl font-extrabold text-slate-900">
                     ₦{((isAnnual ? (enterprisePlan?.priceAnnual || 432000) : (enterprisePlan?.priceMonthly || 45000))).toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  <div className="text-[10px] text-slate-400 font-bold mt-0.5">
                     {isAnnual ? 'Billed Annually' : 'Billed Monthly'}
                   </div>
                 </div>
@@ -939,7 +939,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
               <button
                 onClick={() => handleInitiateCheckout('enterprise', isAnnual)}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow transition-all cursor-pointer"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
               >
                 {currentTier === 'enterprise' ? 'Current Plan (Renew)' : 'Get Enterprise Plus'}
               </button>
