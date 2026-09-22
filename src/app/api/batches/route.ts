@@ -127,7 +127,11 @@ export async function POST(request: Request) {
       type: flockTypeStr
     };
     
-    await supabase.from('batches').insert([newBatch]);
+    const { error: insertError } = await supabase.from('batches').insert([newBatch]);
+    if (insertError) {
+      console.error('Batch insert failed:', insertError);
+      return NextResponse.json({ error: insertError.message || 'Failed to insert batch' }, { status: 500 });
+    }
     
     await supabase.from('alertLogs').insert([{
       id: 'al' + Date.now(),

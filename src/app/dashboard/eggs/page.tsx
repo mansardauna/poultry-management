@@ -4,7 +4,7 @@ import { EggsClient } from "@/components/features/eggs/EggsClient";
 import type { EggRecord, ChickenBatch, CushionAudit, MaturationLog } from "@/data/types";
 
 import { getAuthUser } from '@/lib/auth';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function EggsPage() {
@@ -13,10 +13,10 @@ export default async function EggsPage() {
   const workspaceId = await getWorkspaceId();
 
   const [eggsRaw, batchesRaw, cushionAuditsRaw, maturationLogsRaw] = await Promise.all([
-    supabase.from('eggs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('batches').select('*').eq('workspaceId', workspaceId),
-    supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId),
-    supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('cushionAudits').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId)
   ]);
 
   const eggs = (eggsRaw.data || []) as EggRecord[];

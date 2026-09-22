@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { SalesClient } from "@/components/features/sales/SalesClient";
 import type { Sale, Invoice, ChickenBatch } from "@/data/types";
 import { getAuthUser } from '@/lib/auth';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function SalesPage() {
@@ -12,9 +12,9 @@ export default async function SalesPage() {
   const workspaceId = await getWorkspaceId();
 
   const [salesRaw, invoicesRaw, batchesRaw] = await Promise.all([
-    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
-    supabase.from('invoices').select('*').eq('workspaceId', workspaceId),
-    supabase.from('batches').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId)
   ]);
   const sales = (salesRaw.data || []) as Sale[];
   const invoices = (invoicesRaw.data || []) as Invoice[];

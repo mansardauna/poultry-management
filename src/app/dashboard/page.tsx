@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
-import { getWorkspaceId } from "@/lib/workspace";
+import { getWorkspaceId, applyWorkspaceFilter } from "@/lib/workspace";
 import { DashboardClient } from "@/components/features/dashboard/DashboardClient";
 import type {
   DatabaseSchema,
@@ -47,28 +47,28 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     procurePipelineRaw, cctvLogsRaw, invoicesRaw, tasksRaw, alertSettingsRaw, alertLogsRaw, mortalityLogsRaw,
     medicationTemplatesRaw, medicationSchedulesRaw, payrollLogsRaw, equipmentRaw, contactsRaw, farmPensRaw
   ] = await Promise.all([
-    supabase.from('batches').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('eggs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('feeds').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('feedLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('staff').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('sales').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('expenses').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('procurePipeline').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('cctvLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('invoices').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('tasks').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId).limit(1),
-    supabase.from('alertLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('mortalityLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('medicationTemplates').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('medicationSchedules').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('payrollLogs').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('equipment').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('contacts').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49),
-    supabase.from('farmPens').select('*').eq('workspaceId', workspaceId).range(offset, offset + 49)
+    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('feeds').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('feedLogs').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('cushionAudits').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('procurePipeline').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('cctvLogs').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('alertSettings').select('*'), workspaceId).limit(1),
+    applyWorkspaceFilter(supabase.from('alertLogs').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('mortalityLogs').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('medicationTemplates').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('medicationSchedules').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('equipment').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId).range(offset, offset + 49)
   ]);
 
   const batches = batchesRaw.data || [];

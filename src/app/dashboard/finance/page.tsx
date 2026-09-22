@@ -4,7 +4,7 @@ import { FinanceClient } from "@/components/features/finance/FinanceClient";
 import type { Sale, Expense } from "@/data/types";
 
 import { getAuthUser } from '@/lib/auth';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function default */
 export default async function FinancePage() {
@@ -13,8 +13,8 @@ export default async function FinancePage() {
   const workspaceId = await getWorkspaceId();
 
   const [salesRaw, expensesRaw] = await Promise.all([
-    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
-    supabase.from('expenses').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId)
   ]);
   const sales = (salesRaw.data || []) as Sale[];
   const expenses = (expensesRaw.data || []) as Expense[];

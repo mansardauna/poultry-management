@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { StaffClient } from "@/components/features/staff/StaffClient";
 import type { Staff, StaffTask } from "@/data/types";
 import { getAuthUser } from '@/lib/auth';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function default */
 import { headers, cookies } from 'next/headers';
@@ -17,8 +17,8 @@ export default async function StaffPage() {
   const tier = reqHeaders.get('x-user-tier') || cookieStore.get('pfms_tier')?.value || 'free';
 
   const [staffRaw, tasksRaw] = await Promise.all([
-    supabase.from('staff').select('*').eq('workspaceId', workspaceId),
-    supabase.from('tasks').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId)
   ]);
   const staff = (staffRaw.data || []) as Staff[];
   const tasks = (tasksRaw.data || []) as StaffTask[];
