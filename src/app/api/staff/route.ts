@@ -1,7 +1,7 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 import { getAuthUser } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
@@ -9,9 +9,9 @@ import bcrypt from 'bcryptjs';
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const [staffRes, tasksRes, payrollLogsRes] = await Promise.all([
-    supabase.from('staff').select('*').eq('workspaceId', workspaceId),
-    supabase.from('tasks').select('*').eq('workspaceId', workspaceId),
-    supabase.from('payrollLogs').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId)
   ]);
   
   return NextResponse.json({

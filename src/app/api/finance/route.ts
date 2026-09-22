@@ -1,7 +1,7 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
@@ -11,9 +11,9 @@ export async function GET() {
     { data: expenses },
     { data: invoices }
   ] = await Promise.all([
-    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
-    supabase.from('expenses').select('*').eq('workspaceId', workspaceId),
-    supabase.from('invoices').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId)
   ]);
   return NextResponse.json({
     sales: sales || [],

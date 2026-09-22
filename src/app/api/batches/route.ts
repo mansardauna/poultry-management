@@ -1,12 +1,12 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const { data: batchesData } = await supabase.from('batches').select('*').eq('workspaceId', workspaceId);
+  const { data: batchesData } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId);
   return NextResponse.json(batchesData || []);
 }
 
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     const ageWeeks = Number(body.ageInWeeks) || Number(body.flockAge) || 1;
 
     // Check if an onboarding batch already exists in this workspace to update instead of duplicate
-    const { data: existingBatches } = await supabase.from('batches').select('*').eq('workspaceId', workspaceId).limit(1);
+    const { data: existingBatches } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId).limit(1);
     if (existingBatches && existingBatches.length > 0 && body.isOnboarding) {
       const existing = existingBatches[0];
       const updated = {

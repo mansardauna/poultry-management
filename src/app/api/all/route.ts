@@ -1,7 +1,7 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
@@ -11,28 +11,28 @@ export async function GET() {
     procurePipeline, cctvLogs, invoices, tasks, alertSettingsRecords, alertLogs, mortalityLogs,
     medicationTemplates, medicationSchedules, payrollLogs, equipment, contacts, farmPens
   ] = await Promise.all([
-    supabase.from('batches').select('*').eq('workspaceId', workspaceId),
-    supabase.from('eggs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('feeds').select('*').eq('workspaceId', workspaceId),
-    supabase.from('feedLogs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('staff').select('*').eq('workspaceId', workspaceId),
-    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
-    supabase.from('expenses').select('*').eq('workspaceId', workspaceId),
-    supabase.from('cushionAudits').select('*').eq('workspaceId', workspaceId),
-    supabase.from('maturationLogs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('procurePipeline').select('*').eq('workspaceId', workspaceId),
-    supabase.from('cctvLogs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('invoices').select('*').eq('workspaceId', workspaceId),
-    supabase.from('tasks').select('*').eq('workspaceId', workspaceId),
-    supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId),
-    supabase.from('alertLogs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('mortalityLogs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('medicationTemplates').select('*').eq('workspaceId', workspaceId),
-    supabase.from('medicationSchedules').select('*').eq('workspaceId', workspaceId),
-    supabase.from('payrollLogs').select('*').eq('workspaceId', workspaceId),
-    supabase.from('equipment').select('*').eq('workspaceId', workspaceId),
-    supabase.from('contacts').select('*').eq('workspaceId', workspaceId),
-    supabase.from('farmPens').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('feeds').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('feedLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('cushionAudits').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('procurePipeline').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('cctvLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('alertSettings').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('alertLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('mortalityLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('medicationTemplates').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('medicationSchedules').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('equipment').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId)
   ]);
 
   const alertSettings = alertSettingsRecords.data?.[0] || {

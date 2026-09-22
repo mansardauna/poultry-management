@@ -50,6 +50,19 @@ export async function getWorkspaceId(): Promise<string> {
 }
 
 /**
+ * Helper to apply robust workspace filtering to query builders (Supabase / DataAdapter).
+ * Ensures that if a row was stored under 'main', 'main-org_*', or null, it remains accessible
+ * under the primary workspace context.
+ */
+export function applyWorkspaceFilter(query: any, workspaceId: string) {
+  if (!workspaceId || workspaceId === 'main' || workspaceId.startsWith('main-') || workspaceId.startsWith('org_')) {
+    return query.or(`workspaceId.eq.${workspaceId},workspaceId.eq.main,workspaceId.is.null`);
+  }
+  return query.eq('workspaceId', workspaceId);
+}
+
+
+/**
  * Reusable tenant isolation helper for fetching ONLY the workspaces belonging to the authenticated user/organization.
  */
 export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
