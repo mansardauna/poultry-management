@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ArrowLeft, X, CheckCircle2, Search, Egg, Mic, Printer, Building2 } from 'lucide-react';
+import { useSidebar } from '../layout/SidebarContext';
 
 interface TourStep {
   title: string;
@@ -11,6 +12,7 @@ interface TourStep {
   highlightIcon: any;
   targetQuery: string;
   position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
+  isSidebarItem?: boolean;
 }
 
 const TOUR_STEPS: TourStep[] = [
@@ -20,7 +22,8 @@ const TOUR_STEPS: TourStep[] = [
     description: 'Access daily egg lay logs, track good vs cracked eggs, and convert laying counts into crates (30 eggs/crate).',
     highlightIcon: Egg,
     targetQuery: '[data-tour="eggs-nav"]',
-    position: 'right'
+    position: 'right',
+    isSidebarItem: true
   },
   {
     title: 'Voice & Quick Text Logger',
@@ -52,7 +55,8 @@ const TOUR_STEPS: TourStep[] = [
     description: 'Access multi-farm branch management, cooperative branding, priority vet hotline, and WebRTC CCTV live security streams.',
     highlightIcon: Building2,
     targetQuery: '[data-tour="enterprise-nav"]',
-    position: 'right'
+    position: 'right',
+    isSidebarItem: true
   }
 ];
 
@@ -61,10 +65,11 @@ export function FeatureTour() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const { setIsMobileOpen } = useSidebar();
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(typeof window !== 'undefined' && window.innerWidth < 640);
+      setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -101,6 +106,14 @@ export function FeatureTour() {
   useEffect(() => {
     if (!isOpen) return;
 
+    const currentStep = TOUR_STEPS[currentStepIndex];
+
+    if (isMobile && currentStep?.isSidebarItem) {
+      setIsMobileOpen(true);
+    } else if (isMobile) {
+      setIsMobileOpen(false);
+    }
+
     const updateTargetBounds = () => {
       const step = TOUR_STEPS[currentStepIndex];
       if (step?.targetQuery) {
@@ -115,10 +128,16 @@ export function FeatureTour() {
       }
     };
 
-    updateTargetBounds();
+    // If sidebar drawer needs to open on mobile, delay bounds measurement slightly for slide animation
+    const delay = isMobile && currentStep?.isSidebarItem ? 250 : 50;
+    const timer = setTimeout(updateTargetBounds, delay);
+
     window.addEventListener('resize', updateTargetBounds);
-    return () => window.removeEventListener('resize', updateTargetBounds);
-  }, [isOpen, currentStepIndex]);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateTargetBounds);
+    };
+  }, [isOpen, currentStepIndex, isMobile, setIsMobileOpen]);
 
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
@@ -136,6 +155,7 @@ export function FeatureTour() {
 
   const handleComplete = () => {
     setIsOpen(false);
+    if (isMobile) setIsMobileOpen(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem('pfms_guided_tour_completed', 'true');
     }

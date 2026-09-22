@@ -215,14 +215,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
     }
   }, [isUpgraded, searchParams]);
 
-  useEffect(() => {
-    const hasDismissed = typeof window !== 'undefined' && localStorage.getItem('pfms_onboarded_dismissed') === 'true';
-    if (isOnboarding && !hasDismissed) {
-      setShowOnboarding(true);
-    } else if (!isLoading && role === 'Admin' && workspaces.length === 0 && !hasDismissed) {
-      setShowOnboarding(true);
-    }
-  }, [workspaces.length, role, isLoading, isOnboarding]);
+
 
   useEffect(() => {
     if (planParam === 'pro' && !isLoading) {
@@ -587,14 +580,6 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
-      )}
-
-      {showOnboarding && (
-        <OnboardingWizard onClose={() => {
-          if (typeof window !== 'undefined') localStorage.setItem('pfms_onboarded_dismissed', 'true');
-          setShowOnboarding(false);
-          router.replace('/dashboard');
-        }} />
       )}
 
       {showNewBranchModal && (

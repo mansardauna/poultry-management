@@ -51,8 +51,7 @@ export default function LoginPage() {
       const body = await response.json().catch(() => null);
 
       if (response.ok) {
-        router.push('/dashboard');
-        router.refresh();
+        window.location.href = '/dashboard';
         return;
       }
 

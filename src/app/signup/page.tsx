@@ -55,8 +55,7 @@ function SignupForm() {
           localStorage.removeItem('pfms_workspace');
         }
         const targetUrl = plan === 'pro' ? '/dashboard?onboarding=true&plan=pro' : '/dashboard?onboarding=true';
-        router.push(targetUrl);
-        router.refresh();
+        window.location.href = targetUrl;
         return;
       }
 
