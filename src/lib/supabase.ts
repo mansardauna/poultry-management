@@ -1,4 +1,6 @@
 'use strict';
+import fs from 'fs';
+import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { createDataChain, runSql, makeAuthStub } from './dataAdapter';
 
@@ -11,6 +13,20 @@ export function isValidSupabaseUrl(url?: string): boolean {
   } catch {
     return false;
   }
+}
+
+function getLocalEngine(): 'mysql' | 'postgres' | 'supabase' {
+  try {
+    const configPath = path.join(process.cwd(), 'data', 'database.config.json');
+    if (fs.existsSync(configPath)) {
+      const raw = fs.readFileSync(configPath, 'utf8');
+      const cfg = JSON.parse(raw);
+      if (cfg?.engine === 'mysql' || cfg?.engine === 'postgres') {
+        return cfg.engine;
+      }
+    }
+  } catch (_e) {}
+  return 'supabase';
 }
 
 // 1.0s Strict Timeout Fetch for Supabase to prevent network hangs & retries
@@ -47,14 +63,16 @@ async function localExecutor(ops: any[], table: string) {
 
 export const supabase: any = {
   from: (table: string) => {
-    if (realSupabase) {
+    const engine = getLocalEngine();
+    if (engine === 'supabase' && realSupabase) {
       return realSupabase.from(table);
     }
     return createDataChain(table, localExecutor);
   },
-  auth: realSupabase ? realSupabase.auth : makeAuthStub(),
+  auth: (getLocalEngine() === 'supabase' && realSupabase) ? realSupabase.auth : makeAuthStub(),
   rpc: (...args: any[]) => {
-    if (realSupabase) {
+    const engine = getLocalEngine();
+    if (engine === 'supabase' && realSupabase) {
       return (realSupabase.rpc as any)(...args);
     }
     return Promise.resolve({ data: null, error: null });
