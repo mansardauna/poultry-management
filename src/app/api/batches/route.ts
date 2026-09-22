@@ -95,17 +95,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Batch not found' }, { status: 440 });
     }
 
+    const quantityNum = Number(body.quantity) || Number(body.flockQty) || 0;
+    const breedName = (typeof body.breed === 'string' && body.breed.trim()) ? body.breed.trim() : 'Commercial Layer';
+    const flockTypeStr = body.type || body.flockType || 'Layers';
+    const ageWeeks = Number(body.ageInWeeks) || Number(body.flockAge) || 1;
+
+    // Check if an onboarding batch already exists in this workspace to update instead of duplicate
+    const { data: existingBatches } = await supabase.from('batches').select('*').eq('workspaceId', workspaceId).limit(1);
+    if (existingBatches && existingBatches.length > 0 && body.isOnboarding) {
+      const existing = existingBatches[0];
+      const updated = {
+        breed: breedName,
+        quantity: quantityNum || existing.quantity,
+        type: flockTypeStr,
+        ageInWeeks: ageWeeks
+      };
+      await supabase.from('batches').update(updated).eq('id', existing.id).eq('workspaceId', workspaceId);
+      return NextResponse.json({ ...existing, ...updated }, { status: 200 });
+    }
+
     const newBatch = {
       id: 'b' + Date.now(),
       workspaceId,
-      breed: body.breed,
-      quantity: Number(body.quantity),
+      breed: breedName,
+      quantity: quantityNum,
       purchaseDate: body.purchaseDate || new Date().toISOString().split('T')[0],
-      ageInWeeks: Number(body.ageInWeeks) || 1,
+      ageInWeeks: ageWeeks,
       mortalityCount: 0,
-      vaccinationStatus: body.vaccinationStatus || 'Pending',
-      farmSection: body.farmSection || 'Unassigned',
-      type: body.type || 'Layers'
+      vaccinationStatus: body.vaccinationStatus || 'Up to Date',
+      farmSection: body.farmSection || 'Section A',
+      type: flockTypeStr
     };
     
     await supabase.from('batches').insert([newBatch]);

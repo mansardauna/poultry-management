@@ -85,6 +85,18 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
       setCreatedBranchId(workspaces[0].id);
     }
 
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.systemSettings) {
+          const sys = data.systemSettings;
+          setBranchName(prev => prev || sys.farmName || '');
+          setOwnerName(prev => prev || sys.adminName || '');
+          setOwnerPhone(prev => prev || sys.adminPhone || '');
+        }
+      })
+      .catch(() => {});
+
     fetch('/api/batches')
       .then(res => res.json())
       .then(data => {
@@ -93,7 +105,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           setBreed(prev => prev || b.breed || '');
           setFlockQty(prev => prev || String(b.quantity || ''));
           setFlockType(prev => prev || b.type || 'Layers');
-          setFlockAge(prev => prev || String(b.ageInWeeks || ''));
+          setFlockAge(prev => prev || String(b.ageInWeeks || '1'));
         }
       })
       .catch(() => {});
@@ -195,45 +207,48 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
     setIsSaving(true);
     try {
       let targetWsId = createdBranchId;
+      const effectiveBranchName = branchName.trim() || 'Main Farm';
 
       // 1. Commit Workspace & Settings (pass shouldReload=false to prevent aborting submission)
-      if (branchName.trim()) {
-        if (workspaces.length > 0) {
-          const primaryWs = workspaces[0];
-          await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
-          setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType }, false);
-          targetWsId = primaryWs.id;
-        } else {
-          const workspaceId = `farm-${Date.now()}`;
-          await addWorkspace({
-            id: workspaceId,
-            name: branchName.trim(),
-            type: branchType,
-            createdAt: new Date().toISOString(),
-          }, false);
-          targetWsId = workspaceId;
-        }
-
-        await fetch('/api/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'system',
-            farmName: branchName.trim(),
-            adminName: ownerName.trim(),
-            adminPhone: ownerPhone.trim(),
-          }),
-        }).catch(() => {});
+      if (workspaces.length > 0) {
+        const primaryWs = workspaces[0];
+        await updateWorkspace(primaryWs.id, effectiveBranchName, branchType);
+        setActiveWorkspace({ ...primaryWs, name: effectiveBranchName, type: branchType }, false);
+        targetWsId = primaryWs.id;
+      } else {
+        const workspaceId = `farm-${Date.now()}`;
+        await addWorkspace({
+          id: workspaceId,
+          name: effectiveBranchName,
+          type: branchType,
+          createdAt: new Date().toISOString(),
+        }, false);
+        targetWsId = workspaceId;
       }
 
-      // 2. Commit Flock Batch (if provided)
-      if (breed.trim() && flockQty) {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'system',
+          farmName: effectiveBranchName,
+          adminName: ownerName.trim(),
+          adminPhone: ownerPhone.trim(),
+        }),
+      }).catch(() => {});
+
+      // 2. Commit Flock Batch (Always save if flockQty or breed is specified)
+      const quantityNum = Number(flockQty) || 0;
+      const effectiveBreed = breed.trim() || (flockType === 'Broilers' ? 'Cobb 500 Broiler' : 'Isa Brown Layer');
+
+      if (quantityNum > 0 || breed.trim()) {
         await fetch('/api/batches', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            breed: breed.trim(),
-            quantity: Number(flockQty),
+            isOnboarding: true,
+            breed: effectiveBreed,
+            quantity: quantityNum || 500,
             type: flockType,
             farmSection: 'Section A',
             vaccinationStatus: 'Up to Date',
@@ -242,26 +257,29 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         }).catch(() => {});
       }
 
-      // 3. Commit Staff Member (if provided)
-      if (staffName.trim() && staffUsername.trim() && staffPassword.trim()) {
+      // 3. Commit Staff Member (Always save if staffName or staffUsername is specified)
+      const effectiveStaffName = staffName.trim() || 'Farm Attendant';
+      const effectiveUsername = staffUsername.trim() || effectiveStaffName.toLowerCase().replace(/\s+/g, '');
+      const effectivePassword = staffPassword.trim() || 'staff123';
+
+      if (staffName.trim() || staffUsername.trim()) {
         await fetch('/api/staff', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: staffName.trim(),
+            isOnboarding: true,
+            name: effectiveStaffName,
             role: staffRole,
             salary: Number(staffSalary) || 45000,
             contact: '',
             assignedBranches: targetWsId ? [targetWsId] : [],
-            username: staffUsername.trim(),
-            password: staffPassword.trim(),
+            username: effectiveUsername,
+            password: effectivePassword,
           }),
         }).catch(() => {});
       }
 
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('pfms_onboarding_draft');
-        localStorage.removeItem('pfms_onboarding_current_step');
         localStorage.setItem('pfms_branch_setup_completed', 'true');
         localStorage.setItem('pfms_onboarded_dismissed', 'true');
       }
@@ -607,18 +625,14 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                 <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
                   <div className="space-y-1">
                     <p className="font-bold text-slate-900">Farm Branch: <span className="text-indigo-600">{branchName || 'Main Farm'}</span> ({branchType})</p>
-                    <p className="text-slate-600 font-medium">Owner: {ownerName || 'Not specified'} | Location: {farmLocation || 'Default'} | Capacity: {estimatedCapacity} birds</p>
+                    <p className="text-slate-600 font-medium">Owner: {ownerName || 'Not specified'} | Location: {farmLocation || 'Default'} | Capacity: {estimatedCapacity || '5000'} birds</p>
                   </div>
-                  {breed && (
-                    <div className="space-y-1 border-t border-slate-200 pt-3">
-                      <p className="font-bold text-slate-900">First Flock: <span className="text-indigo-600">{breed}</span> ({flockQty} birds, {flockAge || '1'} weeks old)</p>
-                    </div>
-                  )}
-                  {staffName && (
-                    <div className="space-y-1 border-t border-slate-200 pt-3">
-                      <p className="font-bold text-slate-900">First Staff: <span className="text-indigo-600">{staffName}</span> ({staffRole}, Username: {staffUsername})</p>
-                    </div>
-                  )}
+                  <div className="space-y-1 border-t border-slate-200 pt-3">
+                    <p className="font-bold text-slate-900">First Flock: <span className="text-indigo-600">{breed || 'Commercial Layer'}</span> ({flockQty || '500'} birds, {flockAge || '1'} weeks old)</p>
+                  </div>
+                  <div className="space-y-1 border-t border-slate-200 pt-3">
+                    <p className="font-bold text-slate-900">First Staff: <span className="text-indigo-600">{staffName || 'Farm Attendant'}</span> ({staffRole}, Username: {staffUsername || 'staff1'})</p>
+                  </div>
                   <div className="space-y-1 border-t border-slate-200 pt-3">
                     <p className="font-bold text-slate-900">Daily Logs & Operational Rules</p>
                     <p className="text-slate-600 leading-relaxed">

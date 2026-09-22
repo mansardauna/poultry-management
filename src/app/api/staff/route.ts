@@ -78,15 +78,35 @@ export async function POST(request: Request) {
       ? body.assignedBranches
       : (workspaceId ? [workspaceId] : []);
 
-    const staffUsername = body.username ? body.username.trim() : body.name?.toLowerCase().replace(/\s+/g, '');
+    const staffNameStr = (typeof body.name === 'string' && body.name.trim()) ? body.name.trim() : 'Farm Attendant';
+    const staffUsername = (typeof body.username === 'string' && body.username.trim()) 
+      ? body.username.trim() 
+      : staffNameStr.toLowerCase().replace(/\s+/g, '');
+    const staffPassword = (typeof body.password === 'string' && body.password.trim()) ? body.password.trim() : 'staff123';
+    const staffRole = body.role === 'Manager' ? 'Manager' : 'Staff';
+
+    // Check if an onboarding staff member already exists in this workspace to update instead of duplicate
+    const { data: existingStaffList } = await supabase.from('staff').select('*').eq('workspaceId', workspaceId).limit(1);
+    if (existingStaffList && existingStaffList.length > 0 && body.isOnboarding) {
+      const existing = existingStaffList[0];
+      const updated = {
+        name: staffNameStr,
+        username: staffUsername,
+        role: body.role || existing.role || 'Staff',
+        salary: Number(body.salary) || existing.salary || 45000,
+        assignedBranches: assignedBranchList
+      };
+      await supabase.from('staff').update(updated).eq('id', existing.id).eq('workspaceId', workspaceId);
+      return NextResponse.json({ ...existing, ...updated }, { status: 200 });
+    }
 
     const newStaff = {
       id: 's' + Date.now().toString().slice(-8),
       workspaceId,
-      name: body.name,
+      name: staffNameStr,
       username: staffUsername,
       role: body.role || 'Staff',
-      salary: Number(body.salary) || 0,
+      salary: Number(body.salary) || 45000,
       attendanceDays: Number(body.attendanceDays) || 0,
       contact: body.contact || '',
       assignedBranches: assignedBranchList
@@ -94,12 +114,10 @@ export async function POST(request: Request) {
     
     await supabase.from('staff').insert([newStaff]);
     
-    // Create user login credential
-    if (body.username && body.password) {
+    // Create user login credential in primary users table
+    if (staffUsername && staffPassword) {
       const salt = bcrypt.genSaltSync(10);
-      const passwordHash = bcrypt.hashSync(body.password, salt);
-      const staffRole = body.role === 'Manager' ? 'Manager' : 'Staff';
-      const staffEmail = staffUsername.includes('@') ? staffUsername : `${staffUsername}@farm.local`;
+      const passwordHash = bcrypt.hashSync(staffPassword, salt);
 
       try {
         await supabase.from('users').insert([{
@@ -112,29 +130,6 @@ export async function POST(request: Request) {
           createdAt: new Date().toISOString()
         }]);
       } catch (_e) {}
-
-      try {
-        const { supabase: adminClient } = await import('@/lib/supabase');
-        const { data: usersData } = await adminClient.auth.admin.listUsers();
-        const existingAuth = usersData?.users.find((u: any) => u.email?.toLowerCase() === staffEmail.toLowerCase());
-
-        if (existingAuth) {
-          await adminClient.auth.admin.updateUserById(existingAuth.id, {
-            password: body.password,
-            email_confirm: true,
-            user_metadata: { role: staffRole, workspaceId: workspaceId, username: staffUsername }
-          });
-        } else {
-          await adminClient.auth.admin.createUser({
-            email: staffEmail,
-            password: body.password,
-            email_confirm: true,
-            user_metadata: { role: staffRole, workspaceId: workspaceId, username: staffUsername }
-          });
-        }
-      } catch (_authErr) {
-        console.error('Supabase Auth sync error:', _authErr);
-      }
     }
     
     await supabase.from('alertLogs').insert([{
@@ -175,14 +170,11 @@ export async function DELETE(request: Request) {
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
-    // 1. Fetch staff details before deletion to clean up auth credentials
     const { data: staffMembers } = await supabase.from('staff').select('*').eq('id', id).eq('workspaceId', workspaceId);
     const staffMember = staffMembers?.[0];
 
-    // 2. Delete from `staff` table
     await supabase.from('staff').delete().eq('id', id).eq('workspaceId', workspaceId);
 
-    // 3. Delete from `users` table & Supabase Auth if credentials exist
     if (staffMember) {
       const identifiers = [
         staffMember.name?.trim(),
@@ -195,29 +187,6 @@ export async function DELETE(request: Request) {
             await supabase.from('users').delete().or(`username.eq.${n},username.eq.${n.toLowerCase()}`);
           } catch (_e) {}
         }
-      }
-
-      // Delete from Supabase Auth
-      try {
-        const { supabase: adminClient } = await import('@/lib/supabase');
-        const { data: usersData } = await adminClient.auth.admin.listUsers();
-        
-        const candidateEmails = [
-          staffMember.name?.toLowerCase().replace(/\s+/g, '') + '@farm.local',
-          staffMember.contact?.toLowerCase(),
-          staffMember.contact?.toLowerCase() + '@farm.local',
-          staffMember.name?.toLowerCase()
-        ].filter(Boolean);
-
-        const authUserToDelete = usersData?.users?.find((u: any) => 
-          candidateEmails.includes(u.email?.toLowerCase())
-        );
-
-        if (authUserToDelete) {
-          await adminClient.auth.admin.deleteUser(authUserToDelete.id);
-        }
-      } catch (_authErr) {
-        console.error('Failed to revoke Supabase Auth for deleted staff:', _authErr);
       }
     }
 
