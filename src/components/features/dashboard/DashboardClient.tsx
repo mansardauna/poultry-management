@@ -337,9 +337,9 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
             <button 
               data-tour="print-report-btn"
               onClick={() => window.print()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm  tracking-wider uppercase transition-colors"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 cursor-pointer"
             >
-              {texts.common.printReport}
+              <span>{texts.common.printReport}</span>
             </button>
           </div>
         </div>
@@ -358,6 +358,13 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           initialStep={onboardingStep}
           onClose={() => {
             setOnboardingStep(null);
+            if (typeof window !== 'undefined') {
+              const url = new URL(window.location.href);
+              if (url.searchParams.has('onboarding')) {
+                url.searchParams.delete('onboarding');
+                window.history.replaceState({}, '', url.toString());
+              }
+            }
             refreshData();
           }}
         />

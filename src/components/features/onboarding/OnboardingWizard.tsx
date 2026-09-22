@@ -139,6 +139,13 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
     if (typeof window !== 'undefined') {
       localStorage.setItem('pfms_onboarded_dismissed', 'true');
       localStorage.setItem('pfms_starter_guide_read', 'true');
+      
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('onboarding')) {
+        url.searchParams.delete('onboarding');
+        window.history.replaceState({}, '', url.toString());
+      }
+
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('pfms_trigger_tour'));
       }, 300);
@@ -156,7 +163,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           name: 'Main Farm',
           type: 'Mixed Use',
           createdAt: new Date().toISOString(),
-        });
+        }, false);
       }
       toast.success('Setup initialized. Welcome to Poultry Management System.');
       handleClose();
@@ -189,12 +196,12 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
     try {
       let targetWsId = createdBranchId;
 
-      // 1. Commit Workspace & Settings
+      // 1. Commit Workspace & Settings (pass shouldReload=false to prevent aborting submission)
       if (branchName.trim()) {
         if (workspaces.length > 0) {
           const primaryWs = workspaces[0];
           await updateWorkspace(primaryWs.id, branchName.trim(), branchType);
-          setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType });
+          setActiveWorkspace({ ...primaryWs, name: branchName.trim(), type: branchType }, false);
           targetWsId = primaryWs.id;
         } else {
           const workspaceId = `farm-${Date.now()}`;
@@ -203,7 +210,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
             name: branchName.trim(),
             type: branchType,
             createdAt: new Date().toISOString(),
-          });
+          }, false);
           targetWsId = workspaceId;
         }
 
@@ -256,6 +263,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         localStorage.removeItem('pfms_onboarding_draft');
         localStorage.removeItem('pfms_onboarding_current_step');
         localStorage.setItem('pfms_branch_setup_completed', 'true');
+        localStorage.setItem('pfms_onboarded_dismissed', 'true');
       }
 
       toast.success('Farm onboarding setup submitted successfully.');
@@ -281,15 +289,15 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         </button>
 
         {/* Sidebar Steps Progress */}
-        <div className="md:w-1/3 bg-slate-900 text-slate-100 p-5 sm:p-6 flex flex-col justify-between shrink-0 max-h-[25vh] md:max-h-full overflow-y-auto">
+        <div className="md:w-1/3 bg-slate-900 text-slate-100 p-4 sm:p-6 flex flex-col justify-between shrink-0">
           <div>
-            <div className="flex items-center gap-2 mb-4 md:mb-6">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">P</div>
+            <div className="flex items-center gap-2 mb-3 md:mb-6">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">P</div>
               <span className="font-bold tracking-wider uppercase text-xs text-indigo-300">Farm Onboarding</span>
             </div>
-            <ul className="flex md:flex-col gap-3 md:gap-6 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+            <ul className="grid grid-cols-4 md:flex md:flex-col gap-2 md:gap-5">
               {[
-                { s: 1, label: 'Farm Profile & Branch', icon: Box },
+                { s: 1, label: 'Farm Branch', icon: Box },
                 { s: 2, label: 'Flock Setup', icon: Clipboard },
                 { s: 3, label: 'Staff Member', icon: User },
                 { s: 4, label: 'Starter Guide', icon: GraduationCap },
@@ -297,23 +305,27 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                 <li 
                   key={item.s} 
                   onClick={() => setStep(item.s)}
-                  className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-90 transition-opacity shrink-0"
+                  className={`flex flex-col md:flex-row items-center md:items-center gap-1.5 md:gap-3 p-2 md:p-0 rounded-xl cursor-pointer hover:opacity-90 transition-all ${
+                    step === item.s 
+                      ? 'bg-indigo-600/20 md:bg-transparent border border-indigo-500/30 md:border-none' 
+                      : ''
+                  }`}
                   title={`Jump to Step ${item.s}`}
                 >
-                  <div className={`p-2 rounded-xl transition-colors ${
+                  <div className={`p-2 rounded-xl transition-colors shrink-0 ${
                     step === item.s 
                       ? 'bg-indigo-600 text-white shadow-md' 
                       : step > item.s 
                         ? 'bg-indigo-950 text-indigo-400 border border-indigo-800' 
-                        : 'bg-slate-800 text-slate-500'
+                        : 'bg-slate-800 text-slate-400'
                   }`}>
                     <item.icon size={16} />
                   </div>
-                  <div>
-                    <p className={`text-[10px] uppercase tracking-wider font-extrabold ${
-                      step === item.s ? 'text-indigo-400' : 'text-slate-500'
+                  <div className="text-center md:text-left min-w-0">
+                    <p className={`text-[10px] uppercase tracking-wider font-extrabold truncate ${
+                      step === item.s ? 'text-indigo-400' : 'text-slate-400'
                     }`}>Step {item.s}</p>
-                    <p className={`text-xs font-semibold hidden md:block ${
+                    <p className={`text-xs font-semibold hidden md:block truncate ${
                       step === item.s ? 'text-white' : 'text-slate-400'
                     }`}>{item.label}</p>
                   </div>
@@ -326,7 +338,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
             <button 
               onClick={handleSkipAll}
               disabled={isSaving}
-              className="mt-4 md:mt-6 text-xs font-semibold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors text-left cursor-pointer flex items-center gap-1 shrink-0"
+              className="mt-3 md:mt-6 text-xs font-semibold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors text-left cursor-pointer flex items-center gap-1 shrink-0"
             >
               Skip Setup & Start
             </button>

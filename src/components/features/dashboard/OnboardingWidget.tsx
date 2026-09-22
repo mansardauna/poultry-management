@@ -87,30 +87,31 @@ export function OnboardingWidget({
   if (isDismissed) return null;
 
   return (
-    <div className="bg-slate-900 text-white rounded-2xl p-6 border border-slate-800 mb-8 font-sans shadow-xl">
+    <div className="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 border border-slate-800 mb-8 font-sans shadow-xl">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-            <Box size={20} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-extrabold text-white tracking-tight">Farm Setup & Onboarding Progress</h3>
-              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                {completedCount} of 4 Completed ({progressPercent}%)
-              </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+              <Box size={20} />
             </div>
-            <p className="text-xs text-slate-400 mt-0.5 font-medium">
-              Complete initial setup steps to activate operational logs, mortality alerts, and feed thresholds.
-            </p>
+            <div>
+              <h3 className="text-base font-extrabold text-white tracking-tight">Farm Setup & Onboarding Progress</h3>
+              <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                Complete initial setup steps to activate operational logs, mortality alerts, and feed thresholds.
+              </p>
+            </div>
           </div>
+
+          <span className="self-start sm:self-auto bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider whitespace-nowrap shrink-0">
+            {completedCount} of 4 Completed ({progressPercent}%)
+          </span>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end shrink-0 pt-2 md:pt-0">
           <button
             onClick={() => onOpenStep(nextPendingStep.id)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-indigo-600/20"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-indigo-600/20 flex-1 md:flex-none justify-center"
           >
             <span>Resume Step {nextPendingStep.id}: {nextPendingStep.actionText}</span>
             <ArrowRight size={15} />
@@ -118,7 +119,7 @@ export function OnboardingWidget({
           
           <button
             onClick={handleDismiss}
-            className="text-slate-400 hover:text-white text-xs p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
             title="Dismiss widget"
           >
             <X size={16} />

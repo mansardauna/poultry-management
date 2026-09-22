@@ -60,13 +60,27 @@ export function FeatureTour() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // 1. Check localStorage on load
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(typeof window !== 'undefined' && window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 1. Check localStorage on load (Only trigger if onboarding is not active)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tourCompleted = localStorage.getItem('pfms_guided_tour_completed');
-      if (tourCompleted !== 'true') {
-        const timer = setTimeout(() => setIsOpen(true), 600);
+      const searchParams = new URLSearchParams(window.location.search);
+      const isOnboardingUrl = searchParams.get('onboarding') === 'true';
+      const hasDismissedOnboarding = localStorage.getItem('pfms_onboarded_dismissed') === 'true' || localStorage.getItem('pfms_branch_setup_completed') === 'true';
+
+      if (tourCompleted !== 'true' && !isOnboardingUrl && hasDismissedOnboarding) {
+        const timer = setTimeout(() => setIsOpen(true), 800);
         return () => clearTimeout(timer);
       }
     }
@@ -131,6 +145,38 @@ export function FeatureTour() {
 
   const currentStep = TOUR_STEPS[currentStepIndex];
   const Icon = currentStep.highlightIcon;
+
+  // Calculate safe styles to ensure popover buttons are NEVER cut off on mobile
+  const popoverStyle: React.CSSProperties = isMobile
+    ? {
+        position: 'fixed',
+        bottom: '20px',
+        left: '16px',
+        right: '16px',
+        maxWidth: 'calc(100vw - 32px)',
+        maxHeight: '85vh',
+        zIndex: 102
+      }
+    : targetRect ? {
+        position: 'fixed',
+        top: currentStep.position === 'top' 
+          ? `${Math.max(20, targetRect.top - 240)}px` 
+          : currentStep.position === 'bottom'
+          ? `${Math.min(window.innerHeight - 280, targetRect.bottom + 16)}px`
+          : `${Math.max(20, Math.min(window.innerHeight - 280, targetRect.top))}px`,
+        left: currentStep.position === 'right' 
+          ? `${Math.min(window.innerWidth - 420, targetRect.right + 16)}px` 
+          : currentStep.position === 'left'
+          ? `${Math.max(20, targetRect.left - 420)}px`
+          : `${Math.max(20, Math.min(window.innerWidth - 420, targetRect.left))}px`,
+        zIndex: 102
+      } : {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 102
+      };
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-auto font-sans animate-in fade-in duration-200">
@@ -202,25 +248,8 @@ export function FeatureTour() {
 
       {/* Tour Popover Card */}
       <div 
-        className="absolute z-[102] max-w-sm sm:max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transition-all duration-300"
-        style={
-          targetRect ? {
-            top: currentStep.position === 'top' 
-              ? `${Math.max(20, targetRect.top - 240)}px` 
-              : currentStep.position === 'bottom'
-              ? `${Math.min(window.innerHeight - 260, targetRect.bottom + 16)}px`
-              : `${Math.max(20, Math.min(window.innerHeight - 260, targetRect.top))}px`,
-            left: currentStep.position === 'right' 
-              ? `${Math.min(window.innerWidth - 380, targetRect.right + 16)}px` 
-              : currentStep.position === 'left'
-              ? `${Math.max(20, targetRect.left - 380)}px`
-              : `${Math.max(20, Math.min(window.innerWidth - 380, targetRect.left))}px`,
-          } : {
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)'
-          }
-        }
+        className="max-w-sm sm:max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transition-all duration-300 flex flex-col justify-between"
+        style={popoverStyle}
       >
         {/* Card Header */}
         <div className="bg-slate-900 text-white p-5 relative">
