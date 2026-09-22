@@ -2,7 +2,7 @@
 'use client';
 
 import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar, BookOpen } from 'lucide-react';
-import { useState, useEffect, useRef, FormEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSidebar } from './SidebarContext';
 import { useLanguage, Language } from '@/components/features/LanguageContext';
@@ -118,7 +118,11 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     setSearchQuery('');
   };
 
-  const fetchNotifications = async () => {
+  const isFetchingRef = useRef(false);
+
+  const fetchNotifications = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     try {
       const res = await fetch('/api/notifications');
       if (res.ok) {
@@ -127,16 +131,17 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      isFetchingRef.current = false;
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     // Poll every 30 seconds for new notifications
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchNotifications]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

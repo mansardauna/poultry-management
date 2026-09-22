@@ -1,13 +1,13 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   try {
     const workspaceId = await getWorkspaceId();
-    const { data: notifications } = await supabase.from('alertLogs').select('*').eq('workspaceId', workspaceId).order('date', { ascending: false });
+    const { data: notifications } = await applyWorkspaceFilter(supabase.from('alertLogs').select('*'), workspaceId).order('date', { ascending: false });
     const formatted = (notifications || []).map((log: any) => ({
       ...log,
       read: log.read ?? false,
