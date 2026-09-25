@@ -57,7 +57,7 @@ export async function getWorkspaceId(): Promise<string> {
 export function applyWorkspaceFilter(query: any, workspaceId: string) {
   const cleanId = (workspaceId || 'main').replace(/"/g, '');
   if (!cleanId || cleanId === 'main' || cleanId.startsWith('main-') || cleanId.startsWith('org_')) {
-    return query.or(`workspaceId.eq."${cleanId}",workspaceId.eq."main",workspaceId.is.null`);
+    return query.or(`workspaceId.eq.${cleanId},workspaceId.eq.main,workspaceId.is.null`);
   }
   return query.eq('workspaceId', cleanId);
 }

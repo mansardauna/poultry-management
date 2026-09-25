@@ -115,17 +115,18 @@ export async function POST(request: Request) {
     const staffRole = body.role === 'Manager' ? 'Manager' : 'Staff';
 
     // Check if an onboarding staff member already exists in this workspace to update instead of duplicate
-    const { data: existingStaffList } = await supabase.from('staff').select('*').eq('workspaceId', workspaceId).limit(1);
+    const { data: existingStaffList } = await applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId).limit(1);
     if (existingStaffList && existingStaffList.length > 0 && body.isOnboarding) {
       const existing = existingStaffList[0];
       const updated = {
+        workspaceId,
         name: staffNameStr,
         username: staffUsername,
         role: body.role || existing.role || 'Staff',
         salary: Number(body.salary) || existing.salary || 45000,
         assignedBranches: assignedBranchList
       };
-      await supabase.from('staff').update(updated).eq('id', existing.id).eq('workspaceId', workspaceId);
+      await supabase.from('staff').update(updated).eq('id', existing.id);
       return NextResponse.json({ ...existing, ...updated }, { status: 200 });
     }
 

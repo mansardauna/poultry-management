@@ -119,12 +119,13 @@ export async function POST(request: Request) {
     if (existingBatches && existingBatches.length > 0 && body.isOnboarding) {
       const existing = existingBatches[0];
       const updated = {
+        workspaceId,
         breed: breedName,
         quantity: quantityNum || existing.quantity,
         type: flockTypeStr,
         ageInWeeks: ageWeeks
       };
-      await supabase.from('batches').update(updated).eq('id', existing.id).eq('workspaceId', workspaceId);
+      await supabase.from('batches').update(updated).eq('id', existing.id);
       return NextResponse.json({ ...existing, ...updated }, { status: 200 });
     }
 
