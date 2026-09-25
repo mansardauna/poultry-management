@@ -7,7 +7,21 @@ import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const { data: batchesData } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId);
-  return NextResponse.json(batchesData || []);
+  const normalized = (batchesData || []).map((b: any) => ({
+    id: String(b.id),
+    workspaceId: b.workspaceId || workspaceId,
+    breed: b.breed || 'Commercial Layer',
+    quantity: Number(b.quantity) || 0,
+    purchaseDate: b.purchaseDate || new Date().toISOString().split('T')[0],
+    ageInWeeks: Number(b.ageInWeeks) || 1,
+    mortalityCount: Number(b.mortalityCount) || 0,
+    vaccinationStatus: b.vaccinationStatus || 'Up to Date',
+    farmSection: b.farmSection || 'Section A',
+    type: b.type || 'Layers',
+    unitPurchasePrice: b.unitPurchasePrice ? Number(b.unitPurchasePrice) : null,
+    projectedSellingPrice: b.projectedSellingPrice ? Number(b.projectedSellingPrice) : null,
+  }));
+  return NextResponse.json(normalized);
 }
 
 /** Exported function POST */
@@ -142,8 +156,9 @@ export async function POST(request: Request) {
     }]);
     
     return NextResponse.json(newBatch, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to manage batch operations' }, { status: 500 });
+  } catch (err: any) {
+    console.error('Batch POST exception:', err);
+    return NextResponse.json({ error: err?.message || 'Failed to manage batch operations' }, { status: 500 });
   }
 }
 

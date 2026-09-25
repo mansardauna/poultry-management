@@ -181,7 +181,11 @@ function parseOrFilter(filter: string): { col: string; op: string; value: string
   return filter.split(',').map((part) => {
     const m = /^([^.]+)\.([^.]+)\.(.*)$/.exec(part.trim());
     if (!m) return { col: '1', op: 'eq', value: '1' };
-    return { col: m[1], op: m[2], value: m[3] };
+    let val = m[3];
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      val = val.slice(1, -1);
+    }
+    return { col: m[1], op: m[2], value: val };
   });
 }
 

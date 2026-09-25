@@ -220,6 +220,21 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       });
 
       if (res.ok) {
+        const createdBatch = await res.json();
+        if (createdBatch && createdBatch.id) {
+          const newBatchObj: ChickenBatch = {
+            id: String(createdBatch.id),
+            breed: createdBatch.breed || breed,
+            quantity: Number(createdBatch.quantity) || Number(quantity) || 0,
+            purchaseDate: createdBatch.purchaseDate || new Date().toISOString().split('T')[0],
+            ageInWeeks: Number(createdBatch.ageInWeeks) || Number(ageInWeeks) || 1,
+            mortalityCount: Number(createdBatch.mortalityCount) || 0,
+            vaccinationStatus: createdBatch.vaccinationStatus || vaccinationStatus || 'Up to Date',
+            farmSection: createdBatch.farmSection || farmSection || 'Section A',
+            type: createdBatch.type || type || 'Layers',
+          };
+          setBatches((prev) => [newBatchObj, ...prev.filter((b) => b.id !== newBatchObj.id)]);
+        }
         refreshData();
         handleClose();
         toast.success('Batch added successfully!');
