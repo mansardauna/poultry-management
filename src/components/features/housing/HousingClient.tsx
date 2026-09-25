@@ -61,7 +61,11 @@ export function HousingClient({ role }: { role: string }) {
     if (!confirm('Delete this pen?')) return;
     try {
       const res = await fetch(`/api/housing?id=${id}`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Pen deleted.'); }
+      if (res.ok) { 
+        setPens(prev => prev.filter(p => p.id !== id));
+        refreshData(); 
+        toast.success('Pen deleted.'); 
+      }
       else toast.error('Failed to delete pen');
     } catch (err) { console.error(err); }
   };
@@ -80,11 +84,19 @@ export function HousingClient({ role }: { role: string }) {
         : { ...formData, currentBatchId: formData.currentBatchId === '' ? null : formData.currentBatchId };
       const res = await fetch('/api/housing', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (res.ok) {
+        const saved = await res.json();
+        if (editingPen) {
+          setPens(prev => prev.map(p => p.id === editingPen.id ? { ...p, ...formData, capacity: Number(formData.capacity) } : p));
+        } else if (saved && saved.id) {
+          setPens(prev => [saved, ...prev]);
+        }
         refreshData();
         setOpen(false);
         setEditingPen(null);
         setFormData({ name: '', capacity: 1000, status: 'Active', currentBatchId: '' });
         toast.success(editingPen ? 'Pen updated!' : 'Pen added!');
+      } else {
+        toast.error('Failed to save pen');
       }
     } catch (err) { console.error(err); }
   };

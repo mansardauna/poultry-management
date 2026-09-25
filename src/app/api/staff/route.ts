@@ -13,11 +13,37 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId)
   ]);
+
+  const normalizedStaff = (staffRes.data || []).map((s: any) => ({
+    id: String(s.id),
+    name: s.name || 'Staff Member',
+    role: s.role || 'Attendant',
+    salary: Number(s.salary) || 0,
+    attendanceDays: Number(s.attendanceDays) || 0,
+    contact: s.contact || '',
+    assignedBranches: Array.isArray(s.assignedBranches) ? s.assignedBranches : []
+  }));
+
+  const normalizedTasks = (tasksRes.data || []).map((t: any) => ({
+    id: String(t.id),
+    assignedTo: t.assignedTo || 'Staff',
+    taskName: t.taskName || 'Assigned Task',
+    status: t.status || 'Pending',
+    date: t.date || new Date().toISOString().split('T')[0]
+  }));
+
+  const normalizedPayroll = (payrollLogsRes.data || []).map((p: any) => ({
+    id: String(p.id),
+    date: p.date || new Date().toISOString().split('T')[0],
+    staffId: String(p.staffId || ''),
+    amount: Number(p.amount) || 0,
+    period: p.period || ''
+  }));
   
   return NextResponse.json({
-    staff: staffRes.data || [],
-    tasks: tasksRes.data || [],
-    payrollLogs: payrollLogsRes.data || []
+    staff: normalizedStaff,
+    tasks: normalizedTasks,
+    payrollLogs: normalizedPayroll
   });
 }
 
@@ -42,12 +68,15 @@ export async function POST(request: Request) {
       const newTask = {
         id: 't' + Date.now().toString().slice(-8),
         workspaceId,
-        assignedTo: body.assignedTo,
-        taskName: body.taskName,
+        assignedTo: body.assignedTo || 'Staff',
+        taskName: body.taskName || 'Assigned Task',
         status: 'Pending',
         date: body.date || new Date().toISOString().split('T')[0]
       };
-      await supabase.from('tasks').insert([newTask]);
+      const { error: insErr } = await supabase.from('tasks').insert([newTask]);
+      if (insErr) {
+        return NextResponse.json({ error: insErr.message || 'Failed to assign task' }, { status: 500 });
+      }
       return NextResponse.json(newTask, { status: 201 });
     }
 
@@ -112,7 +141,10 @@ export async function POST(request: Request) {
       assignedBranches: assignedBranchList
     };
     
-    await supabase.from('staff').insert([newStaff]);
+    const { error: insErr } = await supabase.from('staff').insert([newStaff]);
+    if (insErr) {
+      return NextResponse.json({ error: insErr.message || 'Failed to add staff member' }, { status: 500 });
+    }
     
     // Create user login credential in primary users table
     if (staffUsername && staffPassword) {

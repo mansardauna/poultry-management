@@ -155,6 +155,19 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: Staff = {
+            id: String(created.id),
+            name: String(created.name || name),
+            role: String(created.role || staffRole),
+            salary: Number(created.salary) || Number(salary) || 0,
+            attendanceDays: Number(created.attendanceDays) || 0,
+            contact: String(created.contact || contact || ''),
+            assignedBranches: Array.isArray(created.assignedBranches) ? created.assignedBranches : assignedBranches
+          };
+          setStaff((prev) => [norm, ...prev.filter((s) => s.id !== norm.id)]);
+        }
         refreshData();
         handleClose();
         toast.success('Staff member added!');
@@ -178,6 +191,9 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       });
 
       if (res.ok) {
+        setStaff((prev) =>
+          prev.map((s) => (s.id === staffId ? { ...s, attendanceDays: (s.attendanceDays || 0) + 1 } : s))
+        );
         refreshData();
         toast.success('Attendance logged for today!');
       } else {
@@ -204,6 +220,17 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: StaffTask = {
+            id: String(created.id),
+            assignedTo: String(created.assignedTo || assignedTo),
+            taskName: String(created.taskName || taskName),
+            status: String(created.status || 'Pending'),
+            date: String(created.date || new Date().toISOString().split('T')[0])
+          };
+          setTasks((prev) => [norm, ...prev.filter((t) => t.id !== norm.id)]);
+        }
         refreshData();
         handleCloseTaskModal();
         toast.success('Task assigned successfully!');

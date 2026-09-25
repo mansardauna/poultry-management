@@ -58,7 +58,11 @@ export function ContactsClient({ role }: { role: string }) {
     if (!confirm('Delete this contact?')) return;
     try {
       const res = await fetch(`/api/contacts?id=${id}`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Contact deleted.'); }
+      if (res.ok) { 
+        setContacts(prev => prev.filter(c => c.id !== id));
+        refreshData(); 
+        toast.success('Contact deleted.'); 
+      }
       else toast.error('Failed to delete');
     } catch (err) { console.error(err); }
   };
@@ -75,11 +79,19 @@ export function ContactsClient({ role }: { role: string }) {
       const body = editingContact ? { id: editingContact.id, ...formData } : formData;
       const res = await fetch('/api/contacts', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (res.ok) {
+        const saved = await res.json();
+        if (editingContact) {
+          setContacts(prev => prev.map(c => c.id === editingContact.id ? { ...c, ...formData } : c));
+        } else if (saved && saved.id) {
+          setContacts(prev => [saved, ...prev]);
+        }
         refreshData();
         setOpen(false);
         setEditingContact(null);
         setFormData({ name: '', type: 'Customer', contactDetails: '', notes: '' });
         toast.success(editingContact ? 'Contact updated!' : 'Contact added!');
+      } else {
+        toast.error('Failed to save contact');
       }
     } catch (err) { console.error(err); }
   };
@@ -141,7 +153,7 @@ export function ContactsClient({ role }: { role: string }) {
                 ))}
                 {contactsLogic.data.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="text-center py-4 text-slate-500 font-sans">No contacts recorded.</td>
+                    <td colSpan={canEdit ? 5 : 4} className="text-center py-4 text-slate-500 font-sans">No contacts recorded.</td>
                   </tr>
                 )}
               </tbody>

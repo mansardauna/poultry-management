@@ -132,6 +132,20 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const normSale: Sale = {
+            id: String(created.id),
+            date: created.date || saleDate,
+            type: String(created.type || type),
+            quantity: Number(created.quantity) || Number(quantity) || 0,
+            totalAmount: Number(created.totalAmount) || Number(totalAmount) || 0,
+            customerName: String(created.customerName || customerName),
+            paymentMethod: String(created.paymentMethod || paymentMethod),
+            status: String(created.status || 'Paid')
+          };
+          setSales((prev) => [normSale, ...prev.filter((s) => s.id !== normSale.id)]);
+        }
         toast.success('Sale recorded successfully');
         handleClose();
         refreshData();
@@ -149,6 +163,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       const res = await fetch(`/api/sales?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success('Sale deleted');
+        setSales((prev) => prev.filter((s) => s.id !== id));
         refreshData();
       } else toast.error('Failed to delete sale');
     } catch (_e) { toast.error('Error deleting sale'); }
@@ -221,7 +236,22 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       toast.dismiss('inv-toast');
       if (res.ok) {
         const data = await res.json();
-        const createdInv = data.invoice;
+        const createdInv = data.invoice || data;
+
+        if (createdInv && createdInv.id) {
+          const normInv: Invoice = {
+            id: String(createdInv.id),
+            date: createdInv.date || new Date().toISOString().split('T')[0],
+            saleId: String(createdInv.saleId || ''),
+            customerName: String(createdInv.customerName || invCustomerName),
+            items: String(createdInv.items || invItems),
+            quantity: Number(createdInv.quantity) || qty,
+            unitPrice: Number(createdInv.unitPrice) || price,
+            totalAmount: Number(createdInv.totalAmount) || total,
+            status: String(createdInv.status || invStatus || 'Unpaid')
+          };
+          setInvoices((prev) => [normInv, ...prev.filter((i) => i.id !== normInv.id)]);
+        }
 
         toast.success('World-Class Customer Invoice generated successfully!');
         setOpenInvoiceModal(false);
@@ -229,7 +259,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         setInvPhone('');
         setInvEmail('');
 
-        await refreshData();
+        refreshData();
 
         // Immediately switch tab and open the generated invoice viewer with live payment link!
         setActiveTab('invoices');

@@ -181,6 +181,17 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: DailyFeedLog = {
+            id: String(created.id),
+            date: created.date || useDate,
+            feedId: String(created.feedId || useFeedId),
+            quantityConsumedKg: Number(created.quantityConsumedKg) || Number(useQty) || 0,
+            batchId: String(created.batchId || useBatchId)
+          };
+          setLogs((prev) => [norm, ...prev.filter((l) => l.id !== norm.id)]);
+        }
         refreshData();
         handleCloseUsage();
         toast.success('Consumption logged! Inventory updated.');
@@ -209,6 +220,17 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: FeedInventory = {
+            id: String(created.id),
+            type: String(created.type || 'Layer mash'),
+            quantityKg: Number(created.quantityKg) || Number(restockQty) || 0,
+            supplier: String(created.supplier || restockSupplier || 'Generic Supplier'),
+            lastRestock: String(created.lastRestock || new Date().toISOString().split('T')[0])
+          };
+          setFeeds((prev) => [norm, ...prev.filter((f) => f.id !== norm.id)]);
+        }
         refreshData();
         handleCloseRestock();
         toast.success('Stock received! Expense automatically logged.');
@@ -236,6 +258,18 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: ProcurePipeline = {
+            id: String(created.id),
+            date: String(created.date || new Date().toISOString().split('T')[0]),
+            milestone: String(created.milestone || pipelineMilestone),
+            supplier: String(created.supplier || pipelineSupplier || 'Generic Supplier'),
+            status: String(created.status || pipelineStatus || 'Under Negotiations'),
+            eta: String(created.eta || pipelineEta || 'Pending')
+          };
+          setProcurePipeline((prev) => [norm, ...prev.filter((p) => p.id !== norm.id)]);
+        }
         refreshData();
         handleCloseLogistics();
         toast.success('Procurement milestone logged!');

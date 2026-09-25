@@ -1,14 +1,14 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const [templatesRes, schedulesRes] = await Promise.all([
-    supabase.from('medicationTemplates').select('*').eq('workspaceId', workspaceId),
-    supabase.from('medicationSchedules').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('medicationTemplates').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('medicationSchedules').select('*'), workspaceId)
   ]);
   return NextResponse.json({
     templates: templatesRes.data || [],
@@ -31,19 +31,21 @@ export async function POST(req: Request) {
         targetType: body.targetType,
         stages: body.stages
       };
-      await supabase.from('medicationTemplates').insert([newTemplate]);
-      return NextResponse.json({ success: true, template: newTemplate });
+      const { error } = await supabase.from('medicationTemplates').insert([newTemplate]);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, template: newTemplate }, { status: 201 });
     }
 
     if (action === 'completeSchedule') {
       const { id } = body;
-      await supabase.from('medicationSchedules').update({ status: 'Completed' }).eq('id', id).eq('workspaceId', workspaceId);
+      const { error } = await supabase.from('medicationSchedules').update({ status: 'Completed' }).eq('id', id).eq('workspaceId', workspaceId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true });
     }
 
     if (action === 'applyTemplate') {
       const { templateId, batchId, startDate } = body;
-      const { data: templates } = await supabase.from('medicationTemplates').select('*').eq('id', templateId).eq('workspaceId', workspaceId);
+      const { data: templates } = await applyWorkspaceFilter(supabase.from('medicationTemplates').select('*').eq('id', templateId), workspaceId);
       const template = templates && templates.length > 0 ? templates[0] : null;
 
       if (!template) {
@@ -53,7 +55,7 @@ export async function POST(req: Request) {
       const start = new Date(startDate);
       const newSchedules = (template.stages as any[]).map((stage: any, i: number) => {
         const schedDate = new Date(start);
-        schedDate.setDate(schedDate.getDate() + stage.dayOffset);
+        schedDate.setDate(schedDate.getDate() + (Number(stage.dayOffset) || 0));
         return {
           id: `SCH-${Date.now()}-${i}`,
           workspaceId,
@@ -65,8 +67,9 @@ export async function POST(req: Request) {
         };
       });
 
-      await supabase.from('medicationSchedules').insert(newSchedules);
-      return NextResponse.json({ success: true, schedules: newSchedules });
+      const { error } = await supabase.from('medicationSchedules').insert(newSchedules);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, schedules: newSchedules }, { status: 201 });
     }
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });

@@ -15,10 +15,42 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId)
   ]);
+
+  const normalizedSales = (sales || []).map((s: any) => ({
+    id: String(s.id),
+    date: s.date || new Date().toISOString().split('T')[0],
+    type: s.type || 'Eggs',
+    quantity: Number(s.quantity) || 0,
+    totalAmount: Number(s.totalAmount) || 0,
+    customerName: s.customerName || 'Walk-in Customer',
+    paymentMethod: s.paymentMethod || 'Cash',
+    status: s.status || 'Paid'
+  }));
+
+  const normalizedExpenses = (expenses || []).map((ex: any) => ({
+    id: String(ex.id),
+    date: ex.date || new Date().toISOString().split('T')[0],
+    category: ex.category || 'Feed',
+    amount: Number(ex.amount) || 0,
+    description: ex.description || ''
+  }));
+
+  const normalizedInvoices = (invoices || []).map((i: any) => ({
+    id: String(i.id),
+    date: i.date || new Date().toISOString().split('T')[0],
+    saleId: String(i.saleId || ''),
+    customerName: i.customerName || 'Customer Invoice',
+    items: i.items || 'Poultry Products',
+    quantity: Number(i.quantity) || 0,
+    unitPrice: Number(i.unitPrice) || 0,
+    totalAmount: Number(i.totalAmount) || 0,
+    status: i.status || 'Unpaid'
+  }));
+
   return NextResponse.json({
-    sales: sales || [],
-    expenses: expenses || [],
-    invoices: invoices || []
+    sales: normalizedSales,
+    expenses: normalizedExpenses,
+    invoices: normalizedInvoices
   });
 }
 
@@ -35,7 +67,7 @@ export async function POST(request: Request) {
       
       if (staffList) {
         for (const member of staffList) {
-          const pay = member.salary;
+          const pay = Number(member.salary) || 0;
           totalDisbursement += pay;
           
           await supabase.from('expenses').insert([{
@@ -77,11 +109,14 @@ export async function POST(request: Request) {
       workspaceId,
       date: body.date || new Date().toISOString().split('T')[0],
       category: body.category || 'Feed',
-      amount: Number(body.amount),
+      amount: Number(body.amount) || 0,
       description: body.description || ''
     };
     
-    await supabase.from('expenses').insert([newExpense]);
+    const { error: insErr } = await supabase.from('expenses').insert([newExpense]);
+    if (insErr) {
+      return NextResponse.json({ error: insErr.message || 'Failed to record expense' }, { status: 500 });
+    }
     
     await supabase.from('alertLogs').insert([{
       id: 'al-' + Date.now(),
@@ -92,8 +127,8 @@ export async function POST(request: Request) {
     }]);
     
     return NextResponse.json(newExpense, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to record expense' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || 'Failed to record expense' }, { status: 500 });
   }
 }
 

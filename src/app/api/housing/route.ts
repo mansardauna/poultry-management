@@ -1,17 +1,21 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const [farmPensRes, batchesRes] = await Promise.all([
-    supabase.from('farmPens').select('*').eq('workspaceId', workspaceId),
-    supabase.from('batches').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId)
   ]);
+  const farmPens = (farmPensRes.data || []).map((p: any) => ({
+    ...p,
+    capacity: Number(p.capacity || 0)
+  }));
   return NextResponse.json({
-    farmPens: farmPensRes.data || [],
+    farmPens,
     batches: batchesRes.data || []
   });
 }
@@ -33,7 +37,10 @@ export async function POST(request: Request) {
       temperatureLogs: body.temperatureLogs || []
     };
     
-    await supabase.from('farmPens').insert([newPen]);
+    const { error } = await supabase.from('farmPens').insert([newPen]);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     
     return NextResponse.json(newPen, { status: 201 });
   } catch {
@@ -48,8 +55,9 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await supabase.from('farmPens').update(fields).eq('id', id).eq('workspaceId', workspaceId);
-    return NextResponse.json({ success: true });
+    const { error } = await supabase.from('farmPens').update(fields).eq('id', id).eq('workspaceId', workspaceId);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, ...body });
   } catch {
     return NextResponse.json({ error: 'Failed to update pen' }, { status: 500 });
   }
@@ -62,7 +70,8 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await supabase.from('farmPens').delete().eq('id', id).eq('workspaceId', workspaceId);
+    const { error } = await supabase.from('farmPens').delete().eq('id', id).eq('workspaceId', workspaceId);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete pen' }, { status: 500 });

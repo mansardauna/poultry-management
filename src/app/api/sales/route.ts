@@ -1,21 +1,52 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const [salesRes, invoicesRes, batchesRes] = await Promise.all([
-    supabase.from('sales').select('*').eq('workspaceId', workspaceId),
-    supabase.from('invoices').select('*').eq('workspaceId', workspaceId),
-    supabase.from('batches').select('*').eq('workspaceId', workspaceId)
+    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId)
   ]);
+
+  const normalizedSales = (salesRes.data || []).map((s: any) => ({
+    id: String(s.id),
+    date: s.date || new Date().toISOString().split('T')[0],
+    type: s.type || 'Eggs',
+    quantity: Number(s.quantity) || 0,
+    totalAmount: Number(s.totalAmount) || 0,
+    customerName: s.customerName || 'Walk-in Customer',
+    paymentMethod: s.paymentMethod || 'Cash',
+    status: s.status || 'Paid'
+  }));
+
+  const normalizedInvoices = (invoicesRes.data || []).map((i: any) => ({
+    id: String(i.id),
+    date: i.date || new Date().toISOString().split('T')[0],
+    saleId: String(i.saleId || ''),
+    customerName: i.customerName || 'Customer Invoice',
+    items: i.items || 'Poultry Products',
+    quantity: Number(i.quantity) || 0,
+    unitPrice: Number(i.unitPrice) || 0,
+    totalAmount: Number(i.totalAmount) || 0,
+    status: i.status || 'Unpaid'
+  }));
+
+  const normalizedBatches = (batchesRes.data || []).map((b: any) => ({
+    id: String(b.id),
+    breed: b.breed || 'Commercial Layer',
+    quantity: Number(b.quantity) || 0,
+    farmSection: b.farmSection || 'Section A',
+    type: b.type || 'Layers'
+  }));
   
   return NextResponse.json({
-    sales: salesRes.data || [],
-    invoices: invoicesRes.data || [],
-    batches: batchesRes.data || []
+    sales: normalizedSales,
+    invoices: normalizedInvoices,
+    batches: normalizedBatches
   });
 }
 
@@ -46,13 +77,13 @@ export async function POST(request: Request) {
         status: body.status || 'Unpaid'
       };
 
-      const { data, error } = await supabase.from('invoices').insert([newInvoice]).select();
+      const { error } = await supabase.from('invoices').insert([newInvoice]);
       if (error) {
         console.error("Create Invoice Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
-      return NextResponse.json({ invoice: data?.[0] || newInvoice }, { status: 201 });
+      return NextResponse.json(newInvoice, { status: 201 });
     }
 
     const newSaleId = 'sa' + Date.now().toString().slice(-8);
@@ -63,14 +94,17 @@ export async function POST(request: Request) {
       workspaceId,
       date,
       type: body.type || 'Eggs',
-      quantity: Number(body.quantity),
-      totalAmount: Number(body.totalAmount),
+      quantity: Number(body.quantity) || 0,
+      totalAmount: Number(body.totalAmount) || 0,
       customerName: body.customerName || 'Walk-in Customer',
       paymentMethod: body.paymentMethod || 'Cash',
       status: body.status || 'Paid'
     };
     
-    await supabase.from('sales').insert([newSale]);
+    const { error: insErr } = await supabase.from('sales').insert([newSale]);
+    if (insErr) {
+      return NextResponse.json({ error: insErr.message || 'Failed to record sale' }, { status: 500 });
+    }
       
     if (newSale.type === 'Chickens') {
       const batchId = body.batchId || 'b3'; // Default to broilers b3

@@ -16,10 +16,37 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId)
   ]);
   
+  const normalizedEggs = (eggs || []).map((e: any) => ({
+    id: String(e.id),
+    date: e.date || new Date().toISOString().split('T')[0],
+    goodEggs: Number(e.goodEggs) || 0,
+    brokenEggs: Number(e.brokenEggs) || 0,
+    spoiltEggs: Number(e.spoiltEggs) || 0,
+    batchId: String(e.batchId || 'b1'),
+  }));
+
+  const normalizedAudits = (cushionAudits || []).map((a: any) => ({
+    id: String(a.id),
+    date: a.date || new Date().toISOString().split('T')[0],
+    boxName: String(a.boxName || 'Nesting Box 1'),
+    status: String(a.status || 'Optimal Cushioning'),
+    actionTaken: String(a.actionTaken || 'No action required'),
+  }));
+
+  const normalizedMaturation = (maturationLogs || []).map((m: any) => ({
+    id: String(m.id),
+    date: m.date || new Date().toISOString().split('T')[0],
+    birdId: String(m.birdId || 'BIRD-01'),
+    breed: String(m.breed || 'Isa Brown'),
+    eggsCount: Number(m.eggsCount) || 0,
+    avgWeightGrams: Number(m.avgWeightGrams) || 0,
+    notes: String(m.notes || ''),
+  }));
+
   return NextResponse.json({
-    eggs: eggs || [],
-    cushionAudits: cushionAudits || [],
-    maturationLogs: maturationLogs || []
+    eggs: normalizedEggs,
+    cushionAudits: normalizedAudits,
+    maturationLogs: normalizedMaturation
   });
 }
 
@@ -34,19 +61,22 @@ export async function POST(request: Request) {
         id: 'aud-' + Date.now(),
         workspaceId,
         date: body.date || new Date().toISOString().split('T')[0],
-        boxName: body.boxName,
-        status: body.status,
+        boxName: body.boxName || 'Box #1',
+        status: body.status || 'Optimal Cushioning',
         actionTaken: body.actionTaken || 'No action recorded'
       };
       
-      await supabase.from('cushionAudits').insert([newAudit]);
+      const { error: insErr } = await supabase.from('cushionAudits').insert([newAudit]);
+      if (insErr) {
+        return NextResponse.json({ error: insErr.message || 'Failed to record cushion audit' }, { status: 500 });
+      }
       
       if (body.status === 'Optimal Cushioning') {
         await supabase.from('alertLogs').insert([{
           id: 'al-' + Date.now(),
           workspaceId,
           date: new Date().toISOString().split('T')[0],
-          message: `INFO: Cushion audit complete. Nesting box ${body.boxName} cushion is optimal.`,
+          message: `INFO: Cushion audit complete. Nesting box ${newAudit.boxName} cushion is optimal.`,
           severity: 'Info'
         }]);
       } else {
@@ -54,7 +84,7 @@ export async function POST(request: Request) {
           id: 'al-' + Date.now(),
           workspaceId,
           date: new Date().toISOString().split('T')[0],
-          message: `WARNING: Cushion audit on ${body.boxName} found status "${body.status}". Action taken: ${body.actionTaken}`,
+          message: `WARNING: Cushion audit on ${newAudit.boxName} found status "${newAudit.status}". Action taken: ${newAudit.actionTaken}`,
           severity: 'Warning'
         }]);
       }
@@ -66,19 +96,23 @@ export async function POST(request: Request) {
         id: 'mat-' + Date.now(),
         workspaceId,
         date: body.date || new Date().toISOString().split('T')[0],
-        birdId: body.birdId,
+        birdId: body.birdId || 'BIRD-01',
         breed: body.breed || 'Isa Brown',
-        eggsCount: Number(body.eggsCount),
-        avgWeightGrams: Number(body.avgWeightGrams),
+        eggsCount: Number(body.eggsCount) || 0,
+        avgWeightGrams: Number(body.avgWeightGrams) || 0,
         notes: body.notes || 'Maturing normally'
       };
       
-      await supabase.from('maturationLogs').insert([newMatLog]);
+      const { error: insErr } = await supabase.from('maturationLogs').insert([newMatLog]);
+      if (insErr) {
+        return NextResponse.json({ error: insErr.message || 'Failed to record maturation log' }, { status: 500 });
+      }
+
       await supabase.from('alertLogs').insert([{
         id: 'al-' + Date.now(),
         workspaceId,
         date: new Date().toISOString().split('T')[0],
-        message: `INFO: Maturation record logged for bird ${body.birdId}. Eggs count: ${body.eggsCount}, Avg Weight: ${body.avgWeightGrams}g.`,
+        message: `INFO: Maturation record logged for bird ${newMatLog.birdId}. Eggs count: ${newMatLog.eggsCount}, Avg Weight: ${newMatLog.avgWeightGrams}g.`,
         severity: 'Info'
       }]);
       return NextResponse.json(newMatLog, { status: 201 });
@@ -88,13 +122,16 @@ export async function POST(request: Request) {
       id: 'e-' + Date.now(),
       workspaceId,
       date: body.date || new Date().toISOString().split('T')[0],
-      goodEggs: Number(body.goodEggs),
+      goodEggs: Number(body.goodEggs) || 0,
       brokenEggs: Number(body.brokenEggs) || 0,
       spoiltEggs: Number(body.spoiltEggs) || 0,
       batchId: body.batchId || 'b1'
     };
     
-    await supabase.from('eggs').insert([newRecord]);
+    const { error: insErr } = await supabase.from('eggs').insert([newRecord]);
+    if (insErr) {
+      return NextResponse.json({ error: insErr.message || 'Failed to record eggs' }, { status: 500 });
+    }
     
     if (newRecord.brokenEggs > 0) {
       await supabase.from('alertLogs').insert([{
@@ -116,8 +153,8 @@ export async function POST(request: Request) {
     }
     
     return NextResponse.json(newRecord, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to record eggs' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || 'Failed to record eggs' }, { status: 500 });
   }
 }
 

@@ -19,15 +19,37 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('feedLogs').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('procurePipeline').select('*'), workspaceId)
   ]);
-  return NextResponse.json({ feeds: feeds || [], feedLogs: feedLogs || [], procurePipeline: procurePipeline || [] });
+
+  const normalizedFeeds = (feeds || []).map((f: any) => ({
+    id: String(f.id),
+    type: f.type || 'Layer mash',
+    quantityKg: Number(f.quantityKg) || 0,
+    supplier: f.supplier || 'Generic Supplier',
+    lastRestock: f.lastRestock || new Date().toISOString().split('T')[0]
+  }));
+
+  const normalizedLogs = (feedLogs || []).map((fl: any) => ({
+    id: String(fl.id),
+    date: fl.date || new Date().toISOString().split('T')[0],
+    feedId: String(fl.feedId || 'f1'),
+    quantityConsumedKg: Number(fl.quantityConsumedKg) || 0,
+    batchId: String(fl.batchId || 'b1')
+  }));
+
+  const normalizedPipeline = (procurePipeline || []).map((p: any) => ({
+    id: String(p.id),
+    date: p.date || new Date().toISOString().split('T')[0],
+    milestone: p.milestone || '',
+    supplier: p.supplier || 'Generic Supplier',
+    status: p.status || 'Under Negotiations',
+    eta: p.eta || 'Pending'
+  }));
+
+  return NextResponse.json({ feeds: normalizedFeeds, feedLogs: normalizedLogs, procurePipeline: normalizedPipeline });
 }
 
 /**
  * POST /api/feeds
- * Handles three actions:
- * - `logisticsProcure`: Adds a new procurement pipeline milestone entry.
- * - `restock`: Restocks a feed inventory record (or creates a new one) and logs the associated expense.
- * - (default): Logs daily feed consumption and decrements the feed stock, triggering alerts if below threshold.
  */
 export async function POST(request: Request) {
   try {
@@ -39,18 +61,22 @@ export async function POST(request: Request) {
         id: 'pipe-' + Date.now(),
         workspaceId,
         date: body.date || new Date().toISOString().split('T')[0],
-        milestone: body.milestone,
+        milestone: body.milestone || 'Feed Procurement',
         supplier: body.supplier || 'Generic Supplier',
         status: body.status || 'Under Negotiations',
         eta: body.eta || 'Pending'
       };
 
-      await supabase.from('procurePipeline').insert([newPipe]);
+      const { error: insErr } = await supabase.from('procurePipeline').insert([newPipe]);
+      if (insErr) {
+        return NextResponse.json({ error: insErr.message || 'Failed to add procurement milestone' }, { status: 500 });
+      }
+
       await supabase.from('alertLogs').insert([{
         id: 'al-' + Date.now(),
         workspaceId,
         date: new Date().toISOString().split('T')[0],
-        message: `INFO: Logistics procurement step logged: "${body.milestone}" with ${body.supplier}.`,
+        message: `INFO: Logistics procurement step logged: "${newPipe.milestone}" with ${newPipe.supplier}.`,
         severity: 'Info'
       }]);
 
@@ -59,23 +85,30 @@ export async function POST(request: Request) {
 
     if (body.action === 'restock') {
       const { data: feedResult } = await supabase.from('feeds').select('*').eq('id', body.feedId).eq('workspaceId', workspaceId);
-      const quantityKg = Number(body.quantityKg);
+      const quantityKg = Number(body.quantityKg) || 0;
       let feedType: string;
       let newQuantityKg: number;
+      let restockObj: any;
 
       if (feedResult && feedResult.length > 0) {
         const feed = feedResult[0];
         newQuantityKg = feed.quantityKg + quantityKg;
         feedType = feed.type;
-        await supabase.from('feeds').update({
+        restockObj = {
+          ...feed,
           quantityKg: newQuantityKg,
           lastRestock: body.date || new Date().toISOString().split('T')[0],
           supplier: body.supplier || feed.supplier
+        };
+        await supabase.from('feeds').update({
+          quantityKg: newQuantityKg,
+          lastRestock: restockObj.lastRestock,
+          supplier: restockObj.supplier
         }).eq('id', feed.id);
       } else {
         feedType = body.type || 'Layer mash';
         newQuantityKg = quantityKg;
-        const newFeed = {
+        restockObj = {
           id: 'f-' + Date.now(),
           workspaceId,
           type: feedType,
@@ -83,7 +116,7 @@ export async function POST(request: Request) {
           supplier: body.supplier || 'Generic Supplier',
           lastRestock: body.date || new Date().toISOString().split('T')[0]
         };
-        await supabase.from('feeds').insert([newFeed]);
+        await supabase.from('feeds').insert([restockObj]);
       }
 
       const { data: alertSettingsResult } = await supabase.from('alertSettings')
@@ -109,6 +142,8 @@ export async function POST(request: Request) {
         amount: amountSpent,
         description: `Purchased ${quantityKg}kg of ${feedType} from ${body.supplier || 'Supplier'}`
       }]);
+
+      return NextResponse.json(restockObj, { status: 201 });
     } else {
       // Default: log daily consumption
       const newLog = {
@@ -116,7 +151,7 @@ export async function POST(request: Request) {
         workspaceId,
         date: body.date || new Date().toISOString().split('T')[0],
         feedId: body.feedId || 'f1',
-        quantityConsumedKg: Number(body.quantityKg),
+        quantityConsumedKg: Number(body.quantityKg) || Number(body.quantityConsumedKg) || 0,
         batchId: body.batchId || 'b1'
       };
 
@@ -124,7 +159,7 @@ export async function POST(request: Request) {
       const feed = feedResult && feedResult.length > 0 ? feedResult[0] : null;
 
       if (feed) {
-        const newQty = Math.max(0, feed.quantityKg - Number(body.quantityKg));
+        const newQty = Math.max(0, feed.quantityKg - newLog.quantityConsumedKg);
         await supabase.from('feeds').update({ quantityKg: newQty }).eq('id', feed.id);
 
         const { data: alertSettingsResult } = await supabase.from('alertSettings')
@@ -139,27 +174,16 @@ export async function POST(request: Request) {
             message: `CRITICAL: Feed stock level for ${feed.type} drops to ${newQty}kg (safety threshold: ${feedThresholdKg}kg)!`,
             severity: 'Critical'
           }]);
-
-          const { data: taskResult } = await supabase.from('tasks').select('*').eq('status', 'Pending').eq('workspaceId', workspaceId);
-          const taskExists = taskResult?.some((t: any) => (t as { taskName: string }).taskName.includes(`Replenish ${feed.type}`));
-          if (!taskExists) {
-            await supabase.from('tasks').insert([{
-              id: 't-' + Date.now(),
-              workspaceId,
-              assignedTo: 'Abdulrahman Monsur',
-              taskName: `Replenish ${feed.type} stock immediately (Current: ${newQty}kg)`,
-              status: 'Pending',
-              date: new Date().toISOString().split('T')[0]
-            }]);
-          }
         }
       }
-      await supabase.from('feedLogs').insert([newLog]);
+      const { error: insErr } = await supabase.from('feedLogs').insert([newLog]);
+      if (insErr) {
+        return NextResponse.json({ error: insErr.message || 'Failed to log feed consumption' }, { status: 500 });
+      }
+      return NextResponse.json(newLog, { status: 201 });
     }
-
-    return NextResponse.json({ success: true }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to update feeds' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || 'Failed to update feeds' }, { status: 500 });
   }
 }
 

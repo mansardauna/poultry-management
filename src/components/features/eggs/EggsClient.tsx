@@ -203,6 +203,18 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: EggRecord = {
+            id: String(created.id),
+            date: created.date || collectDate,
+            goodEggs: Number(created.goodEggs) || Number(goodEggs) || 0,
+            brokenEggs: Number(created.brokenEggs) || Number(brokenEggs) || 0,
+            spoiltEggs: Number(created.spoiltEggs) || Number(spoiltEggs) || 0,
+            batchId: String(created.batchId || collectBatchId)
+          };
+          setEggs((prev) => [norm, ...prev.filter((e) => e.id !== norm.id)]);
+        }
         refreshData();
         handleCloseCollect();
         toast.success('Egg collection logged!');
@@ -228,6 +240,17 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: CushionAudit = {
+            id: String(created.id),
+            date: created.date || new Date().toISOString().split('T')[0],
+            boxName: String(created.boxName || auditBox),
+            status: String(created.status || auditCondition),
+            actionTaken: String(created.actionTaken || 'No action recorded')
+          };
+          setCushionAudits((prev) => [norm, ...prev.filter((a) => a.id !== norm.id)]);
+        }
         refreshData();
         handleCloseAudit();
         toast.success('Cushion audit registered!');
@@ -256,6 +279,19 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       });
 
       if (res.ok) {
+        const created = await res.json();
+        if (created && created.id) {
+          const norm: MaturationLog = {
+            id: String(created.id),
+            date: created.date || new Date().toISOString().split('T')[0],
+            birdId: String(created.birdId || maturationBirdId),
+            breed: String(created.breed || 'Isa Brown'),
+            eggsCount: Number(created.eggsCount) || Number(maturationEggsCount) || 0,
+            avgWeightGrams: Number(created.avgWeightGrams) || Number(maturationWeight) || 0,
+            notes: String(created.notes || maturationNotes || '')
+          };
+          setMaturationLogs((prev) => [norm, ...prev.filter((m) => m.id !== norm.id)]);
+        }
         refreshData();
         handleCloseMaturation();
         toast.success('Maturation log recorded!');

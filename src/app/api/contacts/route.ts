@@ -1,14 +1,18 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const { data: contactsData } = await supabase.from('contacts').select('*').eq('workspaceId', workspaceId);
+  const { data: contactsData } = await applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId);
+  const formatted = (contactsData || []).map((c: any) => ({
+    ...c,
+    totalTransactions: Number(c.totalTransactions || 0)
+  }));
   return NextResponse.json({
-    contacts: contactsData || []
+    contacts: formatted
   });
 }
 
@@ -28,7 +32,8 @@ export async function POST(request: Request) {
       notes: body.notes || ''
     };
     
-    await supabase.from('contacts').insert([newContact]);
+    const { error } = await supabase.from('contacts').insert([newContact]);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     
     return NextResponse.json(newContact, { status: 201 });
   } catch {
@@ -43,8 +48,9 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await supabase.from('contacts').update(fields).eq('id', id).eq('workspaceId', workspaceId);
-    return NextResponse.json({ success: true });
+    const { error } = await supabase.from('contacts').update(fields).eq('id', id).eq('workspaceId', workspaceId);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, ...body });
   } catch {
     return NextResponse.json({ error: 'Failed to update contact' }, { status: 500 });
   }
@@ -57,7 +63,8 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    await supabase.from('contacts').delete().eq('id', id).eq('workspaceId', workspaceId);
+    const { error } = await supabase.from('contacts').delete().eq('id', id).eq('workspaceId', workspaceId);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete contact' }, { status: 500 });

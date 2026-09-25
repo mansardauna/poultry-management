@@ -59,7 +59,11 @@ export function InventoryClient({ role }: { role: string }) {
     if (!confirm('Delete this equipment?')) return;
     try {
       const res = await fetch(`/api/inventory?id=${id}`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Equipment deleted.'); }
+      if (res.ok) { 
+        setEquipment(prev => prev.filter(eq => eq.id !== id));
+        refreshData(); 
+        toast.success('Equipment deleted.'); 
+      }
       else toast.error('Failed to delete');
     } catch (err) { console.error(err); }
   };
@@ -76,11 +80,19 @@ export function InventoryClient({ role }: { role: string }) {
       const body = editingItem ? { id: editingItem.id, ...formData } : formData;
       const res = await fetch('/api/inventory', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (res.ok) {
+        const saved = await res.json();
+        if (editingItem) {
+          setEquipment(prev => prev.map(item => item.id === editingItem.id ? { ...item, ...formData, quantity: Number(formData.quantity) } : item));
+        } else if (saved && saved.id) {
+          setEquipment(prev => [saved, ...prev]);
+        }
         refreshData();
         setOpen(false);
         setEditingItem(null);
         setFormData({ name: '', type: 'Feeder', quantity: 1, status: 'Good', lastMaintenance: new Date().toISOString().split('T')[0] });
         toast.success(editingItem ? 'Equipment updated!' : 'Equipment added!');
+      } else {
+        toast.error('Failed to save equipment');
       }
     } catch (err) { console.error(err); }
   };

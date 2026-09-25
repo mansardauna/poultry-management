@@ -84,10 +84,17 @@ export function HealthClient({ role }: { role: string }) {
         })
       });
       if (res.ok) {
+        const data = await res.json();
+        if (data.template) {
+          setTemplates(prev => [data.template, ...prev]);
+        }
         refreshData();
         setOpenTemplate(false);
         setTemplateName('');
         setStages([{ dayOffset: 1, medicationName: '', type: 'Vaccine' }]);
+        toast.success('Template saved!');
+      } else {
+        toast.error('Failed to save template');
       }
     } catch (err) {
       console.error(err);
@@ -108,10 +115,17 @@ export function HealthClient({ role }: { role: string }) {
         })
       });
       if (res.ok) {
+        const data = await res.json();
+        if (data.schedules && Array.isArray(data.schedules)) {
+          setSchedules(prev => [...data.schedules, ...prev]);
+        }
         refreshData();
         setOpenApply(false);
         setSelectedTemplateId('');
         setSelectedBatchId('');
+        toast.success('Template applied!');
+      } else {
+        toast.error('Failed to apply template');
       }
     } catch (err) {
       console.error(err);
@@ -126,7 +140,11 @@ export function HealthClient({ role }: { role: string }) {
         body: JSON.stringify({ action: 'completeSchedule', id })
       });
       if (res.ok) {
+        setSchedules(prev => prev.map(s => s.id === id ? { ...s, status: 'Completed' } : s));
         refreshData();
+        toast.success('Schedule completed!');
+      } else {
+        toast.error('Failed to complete schedule');
       }
     } catch (err) {
       console.error(err);
@@ -137,7 +155,11 @@ export function HealthClient({ role }: { role: string }) {
     if (!confirm('Delete this schedule entry?')) return;
     try {
       const res = await fetch(`/api/health?id=${id}&type=schedule`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Schedule deleted.'); }
+      if (res.ok) { 
+        setSchedules(prev => prev.filter(s => s.id !== id));
+        refreshData(); 
+        toast.success('Schedule deleted.'); 
+      }
       else toast.error('Failed to delete');
     } catch (err) { console.error(err); }
   };
@@ -146,7 +168,11 @@ export function HealthClient({ role }: { role: string }) {
     if (!confirm('Delete this template? All linked schedules will remain.')) return;
     try {
       const res = await fetch(`/api/health?id=${id}&type=template`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Template deleted.'); }
+      if (res.ok) { 
+        setTemplates(prev => prev.filter(t => t.id !== id));
+        refreshData(); 
+        toast.success('Template deleted.'); 
+      }
       else toast.error('Failed to delete');
     } catch (err) { console.error(err); }
   };
