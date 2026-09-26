@@ -54,11 +54,81 @@ export async function loadDatabaseConfig(): Promise<DatabaseConfig | null> {
   if (cachedConfig !== undefined) return cachedConfig;
   try {
     const raw = await fs.readFile(configFilePath(), 'utf8');
-    cachedConfig = JSON.parse(raw) as DatabaseConfig;
+    const parsed = JSON.parse(raw) as DatabaseConfig;
+    if (parsed && (parsed.engine === 'mysql' || parsed.engine === 'postgres' || parsed.engine === 'supabase')) {
+      cachedConfig = parsed;
+      return cachedConfig;
+    }
   } catch {
     cachedConfig = null;
   }
-  return cachedConfig;
+
+  // If no database.config.json exists, check environment variables
+  const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.MYSQL_URL;
+  if (dbUrl && !dbUrl.includes('placeholder') && !dbUrl.includes('dwjddjndeaqxlaqynjsy')) {
+    try {
+      const u = new URL(dbUrl);
+      const isMysql = u.protocol.startsWith('mysql');
+      const isPg = u.protocol.startsWith('postgres');
+      if (isMysql) {
+        cachedConfig = {
+          engine: 'mysql',
+          mysql: {
+            host: u.hostname || 'localhost',
+            port: Number(u.port || 3306),
+            database: u.pathname.replace(/^\//, '') || 'poultry_db',
+            user: decodeURIComponent(u.username || 'root'),
+            password: decodeURIComponent(u.password || ''),
+          },
+        };
+        return cachedConfig;
+      }
+      if (isPg) {
+        cachedConfig = {
+          engine: 'postgres',
+          postgres: {
+            host: u.hostname || 'localhost',
+            port: Number(u.port || 5432),
+            database: u.pathname.replace(/^\//, '') || 'postgres',
+            user: decodeURIComponent(u.username || 'postgres'),
+            password: decodeURIComponent(u.password || ''),
+          },
+        };
+        return cachedConfig;
+      }
+    } catch (_e) {}
+  }
+
+  // Check explicit PG_* or MYSQL_* env vars
+  if (process.env.PGHOST || process.env.POSTGRES_HOST) {
+    cachedConfig = {
+      engine: 'postgres',
+      postgres: {
+        host: process.env.PGHOST || process.env.POSTGRES_HOST || 'localhost',
+        port: Number(process.env.PGPORT || process.env.POSTGRES_PORT || 5432),
+        database: process.env.PGDATABASE || process.env.POSTGRES_DB || 'poultry_db',
+        user: process.env.PGUSER || process.env.POSTGRES_USER || 'postgres',
+        password: process.env.PGPASSWORD || process.env.POSTGRES_PASSWORD || '',
+      },
+    };
+    return cachedConfig;
+  }
+
+  if (process.env.MYSQLHOST || process.env.MYSQL_HOST) {
+    cachedConfig = {
+      engine: 'mysql',
+      mysql: {
+        host: process.env.MYSQLHOST || process.env.MYSQL_HOST || 'localhost',
+        port: Number(process.env.MYSQLPORT || process.env.MYSQL_PORT || 3306),
+        database: process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || 'poultry_db',
+        user: process.env.MYSQLUSER || process.env.MYSQL_USER || 'root',
+        password: process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || '',
+      },
+    };
+    return cachedConfig;
+  }
+
+  return null;
 }
 
 export function resetDatabaseConfigCache(): void {
@@ -74,7 +144,7 @@ export async function saveDatabaseConfig(config: DatabaseConfig): Promise<void> 
 
 export async function isSupabaseMode(): Promise<boolean> {
   const cfg = await loadDatabaseConfig();
-  return !cfg || cfg.engine === 'supabase';
+  return Boolean(cfg && cfg.engine === 'supabase');
 }
 
 function configFilePath(): string {

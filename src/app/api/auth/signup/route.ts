@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     // 2. ALWAYS insert user into the primary database `users` table
-    await serviceRoleClient.from('users').insert([{
+    const { error: userInsertErr } = await serviceRoleClient.from('users').insert([{
       id: newUserId,
       username: userClean,
       email: email,
@@ -50,6 +50,14 @@ export async function POST(request: Request) {
       workspaceId: defaultWorkspaceId,
       orgId: orgId
     }]);
+
+    if (userInsertErr) {
+      console.error('Signup user insert error:', userInsertErr);
+      return NextResponse.json(
+        { error: `Database error while creating user: ${userInsertErr?.message || userInsertErr}` },
+        { status: 500 }
+      );
+    }
 
     // 3. ALWAYS insert default primary workspace into `workspaces` table
     await serviceRoleClient.from('workspaces').insert([{

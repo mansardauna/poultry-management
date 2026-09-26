@@ -7,6 +7,7 @@ import { createDataChain, runSql, makeAuthStub } from './dataAdapter';
 export function isValidSupabaseUrl(url?: string): boolean {
   if (!url) return false;
   if (url.includes('placeholder')) return false;
+  if (url.includes('dwjddjndeaqxlaqynjsy')) return false; // Dead/deleted demo Supabase host
   try {
     const u = new URL(url);
     return u.protocol === 'http:' || u.protocol === 'https:';
@@ -21,12 +22,21 @@ function getLocalEngine(): 'mysql' | 'postgres' | 'supabase' {
     if (fs.existsSync(configPath)) {
       const raw = fs.readFileSync(configPath, 'utf8');
       const cfg = JSON.parse(raw);
-      if (cfg?.engine === 'mysql' || cfg?.engine === 'postgres') {
-        return cfg.engine;
+      if (cfg?.engine === 'supabase') {
+        return 'supabase';
+      }
+      if (cfg?.engine === 'mysql') {
+        return 'mysql';
+      }
+      if (cfg?.engine === 'postgres') {
+        return 'postgres';
       }
     }
   } catch (_e) {}
-  return 'supabase';
+  if (process.env.DATABASE_URL?.startsWith('mysql')) {
+    return 'mysql';
+  }
+  return 'postgres';
 }
 
 // 1.0s Strict Timeout Fetch for Supabase to prevent network hangs & retries
@@ -53,12 +63,10 @@ export const realSupabase = isSupabaseConfigured
 
 async function localExecutor(ops: any[], table: string) {
   try {
-    const res = await runSql(ops, table);
-    if (res.data !== null || res.error === null) return res;
-  } catch (_e) {}
-
-  const isSingle = ops.some((o) => o.t === 'single' || o.t === 'maybeSingle');
-  return { data: isSingle ? null : [], error: null };
+    return await runSql(ops, table);
+  } catch (err: any) {
+    return { data: null, error: err || new Error('Database operation failed') };
+  }
 }
 
 export const supabase: any = {

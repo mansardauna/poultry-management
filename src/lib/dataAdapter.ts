@@ -192,11 +192,17 @@ function parseOrFilter(filter: string): { col: string; op: string; value: string
 async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
   const cfg = await loadDatabaseConfig();
   if (!cfg || cfg.engine === 'supabase') {
-    return { data: null, error: { message: 'No local database configured.' } };
+    return { data: null, error: new Error('No SQL database configured.') };
   }
   const engine = cfg.engine;
 
-  const pool = engine === 'mysql' ? await getMyPool(cfg.mysql!) : await getPgPool2(cfg.postgres!);
+  let pool: mysql.Pool | Pool;
+  try {
+    pool = engine === 'mysql' ? await getMyPool(cfg.mysql!) : await getPgPool2(cfg.postgres!);
+  } catch (poolErr) {
+    return { data: null, error: poolErr };
+  }
+
   const params: unknown[] = [];
   let phIndex = 0;
   const ph = () => (engine === 'mysql' ? '?' : `$${++phIndex}`);
