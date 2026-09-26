@@ -474,7 +474,7 @@ async function ensureShapes(
         : `ALTER TABLE "${table}" ADD COLUMN "${c}" TEXT`;
     try {
       await (pool as any).query(alter);
-    } catch (_e) {}
+    } catch {}
     existing.add(c);
   }
   seenColumns.set(table, existing);

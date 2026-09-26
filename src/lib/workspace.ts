@@ -14,7 +14,7 @@ export async function getWorkspaceId(): Promise<string> {
     if (workspaceCookie && workspaceCookie.trim().length > 0) {
       return workspaceCookie;
     }
-  } catch (_e) {}
+  } catch {}
 
   const user = await getAuthUser();
   if (user?.email === 'owner@poultry.com') {
@@ -41,7 +41,7 @@ export async function getWorkspaceId(): Promise<string> {
       if (staffRec?.workspaceId) {
         return staffRec.workspaceId;
       }
-    } catch (_err) {}
+    } catch {}
 
     return `main-${cookieOrgId}`;
   }
@@ -87,7 +87,7 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
     if (list && list.length > 0) {
       return list;
     }
-  } catch (_e) {}
+  } catch {}
 
   const primaryWsId = cookieWs || (orgId ? `main-${orgId}` : 'main-org_owner_main');
   return [{
@@ -114,7 +114,7 @@ export async function getTenantTier(user?: any, cookieOrgId?: string, cookieTier
     if (normCookie === 'pro') {
       return 'pro';
     }
-  } catch (_e) {}
+  } catch {}
 
   const authUser = user || (await getAuthUser());
   if (authUser?.email === 'owner@poultry.com') {

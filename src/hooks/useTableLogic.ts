@@ -66,12 +66,12 @@ export function useTableLogic<T>({ data, searchFields = [], initialPageSize = 20
   }, [sortedData, currentPage, pageSize]);
 
   const totalPages = Math.ceil(sortedData.length / pageSize) || 1;
-  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
 
   return {
     data: paginatedData,
     totalItems: sortedData.length,
-    currentPage,
+    currentPage: safeCurrentPage,
     totalPages,
     pageSize,
     searchTerm,

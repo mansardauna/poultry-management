@@ -70,7 +70,7 @@ export async function getSaasPlansConfig(): Promise<SaasPlanConfig[]> {
         return parsed as SaasPlanConfig[];
       }
     }
-  } catch (_e) {}
+  } catch {}
 
   return DEFAULT_PLANS;
 }

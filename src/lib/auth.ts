@@ -32,7 +32,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         };
       }
     }
-  } catch (_err) {
+  } catch {
     // Fall back to local session cookies below
   }
 
@@ -47,7 +47,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         role,
       };
     }
-  } catch (_err) {}
+  } catch {}
 
   return null;
 }

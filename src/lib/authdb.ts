@@ -96,7 +96,7 @@ export async function loadDatabaseConfig(): Promise<DatabaseConfig | null> {
         };
         return cachedConfig;
       }
-    } catch (_e) {}
+    } catch {}
   }
 
   // Check explicit PG_* or MYSQL_* env vars
@@ -275,7 +275,6 @@ export async function findUserByLogin(
   cfg: DatabaseConfig,
   login: string,
 ): Promise<AuthUser & { passwordHash: string } | null> {
-  const email = login.includes('@') ? login : '';
   const username = login.includes('@') ? login.split('@')[0] : login;
 
   if (cfg.engine === 'mysql') {

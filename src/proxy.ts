@@ -13,7 +13,7 @@ function isValidSupabaseUrl(url?: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+  const supabaseResponse = NextResponse.next({
     request,
   })
 
@@ -74,7 +74,7 @@ export async function proxy(request: NextRequest) {
       
       const res = await Promise.race([supabase.auth.getUser(), timeoutPromise]);
       user = res.data?.user || null;
-    } catch (_err) {
+    } catch {
       user = null;
     }
   }
