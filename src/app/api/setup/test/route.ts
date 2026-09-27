@@ -1,9 +1,11 @@
 'use strict';
 
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { Client } from 'pg';
 import mysql from 'mysql2/promise';
+import { verifyOwnerSession } from '@/lib/ownerAuth';
 
 /**
  * POST /api/setup/test — Validates the database credentials entered in the
@@ -49,6 +51,12 @@ function rejectAfter(ms: number): Promise<never> {
 }
 
 export async function POST(request: Request) {
+  const cookieStore = await cookies();
+  const isOwner = await verifyOwnerSession(cookieStore);
+  if (!isOwner) {
+    return NextResponse.json({ connected: false, error: 'Unauthorized: Database test requires owner login.' }, { status: 401 });
+  }
+
   let body: TestBody;
   try {
     body = await request.json();

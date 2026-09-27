@@ -55,7 +55,7 @@ export default function LandingPage() {
             {cms.heroSubtitle}
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
             {isLoggedIn ? (
               <Link href="/dashboard" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-xl shadow-indigo-600/25 active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2">
                 Go to Dashboard <ArrowRight size={18} />
@@ -70,6 +70,15 @@ export default function LandingPage() {
                 </Link>
               </>
             )}
+          </div>
+
+          <div className="mb-16">
+            <span className="text-xs text-slate-500 font-medium">
+              Self-hosted deployment?{' '}
+              <Link href="/setup/login" className="text-indigo-600 hover:text-indigo-800 font-semibold underline underline-offset-2">
+                Launch Owner Setup Wizard →
+              </Link>
+            </span>
           </div>
 
           {/* Interactive UI Graphic (CSS Only) */}

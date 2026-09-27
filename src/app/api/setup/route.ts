@@ -1,15 +1,23 @@
 'use strict';
 
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { supabase as envServiceRoleClient } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
+import { verifyOwnerSession } from '@/lib/ownerAuth';
 
 /**
  * GET Handler: Check system setup status, database connectivity, and gateway configurations
  */
 export async function GET() {
   try {
+    const cookieStore = await cookies();
+    const isOwner = await verifyOwnerSession(cookieStore);
+    if (!isOwner) {
+      return NextResponse.json({ error: 'Unauthorized: Setup access requires owner login.' }, { status: 401 });
+    }
+
     // 1. Verify database connection
     const { data: dbCheck, error: dbError } = await envServiceRoleClient
       .from('systemSettings')
@@ -116,6 +124,12 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const isOwner = await verifyOwnerSession(cookieStore);
+    if (!isOwner) {
+      return NextResponse.json({ error: 'Unauthorized: Setup access requires owner login.' }, { status: 401 });
+    }
+
     const body = await request.json();
 
     const {
@@ -209,6 +223,10 @@ export async function POST(request: Request) {
         });
         localResponse.cookies.set('pfms_installation_completed', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
         localResponse.cookies.set('pms_db_mode', '1', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+        localResponse.cookies.set('pfms_role', 'SuperAdmin', { path: '/' });
+        localResponse.cookies.set('pfms_email', cleanEmail, { path: '/' });
+        localResponse.cookies.set('pfms_workspace', 'main-org_superadmin', { path: '/' });
+        localResponse.cookies.set('pfms_org_id', 'org_superadmin', { path: '/' });
         return localResponse;
       } catch (err: unknown) {
         console.error('Local Database Setup Error:', err);
@@ -432,8 +450,12 @@ export async function POST(request: Request) {
       dashboardUrl: '/dashboard/admin',
     });
 
-    // Set installation cookie
+    // Set installation and SuperAdmin session cookies
     response.cookies.set('pfms_installation_completed', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+    response.cookies.set('pfms_role', 'SuperAdmin', { path: '/' });
+    response.cookies.set('pfms_email', cleanEmail, { path: '/' });
+    response.cookies.set('pfms_workspace', 'main-org_superadmin', { path: '/' });
+    response.cookies.set('pfms_org_id', 'org_superadmin', { path: '/' });
 
     return response;
   } catch (err: unknown) {
