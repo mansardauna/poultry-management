@@ -55,10 +55,8 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
 
-  // Fixed Farm Balances
-  const openingFund = 16800; // ₦16,800
-  const cashPortion = 5800;  // ₦5,800
-  const bankPortion = 11000; // ₦11,000
+  // Real Financial Calculations - 100% derived from actual table transactions
+
 
   const expensesLogic = useTableLogic({
     data: filterByTimeRange(expenses),
@@ -195,10 +193,11 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
 
   const totalRevenue = filteredSales.reduce((sum, s) => sum + s.totalAmount, 0);
   const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const cashSales = filteredSales.filter(s => s.paymentMethod === 'Cash').reduce((sum, s) => sum + s.totalAmount, 0);
+  const bankSales = filteredSales.filter(s => s.paymentMethod === 'Bank transfer' || s.paymentMethod === 'POS').reduce((sum, s) => sum + s.totalAmount, 0);
   
-  // Formula Reconciliation
-  const netInflowPool = openingFund + totalRevenue;
-  const netBalance = netInflowPool - totalExpenses; 
+  // Formula Reconciliation - 100% from recorded transactions
+  const netBalance = totalRevenue - totalExpenses; 
   const netProfit = totalRevenue - totalExpenses;   
   const returnEfficiency = totalExpenses > 0 ? ((netProfit / totalExpenses) * 100).toFixed(1) : '0';
 
@@ -304,41 +303,30 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Opening Funds & Inflows */}
+            {/* Recorded Revenue & Inflows */}
             <div className="space-y-4">
               <h3 className="text-xs font-semibold uppercase text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2">
-                <Coins size={16} className="text-indigo-600" /> 1. Opening Balance & Inflows
+                <Coins size={16} className="text-indigo-600" /> 1. Recorded Revenue & Inflows
               </h3>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between font-semibold py-1">
-                  <span>Opening Fund Carried Forward:</span>
-                  <span className="text-slate-900">₦{openingFund.toLocaleString()}</span>
-                </div>
-                <div className="pl-4 space-y-1 text-slate-500 text-[11px]">
-                  <div className="flex justify-between">
-                    <span>• Cash Account Balance:</span>
-                    <span>₦{cashPortion.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>• Bank Transfer Account Balance:</span>
-                    <span>₦{bankPortion.toLocaleString()}</span>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between font-semibold py-1 border-t border-slate-100 pt-2 mt-2">
                   <span>Egg Sales Revenue Inflow:</span>
-                  <span className="text-indigo-600">₦{totalRevenue.toLocaleString()}</span>
+                  <span className="text-indigo-600 font-mono">₦{totalRevenue.toLocaleString()}</span>
                 </div>
                 <div className="pl-4 space-y-1 text-slate-500 text-[11px]">
-                  <div className="flex justify-between flex-wrap gap-1">
-                    <span>• Dynamic collection inflow ledger:</span>
-                    <span>₦{totalRevenue.toLocaleString()}</span>
+                  <div className="flex justify-between">
+                    <span>• Cash Collections:</span>
+                    <span className="font-mono">₦{cashSales.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>• Bank Transfer / POS Collections:</span>
+                    <span className="font-mono">₦{bankSales.toLocaleString()}</span>
                   </div>
                 </div>
 
                 <div className="flex justify-between font-semibold text-slate-900 border-t-2 border-slate-200 pt-2 mt-3 text-sm">
-                  <span>Total Cash Inflow Pool:</span>
-                  <span>₦{netInflowPool.toLocaleString()}</span>
+                  <span>Total Inflow Pool:</span>
+                  <span className="font-mono">₦{totalRevenue.toLocaleString()}</span>
                 </div>
               </div>
             </div>

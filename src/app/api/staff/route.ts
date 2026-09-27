@@ -50,8 +50,8 @@ export async function GET() {
 /** Exported function POST */
 export async function POST(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
     const body = await request.json();
+    const workspaceId = body?.workspaceId || (await getWorkspaceId());
     
     if (body.action === 'attendance') {
       const { data: members } = await supabase.from('staff').select('*').eq('id', body.staffId).eq('workspaceId', workspaceId);
@@ -116,17 +116,36 @@ export async function POST(request: Request) {
 
     // Check if an onboarding staff member already exists in this workspace to update instead of duplicate
     const { data: existingStaffList } = await applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId).limit(1);
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync(staffPassword, salt);
+
     if (existingStaffList && existingStaffList.length > 0 && body.isOnboarding) {
       const existing = existingStaffList[0];
       const updated = {
         workspaceId,
         name: staffNameStr,
         username: staffUsername,
+        password: staffPassword,
         role: body.role || existing.role || 'Staff',
         salary: Number(body.salary) || existing.salary || 45000,
         assignedBranches: assignedBranchList
       };
       await supabase.from('staff').update(updated).eq('id', existing.id);
+
+      // Ensure user credential exists for onboarding staff
+      try {
+        await supabase.from('users').upsert([{
+          id: `usr_${existing.id}`,
+          username: staffUsername.toLowerCase(),
+          email: `${staffUsername.toLowerCase()}@poultry.local`,
+          passwordHash: passwordHash,
+          role: staffRole,
+          workspaceId: workspaceId,
+          createdBy: adminUsername,
+          createdAt: new Date().toISOString()
+        }]);
+      } catch {}
+
       return NextResponse.json({ ...existing, ...updated }, { status: 200 });
     }
 
@@ -135,6 +154,7 @@ export async function POST(request: Request) {
       workspaceId,
       name: staffNameStr,
       username: staffUsername,
+      password: staffPassword,
       role: body.role || 'Staff',
       salary: Number(body.salary) || 45000,
       attendanceDays: Number(body.attendanceDays) || 0,
@@ -149,20 +169,18 @@ export async function POST(request: Request) {
     
     // Create user login credential in primary users table
     if (staffUsername && staffPassword) {
-      const salt = bcrypt.genSaltSync(10);
-      const passwordHash = bcrypt.hashSync(staffPassword, salt);
-
       try {
-        await supabase.from('users').insert([{
-          id: `usr_${Date.now()}`,
-          username: staffUsername,
+        await supabase.from('users').upsert([{
+          id: `usr_${newStaff.id}`,
+          username: staffUsername.toLowerCase(),
+          email: `${staffUsername.toLowerCase()}@poultry.local`,
           passwordHash: passwordHash,
           role: staffRole,
           workspaceId: workspaceId,
           createdBy: adminUsername,
           createdAt: new Date().toISOString()
         }]);
-      } catch (_e) {}
+      } catch {}
     }
     
     await supabase.from('alertLogs').insert([{

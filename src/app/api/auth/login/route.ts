@@ -30,7 +30,17 @@ export async function POST(request: Request) {
 
     if (userRecords && userRecords.length > 0) {
       const userRec = userRecords[0];
-      const isPasswordValid = bcrypt.compareSync(password, userRec.passwordHash || '');
+      let isPasswordValid = false;
+      const storedHash = userRec.passwordHash || '';
+      if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$')) {
+        try {
+          isPasswordValid = bcrypt.compareSync(password, storedHash);
+        } catch {
+          isPasswordValid = false;
+        }
+      } else {
+        isPasswordValid = password === storedHash;
+      }
 
       if (isPasswordValid) {
         const staffRole = userRec.role || 'Admin';
@@ -44,6 +54,7 @@ export async function POST(request: Request) {
         response.cookies.set('pfms_tier', tier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
         response.cookies.set('pfms_role', staffRole, { path: '/' });
         response.cookies.set('pfms_email', userRec.email || emailInput, { path: '/' });
+        response.cookies.set('pfms_name', userRec.name || userRec.username || '', { path: '/' });
         return response;
       }
     }
@@ -62,7 +73,11 @@ export async function POST(request: Request) {
 
       if (storedPass) {
         if (storedPass.startsWith('$2a$') || storedPass.startsWith('$2b$')) {
-          isPasswordValid = bcrypt.compareSync(password, storedPass);
+          try {
+            isPasswordValid = bcrypt.compareSync(password, storedPass);
+          } catch {
+            isPasswordValid = false;
+          }
         } else {
           isPasswordValid = password === storedPass;
         }
@@ -78,6 +93,7 @@ export async function POST(request: Request) {
         response.cookies.set('pfms_tier', 'free', { path: '/', maxAge: 60 * 60 * 24 * 365 });
         response.cookies.set('pfms_role', staffRole, { path: '/' });
         response.cookies.set('pfms_email', staffRec.username || staffRec.name || emailInput, { path: '/' });
+        response.cookies.set('pfms_name', staffRec.name || staffRec.username || '', { path: '/' });
         return response;
       }
     }

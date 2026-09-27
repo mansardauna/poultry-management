@@ -12,20 +12,25 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps) {
-  const { addWorkspace, updateWorkspace, workspaces, setActiveWorkspace } = useWorkspace();
+  const { addWorkspace, updateWorkspace, workspaces, setActiveWorkspace, activeWorkspace } = useWorkspace();
   
+  // Target workspace context for draft isolation
+  const targetWs = activeWorkspace || (workspaces.length > 0 ? workspaces[0] : null);
+  const currentWsId = targetWs?.id || 'new';
+  const draftKey = `pfms_onboarding_draft_${currentWsId}`;
+
   // Step State with localStorage Persistence
   const [step, setStepState] = useState<number>(initialStep || 1);
   const [isSaving, setIsSaving] = useState(false);
 
   // Form Field States
-  const [branchName, setBranchName] = useState('');
-  const [branchType, setBranchType] = useState('Layer Farm');
+  const [branchName, setBranchName] = useState(targetWs?.name || '');
+  const [branchType, setBranchType] = useState(targetWs?.type || 'Layer Farm');
   const [ownerName, setOwnerName] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
   const [farmLocation, setFarmLocation] = useState('');
   const [estimatedCapacity, setEstimatedCapacity] = useState('5000');
-  const [createdBranchId, setCreatedBranchId] = useState<string | null>(null);
+  const [createdBranchId, setCreatedBranchId] = useState<string | null>(targetWs?.id || null);
 
   const [breed, setBreed] = useState('');
   const [flockQty, setFlockQty] = useState('');
@@ -41,14 +46,14 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
   const setStep = (newStep: number) => {
     setStepState(newStep);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('pfms_onboarding_current_step', String(newStep));
+      localStorage.setItem(`pfms_onboarding_step_${currentWsId}`, String(newStep));
     }
   };
 
-  // Restore saved step & pre-populate from localStorage or database
+  // Restore saved step & pre-populate ONLY from branch-scoped draft
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedStep = localStorage.getItem('pfms_onboarding_current_step');
+      const savedStep = localStorage.getItem(`pfms_onboarding_step_${currentWsId}`);
       if (!initialStep && savedStep) {
         const parsed = parseInt(savedStep, 10);
         if (parsed >= 1 && parsed <= 4) setStepState(parsed);
@@ -57,7 +62,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
       }
 
       try {
-        const draftStr = localStorage.getItem('pfms_onboarding_draft');
+        const draftStr = localStorage.getItem(draftKey);
         if (draftStr) {
           const d = JSON.parse(draftStr);
           if (d.branchName) setBranchName(d.branchName);
@@ -79,55 +84,17 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
       } catch (_e) {}
     }
 
-    if (workspaces.length > 0) {
-      setBranchName(prev => prev || workspaces[0].name || '');
-      setBranchType(prev => prev || workspaces[0].type || 'Layer Farm');
-      setCreatedBranchId(workspaces[0].id);
+    if (targetWs) {
+      setBranchName(prev => prev || targetWs.name || '');
+      setBranchType(prev => prev || targetWs.type || 'Layer Farm');
+      setCreatedBranchId(targetWs.id);
     }
+  }, [currentWsId, draftKey, targetWs, initialStep]);
 
-    fetch('/api/settings')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.systemSettings) {
-          const sys = data.systemSettings;
-          setBranchName(prev => prev || sys.farmName || '');
-          setOwnerName(prev => prev || sys.adminName || '');
-          setOwnerPhone(prev => prev || sys.adminPhone || '');
-        }
-      })
-      .catch(() => {});
-
-    fetch('/api/batches')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          const b = data[0];
-          setBreed(prev => prev || b.breed || '');
-          setFlockQty(prev => prev || String(b.quantity || ''));
-          setFlockType(prev => prev || b.type || 'Layers');
-          setFlockAge(prev => prev || String(b.ageInWeeks || '1'));
-        }
-      })
-      .catch(() => {});
-
-    fetch('/api/staff')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.staff && Array.isArray(data.staff) && data.staff.length > 0) {
-          const s = data.staff[0];
-          setStaffName(prev => prev || s.name || '');
-          setStaffRole(prev => prev || s.role || 'Attendant');
-          setStaffSalary(prev => prev || String(s.salary || '45000'));
-          setStaffUsername(prev => prev || s.username || '');
-        }
-      })
-      .catch(() => {});
-  }, [workspaces, initialStep]);
-
-  // Continuously persist form state to localStorage
+  // Continuously persist form state to branch-scoped localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('pfms_onboarding_draft', JSON.stringify({
+      localStorage.setItem(draftKey, JSON.stringify({
         branchName,
         branchType,
         ownerName,
@@ -145,12 +112,14 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         staffPassword
       }));
     } catch (_e) {}
-  }, [branchName, branchType, ownerName, ownerPhone, farmLocation, estimatedCapacity, breed, flockQty, flockType, flockAge, staffName, staffRole, staffSalary, staffUsername, staffPassword]);
+  }, [draftKey, branchName, branchType, ownerName, ownerPhone, farmLocation, estimatedCapacity, breed, flockQty, flockType, flockAge, staffName, staffRole, staffSalary, staffUsername, staffPassword]);
 
   const handleClose = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('pfms_onboarded_dismissed', 'true');
       localStorage.setItem('pfms_starter_guide_read', 'true');
+      localStorage.removeItem(`pfms_onboarding_step_${currentWsId}`);
+      localStorage.removeItem('pfms_onboarding_current_step');
       
       const url = new URL(window.location.href);
       if (url.searchParams.has('onboarding')) {
@@ -206,15 +175,19 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
   const handleSubmitAll = async () => {
     setIsSaving(true);
     try {
-      let targetWsId = createdBranchId;
+      let finalWsId = targetWs?.id || createdBranchId;
       const effectiveBranchName = branchName.trim() || 'Main Farm';
 
-      // 1. Commit Workspace & Settings (pass shouldReload=false to prevent aborting submission)
-      if (workspaces.length > 0) {
+      // 1. Commit Workspace & Settings
+      if (targetWs) {
+        await updateWorkspace(targetWs.id, effectiveBranchName, branchType);
+        setActiveWorkspace({ ...targetWs, name: effectiveBranchName, type: branchType }, false);
+        finalWsId = targetWs.id;
+      } else if (workspaces.length > 0) {
         const primaryWs = workspaces[0];
         await updateWorkspace(primaryWs.id, effectiveBranchName, branchType);
         setActiveWorkspace({ ...primaryWs, name: effectiveBranchName, type: branchType }, false);
-        targetWsId = primaryWs.id;
+        finalWsId = primaryWs.id;
       } else {
         const workspaceId = `farm-${Date.now()}`;
         await addWorkspace({
@@ -223,7 +196,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           type: branchType,
           createdAt: new Date().toISOString(),
         }, false);
-        targetWsId = workspaceId;
+        finalWsId = workspaceId;
       }
 
       await fetch('/api/settings', {
@@ -234,10 +207,11 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           farmName: effectiveBranchName,
           adminName: ownerName.trim(),
           adminPhone: ownerPhone.trim(),
+          workspaceId: finalWsId,
         }),
       }).catch(() => {});
 
-      // 2. Commit Flock Batch (Always save if flockQty or breed is specified)
+      // 2. Commit Flock Batch (Scoped to current branch)
       const quantityNum = Number(flockQty) || 0;
       const effectiveBreed = breed.trim() || (flockType === 'Broilers' ? 'Cobb 500 Broiler' : 'Isa Brown Layer');
 
@@ -247,6 +221,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             isOnboarding: true,
+            workspaceId: finalWsId,
             breed: effectiveBreed,
             quantity: quantityNum || 500,
             type: flockType,
@@ -257,7 +232,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         }).catch(() => {});
       }
 
-      // 3. Commit Staff Member (Always save if staffName or staffUsername is specified)
+      // 3. Commit Staff Member (Scoped to current branch)
       const effectiveStaffName = staffName.trim() || 'Farm Attendant';
       const effectiveUsername = staffUsername.trim() || effectiveStaffName.toLowerCase().replace(/\s+/g, '');
       const effectivePassword = staffPassword.trim() || 'staff123';
@@ -268,11 +243,12 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             isOnboarding: true,
+            workspaceId: finalWsId,
             name: effectiveStaffName,
             role: staffRole,
             salary: Number(staffSalary) || 45000,
             contact: '',
-            assignedBranches: targetWsId ? [targetWsId] : [],
+            assignedBranches: finalWsId ? [finalWsId] : [],
             username: effectiveUsername,
             password: effectivePassword,
           }),
@@ -282,6 +258,11 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
       if (typeof window !== 'undefined') {
         localStorage.setItem('pfms_branch_setup_completed', 'true');
         localStorage.setItem('pfms_onboarded_dismissed', 'true');
+        localStorage.setItem('pfms_starter_guide_read', 'true');
+        localStorage.removeItem(draftKey);
+        localStorage.removeItem('pfms_onboarding_draft');
+        localStorage.removeItem(`pfms_onboarding_step_${currentWsId}`);
+        localStorage.removeItem('pfms_onboarding_current_step');
       }
 
       toast.success('Farm onboarding setup submitted successfully.');

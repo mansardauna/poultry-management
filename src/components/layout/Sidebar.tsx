@@ -47,7 +47,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['Admin', 'Manager'] },
+  { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Staff Management', href: '/dashboard/staff', icon: Users, roles: ['Admin', 'Manager'] },
   { name: 'Batches', href: '/dashboard/chickens', icon: Package, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Housing', href: '/dashboard/housing', icon: Home, roles: ['Admin', 'Manager'] },

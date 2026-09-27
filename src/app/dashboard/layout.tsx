@@ -1,5 +1,5 @@
 'use strict';
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
@@ -9,7 +9,7 @@ import { Suspense } from 'react';
 
 /**
  * DashboardLayout wraps all pages inside the `(dashboard)` route group.
- * It reads the `pfms_auth` cookie to determine the current user's role
+ * It reads the `pfms_role` cookie or `x-user-role` header to determine the current user's role
  * and passes it to the Sidebar and Header components for role-based rendering.
  *
  * @param children - The dashboard page content to render inside the main area.
@@ -19,9 +19,10 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
   const headersList = await headers();
-  const role = headersList.get('x-user-role') || 'Staff';
-  const tier = headersList.get('x-user-tier') || 'free';
+  const role = headersList.get('x-user-role') || cookieStore.get('pfms_role')?.value || 'Staff';
+  const tier = headersList.get('x-user-tier') || cookieStore.get('pfms_tier')?.value || 'free';
 
   return (
     <SidebarProvider>

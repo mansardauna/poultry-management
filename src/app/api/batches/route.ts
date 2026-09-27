@@ -27,8 +27,8 @@ export async function GET() {
 /** Exported function POST */
 export async function POST(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
     const body = await request.json();
+    const workspaceId = body?.workspaceId || (await getWorkspaceId());
     
     if (body.action === 'mortality') {
       const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).limit(1);

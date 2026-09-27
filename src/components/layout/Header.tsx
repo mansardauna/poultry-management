@@ -492,11 +492,23 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           )}
         </div>
 
-        {/* Super Admin Badge or Upgrade CTA */}
+        {/* Role Badge or Upgrade CTA */}
         {role === 'SuperAdmin' ? (
           <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
             <span className="bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
               Super Admin
+            </span>
+          </div>
+        ) : role === 'Staff' ? (
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
+            <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
+              Staff Portal
+            </span>
+          </div>
+        ) : role === 'Manager' ? (
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
+            <span className="bg-blue-100 text-blue-800 border border-blue-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
+              Farm Manager
             </span>
           </div>
         ) : (

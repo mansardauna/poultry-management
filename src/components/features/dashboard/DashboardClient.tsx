@@ -1,7 +1,7 @@
 'use strict';
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -66,10 +66,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
   const [tier, setTier] = useState('free');
   const router = useRouter();
+  const hasCheckedOnboardingRef = useRef(false);
 
   useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setTier(match[1]);
+
+    if (hasCheckedOnboardingRef.current) return;
+    hasCheckedOnboardingRef.current = true;
 
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
@@ -80,7 +84,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         setOnboardingStep(1);
       }
     }
-  }, [userRole, data.batches.length, data.staff.length]);
+  }, [userRole]);
 
   const alertLogsLogic = useTableLogic({
     data: filterByTimeRange(data.alertLogs || []),
@@ -241,12 +245,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
   const breakEvenPercent = totalIncurredCost > 0 ? ((totalIncurredCost / Math.max(projectedRevenue, 1)) * 100).toFixed(1) : '0';
 
-  // Finances
+  // Finances - 100% derived from actual recorded database records
   const totalRevenue = filteredSalesForKPIs.reduce((sum, s) => sum + s.totalAmount, 0);
-  const openingFund = 16800;
-  const netBalance = (openingFund + totalRevenue) - totalExpenses;
+  const netBalance = totalRevenue - totalExpenses;
   const netProfit = totalRevenue - totalExpenses;
   const returnEfficiency = totalExpenses > 0 ? ((netProfit / totalExpenses) * 100).toFixed(1) : '0';
+  const totalFeedStockKg = (data.feeds || []).reduce((sum, f) => sum + (f.quantityKg || 0), 0);
+  const activeTasks = filterByTimeRange(data.tasks || []).filter(t => t.status === 'Pending');
+  const pendingTasksCount = activeTasks.length;
 
   // Period-over-period growth comparison
   let previousRevenue = 0;
@@ -310,8 +316,6 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
     }
   };
 
-  const activeTasks = filterByTimeRange(data.tasks || []).filter(t => t.status === 'Pending');
-
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
   const isPro = isEnterprise || normTier === 'pro';
@@ -344,14 +348,16 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </div>
         </div>
 
-      {/* Farm Setup Onboarding Progress Widget */}
-      <OnboardingWidget
-        workspacesCount={workspaces.length}
-        batchesCount={data.batches.length}
-        staffCount={data.staff.length}
-        onOpenStep={(stepNum) => setOnboardingStep(stepNum)}
-        userRole={userRole}
-      />
+      {/* Farm Setup Onboarding Progress Widget - Admin only */}
+      {userRole === 'Admin' && (
+        <OnboardingWidget
+          workspacesCount={workspaces.length}
+          batchesCount={data.batches.length}
+          staffCount={data.staff.length}
+          onOpenStep={(stepNum) => setOnboardingStep(stepNum)}
+          userRole={userRole}
+        />
+      )}
 
       {onboardingStep !== null && (
         <OnboardingWizard
@@ -359,6 +365,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           onClose={() => {
             setOnboardingStep(null);
             if (typeof window !== 'undefined') {
+              localStorage.setItem('pfms_onboarded_dismissed', 'true');
               const url = new URL(window.location.href);
               if (url.searchParams.has('onboarding')) {
                 url.searchParams.delete('onboarding');
@@ -372,7 +379,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
       <FeatureTour />
 
-      {/* Core Telemetry Metrics Grid */}
+      {/* Core Telemetry Metrics Grid - Role-Based Display */}
       <div data-tour="kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
         <StatCard
           title={texts.dashboard.activeFlock}
@@ -388,19 +395,37 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           color="amber"
         />
 
-        <StatCard
-          title={timeRange === 'weekly' ? texts.dashboard.weeklyEggRevenue : timeRange === 'monthly' ? texts.dashboard.monthlyEggRevenue : timeRange === 'yearly' ? texts.dashboard.yearlyEggRevenue : texts.dashboard.eggRevenue}
-          value={`₦${totalRevenue.toLocaleString()}`}
-          subtext={`${revenueGrowth >= 0 ? '+' : ''}${revenueGrowthPct}% revenue trend`}
-          color="indigo"
-        />
-
-        <StatCard
-          title={texts.dashboard.operationalProfit}
-          value={`₦${netProfit.toLocaleString()}`}
-          subtext={`${profitGrowth >= 0 ? '+' : ''}${profitGrowthPct}% net margin`}
-          color="emerald"
-        />
+        {userRole === 'Staff' ? (
+          <>
+            <StatCard
+              title="Feed Stock on Hand"
+              value={`${totalFeedStockKg.toLocaleString()} kg`}
+              subtext="Available inventory in storage"
+              color="emerald"
+            />
+            <StatCard
+              title="Shift Checklist Tasks"
+              value={`${pendingTasksCount} Pending`}
+              subtext={`${data.tasks.length - pendingTasksCount} completed today`}
+              color="indigo"
+            />
+          </>
+        ) : (
+          <>
+            <StatCard
+              title={timeRange === 'weekly' ? texts.dashboard.weeklyEggRevenue : timeRange === 'monthly' ? texts.dashboard.monthlyEggRevenue : timeRange === 'yearly' ? texts.dashboard.yearlyEggRevenue : texts.dashboard.eggRevenue}
+              value={`₦${totalRevenue.toLocaleString()}`}
+              subtext={`${revenueGrowth >= 0 ? '+' : ''}${revenueGrowthPct}% revenue trend`}
+              color="indigo"
+            />
+            <StatCard
+              title={texts.dashboard.operationalProfit}
+              value={`₦${netProfit.toLocaleString()}`}
+              subtext={`${profitGrowth >= 0 ? '+' : ''}${profitGrowthPct}% net margin`}
+              color="emerald"
+            />
+          </>
+        )}
       </div>
 
       {/* Production Analytics & Multi-Farm Calendar Grid */}
@@ -734,43 +759,45 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
             </CardContent>
           </Card>
 
-          {/* Salary Indicator Dashboard */}
-          <Card className={isPayday ? "border-amber-300 shadow-md shadow-amber-100" : ""}>
-            <CardHeader className={`border-b ${isPayday ? 'bg-amber-50 border-amber-100' : 'border-slate-100'}`}>
-              <CardTitle className={`text-sm uppercase tracking-wider flex items-center justify-between ${isPayday ? 'text-amber-700' : 'text-slate-700'}`}>
-                <span className="flex items-center gap-2">
-                  <Coins size={18} className={isPayday ? "text-amber-600" : "text-indigo-650"} /> {texts.dashboard.salaryPayroll}
-                </span>
-                {isPayday && (
-                  <span className="bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full animate-pulse uppercase font-bold">
-                    Action Required
+          {/* Salary Indicator Dashboard - Restricted to Admin and Manager */}
+          {(userRole === 'Admin' || userRole === 'Manager') && (
+            <Card className={isPayday ? "border-amber-300 shadow-md shadow-amber-100" : ""}>
+              <CardHeader className={`border-b ${isPayday ? 'bg-amber-50 border-amber-100' : 'border-slate-100'}`}>
+                <CardTitle className={`text-sm uppercase tracking-wider flex items-center justify-between ${isPayday ? 'text-amber-700' : 'text-slate-700'}`}>
+                  <span className="flex items-center gap-2">
+                    <Coins size={18} className={isPayday ? "text-amber-600" : "text-indigo-650"} /> {texts.dashboard.salaryPayroll}
                   </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-2.5 font-mono text-xs">
-                <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-                  <span className="font-medium text-slate-500">{texts.dashboard.staffDuePay}</span>
-                  <span className={`font-bold ${isPayday ? 'text-red-600' : 'text-slate-900'}`}>
-                    {staffNeedingPay.length} / {data.staff.length}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-                  <span className="font-medium text-slate-500">{texts.dashboard.pendingPayroll}</span>
-                  <span className="text-amber-600 font-bold">₦{totalPendingPayroll.toLocaleString()}</span>
-                </div>
-
-                {isPayday && (
-                  <div className="pt-2">
-                    <Link href="/dashboard/staff" className="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-xs uppercase font-bold transition-colors shadow-sm">
-                      {texts.dashboard.processPayrollNow}
-                    </Link>
+                  {isPayday && (
+                    <span className="bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full animate-pulse uppercase font-bold">
+                      Action Required
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-2.5 font-mono text-xs">
+                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+                    <span className="font-medium text-slate-500">{texts.dashboard.staffDuePay}</span>
+                    <span className={`font-bold ${isPayday ? 'text-red-600' : 'text-slate-900'}`}>
+                      {staffNeedingPay.length} / {data.staff.length}
+                    </span>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
+                    <span className="font-medium text-slate-500">{texts.dashboard.pendingPayroll}</span>
+                    <span className="text-amber-600 font-bold">₦{totalPendingPayroll.toLocaleString()}</span>
+                  </div>
+
+                  {isPayday && (
+                    <div className="pt-2">
+                      <Link href="/dashboard/staff" className="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl text-xs uppercase font-bold transition-colors shadow-sm">
+                        {texts.dashboard.processPayrollNow}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
