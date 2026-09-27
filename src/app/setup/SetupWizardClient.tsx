@@ -19,7 +19,8 @@ import {
   Building2,
   Server,
   Layers,
-  AlertCircle
+  AlertCircle,
+  Check
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -73,8 +74,7 @@ export function SetupWizardClient() {
   const [enterprisePriceMonthly, setEnterprisePriceMonthly] = useState(45000);
   const [enterprisePriceAnnual, setEnterprisePriceAnnual] = useState(432000);
 
-  // Runs the database connection check against the credentials entered in the
-  // wizard (NOT .env). Triggered only when the user leaves the DB step (Next).
+  // Runs the database connection check against the credentials entered in the wizard
   const runDatabaseCheck = async (): Promise<boolean> => {
     setIsDbTesting(true);
     try {
@@ -126,7 +126,7 @@ export function SetupWizardClient() {
     if (dbStatus) {
       setDbStatus({
         connected: false,
-        message: 'Database selection changed — click Next to re-test the connection.',
+        message: 'Database selection changed — click Continue to re-test the connection.',
       });
     }
   };
@@ -216,30 +216,36 @@ export function SetupWizardClient() {
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 sm:p-6 lg:p-10 flex flex-col justify-between">
       {/* Top Header */}
       <div className="max-w-5xl mx-auto w-full flex items-center justify-between pb-6 border-b border-slate-200">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">PFMS</h1>
-          <p className="text-xs text-indigo-600 font-medium">Poultry Farm Management System — Installation & Setup Wizard</p>
-        </div>
+        <Link href="/" className="inline-flex items-center gap-2.5 cursor-pointer group">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+            P
+          </div>
+          <div>
+            <span className="font-extrabold text-xl tracking-tight text-slate-900 block leading-none">PFMS</span>
+            <span className="text-[11px] text-indigo-600 font-semibold">Installation & Setup Wizard</span>
+          </div>
+        </Link>
 
         <div className="flex items-center gap-3">
           <a 
             href="/documentation/superadmin-setup-guide.html"
             target="_blank"
             rel="noreferrer"
-            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold px-4 py-2 rounded-md shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            className="bg-white hover:bg-slate-50 text-indigo-600 border border-slate-200 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <HelpCircle size={15} /> Super Admin Docs
+            <HelpCircle size={15} />
+            <span className="hidden sm:inline">Super Admin Docs</span>
           </a>
-          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold px-3 py-1.5 rounded-md hidden sm:inline-block">
+          <span className="bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[11px] font-bold px-3 py-1.5 rounded-full hidden sm:inline-block">
             Self-Hosted Production Mode
           </span>
         </div>
       </div>
 
       {/* Main Wizard Card */}
-      <div className="max-w-5xl mx-auto w-full my-8 bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden flex flex-col">
+      <div className="max-w-5xl mx-auto w-full my-8 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-indigo-950/5 overflow-hidden flex flex-col">
         {/* Stepper Navigation Header */}
-        <div className="bg-slate-50/80 border-b border-slate-200 p-4 sm:p-6 grid grid-cols-5 gap-2 sm:gap-4">
+        <div className="bg-slate-50/80 border-b border-slate-200 p-4 sm:p-6 grid grid-cols-5 gap-2 sm:gap-3">
           {steps.map((s) => {
             const isActive = currentStep === s.num;
             const isDone = currentStep > s.num;
@@ -248,29 +254,28 @@ export function SetupWizardClient() {
               <div 
                 key={s.num}
                 onClick={() => {
-                  // Block jumping to step 2 if database connection is not verified
                   if (s.num > 1 && !dbStatus?.connected) {
                     toast.error('Database connection must be verified clean before proceeding.');
                     return;
                   }
                   if (isDone || s.num < currentStep) setCurrentStep(s.num);
                 }}
-                className={`flex flex-col sm:flex-row items-center gap-2.5 p-2.5 sm:p-3.5 rounded-sm transition-all cursor-pointer ${
+                className={`flex flex-col sm:flex-row items-center gap-2.5 p-2.5 sm:p-3 rounded-xl transition-all cursor-pointer ${
                   isActive 
                     ? 'bg-white border-2 border-indigo-600 text-slate-900 shadow-sm' 
                     : isDone 
-                    ? 'bg-emerald-50/80 text-emerald-800 border border-emerald-200/60' 
-                    : 'text-slate-400 opacity-60 border border-transparent'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100/50' 
+                    : 'text-slate-400 opacity-60 border border-transparent hover:bg-slate-100/50'
                 }`}
               >
-                <div className={`w-8 h-8 rounded-sm flex items-center justify-center text-xs font-extrabold shrink-0 transition-colors ${
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-extrabold shrink-0 transition-colors ${
                   isActive 
                     ? 'bg-indigo-600 text-white shadow-sm' 
                     : isDone 
                     ? 'bg-emerald-600 text-white font-bold' 
                     : 'bg-slate-200 text-slate-500'
                 }`}>
-                  {isDone ? '✓' : s.num}
+                  {isDone ? <Check size={14} className="stroke-[3]" /> : s.num}
                 </div>
                 <div className="hidden sm:block text-left truncate">
                   <p className="text-[10px] font-extrabold leading-none text-slate-400">Step {s.num}</p>
@@ -287,76 +292,76 @@ export function SetupWizardClient() {
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold px-2.5 py-0.5 rounded-sm">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
                   Step 1 of 5
                 </span>
-                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
+                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1.5">
                   <Database className="text-indigo-600" size={24} /> Database Engine Selection & Credentials
                 </h2>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Choose your preferred database engine. Supabase is not compulsory — you can select Standard PostgreSQL or MySQL.
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  Choose your preferred database engine. Supabase is optional — you can select Standard PostgreSQL or MySQL.
                 </p>
               </div>
 
               {/* 1. Database Driver Engine Selector */}
               <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-700">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Select Database Engine *
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div
                     onClick={() => handleSelectDatabaseType('mysql')}
-                    className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                       databaseType === 'mysql'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
                         : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-blue-600">
-                        🐬 MySQL / MariaDB
+                      <span className="font-extrabold text-sm flex items-center gap-2 text-slate-900">
+                        <Database size={18} className="text-blue-600" /> MySQL / MariaDB
                       </span>
                       {databaseType === 'mysql' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                    <p className="text-xs text-slate-500 font-medium leading-tight">
                       Standard MySQL 8.0, MariaDB, PlanetScale, or AWS RDS.
                     </p>
                   </div>
 
                   <div
                     onClick={() => handleSelectDatabaseType('postgres')}
-                    className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                       databaseType === 'postgres'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
                         : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-indigo-600">
-                        🐘 Standard PostgreSQL
+                      <span className="font-extrabold text-sm flex items-center gap-2 text-slate-900">
+                        <Server size={18} className="text-indigo-600" /> Standard PostgreSQL
                       </span>
                       {databaseType === 'postgres' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                    <p className="text-xs text-slate-500 font-medium leading-tight">
                       Self-Hosted PostgreSQL, Neon, ElephantSQL, or AWS RDS.
                     </p>
                   </div>
 
                   <div
                     onClick={() => handleSelectDatabaseType('supabase')}
-                    className={`p-4 rounded-sm border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                       databaseType === 'supabase'
                         ? 'border-indigo-600 bg-indigo-50/50 text-slate-900 shadow-sm'
                         : 'border-slate-200 bg-white hover:border-indigo-300 text-slate-700'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-sm flex items-center gap-1.5 text-emerald-600">
-                        ⚡ Supabase
+                      <span className="font-extrabold text-sm flex items-center gap-2 text-slate-900">
+                        <Layers size={18} className="text-emerald-600" /> Supabase Cloud
                       </span>
                       {databaseType === 'supabase' && <CheckCircle2 size={16} className="text-indigo-600" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                    <p className="text-xs text-slate-500 font-medium leading-tight">
                       Cloud PostgreSQL DB with Auth & Storage API built-in.
                     </p>
                   </div>
@@ -364,7 +369,7 @@ export function SetupWizardClient() {
               </div>
 
               {/* 2. Documentation Link Callout for Selected Engine */}
-              <div className="bg-indigo-50/70 border border-indigo-200/90 p-4 sm:p-5 rounded-sm space-y-2 text-xs text-indigo-950 font-medium">
+              <div className="bg-indigo-50/70 border border-indigo-200/90 p-4 sm:p-5 rounded-xl space-y-2 text-xs text-indigo-950 font-medium">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-extrabold text-indigo-900 uppercase tracking-wider text-[11px]">
                     <HelpCircle size={16} className="text-indigo-600" /> 
@@ -397,7 +402,7 @@ export function SetupWizardClient() {
               </div>
 
               {/* 3. Database Credentials Input Form */}
-              <div className="bg-slate-50 border border-slate-200 p-6 rounded-sm space-y-4 shadow-sm">
+              <div className="bg-slate-50/70 border border-slate-200/80 p-6 rounded-2xl space-y-4 shadow-xs">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-2">
                   {databaseType === 'supabase' && 'Supabase Credentials (.env.local)'}
                   {databaseType === 'postgres' && 'PostgreSQL Connection Parameters'}
@@ -405,37 +410,37 @@ export function SetupWizardClient() {
                 </h4>
 
                 {databaseType === 'supabase' && (
-                <div className="space-y-3">
+                  <div className="space-y-4">
                     <p className="text-xs text-slate-500 font-medium">
                       Enter your Supabase Project details — the credentials you provide here are tested directly.
                     </p>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Supabase project URL</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Supabase Project URL</label>
                       <input
                         type="text"
                         value={supabaseUrl}
                         onChange={(e) => setSupabaseUrl(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="https://your-project.supabase.co"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Anon / publishable key</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Anon / Publishable Key</label>
                       <input
                         type="password"
                         value={supabaseAnonKey}
                         onChange={(e) => setSupabaseAnonKey(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="eyJhbGciOi... (anon key)"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Service role key</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Service Role Key</label>
                       <input
                         type="password"
                         value={supabaseServiceRoleKey}
                         onChange={(e) => setSupabaseServiceRoleKey(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="eyJhbGciOi... (service role key)"
                       />
                     </div>
@@ -445,52 +450,52 @@ export function SetupWizardClient() {
                 {databaseType === 'postgres' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Host server</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Host Server</label>
                       <input
                         type="text"
                         value={postgresHost}
                         onChange={(e) => setPostgresHost(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="localhost or db.example.com"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Port</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Port</label>
                       <input
                         type="number"
                         value={postgresPort}
                         onChange={(e) => setPostgresPort(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="5432"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Database name</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Database Name</label>
                       <input
                         type="text"
                         value={postgresDb}
                         onChange={(e) => setPostgresDb(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="poultry_db"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Database user</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Database User</label>
                       <input
                         type="text"
                         value={postgresUser}
                         onChange={(e) => setPostgresUser(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="postgres"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Database password</label>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Database Password</label>
                       <input
                         type="password"
                         value={postgresPassword}
                         onChange={(e) => setPostgresPassword(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="postgres password"
                       />
                     </div>
@@ -500,71 +505,71 @@ export function SetupWizardClient() {
                 {databaseType === 'mysql' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Host server</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Host Server</label>
                       <input
                         type="text"
                         value={mysqlHost}
                         onChange={(e) => setMysqlHost(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="localhost or 127.0.0.1"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Port</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Port</label>
                       <input
                         type="number"
                         value={mysqlPort}
                         onChange={(e) => setMysqlPort(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="3306"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Database name</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Database Name</label>
                       <input
                         type="text"
                         value={mysqlDatabase}
                         onChange={(e) => setMysqlDatabase(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="poultry_db"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Database user</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Database User</label>
                       <input
                         type="text"
                         value={mysqlUser}
                         onChange={(e) => setMysqlUser(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="root"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Database password</label>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Database Password</label>
                       <input
                         type="password"
                         value={mysqlPassword}
                         onChange={(e) => setMysqlPassword(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-mono bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
                         placeholder="mysql password"
                       />
                     </div>
                   </div>
                 )}
 
-                {/* Real-Time Connection Test Status Banner (No manual test button) */}
+                {/* Real-Time Connection Test Status Banner */}
                 {dbStatus && (
-                  <div className={`p-4 rounded-sm text-xs font-semibold flex items-center justify-between border ${
+                  <div className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between border ${
                     dbStatus.connected 
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
                       : 'bg-red-50 text-red-800 border-red-200'
                   }`}>
                     <div className="flex items-center gap-2">
-                      {dbStatus.connected ? <CheckCircle2 size={18} className="text-emerald-600" /> : <AlertCircle size={18} className="text-red-600" />}
+                      {dbStatus.connected ? <CheckCircle2 size={18} className="text-emerald-600 shrink-0" /> : <AlertCircle size={18} className="text-red-600 shrink-0" />}
                       <span>{dbStatus.message}</span>
                     </div>
 
-                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white border border-slate-200">
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700">
                       {isDbTesting ? 'Testing…' : 'Connection Status'}
                     </span>
                   </div>
@@ -577,85 +582,85 @@ export function SetupWizardClient() {
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
                   Step 2 of 5
                 </span>
-                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
+                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1.5">
                   <ShieldCheck className="text-indigo-600" size={24} /> Super Admin Credentials & Platform Identity
                 </h2>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
                   Configure the master Super Admin login account and customize your platform brand settings.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
+                <div className="space-y-4 bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 shadow-xs">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Lock size={16} className="text-indigo-600" /> Master Super Admin Account
                   </h3>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Super admin email *
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Super Admin Email *
                     </label>
                     <input
                       type="email"
                       value={superAdminEmail}
                       onChange={(e) => setSuperAdminEmail(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white"
                       placeholder="e.g. owner@poultry.com"
                       required
                     />
                   </div>
 
                   <div className="relative">
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Super admin password *
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Super Admin Password *
                     </label>
                     <input
                       type={showPassword ? "text" : "password"}
                       value={superAdminPassword}
                       onChange={(e) => setSuperAdminPassword(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 pr-10 text-xs font-mono text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 pr-11 text-sm font-mono text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white"
                       placeholder="Minimum 6 characters"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-8 text-slate-400 hover:text-indigo-600 p-1"
+                      className="absolute right-3 top-8.5 text-slate-400 hover:text-indigo-600 p-1 cursor-pointer"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
+                <div className="space-y-4 bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 shadow-xs">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Building2 size={16} className="text-indigo-600" /> Platform Brand & Currency
                   </h3>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Platform application name
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Platform Application Name
                     </label>
                     <input
                       type="text"
                       value={platformName}
                       onChange={(e) => setPlatformName(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white"
                       placeholder="e.g. Poultry Farm Management System"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Primary currency symbol
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Primary Currency Symbol
                     </label>
                     <select
                       value={currencySymbol}
                       onChange={(e) => setCurrencySymbol(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white cursor-pointer"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white cursor-pointer"
                     >
                       <option value="₦">₦ - Nigerian Naira (NGN)</option>
                       <option value="$">$ - US Dollar (USD)</option>
@@ -674,101 +679,101 @@ export function SetupWizardClient() {
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
                   Step 3 of 5
                 </span>
-                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
+                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1.5">
                   <CreditCard className="text-indigo-600" size={24} /> Payment Gateways Integration (Paystack & Stripe)
                 </h2>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
                   Enter your Paystack and Stripe merchant API keys to enable automated customer subscription checkouts and merchant invoice settlements.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Paystack Gateway */}
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
+                <div className="space-y-4 bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 shadow-xs">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Paystack Keys (NGN / Africa)</h3>
                     </div>
                     <a 
                       href="https://dashboard.paystack.com/#/settings/developer" 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"
                     >
                       Get Keys <ExternalLink size={12} />
                     </a>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Paystack public key (pk_test / pk_live...)
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Paystack Public Key (pk_test / pk_live...)
                     </label>
                     <input
                       type="text"
                       value={paystackPublicKey}
                       onChange={(e) => setPaystackPublicKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-emerald-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-mono text-emerald-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white font-medium"
                       placeholder="pk_PAYSTACK_PUBLIC_KEY"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Paystack secret key (sk_test / sk_live...)
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Paystack Secret Key (sk_test / sk_live...)
                     </label>
                     <input
                       type="password"
                       value={paystackSecretKey}
                       onChange={(e) => setPaystackSecretKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-emerald-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-mono text-emerald-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white font-medium"
                       placeholder="sk_PAYSTACK_SECRET_KEY"
                     />
                   </div>
                 </div>
 
                 {/* Stripe Gateway */}
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
+                <div className="space-y-4 bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 shadow-xs">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Stripe Keys (Global / USD)</h3>
                     </div>
                     <a 
                       href="https://dashboard.stripe.com/apikeys" 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"
                     >
                       Get Keys <ExternalLink size={12} />
                     </a>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Stripe publishable key (pk_test / pk_live...)
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Stripe Publishable Key (pk_test / pk_live...)
                     </label>
                     <input
                       type="text"
                       value={stripePublicKey}
                       onChange={(e) => setStripePublicKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-mono text-indigo-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white font-medium"
                       placeholder="pk_STRIPE_PUBLIC_KEY"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Stripe secret key (sk_test / sk_live...)
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Stripe Secret Key (sk_test / sk_live...)
                     </label>
                     <input
                       type="password"
                       value={stripeSecretKey}
                       onChange={(e) => setStripeSecretKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-mono text-indigo-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white font-medium"
                       placeholder="sk_STRIPE_SECRET_KEY"
                     />
                   </div>
@@ -781,93 +786,93 @@ export function SetupWizardClient() {
           {currentStep === 4 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="space-y-1.5 border-b border-slate-100 pb-4">
-                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-sm">
+                <span className="bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">
                   Step 4 of 5
                 </span>
-                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1">
+                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 pt-1.5">
                   <Mail className="text-indigo-600" size={24} /> Transactional Emails & Subscription Pricing Tiers
                 </h2>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
                   Configure Resend/SMTP email delivery for notifications and set your default SaaS subscription plan pricing.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
+                <div className="space-y-4 bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 shadow-xs">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Mail size={16} className="text-indigo-600" /> Transactional Email Gateway
                   </h3>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      Resend / email API key (re_...)
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Resend Email API Key (re_...)
                     </label>
                     <input
                       type="password"
                       value={resendApiKey}
                       onChange={(e) => setResendApiKey(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-mono text-indigo-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-mono text-indigo-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white font-medium"
                       placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxx"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                      System sender email address
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      System Sender Email Address
                     </label>
                     <input
                       type="email"
                       value={fromEmail}
                       onChange={(e) => setFromEmail(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-sm p-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white"
                       placeholder="support@pfms-poultry.com"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-4 bg-slate-50/80 p-6 rounded-sm border border-slate-200 shadow-sm">
+                <div className="space-y-4 bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 shadow-xs">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
                     <Layers size={16} className="text-indigo-600" /> SaaS Plan Pricing Defaults
                   </h3>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Pro monthly ({currencySymbol})</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Pro Monthly ({currencySymbol})</label>
                       <input
                         type="number"
                         value={proPriceMonthly}
                         onChange={(e) => setProPriceMonthly(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-bold bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Pro annual ({currencySymbol})</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Pro Annual ({currencySymbol})</label>
                       <input
                         type="number"
                         value={proPriceAnnual}
                         onChange={(e) => setProPriceAnnual(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-bold bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Enterprise monthly ({currencySymbol})</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Enterprise Monthly ({currencySymbol})</label>
                       <input
                         type="number"
                         value={enterprisePriceMonthly}
                         onChange={(e) => setEnterprisePriceMonthly(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-bold bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Enterprise annual ({currencySymbol})</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Enterprise Annual ({currencySymbol})</label>
                       <input
                         type="number"
                         value={enterprisePriceAnnual}
                         onChange={(e) => setEnterprisePriceAnnual(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-sm p-2.5 text-xs text-slate-900 font-bold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-bold bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all"
                       />
                     </div>
                   </div>
@@ -879,22 +884,22 @@ export function SetupWizardClient() {
           {/* STEP 5: Complete & Launch */}
           {currentStep === 5 && (
             <div className="space-y-6 text-center py-6 animate-in zoom-in-95 duration-300 max-w-xl mx-auto">
-              <div className="w-16 h-16 rounded-sm bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
                 <CheckCircle2 size={36} />
               </div>
 
               <div className="space-y-2">
                 <h2 className="text-3xl font-extrabold text-slate-900">Platform Setup Completed!</h2>
-                <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
                   Your Poultry Farm Management System SaaS platform is fully deployed, configured, and ready to onboard farm clients.
                 </p>
               </div>
 
-              <div className="bg-slate-50 p-6 rounded-sm border border-slate-200 text-left space-y-3 shadow-sm">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-2">
+              <div className="bg-slate-50/80 p-6 rounded-2xl border border-slate-200/80 text-left space-y-3 shadow-xs">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200 pb-2">
                   Master Super Admin Credentials Summary
                 </h4>
-                <div className="text-xs font-mono space-y-1">
+                <div className="text-xs font-mono space-y-1.5 pt-1">
                   <p className="text-slate-700">Database Driver: <strong className="text-indigo-600 uppercase">{databaseType}</strong></p>
                   <p className="text-slate-700">Super Admin Email: <strong className="text-indigo-600">{superAdminEmail}</strong></p>
                   <p className="text-slate-700">Platform Brand: <strong className="text-indigo-600">{platformName}</strong></p>
@@ -905,7 +910,7 @@ export function SetupWizardClient() {
               <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <Link 
                   href="/dashboard/admin" 
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ShieldCheck size={16} /> Open Super Admin Dashboard
                 </Link>
@@ -913,13 +918,13 @@ export function SetupWizardClient() {
                   href="/documentation/superadmin-setup-guide.html"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-white hover:bg-slate-50 text-indigo-700 font-semibold text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 border border-slate-200 cursor-pointer"
                 >
                   <HelpCircle size={16} /> Super Admin Docs
                 </a>
                 <Link 
                   href="/login" 
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 border border-slate-200"
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200 cursor-pointer"
                 >
                   <ArrowRight size={16} /> Log In to Platform
                 </Link>
@@ -928,13 +933,13 @@ export function SetupWizardClient() {
           )}
         </div>
 
-        {/* Wizard Footer Controls with Connection Guard */}
+        {/* Wizard Footer Controls */}
         {currentStep < 5 && (
           <div className="bg-slate-50/80 border-t border-slate-200 p-4 sm:p-6 flex items-center justify-between">
             <button
               onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
               disabled={currentStep === 1 || isSubmitting}
-              className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold text-xs uppercase tracking-wider px-5 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
             >
               <ArrowLeft size={16} /> Back
             </button>
@@ -943,7 +948,7 @@ export function SetupWizardClient() {
               <button
                 onClick={handleContinue}
                 disabled={isDbTesting || isSubmitting}
-                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-md shadow-indigo-600/20 active:scale-[0.99]"
               >
                 <span>{currentStep === 1 && isDbTesting ? 'Testing Database…' : `Continue to Step ${currentStep + 1}`}</span>
                 <ArrowRight size={16} />
@@ -952,9 +957,9 @@ export function SetupWizardClient() {
               <button
                 onClick={handleCompleteSetup}
                 disabled={isSubmitting}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-md shadow-emerald-600/20 active:scale-[0.99] disabled:opacity-50"
               >
-                {isSubmitting ? 'Completing Setup…' : '⚡ Complete Installation & Save Config'}
+                {isSubmitting ? 'Completing Setup…' : 'Complete Installation & Save Config'}
                 <CheckCircle2 size={16} />
               </button>
             )}

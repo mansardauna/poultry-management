@@ -4,7 +4,14 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ShieldCheck, Lock, Eye, EyeOff, ArrowRight, Server, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { 
+  KeyRound, 
+  ArrowRight, 
+  ArrowLeft, 
+  Eye, 
+  EyeOff, 
+  AlertCircle 
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SetupLoginPage() {
@@ -52,59 +59,67 @@ export default function SetupLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 font-sans flex flex-col justify-between text-slate-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-50 font-sans flex flex-col justify-between text-slate-800 p-4 sm:p-6 lg:p-8">
       {/* Top Bar */}
-      <div className="max-w-5xl mx-auto w-full flex items-center justify-between py-4">
-        <Link href="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider">
-          <ArrowLeft size={16} /> Return to Home
+      <div className="max-w-5xl mx-auto w-full flex items-center justify-between py-2">
+        <Link href="/" className="inline-flex items-center gap-2 cursor-pointer group">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+            P
+          </div>
+          <span className="font-bold text-xl tracking-tight text-slate-800">PFMS</span>
         </Link>
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-full px-3 py-1 text-xs text-amber-400 font-semibold">
-          <KeyRound size={13} />
-          <span>System Deployment Portal</span>
-        </div>
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
+        >
+          <ArrowLeft size={15} /> Return to Home
+        </Link>
       </div>
 
       {/* Main Card */}
-      <div className="max-w-md w-full mx-auto my-auto bg-slate-900/90 border border-slate-800 shadow-2xl rounded-2xl p-6 sm:p-8 backdrop-blur-xl">
+      <div className="max-w-md w-full mx-auto my-auto bg-white border border-slate-200/80 shadow-2xl shadow-indigo-950/10 rounded-3xl p-6 sm:p-10">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/20 ring-4 ring-slate-800">
-            <Server className="text-white" size={26} />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black text-2xl shadow-lg shadow-indigo-600/25 mb-4">
+            P
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mb-2">
+          <div>
+            <span className="inline-block text-[11px] font-extrabold uppercase tracking-widest text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-3 py-1 rounded-full mb-3">
+              System Owner Portal
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
             Owner Master Setup
           </h1>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-            Enter your owner credentials to unlock the installation wizard and configure database drivers, payment keys, and mail pipelines.
+          <p className="text-sm font-medium text-slate-500 max-w-sm mx-auto leading-relaxed">
+            Sign in with the master deployment credentials provided by the platform seller to unlock the setup wizard.
           </p>
         </div>
 
         {errorMsg && (
-          <div className="mb-6 p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-medium flex items-start gap-2.5">
-            <div className="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">!</div>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-semibold flex items-center gap-2.5 shadow-xs">
+            <AlertCircle size={18} className="text-red-500 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-              Owner Username / Email
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+              Owner Username or Email
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. owner or owner@poultry.com"
-                required
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="e.g. owner or owner@poultry.com"
+              required
+              className="w-full border-2 border-slate-200 rounded-xl p-3.5 text-sm focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium text-slate-900 placeholder-slate-400"
+            />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-              Master Password
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+              Master Deployment Password
             </label>
             <div className="relative">
               <input
@@ -113,32 +128,32 @@ export default function SetupLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter master deployment password"
                 required
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 pr-11 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full border-2 border-slate-200 rounded-xl p-3.5 pr-12 text-sm focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium text-slate-900 placeholder-slate-400"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-200 transition-colors p-0.5"
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-indigo-600 transition-colors p-0.5 cursor-pointer"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
 
-          <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl text-[11px] text-slate-400 space-y-1.5">
-            <div className="flex items-center gap-2 text-amber-400 font-semibold">
-              <KeyRound size={13} />
-              <span>Software Buyer / License Access</span>
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 space-y-1.5">
+            <div className="flex items-center gap-1.5 text-indigo-700 font-bold">
+              <KeyRound size={14} className="text-indigo-600" />
+              <span>Software Buyer License Notice</span>
             </div>
-            <p>
-              Use the master credentials given by the platform seller (default username: <code className="text-white font-mono font-bold bg-slate-800 px-1 py-0.5 rounded">owner</code>). After verification and completing setup, you will be taken directly into your master SuperAdmin dashboard.
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              Enter the deployment credentials supplied with your license (default username: <code className="text-slate-800 font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">owner</code>). After verification and finishing setup, you will be authenticated directly into the SuperAdmin dashboard.
             </p>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-900/50 disabled:text-indigo-300 disabled:cursor-not-allowed text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-sm py-3.5 px-4 rounded-xl transition-all shadow-md shadow-indigo-600/20 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
           >
             {isLoading ? (
               <span>Authenticating Owner…</span>
@@ -153,7 +168,7 @@ export default function SetupLoginPage() {
       </div>
 
       {/* Footer */}
-      <div className="max-w-5xl mx-auto w-full text-center text-xs text-slate-500 py-4">
+      <div className="max-w-5xl mx-auto w-full text-center text-xs text-slate-400 font-medium py-4">
         &copy; 2026 Poultry Farm Management System. Self-Hosted Master Deployment.
       </div>
     </div>
