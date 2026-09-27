@@ -43,6 +43,50 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
   const [staffUsername, setStaffUsername] = useState('');
   const [staffPassword, setStaffPassword] = useState('');
 
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
+
+  useEffect(() => {
+    const raw = staffUsername.trim().toLowerCase();
+    if (!raw) {
+      setUsernameError('');
+      setIsUsernameAvailable(false);
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    if (raw.length < 3) {
+      setUsernameError('Username must be at least 3 characters.');
+      setIsUsernameAvailable(false);
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    setIsCheckingUsername(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/staff/validate?username=${encodeURIComponent(raw)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.available) {
+            setUsernameError('');
+            setIsUsernameAvailable(true);
+          } else {
+            setUsernameError(data.error || 'Username is already taken across the platform.');
+            setIsUsernameAvailable(false);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [staffUsername]);
+
   const setStep = (newStep: number) => {
     setStepState(newStep);
     if (typeof window !== 'undefined') {
@@ -169,10 +213,23 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
   };
 
   const handleNextStep3 = () => {
+    if (isCheckingUsername) {
+      toast.error('Validating username availability, please wait...');
+      return;
+    }
+    if (usernameError) {
+      toast.error(usernameError);
+      return;
+    }
     setStep(4);
   };
 
   const handleSubmitAll = async () => {
+    if (staffUsername.trim() && (usernameError || isCheckingUsername)) {
+      toast.error(usernameError || 'Please wait for staff username validation to complete.');
+      setStep(3);
+      return;
+    }
     setIsSaving(true);
     try {
       let finalWsId = targetWs?.id || createdBranchId;
@@ -552,14 +609,37 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Username</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                      Staff Login Username
+                    </label>
                     <input 
                       type="text" 
                       value={staffUsername}
-                      onChange={(e) => setStaffUsername(e.target.value)}
+                      onChange={(e) => setStaffUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
                       placeholder="john_attendant"
-                      className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
+                      className={`w-full border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 transition-colors bg-slate-50 font-medium ${
+                        usernameError 
+                          ? 'border-red-500 focus:border-red-600 focus:ring-red-100 text-red-900' 
+                          : isUsernameAvailable 
+                            ? 'border-emerald-500 focus:border-emerald-600 focus:ring-emerald-100' 
+                            : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                      }`}
                     />
+                    {isCheckingUsername && (
+                      <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium animate-pulse">
+                        Checking global availability...
+                      </p>
+                    )}
+                    {!isCheckingUsername && usernameError && (
+                      <p className="text-[11px] text-red-600 font-semibold mt-1 flex items-center gap-1">
+                        ⚠️ {usernameError}
+                      </p>
+                    )}
+                    {!isCheckingUsername && isUsernameAvailable && (
+                      <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                        ✓ Username is available across all platform farms.
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Password</label>
@@ -584,7 +664,8 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                 </button>
                 <button 
                   onClick={handleNextStep3}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer transition-all"
+                  disabled={Boolean(usernameError) || isCheckingUsername}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
                   <span>Continue to Final Review</span> <ChevronRight size={16} />
                 </button>

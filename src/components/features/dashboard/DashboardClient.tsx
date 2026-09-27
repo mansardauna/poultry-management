@@ -125,7 +125,50 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const cutoffPrevious = new Date(today);
   if (timeRange !== 'all') cutoffPrevious.setDate(today.getDate() - periodDays * 2);
 
-  const totalChickens = data.batches.reduce((sum, batch) => sum + batch.quantity - batch.mortalityCount, 0);
+  // Normalized collections guaranteeing clean numeric values throughout calculations
+  const normalizedBatches = (data.batches || []).map((b) => ({
+    ...b,
+    quantity: Number(b.quantity) || 0,
+    mortalityCount: Number(b.mortalityCount) || 0,
+    unitPurchasePrice: Number(b.unitPurchasePrice) || 0,
+    projectedSellingPrice: Number(b.projectedSellingPrice) || 0,
+  }));
+
+  const normalizedEggs = (data.eggs || []).map((e) => ({
+    ...e,
+    goodEggs: Number(e.goodEggs) || 0,
+    brokenEggs: Number(e.brokenEggs) || 0,
+    spoiltEggs: Number(e.spoiltEggs) || 0,
+  }));
+
+  const normalizedSales = (data.sales || []).map((s) => ({
+    ...s,
+    quantity: Number(s.quantity) || 0,
+    totalAmount: Number(s.totalAmount) || 0,
+  }));
+
+  const normalizedExpenses = (data.expenses || []).map((e) => ({
+    ...e,
+    amount: Number(e.amount) || 0,
+  }));
+
+  const normalizedFeeds = (data.feeds || []).map((f) => ({
+    ...f,
+    quantityKg: Number(f.quantityKg) || 0,
+  }));
+
+  const normalizedStaff = (data.staff || []).map((s) => ({
+    ...s,
+    salary: Number(s.salary) || 0,
+    attendanceDays: Number(s.attendanceDays) || 0,
+  }));
+
+  const normalizedMortality = (data.mortalityLogs || []).map((m) => ({
+    ...m,
+    count: Number(m.count) || 0,
+  }));
+
+  const totalChickens = normalizedBatches.reduce((sum, batch) => sum + batch.quantity - batch.mortalityCount, 0);
 
   // Dynamic Egg Metrics
   const chartData = [];
@@ -133,14 +176,13 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   let previousYield = 0;
 
   if (timeRange === 'weekly' || timeRange === 'all') {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      const eggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
-      const badEggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + (e.brokenEggs || 0) + (e.spoiltEggs || 0), 0);
-      const revenueThatDay = data.sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
+      const eggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
+      const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
+      const revenueThatDay = normalizedSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
         name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { weekday: 'short' }),
         Eggs: eggsThatDay,
@@ -155,16 +197,16 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      previousYield += data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
+      previousYield += normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
     }
   } else if (timeRange === 'monthly') {
     for (let i = 29; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      const eggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
-      const badEggsThatDay = data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + (e.brokenEggs || 0) + (e.spoiltEggs || 0), 0);
-      const revenueThatDay = data.sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
+      const eggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
+      const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
+      const revenueThatDay = normalizedSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
         name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { day: 'numeric', month: 'short' }),
         Eggs: eggsThatDay,
@@ -179,7 +221,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      previousYield += data.eggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
+      previousYield += normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
     }
   } else if (timeRange === 'yearly') {
     for (let i = 11; i >= 0; i--) {
@@ -187,17 +229,17 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       d.setMonth(d.getMonth() - i);
       const year = d.getFullYear();
       const month = d.getMonth();
-      const eggsInMonth = data.eggs.filter(e => {
+      const eggsInMonth = normalizedEggs.filter(e => {
         const ed = new Date(e.date);
         return ed.getFullYear() === year && ed.getMonth() === month;
       }).reduce((sum, e) => sum + e.goodEggs, 0);
 
-      const badEggsInMonth = data.eggs.filter(e => {
+      const badEggsInMonth = normalizedEggs.filter(e => {
          const ed = new Date(e.date);
          return ed.getFullYear() === year && ed.getMonth() === month;
-      }).reduce((sum, e) => sum + (e.brokenEggs || 0) + (e.spoiltEggs || 0), 0);
+      }).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
 
-      const revenueInMonth = data.sales.filter(s => {
+      const revenueInMonth = normalizedSales.filter(s => {
          const sd = new Date(s.date);
          return sd.getFullYear() === year && sd.getMonth() === month;
       }).reduce((sum, s) => sum + s.totalAmount, 0);
@@ -217,7 +259,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       d.setMonth(d.getMonth() - i);
       const year = d.getFullYear();
       const month = d.getMonth();
-      previousYield += data.eggs.filter(e => {
+      previousYield += normalizedEggs.filter(e => {
         const ed = new Date(e.date);
         return ed.getFullYear() === year && ed.getMonth() === month;
       }).reduce((sum, e) => sum + e.goodEggs, 0);
@@ -230,9 +272,9 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
     : (currentYield > 0 ? '100.0' : '0.0');
 
   // Break-Even Calculation (using filtered subsets)
-  const filteredExpensesForKPIs = timeRange === 'all' ? data.expenses : data.expenses.filter(e => new Date(e.date) >= cutoffCurrent);
-  const filteredSalesForKPIs = timeRange === 'all' ? data.sales : data.sales.filter(s => new Date(s.date) >= cutoffCurrent);
-  const filteredBatchesForKPIs = timeRange === 'all' ? data.batches : data.batches.filter(b => new Date(b.purchaseDate) >= cutoffCurrent);
+  const filteredExpensesForKPIs = timeRange === 'all' ? normalizedExpenses : normalizedExpenses.filter(e => new Date(e.date) >= cutoffCurrent);
+  const filteredSalesForKPIs = timeRange === 'all' ? normalizedSales : normalizedSales.filter(s => new Date(s.date) >= cutoffCurrent);
+  const filteredBatchesForKPIs = timeRange === 'all' ? normalizedBatches : normalizedBatches.filter(b => new Date(b.purchaseDate) >= cutoffCurrent);
 
   const totalExpenses = filteredExpensesForKPIs.reduce((sum, e) => sum + e.amount, 0);
   const costOfBirds = filteredBatchesForKPIs.reduce((sum, b) => sum + (b.quantity * (b.unitPurchasePrice || 0)), 0);
@@ -250,7 +292,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const netBalance = totalRevenue - totalExpenses;
   const netProfit = totalRevenue - totalExpenses;
   const returnEfficiency = totalExpenses > 0 ? ((netProfit / totalExpenses) * 100).toFixed(1) : '0';
-  const totalFeedStockKg = (data.feeds || []).reduce((sum, f) => sum + (f.quantityKg || 0), 0);
+  const totalFeedStockKg = (normalizedFeeds || []).reduce((sum, f) => sum + (f.quantityKg || 0), 0);
   const activeTasks = filterByTimeRange(data.tasks || []).filter(t => t.status === 'Pending');
   const pendingTasksCount = activeTasks.length;
 
@@ -258,10 +300,10 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   let previousRevenue = 0;
   let previousExpenses = 0;
   if (timeRange !== 'all') {
-    previousRevenue = data.sales
+    previousRevenue = normalizedSales
       .filter(s => new Date(s.date) >= cutoffPrevious && new Date(s.date) < cutoffCurrent)
       .reduce((sum, s) => sum + s.totalAmount, 0);
-    previousExpenses = data.expenses
+    previousExpenses = normalizedExpenses
       .filter(e => new Date(e.date) >= cutoffPrevious && new Date(e.date) < cutoffCurrent)
       .reduce((sum, e) => sum + e.amount, 0);
   }
@@ -277,7 +319,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
     ? ((profitGrowth / Math.abs(previousProfit)) * 100).toFixed(1)
     : (currentProfit > 0 ? '100.0' : '0.0');
 
-  const recentMortality = (data.mortalityLogs || [])
+  const recentMortality = (normalizedMortality || [])
     .filter(m => timeRange === 'all' ? true : new Date(m.date) >= cutoffCurrent)
     .reduce((sum, m) => sum + m.count, 0);
   const flockPct = totalChickens > 0
@@ -285,14 +327,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
     : '0.0';
 
   // Alerts logic
-  const totalFeedKg = data.feeds.reduce((sum, f) => sum + f.quantityKg, 0);
+  const totalFeedKg = normalizedFeeds.reduce((sum, f) => sum + f.quantityKg, 0);
   const feedThreshold = data.alertSettings?.feedThresholdKg || 50;
   const isFeedCritical = totalFeedKg < feedThreshold;
   
   const hasCctvFailures = (data.cctvLogs || []).some(log => log.status === 'Offline' || log.status === 'Error');
 
   // Salary Indicator Logic
-  const staffNeedingPay = data.staff.filter(s => s.attendanceDays >= 28);
+  const staffNeedingPay = normalizedStaff.filter(s => s.attendanceDays >= 28);
   const totalPendingPayroll = staffNeedingPay.reduce((sum, s) => sum + s.salary, 0);
   const isPayday = staffNeedingPay.length > 0;
 
@@ -352,8 +394,8 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       {userRole === 'Admin' && (
         <OnboardingWidget
           workspacesCount={workspaces.length}
-          batchesCount={data.batches.length}
-          staffCount={data.staff.length}
+          batchesCount={normalizedBatches.length}
+          staffCount={normalizedStaff.length}
           onOpenStep={(stepNum) => setOnboardingStep(stepNum)}
           userRole={userRole}
         />
@@ -383,14 +425,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       <div data-tour="kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
         <StatCard
           title={texts.dashboard.activeFlock}
-          value={totalChickens.toLocaleString()}
+          value={Number(totalChickens).toLocaleString()}
           subtext={`${recentMortality === 0 ? '0.0%' : `−${flockPct}%`} ${texts.dashboard.flockMortalityRate}`}
           color="blue"
         />
 
         <StatCard
           title={timeRange === 'weekly' ? texts.dashboard.weeklyEggOutput : timeRange === 'monthly' ? texts.dashboard.monthlyEggOutput : timeRange === 'yearly' ? texts.dashboard.yearlyEggOutput : texts.dashboard.eggOutput}
-          value={`${currentYield.toLocaleString()} Eggs`}
+          value={`${Number(currentYield).toLocaleString()} Eggs`}
           subtext={`${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`}
           color="amber"
         />
@@ -399,7 +441,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <>
             <StatCard
               title="Feed Stock on Hand"
-              value={`${totalFeedStockKg.toLocaleString()} kg`}
+              value={`${Number(totalFeedStockKg).toLocaleString()} kg`}
               subtext="Available inventory in storage"
               color="emerald"
             />
@@ -414,13 +456,13 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <>
             <StatCard
               title={timeRange === 'weekly' ? texts.dashboard.weeklyEggRevenue : timeRange === 'monthly' ? texts.dashboard.monthlyEggRevenue : timeRange === 'yearly' ? texts.dashboard.yearlyEggRevenue : texts.dashboard.eggRevenue}
-              value={`₦${totalRevenue.toLocaleString()}`}
+              value={`₦${Number(totalRevenue).toLocaleString()}`}
               subtext={`${revenueGrowth >= 0 ? '+' : ''}${revenueGrowthPct}% revenue trend`}
               color="indigo"
             />
             <StatCard
               title={texts.dashboard.operationalProfit}
-              value={`₦${netProfit.toLocaleString()}`}
+              value={`₦${Number(netProfit).toLocaleString()}`}
               subtext={`${profitGrowth >= 0 ? '+' : ''}${profitGrowthPct}% net margin`}
               color="emerald"
             />

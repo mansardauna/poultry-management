@@ -43,14 +43,57 @@ export async function GET() {
     notifyWhatsapp: true
   };
 
+  const normalizedBatches = (batches.data || []).map((b: any) => ({
+    ...b,
+    quantity: Number(b.quantity) || 0,
+    mortalityCount: Number(b.mortalityCount) || 0,
+    unitPurchasePrice: Number(b.unitPurchasePrice) || 0,
+    projectedSellingPrice: Number(b.projectedSellingPrice) || 0
+  }));
+
+  const normalizedEggs = (eggs.data || []).map((e: any) => ({
+    ...e,
+    goodEggs: Number(e.goodEggs) || 0,
+    brokenEggs: Number(e.brokenEggs) || 0,
+    spoiltEggs: Number(e.spoiltEggs) || 0
+  }));
+
+  const normalizedFeeds = (feeds.data || []).map((f: any) => ({
+    ...f,
+    quantityKg: Number(f.quantityKg) || 0,
+    costPerBag: Number(f.costPerBag) || 0
+  }));
+
+  const normalizedStaff = (staff.data || []).map((s: any) => ({
+    ...s,
+    salary: Number(s.salary) || 0,
+    attendanceDays: Number(s.attendanceDays) || 0
+  }));
+
+  const normalizedSales = (sales.data || []).map((s: any) => ({
+    ...s,
+    quantity: Number(s.quantity) || 0,
+    totalAmount: Number(s.totalAmount) || 0
+  }));
+
+  const normalizedExpenses = (expenses.data || []).map((e: any) => ({
+    ...e,
+    amount: Number(e.amount) || 0
+  }));
+
+  const normalizedMortality = (mortalityLogs.data || []).map((m: any) => ({
+    ...m,
+    count: Number(m.count) || 0
+  }));
+
   return NextResponse.json({
-    batches: batches.data || [], 
-    eggs: eggs.data || [], 
-    feeds: feeds.data || [], 
+    batches: normalizedBatches, 
+    eggs: normalizedEggs, 
+    feeds: normalizedFeeds, 
     feedLogs: feedLogs.data || [], 
-    staff: staff.data || [], 
-    sales: sales.data || [], 
-    expenses: expenses.data || [],
+    staff: normalizedStaff, 
+    sales: normalizedSales, 
+    expenses: normalizedExpenses,
     cushionAudits: cushionAudits.data || [], 
     maturationLogs: maturationLogs.data || [], 
     procurePipeline: procurePipeline.data || [], 
@@ -59,7 +102,7 @@ export async function GET() {
     tasks: tasks.data || [], 
     alertSettings, 
     alertLogs: alertLogs.data || [], 
-    mortalityLogs: mortalityLogs.data || [],
+    mortalityLogs: normalizedMortality,
     medicationTemplates: medicationTemplates.data || [], 
     medicationSchedules: medicationSchedules.data || [], 
     payrollLogs: payrollLogs.data || [],
@@ -68,3 +111,4 @@ export async function GET() {
     farmPens: farmPens.data || []
   });
 }
+

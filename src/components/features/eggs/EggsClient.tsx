@@ -498,9 +498,9 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   };
 
   const filteredEggs = filterByTimeRange(eggs);
-  const totalGoodEggs = filteredEggs.reduce((sum, e) => sum + e.goodEggs, 0);
-  const totalBrokenEggs = filteredEggs.reduce((sum, e) => sum + e.brokenEggs, 0);
-  const totalSpoiltEggs = filteredEggs.reduce((sum, e) => sum + e.spoiltEggs, 0);
+  const totalGoodEggs = filteredEggs.reduce((sum, e) => sum + (Number(e.goodEggs) || 0), 0);
+  const totalBrokenEggs = filteredEggs.reduce((sum, e) => sum + (Number(e.brokenEggs) || 0), 0);
+  const totalSpoiltEggs = filteredEggs.reduce((sum, e) => sum + (Number(e.spoiltEggs) || 0), 0);
   const totalCollected = totalGoodEggs + totalBrokenEggs + totalSpoiltEggs;
 
   return (

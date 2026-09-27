@@ -116,6 +116,26 @@ export async function POST(request: Request) {
 
     // Check if an onboarding staff member already exists in this workspace to update instead of duplicate
     const { data: existingStaffList } = await applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId).limit(1);
+    const isExistingOnboardingMember = Boolean(existingStaffList && existingStaffList.length > 0 && body.isOnboarding);
+    const currentStaffId = isExistingOnboardingMember ? existingStaffList![0].id : null;
+
+    // Global anti-impersonation uniqueness check across ALL workspaces in both users and staff tables
+    const cleanUser = staffUsername.trim().toLowerCase();
+    const poultryEmail = `${cleanUser}@poultry.local`;
+    const [{ data: userMatches }, { data: staffMatches }] = await Promise.all([
+      supabase.from('users').select('id, username, email').or(`username.eq.${cleanUser},email.eq.${cleanUser},email.eq.${poultryEmail}`),
+      supabase.from('staff').select('id, username, name').or(`username.eq.${cleanUser},name.eq.${cleanUser}`)
+    ]);
+
+    const conflictingUser = (userMatches || []).find((u: any) => !currentStaffId || (u.id !== `usr_${currentStaffId}` && u.id !== currentStaffId));
+    const conflictingStaff = (staffMatches || []).find((s: any) => !currentStaffId || s.id !== currentStaffId);
+
+    if (conflictingUser || conflictingStaff) {
+      return NextResponse.json({
+        error: `Staff login username "${staffUsername}" is already taken across the platform. Please choose a unique username to prevent impersonation.`
+      }, { status: 409 });
+    }
+
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(staffPassword, salt);
 

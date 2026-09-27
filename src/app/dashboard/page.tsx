@@ -71,13 +71,46 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId).range(offset, offset + 49)
   ]);
 
-  const batches = batchesRaw.data || [];
-  const eggs = eggsRaw.data || [];
-  const feeds = feedsRaw.data || [];
+  const batches = (batchesRaw.data || []).map((b: any) => ({
+    ...b,
+    quantity: Number(b.quantity) || 0,
+    mortalityCount: Number(b.mortalityCount) || 0,
+    unitPurchasePrice: Number(b.unitPurchasePrice) || 0,
+    projectedSellingPrice: Number(b.projectedSellingPrice) || 0
+  })) as ChickenBatch[];
+
+  const eggs = (eggsRaw.data || []).map((e: any) => ({
+    ...e,
+    goodEggs: Number(e.goodEggs) || 0,
+    brokenEggs: Number(e.brokenEggs) || 0,
+    spoiltEggs: Number(e.spoiltEggs) || 0
+  })) as EggRecord[];
+
+  const feeds = (feedsRaw.data || []).map((f: any) => ({
+    ...f,
+    quantityKg: Number(f.quantityKg) || 0,
+    costPerBag: Number(f.costPerBag) || 0
+  })) as FeedInventory[];
+
   const feedLogs = feedLogsRaw.data || [];
-  const staff = staffRaw.data || [];
-  const sales = salesRaw.data || [];
-  const expenses = expensesRaw.data || [];
+
+  const staff = (staffRaw.data || []).map((s: any) => ({
+    ...s,
+    salary: Number(s.salary) || 0,
+    attendanceDays: Number(s.attendanceDays) || 0
+  })) as Staff[];
+
+  const sales = (salesRaw.data || []).map((s: any) => ({
+    ...s,
+    quantity: Number(s.quantity) || 0,
+    totalAmount: Number(s.totalAmount) || 0
+  })) as Sale[];
+
+  const expenses = (expensesRaw.data || []).map((e: any) => ({
+    ...e,
+    amount: Number(e.amount) || 0
+  })) as Expense[];
+
   const cushionAudits = cushionAuditsRaw.data || [];
   const maturationLogs = maturationLogsRaw.data || [];
   const procurePipeline = procurePipelineRaw.data || [];
@@ -85,7 +118,12 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const invoices = invoicesRaw.data || [];
   const tasks = tasksRaw.data || [];
   const alertLogs = alertLogsRaw.data || [];
-  const mortalityLogs = mortalityLogsRaw.data || [];
+
+  const mortalityLogs = (mortalityLogsRaw.data || []).map((m: any) => ({
+    ...m,
+    count: Number(m.count) || 0
+  })) as MortalityLog[];
+
   const medicationTemplates = medicationTemplatesRaw.data || [];
   const medicationSchedules = medicationSchedulesRaw.data || [];
   const payrollLogs = payrollLogsRaw.data || [];
@@ -106,13 +144,13 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     <DashboardClient
       userRole={user?.role || 'Admin'}
       initialData={{
-        batches: batches as ChickenBatch[],
-        eggs: eggs as EggRecord[],
-        feeds: feeds as FeedInventory[],
+        batches,
+        eggs,
+        feeds,
         feedLogs: feedLogs as DailyFeedLog[],
-        staff: staff as Staff[],
-        sales: sales as Sale[],
-        expenses: expenses as Expense[],
+        staff,
+        sales,
+        expenses,
         cushionAudits: cushionAudits as CushionAudit[],
         maturationLogs: maturationLogs as MaturationLog[],
         procurePipeline: procurePipeline as ProcurePipeline[],
@@ -121,7 +159,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
         tasks: tasks as StaffTask[],
         alertSettings: alertSettingsData,
         alertLogs: alertLogs as AlertLog[],
-        mortalityLogs: mortalityLogs as MortalityLog[],
+        mortalityLogs,
         medicationTemplates: medicationTemplates as MedicationTemplate[],
         medicationSchedules: medicationSchedules as MedicationSchedule[],
         payrollLogs: payrollLogs as PayrollLog[],

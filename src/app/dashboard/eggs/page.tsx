@@ -19,7 +19,12 @@ export default async function EggsPage() {
     applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId)
   ]);
 
-  const eggs = (eggsRaw.data || []) as EggRecord[];
+  const eggs = (eggsRaw.data || []).map((e: any) => ({
+    ...e,
+    goodEggs: Number(e.goodEggs) || 0,
+    brokenEggs: Number(e.brokenEggs) || 0,
+    spoiltEggs: Number(e.spoiltEggs) || 0
+  })) as EggRecord[];
   const batches = (batchesRaw.data || []) as ChickenBatch[];
   const cushionAudits = (cushionAuditsRaw.data || []) as CushionAudit[];
   const maturationLogs = (maturationLogsRaw.data || []) as MaturationLog[];

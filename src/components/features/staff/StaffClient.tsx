@@ -91,6 +91,49 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
   const [assignedBranches, setAssignedBranches] = useState<string[]>([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [usernameChecking, setUsernameChecking] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [usernameAvailable, setUsernameAvailable] = useState(false);
+
+  useEffect(() => {
+    const raw = username.trim().toLowerCase();
+    if (!raw) {
+      setUsernameError('');
+      setUsernameAvailable(false);
+      setUsernameChecking(false);
+      return;
+    }
+
+    if (raw.length < 3) {
+      setUsernameError('Username must be at least 3 characters long.');
+      setUsernameAvailable(false);
+      setUsernameChecking(false);
+      return;
+    }
+
+    setUsernameChecking(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/staff/validate?username=${encodeURIComponent(raw)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.available) {
+            setUsernameError('');
+            setUsernameAvailable(true);
+          } else {
+            setUsernameError(data.error || 'Username is already taken across the platform.');
+            setUsernameAvailable(false);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setUsernameChecking(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [username]);
 
   // Assign Task Form
   const [taskName, setTaskName] = useState('');
@@ -124,6 +167,9 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
     setAssignedBranches([]);
     setUsername('');
     setPassword('');
+    setUsernameError('');
+    setUsernameAvailable(false);
+    setUsernameChecking(false);
   };
 
   const handleOpenTaskModal = () => {
@@ -137,6 +183,14 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
 
   const handleAddStaff = async () => {
     if (!name || !staffRole || !salary) return;
+    if (usernameChecking) {
+      toast.error('Validating username availability, please wait...');
+      return;
+    }
+    if (usernameError) {
+      toast.error(usernameError);
+      return;
+    }
 
     try {
       const res = await fetch('/api/staff', {
@@ -596,9 +650,18 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             fullWidth
             variant="outlined"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
-            helperText="Staff member will log in with this username"
+            error={Boolean(usernameError)}
+            helperText={
+              usernameChecking
+                ? "Checking global platform availability..."
+                : usernameError
+                ? `⚠️ ${usernameError}`
+                : usernameAvailable
+                ? "✓ Username is available across all platform farms"
+                : "Staff member will log in with this username"
+            }
           />
           <TextField
             label="Staff Login Password"
@@ -639,7 +702,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           <MuiButton 
             onClick={handleAddStaff} 
             variant="contained" 
-            disabled={!name || !staffRole || !salary || !username || !password}
+            disabled={!name || !staffRole || !salary || !username || !password || Boolean(usernameError) || usernameChecking}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
             Add Staff
