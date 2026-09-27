@@ -33,11 +33,13 @@ export async function proxy(request: NextRequest) {
     '/terms', 
     '/documentation', 
     '/reset-password',
+    '/setup/login',
     '/setup'
   ];
 
   const isPublicPath = 
     publicPaths.includes(path) || 
+    path.startsWith('/setup/login') ||
     path.startsWith('/api/') || 
     path.startsWith('/pay-invoice') || 
     path.includes('.');
