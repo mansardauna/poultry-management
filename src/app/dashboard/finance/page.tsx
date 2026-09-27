@@ -5,11 +5,18 @@ import type { Sale, Expense } from "@/data/types";
 
 import { getAuthUser } from '@/lib/auth';
 import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
+import { isRouteAllowedForRole } from '@/lib/permissions';
+import { AccessDenied } from '@/components/layout/AccessDenied';
 
 /** Exported function default */
 export default async function FinancePage() {
   const user = await getAuthUser();
   const role = user?.role || 'Staff';
+
+  if (!isRouteAllowedForRole('/dashboard/finance', role)) {
+    return <AccessDenied role={role} path="/dashboard/finance" />;
+  }
+
   const workspaceId = await getWorkspaceId();
 
   const [salesRaw, expensesRaw] = await Promise.all([

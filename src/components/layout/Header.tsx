@@ -64,25 +64,40 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const SEARCH_ITEMS = [
-    { name: 'Staff Management', desc: 'Add staff, set access roles, view team roster', href: '/dashboard/staff', category: 'Team & Staff', icon: '' },
-    { name: 'Sales & Merchant Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: '' },
-    { name: 'Chicken Batches & Flocks', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: '' },
-    { name: 'Egg Production & Collections', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: '' },
-    { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: '' },
-    { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: '' },
-    { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: '' },
-    { name: 'CCTV Camera Surveillance', desc: 'Pair cameras via WebRTC phone scanner or QR image', href: '/dashboard/cctv', category: 'Security & CCTV', icon: '' },
-    { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: '' },
-    { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: '' },
-    { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: '' },
-    { name: 'Enterprise Hub', desc: 'Cooperative management & multi-farm reports', href: '/dashboard/enterprise', category: 'Enterprise', icon: '' },
-    { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: '' },
+  const SUPERADMIN_SEARCH_ITEMS = [
+    { name: 'Platform Overview', desc: 'Real-time telemetry, revenue & tenant count', href: '/dashboard/admin?tab=overview', category: 'Platform Telemetry', icon: '📊' },
+    { name: 'Setup & Gateways', desc: 'Database drivers, Paystack, Stripe & Resend config', href: '/dashboard/admin?tab=setup', category: 'Infrastructure & APIs', icon: '⚙️' },
+    { name: 'Database Engine Driver', desc: 'MySQL / PostgreSQL / Supabase connection parameters', href: '/dashboard/admin?tab=setup', category: 'Database Config', icon: '🗄️' },
+    { name: 'Payment Gateways', desc: 'Paystack & Stripe API keys, webhooks, currency', href: '/dashboard/admin?tab=setup', category: 'Payment Gateways', icon: '💳' },
+    { name: 'Transactional Email (Resend)', desc: 'Resend API key and outbound sender email', href: '/dashboard/admin?tab=setup', category: 'Email Gateway', icon: '✉️' },
+    { name: 'SaaS Plans & Entitlements', desc: 'Free, Pro, Enterprise pricing & feature entitlements', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: '📦' },
+    { name: 'Landing Page CMS', desc: 'Hero headlines, announcement banner, support contacts', href: '/dashboard/admin?tab=cms', category: 'CMS & Content', icon: '✨' },
+    { name: 'Tenant Farm Organizations', desc: 'Directory of registered farm tenant workspaces', href: '/dashboard/admin?tab=orgs', category: 'Tenants & Farms', icon: '🏢' },
+    { name: 'Platform Settings & Governance', desc: 'System versioning, diagnostics and maintenance', href: '/dashboard/admin?tab=settings', category: 'System Governance', icon: '🛡️' },
+    { name: 'Super Admin Documentation', desc: 'Setup guide, installation docs and deployment', href: '/documentation/superadmin-setup-guide.html', category: 'Documentation', icon: '📖' },
   ];
 
+  const FARM_SEARCH_ITEMS = [
+    { name: 'Staff Management', desc: 'Add staff, set access roles, view team roster', href: '/dashboard/staff', category: 'Team & Staff', icon: '👥' },
+    { name: 'Sales & Merchant Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: '🛒' },
+    { name: 'Chicken Batches & Flocks', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: '🐔' },
+    { name: 'Egg Production & Collections', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: '🥚' },
+    { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: '🌾' },
+    { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: '💰' },
+    { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: '💊' },
+    { name: 'CCTV Camera Surveillance', desc: 'Pair cameras via WebRTC phone scanner or QR image', href: '/dashboard/cctv', category: 'Security & CCTV', icon: '📹' },
+    { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: '🏠' },
+    { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: '🔧' },
+    { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: '📇' },
+    { name: 'Enterprise Hub', desc: 'Cooperative management & multi-farm reports', href: '/dashboard/enterprise', category: 'Enterprise', icon: '🏢' },
+    { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: '⚙️' },
+  ];
+
+  const currentSearchItems = role === 'SuperAdmin' ? SUPERADMIN_SEARCH_ITEMS : FARM_SEARCH_ITEMS;
+
   const filteredSearchResults = searchQuery.trim() === '' 
-    ? SEARCH_ITEMS.slice(0, 4) 
-    : SEARCH_ITEMS.filter(item => 
+    ? currentSearchItems.slice(0, 5) 
+    : currentSearchItems.filter(item => 
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
         item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -93,25 +108,49 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     const query = searchQuery.toLowerCase().trim();
     if (!query) return;
 
-    const matched = SEARCH_ITEMS.find(item => 
-      item.name.toLowerCase().includes(query) || 
-      item.desc.toLowerCase().includes(query)
-    );
+    if (role === 'SuperAdmin') {
+      const matched = SUPERADMIN_SEARCH_ITEMS.find(item => 
+        item.name.toLowerCase().includes(query) || 
+        item.desc.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query)
+      );
 
-    if (matched) {
-      router.push(matched.href);
+      if (matched) {
+        router.push(matched.href);
+      } else if (query.includes('setup') || query.includes('gateway') || query.includes('db') || query.includes('database') || query.includes('mysql') || query.includes('paystack') || query.includes('stripe')) {
+        router.push('/dashboard/admin?tab=setup');
+      } else if (query.includes('plan') || query.includes('price') || query.includes('tier') || query.includes('entitlement')) {
+        router.push('/dashboard/admin?tab=plans');
+      } else if (query.includes('cms') || query.includes('landing') || query.includes('hero') || query.includes('banner')) {
+        router.push('/dashboard/admin?tab=cms');
+      } else if (query.includes('tenant') || query.includes('org') || query.includes('farm')) {
+        router.push('/dashboard/admin?tab=orgs');
+      } else if (query.includes('setting') || query.includes('govern') || query.includes('maintain')) {
+        router.push('/dashboard/admin?tab=settings');
+      } else {
+        router.push('/dashboard/admin?tab=overview');
+      }
     } else {
-      if (query.includes('egg')) router.push('/dashboard/eggs');
-      else if (query.includes('feed') || query.includes('wheat')) router.push('/dashboard/feed');
-      else if (query.includes('financ') || query.includes('money')) router.push('/dashboard/finance');
-      else if (query.includes('sale') || query.includes('invoice')) router.push('/dashboard/sales');
-      else if (query.includes('staff') || query.includes('user')) router.push('/dashboard/staff');
-      else if (query.includes('health') || query.includes('sick')) router.push('/dashboard/health');
-      else if (query.includes('inventor') || query.includes('equip')) router.push('/dashboard/inventory');
-      else if (query.includes('cctv') || query.includes('camera')) router.push('/dashboard/cctv');
-      else if (query.includes('hous') || query.includes('pen')) router.push('/dashboard/housing');
-      else if (query.includes('batch') || query.includes('chicken')) router.push('/dashboard/chickens');
-      else router.push('/dashboard');
+      const matched = FARM_SEARCH_ITEMS.find(item => 
+        item.name.toLowerCase().includes(query) || 
+        item.desc.toLowerCase().includes(query)
+      );
+
+      if (matched) {
+        router.push(matched.href);
+      } else {
+        if (query.includes('egg')) router.push('/dashboard/eggs');
+        else if (query.includes('feed') || query.includes('wheat')) router.push('/dashboard/feed');
+        else if (query.includes('financ') || query.includes('money')) router.push('/dashboard/finance');
+        else if (query.includes('sale') || query.includes('invoice')) router.push('/dashboard/sales');
+        else if (query.includes('staff') || query.includes('user')) router.push('/dashboard/staff');
+        else if (query.includes('health') || query.includes('sick')) router.push('/dashboard/health');
+        else if (query.includes('inventor') || query.includes('equip')) router.push('/dashboard/inventory');
+        else if (query.includes('cctv') || query.includes('camera')) router.push('/dashboard/cctv');
+        else if (query.includes('hous') || query.includes('pen')) router.push('/dashboard/housing');
+        else if (query.includes('batch') || query.includes('chicken')) router.push('/dashboard/chickens');
+        else router.push('/dashboard');
+      }
     }
 
     setIsSearchFocused(false);
@@ -240,7 +279,11 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
             className={`block w-full pl-10 pr-9 py-2 sm:py-2.5 border rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm font-medium transition-all shadow-sm ${
               isSearchFocused ? 'border-indigo-500 ring-2 ring-indigo-100' : 'border-slate-300'
             }`}
-            placeholder={`${texts.common.search || 'Search'} farm records, staff, batches, invoices...`}
+            placeholder={
+              role === 'SuperAdmin'
+                ? 'Search tenants, gateways, database, SaaS plans, CMS...'
+                : `${texts.common.search || 'Search'} farm records, staff, batches, invoices...`
+            }
             type="search"
             value={searchQuery}
             onFocus={() => setIsSearchFocused(true)}
@@ -285,7 +328,10 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               {filteredSearchResults.length === 0 ? (
                 <div className="py-8 text-center text-slate-400 text-xs">
                   <Search size={28} className="mx-auto mb-2 opacity-30 text-indigo-600" />
-                  No matching farm modules or records found for &quot;<strong>{searchQuery}</strong>&quot;.
+                  {role === 'SuperAdmin'
+                    ? <>No matching configuration, gateway, or tenant records found for &quot;<strong>{searchQuery}</strong>&quot;.</>
+                    : <>No matching farm modules or records found for &quot;<strong>{searchQuery}</strong>&quot;.</>
+                  }
                 </div>
               ) : (
                 filteredSearchResults.map((item) => (
@@ -337,20 +383,22 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* Time Range Filter */}
-        <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
-          <Calendar size={14} className="text-indigo-500 mr-2 ml-1" />
-          <select 
-            value={timeRange} 
-            onChange={(e) => setTimeRange(e.target.value as TimeRange)}
-            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-6 pl-0"
-          >
-            <option value="all">{texts.common.allTime}</option>
-            <option value="weekly">{texts.common.weekly}</option>
-            <option value="monthly">{texts.common.monthly}</option>
-            <option value="yearly">{texts.common.yearly}</option>
-          </select>
-        </div>
+        {/* Time Range Filter (Hidden for SuperAdmin) */}
+        {role !== 'SuperAdmin' && (
+          <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
+            <Calendar size={14} className="text-indigo-500 mr-2 ml-1" />
+            <select 
+              value={timeRange} 
+              onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+              className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-6 pl-0"
+            >
+              <option value="all">{texts.common.allTime}</option>
+              <option value="weekly">{texts.common.weekly}</option>
+              <option value="monthly">{texts.common.monthly}</option>
+              <option value="yearly">{texts.common.yearly}</option>
+            </select>
+          </div>
+        )}
 
         {/* Language Selection Dropdown */}
         <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">

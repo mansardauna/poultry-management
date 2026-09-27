@@ -1,4 +1,4 @@
-'use strict';
+import { redirect } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { SettingsClient } from "@/components/features/settings/SettingsClient";
 import { getWorkspaceId, getTenantWorkspaces } from "@/lib/workspace";
@@ -6,9 +6,14 @@ import { getAuthUser } from "@/lib/auth";
 
 /** Exported function default */
 export default async function SettingsPage() {
-  const workspaceId = await getWorkspaceId();
   const user = await getAuthUser();
   const role = user?.role || 'Staff';
+
+  if (role === 'SuperAdmin') {
+    redirect('/dashboard/admin?tab=settings');
+  }
+
+  const workspaceId = await getWorkspaceId();
 
   const alertSettings = (await supabase.from('alertSettings').select('*').eq('workspaceId', workspaceId).limit(1)).data?.[0] ?? {
     feedThresholdKg: 50,

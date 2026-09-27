@@ -46,9 +46,15 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
   }
 ];
 
+import { AccessDenied } from '@/components/layout/AccessDenied';
+
 export default async function AdminCmsPage() {
   const user = await getAuthUser();
   const userEmail = user?.email || '';
+
+  if (!user || user.role !== 'SuperAdmin') {
+    return <AccessDenied role={user?.role || 'Staff'} path="/dashboard/admin" />;
+  }
 
   let plans: SaasPlanConfig[] = DEFAULT_PLANS;
   try {

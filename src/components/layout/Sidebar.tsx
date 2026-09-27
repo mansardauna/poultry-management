@@ -28,7 +28,11 @@ import {
   Trash2,
   Building2,
   ShieldCheck,
-  Layout
+  Layout,
+  Layers,
+  Sparkles,
+  Server,
+  BookOpen
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
@@ -46,6 +50,15 @@ interface SidebarProps {
   tier?: string;
 }
 
+export const superAdminMenuItems = [
+  { name: 'Platform overview', tab: 'overview', href: '/dashboard/admin?tab=overview', icon: Activity },
+  { name: 'Setup & gateways', tab: 'setup', href: '/dashboard/admin?tab=setup', icon: Settings },
+  { name: 'SaaS plans & entitlements', tab: 'plans', href: '/dashboard/admin?tab=plans', icon: Layers },
+  { name: 'Landing page CMS', tab: 'cms', href: '/dashboard/admin?tab=cms', icon: Sparkles },
+  { name: 'Tenant farm organizations', tab: 'orgs', href: '/dashboard/admin?tab=orgs', icon: Building2 },
+  { name: 'Platform settings', tab: 'settings', href: '/dashboard/admin?tab=settings', icon: Server },
+];
+
 const menuItems = [
   { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Staff Management', href: '/dashboard/staff', icon: Users, roles: ['Admin', 'Manager'] },
@@ -59,8 +72,6 @@ const menuItems = [
   { name: 'Inventory', href: '/dashboard/inventory', icon: Wrench, roles: ['Admin', 'Manager'] },
   { name: 'Contacts', href: '/dashboard/contacts', icon: UserSquare2, roles: ['Admin', 'Manager'] },
   { name: 'Enterprise Hub', href: '/dashboard/enterprise', icon: Building2, roles: ['Admin', 'Manager'] },
-  { name: 'Super Admin Portal', href: '/dashboard/admin', icon: ShieldCheck, roles: ['SuperAdmin'] },
-  { name: 'Landing CMS', href: '/dashboard/admin?tab=cms', icon: Layout, roles: ['SuperAdmin'] },
   { name: 'CCTV Monitoring', href: '/dashboard/cctv', icon: Video, roles: ['Admin'] },
 ];
 
@@ -194,6 +205,21 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
       .catch(() => {});
   }, []);
 
+  const [tenantsCount, setTenantsCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (role === 'SuperAdmin') {
+      fetch('/api/setup')
+        .then(res => res.json())
+        .then(data => {
+          if (typeof data.tenantsCount === 'number') {
+            setTenantsCount(data.tenantsCount);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [role]);
+
   useEffect(() => {
     setCurrentTier(tier);
   }, [tier]);
@@ -278,7 +304,21 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         )}
       >
         <div className="flex items-center justify-between h-20 border-b border-indigo-900 px-4 relative">
-          {!isCollapsed ? (
+          {role === 'SuperAdmin' ? (
+            !isCollapsed ? (
+              <div className="flex items-center gap-3 px-2 py-2 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0 shadow-sm">
+                  <ShieldCheck size={22} />
+                </div>
+                <div className="flex flex-col truncate">
+                  <span className="font-bold text-white text-sm truncate">Super Admin</span>
+                  <span className="text-xs text-purple-300 font-medium">Master Console</span>
+                </div>
+              </div>
+            ) : (
+              <ShieldCheck size={28} className="text-purple-400 mx-auto" />
+            )
+          ) : !isCollapsed ? (
             <div className="relative flex-1">
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -396,121 +436,179 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto py-4 scrollbar-sidebar scrollbar-custom">
-          <nav className="space-y-1 px-3">
-            {visibleItems.map((item) => {
-              const isActive = item.href === '/dashboard' 
-                ? pathname === '/dashboard' 
-                : (pathname === item.href || pathname.startsWith(item.href + '/'));
-                
-              const normTier = (currentTier || '').toLowerCase();
-              const isEnterpriseTier = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
-              const isProTier = isEnterpriseTier || normTier === 'pro';
-              const isLocked = (item.name === 'CCTV Monitoring' && !isProTier) || (item.name === 'Enterprise Hub' && !isEnterpriseTier);
-                
-              return (
-                <div key={item.name}>
-                  <Link
-                    data-tour={
-                      item.name === 'Eggs' ? 'eggs-nav' : 
-                      item.name === 'Enterprise Hub' ? 'enterprise-nav' : 
-                      item.name === 'CCTV Monitoring' ? 'cctv-nav' : 
-                      item.name === 'Batches' ? 'sidebar-menu' : 
-                      undefined
-                    }
-                    href={isLocked ? (role === 'Staff' ? '#' : '/dashboard/settings?tab=subscription') : item.href}
-                    onClick={(e) => {
-                       if (isLocked) {
-                          e.preventDefault();
-                          if (role === 'Staff') {
-                            toast.error(`${item.name} is not enabled on your farm's plan. Please contact your farm administrator to upgrade.`);
-                          } else {
-                            toast.error(
-                              item.name === 'Enterprise Hub' 
-                                ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
-                                : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
-                            );
-                            router.push('/dashboard/settings?tab=subscription');
-                          }
-                          return;
-                       }
-                       setIsMobileOpen(false);
-                    }}
-                    className={clsx(
-                      isActive ? 'bg-indigo-800 text-white' : 'hover:bg-indigo-900 hover:text-white',
-                      isLocked && 'opacity-60 grayscale',
-                      'group flex items-center px-3 py-3 text-sm font-semibold rounded-md transition-colors relative',
-                      isCollapsed ? 'justify-center' : ''
-                    )}
-                    title={isCollapsed ? item.name : undefined}
-                  >
-                    <item.icon
-                      size={22}
-                      className={clsx(
-                        isActive ? 'text-blue-400' : 'text-indigo-400 group-hover:text-blue-300',
-                        'flex-shrink-0 transition-colors',
-                        isCollapsed ? 'mr-0' : 'mr-3'
-                      )}
-                    />
-                    {!isCollapsed && (
-                       <span className="truncate flex-1">
-                          {texts.menu[item.name] || item.name}
-                       </span>
-                    )}
-                    
-                    {!isCollapsed && isLocked && (
-                      <span className="text-[10px] uppercase font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">PRO</span>
-                    )}
-                    
-                    {/* Active Indicator */}
-                    {isActive && !isLocked && (
-                      <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
-                    )}
-                  </Link>
+          {role === 'SuperAdmin' ? (
+            <nav className="space-y-1.5 px-3">
+              {superAdminMenuItems.map((item) => {
+                const currentAdminTab = searchParams.get('tab') || 'overview';
+                const isActive = pathname === '/dashboard/admin' && currentAdminTab === item.tab;
+                const displayName = item.tab === 'orgs' 
+                  ? `Tenant farm organizations (${tenantsCount})`
+                  : item.name;
 
-                  {/* Enterprise Hub Sub-Menu Links */}
-                  {!isCollapsed && !isLocked && item.name === 'Enterprise Hub' && (pathname.startsWith('/dashboard/enterprise')) && (
-                    <div className="pl-9 pr-2 py-1.5 space-y-1 bg-indigo-950/60 text-[11px] font-medium border-l-2 border-purple-500/40 my-1">
-                      <Link 
-                        href="/dashboard/enterprise/branches" 
-                        onClick={() => setIsMobileOpen(false)}
-                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/branches') ? 'text-white font-bold' : 'text-indigo-200 hover:text-white'}`}
-                      >
-                        • Branch Matrix & Transfers
-                      </Link>
-                      <Link 
-                        href="/dashboard/enterprise/whitelabel" 
-                        onClick={() => setIsMobileOpen(false)}
-                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/whitelabel') ? 'text-white font-bold' : 'text-purple-300 hover:text-white'}`}
-                      >
-                        • White-Label & Themes
-                      </Link>
-                      <Link 
-                        href="/dashboard/enterprise/api" 
-                        onClick={() => setIsMobileOpen(false)}
-                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/api') ? 'text-white font-bold' : 'text-indigo-300 hover:text-white'}`}
-                      >
-                        • API Keys & Webhooks
-                      </Link>
-                      <Link 
-                        href="/dashboard/enterprise/vet" 
-                        onClick={() => setIsMobileOpen(false)}
-                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/vet') ? 'text-white font-bold' : 'text-emerald-300 hover:text-white'}`}
-                      >
-                        • 24/7 Vet Hotline
-                      </Link>
-                      <Link 
-                        href="/dashboard/enterprise/feed-pool" 
-                        onClick={() => setIsMobileOpen(false)}
-                        className={`block py-1 hover:underline transition-colors ${pathname.includes('/feed-pool') ? 'text-white font-bold' : 'text-amber-300 hover:text-white'}`}
-                      >
-                        • Wholesale Feed Pool
-                      </Link>
-                    </div>
+                return (
+                  <div key={item.name}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setIsMobileOpen(false)}
+                      className={clsx(
+                        isActive ? 'bg-purple-800 text-white shadow-sm' : 'hover:bg-indigo-900 hover:text-white text-indigo-100',
+                        'group flex items-center px-3 py-3 text-sm font-semibold rounded-md transition-colors relative',
+                        isCollapsed ? 'justify-center' : ''
+                      )}
+                      title={isCollapsed ? displayName : undefined}
+                    >
+                      <item.icon
+                        size={22}
+                        className={clsx(
+                          isActive ? 'text-purple-300' : 'text-indigo-400 group-hover:text-purple-300',
+                          'flex-shrink-0 transition-colors',
+                          isCollapsed ? 'mr-0' : 'mr-3'
+                        )}
+                      />
+                      {!isCollapsed && (
+                        <span className="truncate flex-1">{displayName}</span>
+                      )}
+                      {isActive && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-purple-400 rounded-r" />
+                      )}
+                    </Link>
+                  </div>
+                );
+              })}
+
+              <div className="pt-3 border-t border-indigo-900/60 mt-3">
+                <a
+                  href="/documentation/superadmin-setup-guide.html"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={clsx(
+                    'hover:bg-indigo-900 text-indigo-300 hover:text-white group flex items-center px-3 py-2.5 text-xs font-semibold rounded-md transition-colors',
+                    isCollapsed ? 'justify-center' : ''
                   )}
-                </div>
-              );
-            })}
-          </nav>
+                  title={isCollapsed ? 'Super admin docs' : undefined}
+                >
+                  <BookOpen size={18} className={clsx('text-indigo-400 group-hover:text-purple-300 flex-shrink-0', isCollapsed ? 'mr-0' : 'mr-3')} />
+                  {!isCollapsed && <span>Super admin docs</span>}
+                </a>
+              </div>
+            </nav>
+          ) : (
+            <nav className="space-y-1 px-3">
+              {visibleItems.map((item) => {
+                const isActive = item.href === '/dashboard' 
+                  ? pathname === '/dashboard' 
+                  : (pathname === item.href || pathname.startsWith(item.href + '/'));
+                  
+                const normTier = (currentTier || '').toLowerCase();
+                const isEnterpriseTier = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
+                const isProTier = isEnterpriseTier || normTier === 'pro';
+                const isLocked = (item.name === 'CCTV Monitoring' && !isProTier) || (item.name === 'Enterprise Hub' && !isEnterpriseTier);
+                  
+                return (
+                  <div key={item.name}>
+                    <Link
+                      data-tour={
+                        item.name === 'Eggs' ? 'eggs-nav' : 
+                        item.name === 'Enterprise Hub' ? 'enterprise-nav' : 
+                        item.name === 'CCTV Monitoring' ? 'cctv-nav' : 
+                        item.name === 'Batches' ? 'sidebar-menu' : 
+                        undefined
+                      }
+                      href={isLocked ? (role === 'Staff' ? '#' : '/dashboard/settings?tab=subscription') : item.href}
+                      onClick={(e) => {
+                         if (isLocked) {
+                            e.preventDefault();
+                            if (role === 'Staff') {
+                              toast.error(`${item.name} is not enabled on your farm's plan. Please contact your farm administrator to upgrade.`);
+                            } else {
+                              toast.error(
+                                item.name === 'Enterprise Hub' 
+                                  ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
+                                  : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
+                              );
+                              router.push('/dashboard/settings?tab=subscription');
+                            }
+                            return;
+                         }
+                         setIsMobileOpen(false);
+                      }}
+                      className={clsx(
+                        isActive ? 'bg-indigo-800 text-white' : 'hover:bg-indigo-900 hover:text-white',
+                        isLocked && 'opacity-60 grayscale',
+                        'group flex items-center px-3 py-3 text-sm font-semibold rounded-md transition-colors relative',
+                        isCollapsed ? 'justify-center' : ''
+                      )}
+                      title={isCollapsed ? item.name : undefined}
+                    >
+                      <item.icon
+                        size={22}
+                        className={clsx(
+                          isActive ? 'text-blue-400' : 'text-indigo-400 group-hover:text-blue-300',
+                          'flex-shrink-0 transition-colors',
+                          isCollapsed ? 'mr-0' : 'mr-3'
+                        )}
+                      />
+                      {!isCollapsed && (
+                         <span className="truncate flex-1">
+                            {texts.menu[item.name] || item.name}
+                         </span>
+                      )}
+                      
+                      {!isCollapsed && isLocked && (
+                        <span className="text-[10px] uppercase font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">PRO</span>
+                      )}
+                      
+                      {/* Active Indicator */}
+                      {isActive && !isLocked && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
+                      )}
+                    </Link>
+
+                    {/* Enterprise Hub Sub-Menu Links */}
+                    {!isCollapsed && !isLocked && item.name === 'Enterprise Hub' && (pathname.startsWith('/dashboard/enterprise')) && (
+                      <div className="pl-9 pr-2 py-1.5 space-y-1 bg-indigo-950/60 text-[11px] font-medium border-l-2 border-purple-500/40 my-1">
+                        <Link 
+                          href="/dashboard/enterprise/branches" 
+                          onClick={() => setIsMobileOpen(false)}
+                          className={`block py-1 hover:underline transition-colors ${pathname.includes('/branches') ? 'text-white font-bold' : 'text-indigo-200 hover:text-white'}`}
+                        >
+                          • Branch Matrix & Transfers
+                        </Link>
+                        <Link 
+                          href="/dashboard/enterprise/whitelabel" 
+                          onClick={() => setIsMobileOpen(false)}
+                          className={`block py-1 hover:underline transition-colors ${pathname.includes('/whitelabel') ? 'text-white font-bold' : 'text-purple-300 hover:text-white'}`}
+                        >
+                          • White-Label & Themes
+                        </Link>
+                        <Link 
+                          href="/dashboard/enterprise/api" 
+                          onClick={() => setIsMobileOpen(false)}
+                          className={`block py-1 hover:underline transition-colors ${pathname.includes('/api') ? 'text-white font-bold' : 'text-indigo-300 hover:text-white'}`}
+                        >
+                          • API Keys & Webhooks
+                        </Link>
+                        <Link 
+                          href="/dashboard/enterprise/vet" 
+                          onClick={() => setIsMobileOpen(false)}
+                          className={`block py-1 hover:underline transition-colors ${pathname.includes('/vet') ? 'text-white font-bold' : 'text-emerald-300 hover:text-white'}`}
+                        >
+                          • 24/7 Vet Hotline
+                        </Link>
+                        <Link 
+                          href="/dashboard/enterprise/feed-pool" 
+                          onClick={() => setIsMobileOpen(false)}
+                          className={`block py-1 hover:underline transition-colors ${pathname.includes('/feed-pool') ? 'text-white font-bold' : 'text-amber-300 hover:text-white'}`}
+                        >
+                          • Wholesale Feed Pool
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+          )}
         </div>
         {/* Plan Upgrade Banner in Sidebar - Only for Farm Admin */}
         {!isCollapsed && role === 'Admin' && currentTier === 'free' && (
@@ -541,29 +639,35 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </div>
         )}
 
-        {!isCollapsed && role === 'SuperAdmin' && (
-          <div className="mx-3 mb-2 p-3 bg-indigo-950/80 border border-indigo-500/40 rounded-xl flex items-center gap-2.5">
-            <ShieldCheck size={18} className="text-indigo-400 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-indigo-300 truncate">Super admin control</p>
-              <p className="text-[10px] text-indigo-400/80 truncate">System management & CMS</p>
-            </div>
-          </div>
-        )}
-
         <div className="p-4 border-t border-indigo-900 flex flex-col gap-2">
-          <Link
-            href="/dashboard/settings"
-            onClick={() => setIsMobileOpen(false)}
-            className={clsx(
-              "group flex items-center px-3 py-3 text-sm font-semibold rounded-md hover:bg-indigo-900 hover:text-white transition-colors",
-              isCollapsed ? 'justify-center' : ''
-            )}
-            title={isCollapsed ? texts.menu.Settings : undefined}
-          >
-            <Settings size={22} className={clsx("text-indigo-400 group-hover:text-blue-300 flex-shrink-0 transition-colors", isCollapsed ? 'mr-0' : 'mr-3')} />
-            {!isCollapsed && texts.menu.Settings}
-          </Link>
+          {role === 'SuperAdmin' ? (
+            <Link
+              href="/dashboard/admin?tab=settings"
+              onClick={() => setIsMobileOpen(false)}
+              className={clsx(
+                "group flex items-center px-3 py-3 text-sm font-semibold rounded-md hover:bg-indigo-900 hover:text-white transition-colors",
+                pathname === '/dashboard/admin' && searchParams.get('tab') === 'settings' ? 'bg-purple-800 text-white' : 'text-indigo-200',
+                isCollapsed ? 'justify-center' : ''
+              )}
+              title={isCollapsed ? 'Platform settings' : undefined}
+            >
+              <Server size={22} className={clsx("text-indigo-400 group-hover:text-purple-300 flex-shrink-0 transition-colors", isCollapsed ? 'mr-0' : 'mr-3')} />
+              {!isCollapsed && 'Platform settings'}
+            </Link>
+          ) : (
+            <Link
+              href="/dashboard/settings"
+              onClick={() => setIsMobileOpen(false)}
+              className={clsx(
+                "group flex items-center px-3 py-3 text-sm font-semibold rounded-md hover:bg-indigo-900 hover:text-white transition-colors",
+                isCollapsed ? 'justify-center' : ''
+              )}
+              title={isCollapsed ? texts.menu.Settings : undefined}
+            >
+              <Settings size={22} className={clsx("text-indigo-400 group-hover:text-blue-300 flex-shrink-0 transition-colors", isCollapsed ? 'mr-0' : 'mr-3')} />
+              {!isCollapsed && texts.menu.Settings}
+            </Link>
+          )}
           <button
             onClick={handleLogout}
             className={clsx(

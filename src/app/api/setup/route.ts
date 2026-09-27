@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import { supabase as envServiceRoleClient } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 import { isSystemInstalled } from '@/lib/dbCheck';
+import { loadDatabaseConfig } from '@/lib/authdb';
 import { APP_VERSION } from '@/lib/version';
 
 /**
@@ -86,6 +87,23 @@ export async function GET() {
       } catch (_e) {}
     }
 
+    // Inspect active real file-based / runtime database configuration
+    const activeEngineConfig = await loadDatabaseConfig();
+    if (activeEngineConfig?.engine) {
+      databaseConfig.databaseType = activeEngineConfig.engine;
+      if (activeEngineConfig.engine === 'mysql' && activeEngineConfig.mysql) {
+        databaseConfig.mysqlHost = activeEngineConfig.mysql.host || 'localhost';
+        databaseConfig.mysqlPort = activeEngineConfig.mysql.port || 3306;
+        databaseConfig.mysqlDatabase = activeEngineConfig.mysql.database || 'poultry_db';
+        databaseConfig.mysqlUser = activeEngineConfig.mysql.user || 'root';
+      } else if (activeEngineConfig.engine === 'postgres' && activeEngineConfig.postgres) {
+        databaseConfig.postgresHost = activeEngineConfig.postgres.host || 'localhost';
+        databaseConfig.postgresPort = activeEngineConfig.postgres.port || 5432;
+        databaseConfig.postgresDb = activeEngineConfig.postgres.database || 'poultry_db';
+        databaseConfig.postgresUser = activeEngineConfig.postgres.user || 'postgres';
+      }
+    }
+
     // 4. Check Super Admin exists
     const { data: superAdmin } = await envServiceRoleClient
       .from('users')
@@ -105,6 +123,13 @@ export async function GET() {
       };
     }
 
+    // 5. Query tenant organizations count
+    let tenantsCount = 0;
+    try {
+      const { data: orgData } = await envServiceRoleClient.from('organizations').select('id');
+      if (orgData) tenantsCount = orgData.length;
+    } catch (_e) {}
+
     return NextResponse.json({
       isDatabaseConnected,
       isSetupCompleted: gateways.isSetupCompleted || Boolean(superAdmin),
@@ -112,6 +137,7 @@ export async function GET() {
       superAdminEmail: superAdmin?.email || superAdmin?.username || 'owner@poultry.com',
       gateways,
       databaseConfig,
+      tenantsCount,
     });
   } catch (err: unknown) {
     return NextResponse.json({

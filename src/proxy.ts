@@ -89,21 +89,43 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-current-path', path);
+
   if (user || roleCookie) {
     const email = user?.email || request.cookies.get('pfms_email')?.value || '';
     const isSuperAdmin = email === 'superadmin@pfms.com' || roleCookie === 'SuperAdmin';
     const userRole = isSuperAdmin ? 'SuperAdmin' : (roleCookie || user?.user_metadata?.role || 'Admin');
     
-    supabaseResponse.headers.set('x-user-role', userRole)
-    supabaseResponse.headers.set('x-user-email', email)
+    requestHeaders.set('x-user-role', userRole);
+    requestHeaders.set('x-user-email', email);
+    supabaseResponse.headers.set('x-user-role', userRole);
+    supabaseResponse.headers.set('x-user-email', email);
     
-    const tier = request.cookies.get('pfms_tier')?.value || 'free'
-    const orgId = orgIdCookie || ''
-    supabaseResponse.headers.set('x-user-tier', tier)
-    supabaseResponse.headers.set('x-org-id', orgId)
+    const tier = request.cookies.get('pfms_tier')?.value || 'free';
+    const orgId = orgIdCookie || '';
+    requestHeaders.set('x-user-tier', tier);
+    requestHeaders.set('x-org-id', orgId);
+    supabaseResponse.headers.set('x-user-tier', tier);
+    supabaseResponse.headers.set('x-org-id', orgId);
   }
 
-  return supabaseResponse
+  // Create response with modified request headers
+  const responseWithHeaders = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+
+  // Copy cookies and response headers
+  supabaseResponse.cookies.getAll().forEach(c => {
+    responseWithHeaders.cookies.set(c.name, c.value);
+  });
+  supabaseResponse.headers.forEach((val, key) => {
+    responseWithHeaders.headers.set(key, val);
+  });
+
+  return responseWithHeaders;
 }
 
 export const config = {

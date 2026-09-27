@@ -4,6 +4,8 @@ import { StaffClient } from "@/components/features/staff/StaffClient";
 import type { Staff, StaffTask } from "@/data/types";
 import { getAuthUser } from '@/lib/auth';
 import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
+import { isRouteAllowedForRole } from '@/lib/permissions';
+import { AccessDenied } from '@/components/layout/AccessDenied';
 
 /** Exported function default */
 import { headers, cookies } from 'next/headers';
@@ -11,6 +13,11 @@ import { headers, cookies } from 'next/headers';
 export default async function StaffPage() {
   const user = await getAuthUser();
   const role = user?.role || 'Staff';
+
+  if (!isRouteAllowedForRole('/dashboard/staff', role)) {
+    return <AccessDenied role={role} path="/dashboard/staff" />;
+  }
+
   const workspaceId = await getWorkspaceId();
   const reqHeaders = await headers();
   const cookieStore = await cookies();

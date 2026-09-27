@@ -1,7 +1,17 @@
 'use strict';
 import { redirect } from 'next/navigation';
+import { getAuthUser } from '@/lib/auth';
+import { isRouteAllowedForRole } from '@/lib/permissions';
+import { AccessDenied } from '@/components/layout/AccessDenied';
 
 export default async function EnterprisePage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const user = await getAuthUser();
+  const role = user?.role || 'Staff';
+
+  if (!isRouteAllowedForRole('/dashboard/enterprise', role)) {
+    return <AccessDenied role={role} path="/dashboard/enterprise" />;
+  }
+
   const params = await searchParams;
   const tab = params?.tab;
 

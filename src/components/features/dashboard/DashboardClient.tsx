@@ -475,11 +475,11 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {/* Production Charts */}
         <Card className="flex flex-col justify-between">
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+            <CardTitle className="text-sm font-semibold text-slate-700">
               {texts.dashboard.eggProductionVolumeChart} & Sales Trend
             </CardTitle>
             {isPro && (
-              <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono uppercase">
+              <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
                 Live Data
               </span>
             )}
@@ -488,8 +488,8 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
             {isFree ? (
               <div className="p-8 text-center rounded-2xl border border-slate-200 bg-white h-full flex flex-col justify-center items-center space-y-4">
                 <div className="space-y-2 max-w-md">
-                  <span className="bg-amber-100 text-amber-800 font-extrabold text-[10px] uppercase px-3 py-1 rounded-full border border-amber-200">
-                    PRO & ENTERPRISE DASHBOARD FEATURE
+                  <span className="bg-amber-100 text-amber-800 font-extrabold text-[10px] px-3 py-1 rounded-full border border-amber-200">
+                    Pro & Enterprise Feature
                   </span>
                   <h3 className="text-lg font-extrabold text-slate-900 pt-1">Production Analytics & Financial Charts Locked</h3>
                   <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -501,7 +501,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                 {userRole !== 'Staff' && (
                   <button 
                     onClick={() => router.push('/dashboard/settings?tab=subscription')}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl shadow cursor-pointer transition-all inline-flex items-center gap-2"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow cursor-pointer transition-all inline-flex items-center gap-2"
                   >
                     <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
                   </button>
@@ -516,7 +516,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                     <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
                     <Tooltip 
                       contentStyle={{ borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                      labelClassName="text-slate-800 text-xs uppercase font-bold"
+                      labelClassName="text-slate-800 text-xs font-bold"
                     />
                     <Legend />
                     <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name="Good Eggs Collected" />
@@ -531,7 +531,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {/* Multi-Farm Production & Vet Inspection Calendar */}
         <Card className="flex flex-col justify-between border border-slate-200 bg-white rounded-2xl shadow-sm">
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-bold uppercase text-slate-900 flex items-center gap-2">
+            <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <Calendar size={18} className="text-indigo-600" /> Multi-Farm Production & Schedule
             </CardTitle>
             <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2.5 py-1 rounded font-mono">
@@ -542,7 +542,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
               <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
-                <span className="text-[9px] font-extrabold uppercase text-emerald-700 block tracking-wider">VACCINATION & HEALTH</span>
+                <span className="text-[10px] font-bold text-emerald-700 block">Vaccination & Health</span>
                 <p className="text-slate-900 font-bold text-sm">
                   {data.batches[0] ? `${data.batches[0].breed} (${data.batches[0].type || 'Layers'})` : 'Flock Health Routine'}
                 </p>
@@ -552,7 +552,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               </div>
 
               <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
-                <span className="text-[9px] font-extrabold uppercase text-indigo-700 block tracking-wider">FEED STOCK LEVEL</span>
+                <span className="text-[10px] font-bold text-indigo-700 block">Feed Stock Level</span>
                 <p className="text-slate-900 font-bold text-sm">
                   {data.feeds[0] ? `${data.feeds[0].quantityKg}kg ${data.feeds[0].type}` : 'Feed Inventory Normal'}
                 </p>
@@ -562,7 +562,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               </div>
 
               <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/50 space-y-1">
-                <span className="text-[9px] font-extrabold uppercase text-purple-700 block tracking-wider">VET & DIAGNOSTICS</span>
+                <span className="text-[10px] font-bold text-purple-700 block">Vet & Diagnostics</span>
                 <p className="text-slate-900 font-bold text-sm">
                   {data.alertLogs[0] ? data.alertLogs[0].message : 'Scheduled Farm Audit'}
                 </p>
@@ -572,7 +572,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               </div>
 
               <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
-                <span className="text-[9px] font-extrabold uppercase text-amber-800 block tracking-wider">SALES DISPATCH LOG</span>
+                <span className="text-[10px] font-bold text-amber-800 block">Sales Dispatch Log</span>
                 <p className="text-slate-900 font-bold text-sm">
                   {data.sales[0] ? `${data.sales[0].customerName} (₦${data.sales[0].totalAmount.toLocaleString()})` : 'Recent Wholesale Dispatch'}
                 </p>
@@ -602,7 +602,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {/* Weekly Comparative Analytics Card */}
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+            <CardTitle className="text-sm font-semibold text-slate-700">
               {texts.dashboard.weeklyComparativeAnalytics}
             </CardTitle>
           </CardHeader>
@@ -635,7 +635,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {/* Break-Even Widget */}
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider">
+            <CardTitle className="text-sm font-semibold text-slate-700">
               {texts.dashboard.breakEvenAnalysis}
             </CardTitle>
           </CardHeader>
@@ -663,7 +663,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
             </div>
 
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-              <p className="text-[10px] font-bold text-slate-800 uppercase">{texts.dashboard.currentInventoryAudit}</p>
+              <p className="text-[10px] font-bold text-slate-800">{texts.dashboard.currentInventoryAudit}</p>
               <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
                 Feed Stock: <strong>{totalFeedKg} kg</strong> | Total Birds: <strong>{totalChickens}</strong>
               </p>
@@ -674,7 +674,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {/* Managed Branches / Farms */}
         <Card>
           <CardHeader className="border-b border-slate-100">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <MapPin size={18} className="text-indigo-650" /> {texts.dashboard.managedBranchesFarms} ({workspaces.length})
             </CardTitle>
           </CardHeader>
@@ -710,12 +710,12 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {/* Dynamic Alerts System Log Queue */}
         <Card className="lg:col-span-2">
           <CardHeader className="border-b border-slate-100 flex items-center justify-between">
-            <CardTitle className="text-sm uppercase text-slate-700 tracking-wider flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <span className="flex items-center gap-2">
                 <Bell size={18} className="text-red-500 animate-swing" /> {texts.dashboard.alertLogsQueue}
               </span>
               {(isFeedCritical || hasCctvFailures) && (
-                <span className="rounded-full bg-red-500 px-2 py-1 text-[10px]  uppercase text-white">
+                <span className="rounded-full bg-red-500 px-2 py-1 text-[10px] uppercase text-white">
                   Notification
                 </span>
               )}
@@ -773,7 +773,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           {/* Manager Checklist Queue */}
           <Card>
             <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-sm uppercase text-slate-700 tracking-wider flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <CheckSquare size={18} className="text-indigo-650" /> {texts.dashboard.shiftChecklistQueue}
               </CardTitle>
             </CardHeader>
@@ -809,7 +809,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           {(userRole === 'Admin' || userRole === 'Manager') && (
             <Card className={isPayday ? "border-amber-300 shadow-md shadow-amber-100" : ""}>
               <CardHeader className={`border-b ${isPayday ? 'bg-amber-50 border-amber-100' : 'border-slate-100'}`}>
-                <CardTitle className={`text-sm uppercase tracking-wider flex items-center justify-between ${isPayday ? 'text-amber-700' : 'text-slate-700'}`}>
+                <CardTitle className={`text-sm font-semibold flex items-center justify-between ${isPayday ? 'text-amber-700' : 'text-slate-700'}`}>
                   <span className="flex items-center gap-2">
                     <Coins size={18} className={isPayday ? "text-amber-600" : "text-indigo-650"} /> {texts.dashboard.salaryPayroll}
                   </span>

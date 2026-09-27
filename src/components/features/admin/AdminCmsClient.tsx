@@ -488,88 +488,14 @@ export function AdminCmsClient({
         </div>
       )}
 
-      {/* Main Portal Navigation Tabs */}
-      <div className="flex border-b border-slate-200 overflow-x-auto gap-2 scrollbar-none pb-1">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'overview'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
-          }`}
-        >
-          <Activity size={16} />
-          <span>Platform overview</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('setup')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'setup'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
-          }`}
-        >
-          <Settings size={16} />
-          <span>Setup & gateways</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('plans')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'plans'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
-          }`}
-        >
-          <Layers size={16} />
-          <span>SaaS plans & entitlements</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('cms')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'cms'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
-          }`}
-        >
-          <Sparkles size={16} />
-          <span>Landing page CMS</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('orgs')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'orgs'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
-          }`}
-        >
-          <Building2 size={16} />
-          <span>Tenant farm organizations ({allOrgs.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'settings'
-              ? 'border-purple-600 text-purple-700 bg-purple-50/50 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-t-xl'
-          }`}
-        >
-          <Server size={16} />
-          <span>System governance</span>
-        </button>
-      </div>
-
+      {/* Active Tab Content (Controlled from Sidebar) */}
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border border-purple-200 bg-purple-50/30">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-extrabold uppercase text-purple-900 flex items-center justify-between">
+                <CardTitle className="text-xs font-bold text-purple-900 flex items-center justify-between">
                   <span>Monthly Recurring Revenue</span>
                   <DollarSign size={18} className="text-purple-600" />
                 </CardTitle>
@@ -584,7 +510,7 @@ export function AdminCmsClient({
 
             <Card className="border border-indigo-200 bg-indigo-50/30">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-extrabold uppercase text-indigo-900 flex items-center justify-between">
+                <CardTitle className="text-xs font-bold text-indigo-900 flex items-center justify-between">
                   <span>Tenant Farm Workspaces</span>
                   <Building2 size={18} className="text-indigo-600" />
                 </CardTitle>
@@ -599,13 +525,15 @@ export function AdminCmsClient({
 
             <Card className="border border-emerald-200 bg-emerald-50/30">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-extrabold uppercase text-emerald-900 flex items-center justify-between">
+                <CardTitle className="text-xs font-bold text-emerald-900 flex items-center justify-between">
                   <span>Database Engine Driver</span>
                   <Database size={18} className="text-emerald-600" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-extrabold text-emerald-950 uppercase">{databaseType}</div>
+                <div className="text-2xl font-extrabold text-emerald-950">
+                  {databaseType === 'mysql' ? 'MySQL / MariaDB' : databaseType === 'postgres' ? 'PostgreSQL' : 'Supabase Cloud'}
+                </div>
                 <p className="text-xs text-emerald-700 font-medium mt-1">
                   {dbStatus?.connected ? '✓ Real-time status live' : '⚠ Connection check required'}
                 </p>
@@ -614,7 +542,7 @@ export function AdminCmsClient({
 
             <Card className="border border-amber-200 bg-amber-50/30">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-extrabold uppercase text-amber-900 flex items-center justify-between">
+                <CardTitle className="text-xs font-bold text-amber-900 flex items-center justify-between">
                   <span>Platform Application Title</span>
                   <ShieldCheck size={18} className="text-amber-600" />
                 </CardTitle>
@@ -634,7 +562,9 @@ export function AdminCmsClient({
               {dbStatus?.connected ? <CheckCircle size={20} className="text-emerald-600" /> : <AlertCircle size={20} className="text-red-600" />}
               <div>
                 <span className="font-bold block text-sm">{dbStatus?.message || 'Database status unknown'}</span>
-                <span className="text-[11px] opacity-80">Engine: {databaseType.toUpperCase()} Driver</span>
+                <span className="text-[11px] opacity-80">
+                  Engine: {databaseType === 'mysql' ? 'MySQL / MariaDB' : databaseType === 'postgres' ? 'PostgreSQL' : 'Supabase Cloud'} Driver
+                </span>
               </div>
             </div>
 
@@ -858,7 +788,7 @@ export function AdminCmsClient({
               </div>
 
               <div className="relative">
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">
                   Update Super Admin Password (Optional)
                 </label>
                 <input
@@ -965,7 +895,7 @@ export function AdminCmsClient({
             <button
               onClick={handleSaveSetupParams}
               disabled={isSaving}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider px-8 py-4 rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-8 py-3.5 rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
               <span>Save & Apply Setup Configuration</span>
@@ -1002,7 +932,7 @@ export function AdminCmsClient({
                 <CardContent className="p-6 space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Monthly ({currencySymbol})</label>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Monthly ({currencySymbol})</label>
                       <input
                         type="number"
                         value={plan.priceMonthly}
@@ -1011,7 +941,7 @@ export function AdminCmsClient({
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Annual ({currencySymbol})</label>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Annual ({currencySymbol})</label>
                       <input
                         type="number"
                         value={plan.priceAnnual}
@@ -1151,7 +1081,7 @@ export function AdminCmsClient({
 
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 font-extrabold uppercase text-slate-600">
+              <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
                 <tr>
                   <th className="p-4">Organization Name</th>
                   <th className="p-4">Subscription Plan</th>
@@ -1169,12 +1099,12 @@ export function AdminCmsClient({
                     <tr key={org.id} className="hover:bg-slate-50/80">
                       <td className="p-4 font-bold text-slate-900">{org.name}</td>
                       <td className="p-4">
-                        <span className="bg-purple-100 text-purple-800 text-[11px] font-extrabold px-2.5 py-0.5 rounded uppercase">
+                        <span className="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded capitalize">
                           {org.subscriptionTier || 'Free Starter'}
                         </span>
                       </td>
                       <td className="p-4">
-                        <span className="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-2.5 py-0.5 rounded uppercase">
+                        <span className="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded capitalize">
                           {org.subscriptionStatus || 'Active'}
                         </span>
                       </td>
@@ -1203,14 +1133,16 @@ export function AdminCmsClient({
 
             <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-                <h4 className="font-extrabold text-xs text-slate-900 uppercase">Database Driver Status</h4>
-                <p className="text-xs text-slate-500 font-mono">Engine: {databaseType.toUpperCase()}</p>
+                <h4 className="font-bold text-xs text-slate-900">Database Driver Status</h4>
+                <p className="text-xs text-slate-600 font-mono">
+                  Engine: {databaseType === 'mysql' ? 'MySQL / MariaDB' : databaseType === 'postgres' ? 'PostgreSQL' : 'Supabase Cloud'}
+                </p>
                 <p className="text-xs text-emerald-700 font-bold">Status: Healthy & Active</p>
               </div>
 
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-                <h4 className="font-extrabold text-xs text-slate-900 uppercase">Deployment Environment</h4>
-                <p className="text-xs text-slate-500 font-mono">Node.js Next.js 16 (Turbopack)</p>
+                <h4 className="font-bold text-xs text-slate-900">Deployment Environment</h4>
+                <p className="text-xs text-slate-600 font-mono">Node.js Next.js 16 (Production)</p>
                 <p className="text-xs text-indigo-700 font-bold">Mode: Production Self-Hosted</p>
               </div>
             </div>

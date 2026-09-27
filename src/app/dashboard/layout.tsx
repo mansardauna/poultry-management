@@ -7,6 +7,9 @@ import { Toaster } from 'react-hot-toast';
 import { AiLogger } from "@/components/features/ai/AiLogger";
 import { Suspense } from 'react';
 
+import { isRouteAllowedForRole } from "@/lib/permissions";
+import { AccessDenied } from "@/components/layout/AccessDenied";
+
 /**
  * DashboardLayout wraps all pages inside the `(dashboard)` route group.
  * It reads the `pfms_role` cookie or `x-user-role` header to determine the current user's role
@@ -23,6 +26,9 @@ export default async function DashboardLayout({
   const headersList = await headers();
   const role = headersList.get('x-user-role') || cookieStore.get('pfms_role')?.value || 'Staff';
   const tier = headersList.get('x-user-tier') || cookieStore.get('pfms_tier')?.value || 'free';
+  const currentPath = headersList.get('x-current-path') || headersList.get('x-middleware-request-x-current-path') || '';
+
+  const isAllowed = !currentPath || isRouteAllowedForRole(currentPath, role);
 
   return (
     <SidebarProvider>
@@ -52,7 +58,7 @@ export default async function DashboardLayout({
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <Header role={role} tier={tier} />
           <main className="flex-1 overflow-y-auto p-4 md:p-8">
-            {children}
+            {isAllowed ? children : <AccessDenied role={role} path={currentPath} />}
           </main>
         </div>
         <AiLogger />
