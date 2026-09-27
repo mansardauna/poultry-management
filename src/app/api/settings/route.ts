@@ -58,6 +58,21 @@ export async function POST(request: Request) {
       await supabase.from('systemSettings').delete().eq('workspaceId', workspaceId);
       await supabase.from('systemSettings').insert([newSystemSettings]);
 
+      if (body.farmName && typeof body.farmName === 'string') {
+        const trimmedName = body.farmName.trim();
+        if (trimmedName) {
+          // Update current workspace name in workspaces table
+          await supabase.from('workspaces').update({ name: trimmedName }).eq('id', workspaceId);
+          // Also update organization name if this workspace matches an organization
+          let orgId = '';
+          const match = workspaceId.match(/org_[a-zA-Z0-9]+/);
+          if (match) orgId = match[0];
+          if (orgId) {
+            await supabase.from('organizations').update({ name: trimmedName }).eq('id', orgId);
+          }
+        }
+      }
+
       return NextResponse.json({ success: true, systemSettings: newSystemSettings });
     }
 

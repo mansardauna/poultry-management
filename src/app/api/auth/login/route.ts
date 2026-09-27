@@ -45,7 +45,14 @@ export async function POST(request: Request) {
       if (isPasswordValid) {
         const staffRole = userRec.role || 'Admin';
         const targetWorkspaceId = userRec.workspaceId || `main-org_${userRec.id}`;
-        const orgId = userRec.orgId || (targetWorkspaceId.startsWith('main-') ? targetWorkspaceId.slice(5) : 'org_owner_main');
+        let orgId = userRec.orgId || '';
+        if (!orgId && targetWorkspaceId) {
+          const match = targetWorkspaceId.match(/org_[a-zA-Z0-9]+/);
+          if (match) orgId = match[0];
+        }
+        if (!orgId) {
+          orgId = targetWorkspaceId.startsWith('main-') ? targetWorkspaceId.slice(5) : 'org_owner_main';
+        }
         const tier = userRec.subscriptionTier || (emailInput === 'owner@poultry.com' ? 'pro' : 'free');
 
         const response = NextResponse.json({ ok: true, role: staffRole });
@@ -85,11 +92,23 @@ export async function POST(request: Request) {
 
       if (isPasswordValid) {
         const staffRole = staffRec.role || 'Staff';
-        const assignedBranch = (Array.isArray(staffRec.assignedBranches) && staffRec.assignedBranches[0]) || staffRec.workspaceId || 'main-org_owner_main';
+        let assignedBranch = staffRec.workspaceId || 'main-org_owner_main';
+        if (Array.isArray(staffRec.assignedBranches) && staffRec.assignedBranches[0]) {
+          assignedBranch = staffRec.assignedBranches[0];
+        } else if (typeof staffRec.assignedBranches === 'string') {
+          try {
+            const parsed = JSON.parse(staffRec.assignedBranches);
+            if (Array.isArray(parsed) && parsed[0]) assignedBranch = parsed[0];
+          } catch {}
+        }
+        let staffOrgId = '';
+        const match = (assignedBranch || staffRec.workspaceId || '').match(/org_[a-zA-Z0-9]+/);
+        if (match) staffOrgId = match[0];
+        if (!staffOrgId) staffOrgId = 'org_owner_main';
 
         const response = NextResponse.json({ ok: true, role: staffRole });
         response.cookies.set('pfms_workspace', assignedBranch, { path: '/' });
-        response.cookies.set('pfms_org_id', 'org_owner_main', { path: '/' });
+        response.cookies.set('pfms_org_id', staffOrgId, { path: '/' });
         response.cookies.set('pfms_tier', 'free', { path: '/', maxAge: 60 * 60 * 24 * 365 });
         response.cookies.set('pfms_role', staffRole, { path: '/' });
         response.cookies.set('pfms_email', staffRec.username || staffRec.name || emailInput, { path: '/' });

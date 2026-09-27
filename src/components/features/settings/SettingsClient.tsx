@@ -100,7 +100,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   
   // Real Dynamic Payment Methods & Subscription History
   const [paymentMethods, setPaymentMethods] = useState<any[]>(initialPaymentMethods);
-  const { activeWorkspace } = useWorkspace();
+  const { activeWorkspace, updateWorkspace } = useWorkspace();
   const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>(initialSubscriptionHistory);
 
   // Add Card Modal State
@@ -273,7 +273,12 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         })
       });
       if (res.ok) {
-        toast.success('System & payment gateway settings saved!');
+        if (activeWorkspace && farmName.trim() && farmName.trim() !== activeWorkspace.name) {
+          try {
+            await updateWorkspace(activeWorkspace.id, farmName.trim(), activeWorkspace.type);
+          } catch {}
+        }
+        toast.success('System & branch settings saved!');
         router.refresh();
       }
       else toast.error('Failed to save system settings');

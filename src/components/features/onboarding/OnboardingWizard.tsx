@@ -316,10 +316,12 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         localStorage.setItem('pfms_branch_setup_completed', 'true');
         localStorage.setItem('pfms_onboarded_dismissed', 'true');
         localStorage.setItem('pfms_starter_guide_read', 'true');
+        localStorage.setItem('pfms_widget_dismissed', 'true');
         localStorage.removeItem(draftKey);
         localStorage.removeItem('pfms_onboarding_draft');
         localStorage.removeItem(`pfms_onboarding_step_${currentWsId}`);
         localStorage.removeItem('pfms_onboarding_current_step');
+        window.dispatchEvent(new CustomEvent('pfms_onboarding_updated'));
       }
 
       toast.success('Farm onboarding setup submitted successfully.');

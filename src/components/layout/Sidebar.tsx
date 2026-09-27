@@ -320,25 +320,41 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             )
           ) : !isCollapsed ? (
             <div className="relative flex-1">
-              <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full flex items-center justify-between py-2 px-2 hover:bg-indigo-900 rounded-md transition-colors text-left"
-              >
-                <div className="flex items-center gap-2 truncate">
-                  {whiteLabel.logoUrl ? (
-                    <img src={whiteLabel.logoUrl} alt="Logo" className="w-6 h-6 rounded object-cover flex-shrink-0" />
-                  ) : (
-                    <Box size={24} className="text-blue-400 flex-shrink-0" />
-                  )}
-                  <div className="flex flex-col truncate">
-                    <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Main'}</span>
-                    <span className="text-xs text-indigo-400">{whiteLabel.coopName || activeWorkspace?.type || 'Farm Branch'}</span>
+              {role === 'Staff' && workspaces.length <= 1 ? (
+                <div className="w-full flex items-center justify-between py-2 px-2 rounded-md text-left">
+                  <div className="flex items-center gap-2 truncate">
+                    {whiteLabel.logoUrl ? (
+                      <img src={whiteLabel.logoUrl} alt="Logo" className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                    ) : (
+                      <Box size={24} className="text-blue-400 flex-shrink-0" />
+                    )}
+                    <div className="flex flex-col truncate">
+                      <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Assigned Branch'}</span>
+                      <span className="text-xs text-indigo-400">Assigned Branch</span>
+                    </div>
                   </div>
                 </div>
-                <ChevronDown size={16} className={clsx("text-indigo-400 transition-transform", isDropdownOpen && "rotate-180")} />
-              </button>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full flex items-center justify-between py-2 px-2 hover:bg-indigo-900 rounded-md transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      {whiteLabel.logoUrl ? (
+                        <img src={whiteLabel.logoUrl} alt="Logo" className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                      ) : (
+                        <Box size={24} className="text-blue-400 flex-shrink-0" />
+                      )}
+                      <div className="flex flex-col truncate">
+                        <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Main'}</span>
+                        <span className="text-xs text-indigo-400">{whiteLabel.coopName || activeWorkspace?.type || 'Farm Branch'}</span>
+                      </div>
+                    </div>
+                    <ChevronDown size={16} className={clsx("text-indigo-400 transition-transform", isDropdownOpen && "rotate-180")} />
+                  </button>
 
-              {isDropdownOpen && (
+                  {isDropdownOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-xl py-2 z-50 text-slate-800 max-h-64 overflow-y-auto scrollbar-sidebar">
                   <div className="px-3 py-1 text-xs font-semibold text-slate-500">
                     Your farms
@@ -416,7 +432,9 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                   )}
                 </div>
               )}
-            </div>
+            </>
+          )}
+        </div>
           ) : (
             <Box size={28} className="text-blue-400 mx-auto" />
           )}

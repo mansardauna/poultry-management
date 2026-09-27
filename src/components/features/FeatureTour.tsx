@@ -121,7 +121,7 @@ export function FeatureTour() {
         if (el) {
           const rect = el.getBoundingClientRect();
           setTargetRect(rect);
-          el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
         } else {
           setTargetRect(null);
         }
@@ -166,29 +166,30 @@ export function FeatureTour() {
   const currentStep = TOUR_STEPS[currentStepIndex];
   const Icon = currentStep.highlightIcon;
 
-  // Calculate safe styles to ensure popover buttons are NEVER cut off on mobile
+  // On mobile, dynamically position card away from target element
+  const isTargetInBottomHalf = targetRect ? targetRect.top > (window.innerHeight / 2) : false;
+
   const popoverStyle: React.CSSProperties = isMobile
     ? {
         position: 'fixed',
-        bottom: '20px',
-        left: '16px',
-        right: '16px',
-        maxWidth: 'calc(100vw - 32px)',
-        maxHeight: '85vh',
+        ...(isTargetInBottomHalf ? { top: '16px' } : { bottom: '16px' }),
+        left: '12px',
+        right: '12px',
+        maxWidth: 'calc(100vw - 24px)',
         zIndex: 102
       }
     : targetRect ? {
         position: 'fixed',
         top: currentStep.position === 'top' 
-          ? `${Math.max(20, targetRect.top - 240)}px` 
+          ? `${Math.max(16, targetRect.top - 200)}px` 
           : currentStep.position === 'bottom'
-          ? `${Math.min(window.innerHeight - 280, targetRect.bottom + 16)}px`
-          : `${Math.max(20, Math.min(window.innerHeight - 280, targetRect.top))}px`,
+          ? `${Math.min(window.innerHeight - 230, targetRect.bottom + 12)}px`
+          : `${Math.max(16, Math.min(window.innerHeight - 230, targetRect.top))}px`,
         left: currentStep.position === 'right' 
-          ? `${Math.min(window.innerWidth - 420, targetRect.right + 16)}px` 
+          ? `${Math.min(window.innerWidth - 360, targetRect.right + 12)}px` 
           : currentStep.position === 'left'
-          ? `${Math.max(20, targetRect.left - 420)}px`
-          : `${Math.max(20, Math.min(window.innerWidth - 420, targetRect.left))}px`,
+          ? `${Math.max(16, targetRect.left - 360)}px`
+          : `${Math.max(16, Math.min(window.innerWidth - 360, targetRect.left))}px`,
         zIndex: 102
       } : {
         position: 'fixed',
@@ -200,13 +201,13 @@ export function FeatureTour() {
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-auto font-sans animate-in fade-in duration-200">
-      {/* Dynamic 4-Panel Cutout Spotlight Overlay (Clean 35% Opacity Backdrop, Target Area is 100% Transparent) */}
+      {/* Dynamic 4-Panel Cutout Spotlight Overlay (Clean 20% Opacity Backdrop, Target Area is 100% Transparent) */}
       {targetRect ? (
         <>
           {/* Top Panel */}
           <div 
             onClick={handleComplete}
-            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            className="fixed bg-slate-950/20 transition-all duration-300 z-[100] cursor-pointer"
             style={{
               top: 0,
               left: 0,
@@ -217,7 +218,7 @@ export function FeatureTour() {
           {/* Bottom Panel */}
           <div 
             onClick={handleComplete}
-            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            className="fixed bg-slate-950/20 transition-all duration-300 z-[100] cursor-pointer"
             style={{
               top: `${Math.min(window.innerHeight, targetRect.bottom + 6)}px`,
               left: 0,
@@ -228,7 +229,7 @@ export function FeatureTour() {
           {/* Left Panel */}
           <div 
             onClick={handleComplete}
-            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            className="fixed bg-slate-950/20 transition-all duration-300 z-[100] cursor-pointer"
             style={{
               top: `${Math.max(0, targetRect.top - 6)}px`,
               left: 0,
@@ -239,7 +240,7 @@ export function FeatureTour() {
           {/* Right Panel */}
           <div 
             onClick={handleComplete}
-            className="fixed bg-slate-950/35 backdrop-blur-[1px] transition-all duration-300 z-[100] cursor-pointer"
+            className="fixed bg-slate-950/20 transition-all duration-300 z-[100] cursor-pointer"
             style={{
               top: `${Math.max(0, targetRect.top - 6)}px`,
               left: `${Math.min(window.innerWidth, targetRect.right + 6)}px`,
@@ -262,57 +263,57 @@ export function FeatureTour() {
       ) : (
         <div 
           onClick={handleComplete}
-          className="fixed inset-0 bg-slate-950/35 backdrop-blur-[1px] transition-opacity z-[100] cursor-pointer" 
+          className="fixed inset-0 bg-slate-950/20 transition-opacity z-[100] cursor-pointer" 
         />
       )}
 
       {/* Tour Popover Card */}
       <div 
-        className="max-w-sm sm:max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transition-all duration-300 flex flex-col justify-between"
+        className="max-w-[340px] sm:max-w-sm w-full bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden transition-all duration-300 flex flex-col justify-between"
         style={popoverStyle}
       >
         {/* Card Header */}
-        <div className="bg-slate-900 text-white p-5 relative">
+        <div className="bg-slate-900 text-white p-3.5 sm:p-4 relative">
           <button
             onClick={handleComplete}
-            className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer p-1"
+            className="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors cursor-pointer p-1"
             title="Skip Tour"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
 
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center shrink-0">
-              <Icon size={20} />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center shrink-0">
+              <Icon size={16} />
             </div>
             <div>
-              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">
+              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full">
                 Step {currentStepIndex + 1} of {TOUR_STEPS.length}
               </span>
-              <h3 className="text-base font-extrabold text-white mt-0.5 leading-tight">{currentStep.title}</h3>
-              <p className="text-[11px] text-indigo-300 font-medium">{currentStep.subtitle}</p>
+              <h3 className="text-sm font-extrabold text-white mt-0.5 leading-snug">{currentStep.title}</h3>
+              <p className="text-[10px] text-indigo-300 font-medium">{currentStep.subtitle}</p>
             </div>
           </div>
         </div>
 
         {/* Card Body */}
-        <div className="p-5 space-y-4">
-          <p className="text-xs text-slate-600 leading-relaxed font-medium">
+        <div className="p-3.5 sm:p-4 space-y-3">
+          <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed font-medium">
             {currentStep.description}
           </p>
 
           {/* Progress Dots */}
-          <div className="flex items-center justify-center gap-1.5 pt-1">
+          <div className="flex items-center justify-center gap-1.5 pt-0.5">
             {TOUR_STEPS.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentStepIndex(idx)}
-                className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                className={`h-1 rounded-full transition-all cursor-pointer ${
                   idx === currentStepIndex 
-                    ? 'w-6 bg-indigo-600' 
+                    ? 'w-5 bg-indigo-600' 
                     : idx < currentStepIndex 
-                    ? 'w-1.5 bg-emerald-500' 
-                    : 'w-1.5 bg-slate-200'
+                    ? 'w-1 bg-emerald-500' 
+                    : 'w-1 bg-slate-200'
                 }`}
                 title={`Go to step ${idx + 1}`}
               />
@@ -320,28 +321,28 @@ export function FeatureTour() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
             <button
               onClick={handleBack}
               disabled={currentStepIndex === 0}
-              className="px-3 py-2 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
             >
-              <ArrowLeft size={14} /> Back
+              <ArrowLeft size={13} /> Back
             </button>
 
             <button
               onClick={handleComplete}
-              className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer px-2"
+              className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer px-1"
             >
               Skip
             </button>
 
             <button
               onClick={handleNext}
-              className="px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
             >
-              <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish Tour' : 'Next'}</span>
-              {currentStepIndex === TOUR_STEPS.length - 1 ? <CheckCircle2 size={14} /> : <ArrowRight size={14} />}
+              <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
+              {currentStepIndex === TOUR_STEPS.length - 1 ? <CheckCircle2 size={13} /> : <ArrowRight size={13} />}
             </button>
           </div>
         </div>

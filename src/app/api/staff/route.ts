@@ -1,7 +1,7 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter, applyStaffWorkspaceFilter } from '@/lib/workspace';
 import { getAuthUser } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
@@ -9,20 +9,34 @@ import bcrypt from 'bcryptjs';
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const [staffRes, tasksRes, payrollLogsRes] = await Promise.all([
-    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
+    applyStaffWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId)
   ]);
 
-  const normalizedStaff = (staffRes.data || []).map((s: any) => ({
-    id: String(s.id),
-    name: s.name || 'Staff Member',
-    role: s.role || 'Attendant',
-    salary: Number(s.salary) || 0,
-    attendanceDays: Number(s.attendanceDays) || 0,
-    contact: s.contact || '',
-    assignedBranches: Array.isArray(s.assignedBranches) ? s.assignedBranches : []
-  }));
+  const normalizedStaff = (staffRes.data || []).map((s: any) => {
+    let branches: string[] = [];
+    if (Array.isArray(s.assignedBranches)) {
+      branches = s.assignedBranches;
+    } else if (typeof s.assignedBranches === 'string') {
+      try {
+        const parsed = JSON.parse(s.assignedBranches);
+        if (Array.isArray(parsed)) branches = parsed;
+      } catch {}
+      if (branches.length === 0 && s.assignedBranches.trim() && s.assignedBranches !== '[]') {
+        branches = [s.assignedBranches.trim().replace(/[\[\]"']/g, '')];
+      }
+    }
+    return {
+      id: String(s.id),
+      name: s.name || 'Staff Member',
+      role: s.role || 'Attendant',
+      salary: Number(s.salary) || 0,
+      attendanceDays: Number(s.attendanceDays) || 0,
+      contact: s.contact || '',
+      assignedBranches: branches
+    };
+  });
 
   const normalizedTasks = (tasksRes.data || []).map((t: any) => ({
     id: String(t.id),
@@ -103,9 +117,29 @@ export async function POST(request: Request) {
     const user = await getAuthUser();
     const adminUsername = user?.email?.split('@')[0] || 'admin';
 
-    const assignedBranchList = (Array.isArray(body.assignedBranches) && body.assignedBranches.length > 0)
+    // Resolve organization ID for staff
+    let adminOrgId = '';
+    if (user?.email) {
+      try {
+        const { data: adminUserRec } = await supabase.from('users').select('orgId, workspaceId').eq('email', user.email).limit(1).maybeSingle();
+        if (adminUserRec?.orgId) adminOrgId = adminUserRec.orgId;
+        else if (adminUserRec?.workspaceId && adminUserRec.workspaceId.includes('org_')) {
+          const match = adminUserRec.workspaceId.match(/org_[a-zA-Z0-9]+/);
+          if (match) adminOrgId = match[0];
+        }
+      } catch {}
+    }
+    if (!adminOrgId && workspaceId && workspaceId.includes('org_')) {
+      const match = workspaceId.match(/org_[a-zA-Z0-9]+/);
+      if (match) adminOrgId = match[0];
+    }
+
+    const rawBranches = (Array.isArray(body.assignedBranches) && body.assignedBranches.length > 0)
       ? body.assignedBranches
       : (workspaceId ? [workspaceId] : []);
+
+    const assignedBranchList = rawBranches.map((b: string) => (b === 'main' ? workspaceId : b));
+    const targetBranchId = assignedBranchList[0] || workspaceId;
 
     const staffNameStr = (typeof body.name === 'string' && body.name.trim()) ? body.name.trim() : 'Farm Attendant';
     const staffUsername = (typeof body.username === 'string' && body.username.trim()) 
@@ -142,7 +176,7 @@ export async function POST(request: Request) {
     if (existingStaffList && existingStaffList.length > 0 && body.isOnboarding) {
       const existing = existingStaffList[0];
       const updated = {
-        workspaceId,
+        workspaceId: targetBranchId,
         name: staffNameStr,
         username: staffUsername,
         password: staffPassword,
@@ -160,7 +194,8 @@ export async function POST(request: Request) {
           email: `${staffUsername.toLowerCase()}@poultry.local`,
           passwordHash: passwordHash,
           role: staffRole,
-          workspaceId: workspaceId,
+          workspaceId: targetBranchId,
+          orgId: adminOrgId || null,
           createdBy: adminUsername,
           createdAt: new Date().toISOString()
         }]);
@@ -171,7 +206,7 @@ export async function POST(request: Request) {
 
     const newStaff = {
       id: 's' + Date.now().toString().slice(-8),
-      workspaceId,
+      workspaceId: targetBranchId,
       name: staffNameStr,
       username: staffUsername,
       password: staffPassword,
@@ -196,7 +231,8 @@ export async function POST(request: Request) {
           email: `${staffUsername.toLowerCase()}@poultry.local`,
           passwordHash: passwordHash,
           role: staffRole,
-          workspaceId: workspaceId,
+          workspaceId: targetBranchId,
+          orgId: adminOrgId || null,
           createdBy: adminUsername,
           createdAt: new Date().toISOString()
         }]);

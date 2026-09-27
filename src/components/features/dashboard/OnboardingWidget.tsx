@@ -20,22 +20,36 @@ export function OnboardingWidget({
   userRole = 'Admin'
 }: OnboardingWidgetProps) {
   const [guideRead, setGuideRead] = useState(false);
+  const [branchCompleted, setBranchCompleted] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  useEffect(() => {
+  const syncStorage = () => {
     if (typeof window !== 'undefined') {
       setGuideRead(localStorage.getItem('pfms_starter_guide_read') === 'true');
-      setIsDismissed(localStorage.getItem('pfms_widget_dismissed') === 'true');
+      setIsDismissed(
+        localStorage.getItem('pfms_widget_dismissed') === 'true' ||
+        localStorage.getItem('pfms_onboarded_dismissed') === 'true'
+      );
+      setBranchCompleted(localStorage.getItem('pfms_branch_setup_completed') === 'true');
     }
+  };
+
+  useEffect(() => {
+    syncStorage();
+    window.addEventListener('pfms_onboarding_updated', syncStorage);
+    window.addEventListener('storage', syncStorage);
+    return () => {
+      window.removeEventListener('pfms_onboarding_updated', syncStorage);
+      window.removeEventListener('storage', syncStorage);
+    };
   }, []);
 
   if (userRole !== 'Admin') return null;
 
-  const branchSetupCompleted = typeof window !== 'undefined' && localStorage.getItem('pfms_branch_setup_completed') === 'true';
-  const step1Done = branchSetupCompleted || batchesCount > 0;
-  const step2Done = batchesCount > 0;
-  const step3Done = staffCount > 0;
-  const step4Done = guideRead;
+  const step1Done = branchCompleted || workspacesCount > 0 || batchesCount > 0;
+  const step2Done = batchesCount > 0 || branchCompleted;
+  const step3Done = staffCount > 0 || branchCompleted;
+  const step4Done = guideRead || branchCompleted;
 
   const steps = [
     {
@@ -83,6 +97,15 @@ export function OnboardingWidget({
       localStorage.setItem('pfms_widget_dismissed', 'true');
     }
   };
+
+  useEffect(() => {
+    if (completedCount >= 4 && !isDismissed) {
+      const timer = setTimeout(() => {
+        handleDismiss();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [completedCount, isDismissed]);
 
   if (isDismissed) return null;
 

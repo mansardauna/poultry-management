@@ -1,7 +1,7 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
+import { getWorkspaceId, applyWorkspaceFilter, applyStaffWorkspaceFilter } from '@/lib/workspace';
 
 /** Exported function GET */
 export async function GET() {
@@ -15,7 +15,7 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('feeds').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('feedLogs').select('*'), workspaceId),
-    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
+    applyStaffWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('cushionAudits').select('*'), workspaceId),
