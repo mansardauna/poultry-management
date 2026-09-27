@@ -138,9 +138,18 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
 
   useEffect(() => {
     fetchNotifications();
-    // Poll every 30 seconds for new notifications
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+
+    const handleUpdate = () => {
+      fetchNotifications();
+    };
+
+    window.addEventListener('pfms_notifications_updated', handleUpdate);
+    window.addEventListener('pfms_data_updated', handleUpdate);
+
+    return () => {
+      window.removeEventListener('pfms_notifications_updated', handleUpdate);
+      window.removeEventListener('pfms_data_updated', handleUpdate);
+    };
   }, [fetchNotifications]);
 
   // Close dropdown when clicking outside
@@ -369,7 +378,12 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         {/* Notification Bell */}
         <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => setDropdownOpen((prev) => !prev)}
+            onClick={() => {
+              setDropdownOpen((prev) => {
+                if (!prev) fetchNotifications();
+                return !prev;
+              });
+            }}
             className="p-2 text-slate-400 hover:text-indigo-600 rounded-md transition-colors relative focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Notifications"
           >
@@ -485,7 +499,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               {/* Footer */}
               <div className="px-4 py-2 border-t border-slate-100 bg-slate-50">
                 <p className="text-[10px] text-slate-400 text-center">
-                  {notifications.length} total alerts · Auto-refreshes every 30s
+                  {notifications.length} total alerts
                 </p>
               </div>
             </div>
