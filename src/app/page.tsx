@@ -72,15 +72,6 @@ export default function LandingPage() {
             )}
           </div>
 
-          <div className="mb-16">
-            <span className="text-xs text-slate-500 font-medium">
-              Self-hosted deployment?{' '}
-              <Link href="/setup/login" className="text-indigo-600 hover:text-indigo-800 font-semibold underline underline-offset-2">
-                Launch Owner Setup Wizard →
-              </Link>
-            </span>
-          </div>
-
           {/* Interactive UI Graphic (CSS Only) */}
           <div className="relative max-w-4xl mx-auto h-[400px] md:h-[500px]">
             {/* Center Main Card */}

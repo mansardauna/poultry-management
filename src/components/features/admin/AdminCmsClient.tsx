@@ -124,6 +124,57 @@ export function AdminCmsClient({
   const [enterprisePriceMonthly, setEnterprisePriceMonthly] = useState(45000);
   const [enterprisePriceAnnual, setEnterprisePriceAnnual] = useState(432000);
 
+  // System Versioning & Database Upgrade State
+  const [versionInfo, setVersionInfo] = useState<{
+    currentVersion: string;
+    installedVersion: string;
+    updateAvailable: boolean;
+  }>({
+    currentVersion: '2.4.0',
+    installedVersion: '2.4.0',
+    updateAvailable: false,
+  });
+  const [isUpgrading, setIsUpgrading] = useState(false);
+
+  // Fetch Version Status from /api/admin/upgrade
+  const loadVersionInfo = async () => {
+    try {
+      const res = await fetch('/api/admin/upgrade');
+      if (res.ok) {
+        const data = await res.json();
+        setVersionInfo({
+          currentVersion: data.currentVersion || '2.4.0',
+          installedVersion: data.installedVersion || '2.4.0',
+          updateAvailable: Boolean(data.updateAvailable),
+        });
+      }
+    } catch (_e) {}
+  };
+
+  // Run System Upgrade & Database Migrations
+  const handleRunUpgrade = async () => {
+    setIsUpgrading(true);
+    try {
+      const res = await fetch('/api/admin/upgrade', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        toast.success(data.message || `System upgraded to v${data.currentVersion} successfully!`);
+        setVersionInfo({
+          currentVersion: data.currentVersion,
+          installedVersion: data.installedVersion,
+          updateAvailable: false,
+        });
+        loadSetupParams();
+      } else {
+        toast.error(data.error || 'System upgrade failed');
+      }
+    } catch (_err) {
+      toast.error('Network error during system upgrade');
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+
   // Load Setup Parameters from GET /api/setup
   const loadSetupParams = async () => {
     setIsLoadingSetup(true);
@@ -179,6 +230,7 @@ export function AdminCmsClient({
 
   useEffect(() => {
     loadSetupParams();
+    loadVersionInfo();
 
     // Fetch CMS Content
     fetch('/api/admin/cms')
@@ -338,9 +390,19 @@ export function AdminCmsClient({
       {/* Top Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <span className="bg-purple-100 text-purple-800 border border-purple-200 text-xs font-semibold px-3 py-1 rounded-full">
-            Super Admin Control Center ({currentUserEmail || superAdminEmailState || 'Super Admin'})
-          </span>
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <span className="bg-purple-100 text-purple-800 border border-purple-200 text-xs font-semibold px-3 py-1 rounded-full">
+              Super Admin Control Center ({currentUserEmail || superAdminEmailState || 'Super Admin'})
+            </span>
+            <span className={`border text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 ${
+              versionInfo.updateAvailable
+                ? 'bg-amber-50 text-amber-800 border-amber-300'
+                : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${versionInfo.updateAvailable ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+              <span>v{versionInfo.installedVersion} {versionInfo.updateAvailable ? '(Upgrade Available)' : '(Up to date)'}</span>
+            </span>
+          </div>
           <h1 className="text-2xl font-bold text-slate-900 mt-2">{platformName} Master Super Admin Portal</h1>
           <p className="text-sm text-slate-500 font-medium mt-1">
             Manage live platform setup parameters, database drivers, payment keys, SaaS plans, and landing CMS.
@@ -392,6 +454,39 @@ export function AdminCmsClient({
           )}
         </div>
       </div>
+
+      {/* Version Upgrade Banner (Displays when code version constant differs from DB version) */}
+      {versionInfo.updateAvailable && (
+        <div className="bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-blue-500/10 border-2 border-amber-400/80 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in duration-300">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shadow-amber-500/30 shrink-0">
+              <RefreshCw className={isUpgrading ? 'animate-spin' : ''} size={22} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300/80 px-2.5 py-0.5 rounded-full">
+                  System Upgrade Required
+                </span>
+                <span className="text-xs text-slate-500 font-medium">
+                  DB Version: <strong className="text-slate-700">v{versionInfo.installedVersion}</strong> → Target: <strong className="text-indigo-600 font-bold">v{versionInfo.currentVersion}</strong>
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-slate-800 mt-1">
+                A newer application version is available. Run the upgrade to execute database migrations, apply schema updates, and synchronize system settings.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleRunUpgrade}
+            disabled={isUpgrading}
+            className="shrink-0 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-xs uppercase tracking-wider px-5 py-3 rounded-xl transition-all shadow-md shadow-indigo-600/20 active:scale-95 flex items-center gap-2 cursor-pointer"
+          >
+            <RefreshCw size={15} className={isUpgrading ? 'animate-spin' : ''} />
+            <span>{isUpgrading ? 'Applying Upgrade & Migrations…' : 'Run System Upgrade Now'}</span>
+          </button>
+        </div>
+      )}
 
       {/* Main Portal Navigation Tabs */}
       <div className="flex border-b border-slate-200 overflow-x-auto gap-2 scrollbar-none pb-1">

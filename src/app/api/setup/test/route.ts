@@ -5,7 +5,8 @@ import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { Client } from 'pg';
 import mysql from 'mysql2/promise';
-import { verifyOwnerSession } from '@/lib/ownerAuth';
+import { isSystemInstalled } from '@/lib/dbCheck';
+import { getAuthUser } from '@/lib/auth';
 
 /**
  * POST /api/setup/test — Validates the database credentials entered in the
@@ -51,10 +52,12 @@ function rejectAfter(ms: number): Promise<never> {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  const isOwner = await verifyOwnerSession(cookieStore);
-  if (!isOwner) {
-    return NextResponse.json({ connected: false, error: 'Unauthorized: Database test requires owner login.' }, { status: 401 });
+  const installed = await isSystemInstalled();
+  if (installed) {
+    const user = await getAuthUser();
+    if (!user || user.role !== 'SuperAdmin') {
+      return NextResponse.json({ connected: false, error: 'Access denied: System is already installed.' }, { status: 403 });
+    }
   }
 
   let body: TestBody;

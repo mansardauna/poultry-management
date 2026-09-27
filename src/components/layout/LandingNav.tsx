@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-import { Server } from 'lucide-react';
-
 export function LandingNav({ activePath }: { activePath?: string }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -36,15 +34,6 @@ export function LandingNav({ activePath }: { activePath?: string }) {
           </div>
           
           <div className="flex items-center gap-3 sm:gap-4">
-            <Link
-              href="/setup/login"
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all cursor-pointer shadow-xs"
-              title="System Owner & Deployment Setup"
-            >
-              <Server size={13} className="text-indigo-600" />
-              <span>Setup</span>
-            </Link>
-
             {isLoggedIn ? (
               <Link href="/dashboard" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md shadow-indigo-600/20 active:scale-95">
                 Dashboard

@@ -5,17 +5,20 @@ import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { supabase as envServiceRoleClient } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
-import { verifyOwnerSession } from '@/lib/ownerAuth';
+import { isSystemInstalled } from '@/lib/dbCheck';
+import { APP_VERSION } from '@/lib/version';
 
 /**
  * GET Handler: Check system setup status, database connectivity, and gateway configurations
  */
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const isOwner = await verifyOwnerSession(cookieStore);
-    if (!isOwner) {
-      return NextResponse.json({ error: 'Unauthorized: Setup access requires owner login.' }, { status: 401 });
+    const installed = await isSystemInstalled();
+    if (installed) {
+      const user = await getAuthUser();
+      if (!user || user.role !== 'SuperAdmin') {
+        return NextResponse.json({ error: 'Unauthorized: Setup access restricted to SuperAdmin.' }, { status: 403 });
+      }
     }
 
     // 1. Verify database connection
@@ -124,10 +127,12 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const isOwner = await verifyOwnerSession(cookieStore);
-    if (!isOwner) {
-      return NextResponse.json({ error: 'Unauthorized: Setup access requires owner login.' }, { status: 401 });
+    const installed = await isSystemInstalled();
+    if (installed) {
+      const user = await getAuthUser();
+      if (!user || user.role !== 'SuperAdmin') {
+        return NextResponse.json({ error: 'Access denied: System is already installed. Re-running the installer is prohibited.' }, { status: 403 });
+      }
     }
 
     const body = await request.json();
@@ -440,6 +445,13 @@ export async function POST(request: Request) {
       id: 'saas_plans_config',
       workspaceId: 'global',
       adminName: JSON.stringify(updatedPlans)
+    }]);
+
+    // Save initial system version
+    await serviceRoleClient.from('systemSettings').upsert([{
+      id: 'app_version',
+      workspaceId: 'global',
+      adminName: JSON.stringify({ version: APP_VERSION, installedAt: new Date().toISOString() })
     }]);
 
     const response = NextResponse.json({

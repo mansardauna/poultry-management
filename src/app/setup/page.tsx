@@ -1,15 +1,20 @@
-import { cookies } from 'next/headers';
+'use strict';
+
 import { redirect } from 'next/navigation';
-import { verifyOwnerSession } from '@/lib/ownerAuth';
+import { isSystemInstalled } from '@/lib/dbCheck';
 import { SetupWizardClient } from './SetupWizardClient';
 
-export default async function SetupPage() {
-  const cookieStore = await cookies();
-  const isAuthorized = await verifyOwnerSession(cookieStore);
+export const dynamic = 'force-dynamic';
 
-  if (!isAuthorized) {
-    redirect('/setup/login');
+export default async function SetupPage() {
+  const installed = await isSystemInstalled();
+
+  // If system is already installed and has an active database connection,
+  // do not allow running the installer again.
+  if (installed) {
+    redirect('/login');
   }
 
+  // First-time setup: database connection not yet provided or active.
   return <SetupWizardClient />;
 }

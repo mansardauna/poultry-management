@@ -14,7 +14,6 @@ export function LandingFooter() {
           <Link href="/terms" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
           <Link href="/about" className="hover:text-indigo-600 transition-colors">About Us</Link>
           <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact Support</Link>
-          <Link href="/setup/login" className="hover:text-indigo-600 transition-colors font-medium text-slate-700">System Setup</Link>
         </div>
         <div className="text-sm text-slate-400">
           © {new Date().getFullYear()} PFMS Inc. All rights reserved.
