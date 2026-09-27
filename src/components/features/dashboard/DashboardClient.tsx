@@ -18,7 +18,8 @@ import {
   MapPin,
   Calendar,
   Sparkles,
-  Lock
+  Lock,
+  Printer
 } from 'lucide-react';
 import { DatabaseSchema, StaffTask, AlertLog } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
@@ -366,29 +367,32 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   return (
     <div className="space-y-6">
       {/* Welcome & Farm Profile Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
-        <div>
-          <h1 className="text-3xl text-slate-900  tracking-tight">
+      <div className="flex flex-row justify-between items-center gap-3 mb-2">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight truncate">
             {activeWorkspace?.name || texts.dashboard.title}
           </h1>
-          <p className="text-slate-500 text-sm mt-1 flex items-center gap-2">
-            <span className="flex items-center gap-1">
-              <MapPin size={14} className="text-indigo-500" /> {activeWorkspace?.name || 'Main Location'}
+          <p className="text-slate-500 text-xs sm:text-sm mt-0.5 sm:mt-1 flex items-center gap-2 truncate">
+            <span className="flex items-center gap-1 truncate">
+              <MapPin size={14} className="text-indigo-500 shrink-0" />
+              <span className="truncate">{activeWorkspace?.name || 'Main Location'}</span>
             </span>
-            <span className="text-slate-300">|</span>
-            <span>{todayFormatted}</span>
+            <span className="text-slate-300 shrink-0">|</span>
+            <span className="shrink-0 text-[11px] sm:text-xs text-slate-400">{todayFormatted}</span>
           </p>
         </div>
-          <div className="flex flex-wrap gap-2">
-            <button 
-              data-tour="print-report-btn"
-              onClick={() => window.print()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 cursor-pointer"
-            >
-              <span>{texts.common.printReport}</span>
-            </button>
-          </div>
+        <div className="shrink-0 flex items-center gap-2">
+          <button 
+            data-tour="print-report-btn"
+            onClick={() => window.print()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
+          >
+            <Printer size={15} className="shrink-0" />
+            <span className="hidden sm:inline">{texts.common.printReport}</span>
+            <span className="sm:hidden">Print</span>
+          </button>
         </div>
+      </div>
 
       {/* Farm Setup Onboarding Progress Widget - Admin only */}
       {userRole === 'Admin' && (
@@ -422,7 +426,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       <FeatureTour />
 
       {/* Core Telemetry Metrics Grid - Role-Based Display */}
-      <div data-tour="kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+      <div data-tour="kpi-cards" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 sm:mt-6">
         <StatCard
           title={texts.dashboard.activeFlock}
           value={Number(totalChickens).toLocaleString()}

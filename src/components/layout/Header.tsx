@@ -1,7 +1,39 @@
 'use strict';
 'use client';
 
-import { Bell, Search, User, X, CheckCheck, Menu, Globe, Calendar, BookOpen } from 'lucide-react';
+import { 
+  Bell, 
+  Search, 
+  User, 
+  X, 
+  CheckCheck, 
+  Menu, 
+  Globe, 
+  Calendar, 
+  BookOpen,
+  SlidersHorizontal,
+  BarChart3,
+  Settings,
+  Database,
+  CreditCard,
+  Mail,
+  Package,
+  Sparkles,
+  Building2,
+  Shield,
+  Users,
+  ShoppingCart,
+  Bird,
+  Egg,
+  Wheat,
+  DollarSign,
+  Pill,
+  Video,
+  Home,
+  Wrench,
+  Contact,
+  LucideIcon
+} from 'lucide-react';
 import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSidebar } from './SidebarContext';
@@ -30,6 +62,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'unread' | 'read'>('unread');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -64,33 +97,45 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const SUPERADMIN_SEARCH_ITEMS = [
-    { name: 'Platform Overview', desc: 'Real-time telemetry, revenue & tenant count', href: '/dashboard/admin?tab=overview', category: 'Platform Telemetry', icon: '📊' },
-    { name: 'Setup & Gateways', desc: 'Database drivers, Paystack, Stripe & Resend config', href: '/dashboard/admin?tab=setup', category: 'Infrastructure & APIs', icon: '⚙️' },
-    { name: 'Database Engine Driver', desc: 'MySQL / PostgreSQL / Supabase connection parameters', href: '/dashboard/admin?tab=setup', category: 'Database Config', icon: '🗄️' },
-    { name: 'Payment Gateways', desc: 'Paystack & Stripe API keys, webhooks, currency', href: '/dashboard/admin?tab=setup', category: 'Payment Gateways', icon: '💳' },
-    { name: 'Transactional Email (Resend)', desc: 'Resend API key and outbound sender email', href: '/dashboard/admin?tab=setup', category: 'Email Gateway', icon: '✉️' },
-    { name: 'SaaS Plans & Entitlements', desc: 'Free, Pro, Enterprise pricing & feature entitlements', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: '📦' },
-    { name: 'Landing Page CMS', desc: 'Hero headlines, announcement banner, support contacts', href: '/dashboard/admin?tab=cms', category: 'CMS & Content', icon: '✨' },
-    { name: 'Tenant Farm Organizations', desc: 'Directory of registered farm tenant workspaces', href: '/dashboard/admin?tab=orgs', category: 'Tenants & Farms', icon: '🏢' },
-    { name: 'Platform Settings & Governance', desc: 'System versioning, diagnostics and maintenance', href: '/dashboard/admin?tab=settings', category: 'System Governance', icon: '🛡️' },
-    { name: 'Super Admin Documentation', desc: 'Setup guide, installation docs and deployment', href: '/documentation/superadmin-setup-guide.html', category: 'Documentation', icon: '📖' },
+  const SUPERADMIN_SEARCH_ITEMS: Array<{
+    name: string;
+    desc: string;
+    href: string;
+    category: string;
+    icon: LucideIcon;
+  }> = [
+    { name: 'Platform Overview', desc: 'Real-time telemetry, revenue & tenant count', href: '/dashboard/admin?tab=overview', category: 'Platform Telemetry', icon: BarChart3 },
+    { name: 'Setup & Gateways', desc: 'Database drivers, Paystack, Stripe & Resend config', href: '/dashboard/admin?tab=setup', category: 'Infrastructure & APIs', icon: Settings },
+    { name: 'Database Engine Driver', desc: 'MySQL / PostgreSQL / Supabase connection parameters', href: '/dashboard/admin?tab=setup', category: 'Database Config', icon: Database },
+    { name: 'Payment Gateways', desc: 'Paystack & Stripe API keys, webhooks, currency', href: '/dashboard/admin?tab=setup', category: 'Payment Gateways', icon: CreditCard },
+    { name: 'Transactional Email (Resend)', desc: 'Resend API key and outbound sender email', href: '/dashboard/admin?tab=setup', category: 'Email Gateway', icon: Mail },
+    { name: 'SaaS Plans & Entitlements', desc: 'Free, Pro, Enterprise pricing & feature entitlements', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: Package },
+    { name: 'Landing Page CMS', desc: 'Hero headlines, announcement banner, support contacts', href: '/dashboard/admin?tab=cms', category: 'CMS & Content', icon: Sparkles },
+    { name: 'Tenant Farm Organizations', desc: 'Directory of registered farm tenant workspaces', href: '/dashboard/admin?tab=orgs', category: 'Tenants & Farms', icon: Building2 },
+    { name: 'Platform Settings & Governance', desc: 'System versioning, diagnostics and maintenance', href: '/dashboard/admin?tab=settings', category: 'System Governance', icon: Shield },
+    { name: 'Super Admin Documentation', desc: 'Setup guide, installation docs and deployment', href: '/documentation/superadmin-setup-guide.html', category: 'Documentation', icon: BookOpen },
   ];
 
-  const FARM_SEARCH_ITEMS = [
-    { name: 'Staff Management', desc: 'Add staff, set access roles, view team roster', href: '/dashboard/staff', category: 'Team & Staff', icon: '👥' },
-    { name: 'Sales & Merchant Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: '🛒' },
-    { name: 'Chicken Batches & Flocks', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: '🐔' },
-    { name: 'Egg Production & Collections', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: '🥚' },
-    { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: '🌾' },
-    { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: '💰' },
-    { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: '💊' },
-    { name: 'CCTV Camera Surveillance', desc: 'Pair cameras via WebRTC phone scanner or QR image', href: '/dashboard/cctv', category: 'Security & CCTV', icon: '📹' },
-    { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: '🏠' },
-    { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: '🔧' },
-    { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: '📇' },
-    { name: 'Enterprise Hub', desc: 'Cooperative management & multi-farm reports', href: '/dashboard/enterprise', category: 'Enterprise', icon: '🏢' },
-    { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: '⚙️' },
+  const FARM_SEARCH_ITEMS: Array<{
+    name: string;
+    desc: string;
+    href: string;
+    category: string;
+    icon: LucideIcon;
+  }> = [
+    { name: 'Staff Management', desc: 'Add staff, set access roles, view team roster', href: '/dashboard/staff', category: 'Team & Staff', icon: Users },
+    { name: 'Sales & Merchant Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: ShoppingCart },
+    { name: 'Chicken Batches & Flocks', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: Bird },
+    { name: 'Egg Production & Collections', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: Egg },
+    { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: Wheat },
+    { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: DollarSign },
+    { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: Pill },
+    { name: 'CCTV Camera Surveillance', desc: 'Pair cameras via WebRTC phone scanner or QR image', href: '/dashboard/cctv', category: 'Security & CCTV', icon: Video },
+    { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: Home },
+    { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: Wrench },
+    { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: Contact },
+    { name: 'Enterprise Hub', desc: 'Cooperative management & multi-farm reports', href: '/dashboard/enterprise', category: 'Enterprise', icon: Building2 },
+    { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: Settings },
   ];
 
   const currentSearchItems = role === 'SuperAdmin' ? SUPERADMIN_SEARCH_ITEMS : FARM_SEARCH_ITEMS;
@@ -334,7 +379,9 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                   }
                 </div>
               ) : (
-                filteredSearchResults.map((item) => (
+                filteredSearchResults.map((item) => {
+                const Icon = item.icon;
+                return (
                   <button
                     key={item.href + item.name}
                     onClick={() => {
@@ -345,8 +392,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                     className="w-full text-left p-3 rounded-xl hover:bg-indigo-50/70 transition-all flex items-center justify-between group border border-transparent hover:border-indigo-100 cursor-pointer"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-xl p-2 rounded-lg bg-slate-100 group-hover:bg-indigo-100 transition-colors shrink-0">
-                        {item.icon}
+                      <span className="p-2 rounded-lg bg-slate-100 group-hover:bg-indigo-100 text-slate-700 group-hover:text-indigo-600 transition-colors shrink-0">
+                        <Icon size={18} />
                       </span>
                       <div className="truncate">
                         <div className="flex items-center gap-2">
@@ -364,33 +411,34 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       Jump →
                     </span>
                   </button>
-                ))
-              )}
-            </div>
-
-            {searchQuery && (
-              <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
-                <button
-                  onClick={handleSearch}
-                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
-                >
-                  Press Enter to perform global query &quot;{searchQuery}&quot;
-                </button>
-              </div>
+                );
+              })
             )}
           </div>
-        )}
-      </div>
 
-      <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* Time Range Filter (Hidden for SuperAdmin) */}
+          {searchQuery && (
+            <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+              <button
+                onClick={handleSearch}
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                Press Enter to perform global query &quot;{searchQuery}&quot;
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+
+      <div className="flex items-center space-x-1.5 sm:space-x-3">
+        {/* Desktop Time Range Filter (Hidden on mobile & hidden for SuperAdmin) */}
         {role !== 'SuperAdmin' && (
-          <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
+          <div className="hidden md:flex relative items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
             <Calendar size={14} className="text-indigo-500 mr-2 ml-1" />
             <select 
               value={timeRange} 
               onChange={(e) => setTimeRange(e.target.value as TimeRange)}
-              className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-6 pl-0"
+              className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-6 pl-0 text-xs"
             >
               <option value="all">{texts.common.allTime}</option>
               <option value="weekly">{texts.common.weekly}</option>
@@ -400,26 +448,20 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           </div>
         )}
 
-        {/* Language Selection Dropdown */}
-        <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
-          <Globe size={16} className="text-indigo-500 mr-1" />
+        {/* Desktop Language Selection Dropdown (Hidden on mobile) */}
+        <div className="hidden md:flex relative items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
+          <Globe size={15} className="text-indigo-500 mr-1.5" />
           <select 
             value={language} 
             onChange={(e) => setLanguage(e.target.value as Language)}
-            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-4 pl-0 appearance-none w-8 sm:w-auto"
+            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-4 pl-0 appearance-none text-xs"
           >
-            <option value="en" className="sm:hidden">EN</option>
-            <option value="en" className="hidden sm:block">English (EN)</option>
-            <option value="es" className="sm:hidden">ES</option>
-            <option value="es" className="hidden sm:block">Español (ES)</option>
-            <option value="ar" className="sm:hidden">AR</option>
-            <option value="ar" className="hidden sm:block">العربية (AR)</option>
-            <option value="de" className="sm:hidden">DE</option>
-            <option value="de" className="hidden sm:block">Deutsch (DE)</option>
-            <option value="fr" className="sm:hidden">FR</option>
-            <option value="fr" className="hidden sm:block">Français (FR)</option>
-            <option value="zh" className="sm:hidden">ZH</option>
-            <option value="zh" className="hidden sm:block">中文 (ZH)</option>
+            <option value="en">English (EN)</option>
+            <option value="es">Español (ES)</option>
+            <option value="ar">العربية (AR)</option>
+            <option value="de">Deutsch (DE)</option>
+            <option value="fr">Français (FR)</option>
+            <option value="zh">中文 (ZH)</option>
           </select>
         </div>
 
@@ -432,10 +474,10 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 return !prev;
               });
             }}
-            className="p-2 text-slate-400 hover:text-indigo-600 rounded-md transition-colors relative focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors relative focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Notifications"
           >
-            <Bell size={24} />
+            <Bell size={20} className="sm:w-5 sm:h-5" />
             {unreadNotifications.length > 0 && (
               <span className="absolute top-1 right-1 flex items-center justify-center h-4 w-4 rounded-full bg-red-500 text-white text-[9px] font-semibold ring-2 ring-white">
                 {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
@@ -554,28 +596,41 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           )}
         </div>
 
-        {/* Role Badge or Upgrade CTA */}
+        {/* Mobile Quick Controls Drawer Toggle (Distinct SlidersHorizontal icon, not hamburger) */}
+        <button
+          onClick={() => setIsRightDrawerOpen(true)}
+          className="md:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer relative"
+          aria-label="Open preferences and filters"
+          title="Filters & Preferences"
+        >
+          <SlidersHorizontal size={20} />
+          {timeRange !== 'all' && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-white" />
+          )}
+        </button>
+
+        {/* Role Badge or Desktop Upgrade CTA */}
         {role === 'SuperAdmin' ? (
-          <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
-            <span className="bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
+            <span className="bg-indigo-600 text-white text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg whitespace-nowrap">
               Super Admin
             </span>
           </div>
         ) : role === 'Staff' ? (
-          <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
-            <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
+            <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg whitespace-nowrap">
               Staff Portal
             </span>
           </div>
         ) : role === 'Manager' ? (
-          <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
-            <span className="bg-blue-100 text-blue-800 border border-blue-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
+            <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg whitespace-nowrap">
               Farm Manager
             </span>
           </div>
         ) : (
           role === 'Admin' && currentTier === 'free' && (
-            <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
+            <div className="hidden md:flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
               <button
                 onClick={() => router.push('/dashboard/settings?tab=subscription')}
                 className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
@@ -586,6 +641,146 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           )
         )}
       </div>
+
+      {/* Mobile Right Controls Sidebar / Slide-Over Drawer */}
+      {isRightDrawerOpen && (
+        <div className="fixed inset-0 z-50 md:hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsRightDrawerOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Drawer Panel */}
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div className="w-screen max-w-xs sm:max-w-sm bg-white shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-300">
+              {/* Header */}
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg">
+                    <SlidersHorizontal size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Filters & Controls</h3>
+                    <p className="text-[11px] text-slate-500 font-medium">Quick configuration drawer</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsRightDrawerOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Close drawer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                {/* Time Range Filter (Farm users only) */}
+                {role !== 'SuperAdmin' && (
+                  <div>
+                    <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
+                      <Calendar size={14} className="text-indigo-600" />
+                      Time Filter
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'all', label: texts.common.allTime || 'All Time' },
+                        { id: 'weekly', label: texts.common.weekly || 'Weekly' },
+                        { id: 'monthly', label: texts.common.monthly || 'Monthly' },
+                        { id: 'yearly', label: texts.common.yearly || 'Yearly' },
+                      ].map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => {
+                            setTimeRange(t.id as TimeRange);
+                          }}
+                          className={`px-3 py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
+                            timeRange === t.id
+                              ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Language Selector */}
+                <div>
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
+                    <Globe size={14} className="text-indigo-600" />
+                    Language
+                  </label>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {[
+                      { id: 'en', name: 'English', code: 'EN' },
+                      { id: 'es', name: 'Español', code: 'ES' },
+                      { id: 'ar', name: 'العربية', code: 'AR' },
+                      { id: 'de', name: 'Deutsch', code: 'DE' },
+                      { id: 'fr', name: 'Français', code: 'FR' },
+                      { id: 'zh', name: '中文', code: 'ZH' },
+                    ].map((lang) => (
+                      <button
+                        key={lang.id}
+                        type="button"
+                        onClick={() => {
+                          setLanguage(lang.id as Language);
+                        }}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
+                          language === lang.id
+                            ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{lang.name}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-mono ${
+                          language === lang.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {lang.code}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Upgrade Promo Card in Drawer for Free Tier */}
+                {role === 'Admin' && currentTier === 'free' && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100/60 border border-indigo-200 space-y-3">
+                    <div className="flex items-center gap-2 text-indigo-700 font-bold text-xs uppercase tracking-wider">
+                      <Sparkles size={14} className="text-indigo-600" />
+                      Upgrade to Commercial Pro
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Get unlimited branches, exportable custom PDF reports, CCTV phone scanning, and multi-staff rosters.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsRightDrawerOpen(false);
+                        router.push('/dashboard/settings?tab=subscription');
+                      }}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Sparkles size={14} />
+                      <span>Upgrade Plan</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-[11px] text-slate-500">
+                <span>PoultryPro v2.1.0</span>
+                <span className="font-semibold text-indigo-600">Enterprise Edition</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
