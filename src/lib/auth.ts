@@ -42,6 +42,24 @@ export async function getAuthUser(): Promise<AuthUser | null> {
     const role = cookieStore.get('pfms_role')?.value;
     const email = cookieStore.get('pfms_email')?.value || 'admin@poultry.local';
     if (role) {
+      try {
+        const { supabase } = await import('./supabase');
+        const { data: userRecs } = await supabase
+          .from('users')
+          .select('id, email, username, role')
+          .eq('email', email)
+          .limit(1);
+        if (userRecs && userRecs.length > 0) {
+          const u = userRecs[0];
+          return {
+            id: u.id,
+            email: u.email,
+            role: u.role || role,
+            username: u.username,
+          };
+        }
+      } catch {}
+
       return {
         id: 'local_user',
         email,

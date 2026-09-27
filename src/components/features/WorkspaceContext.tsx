@@ -29,13 +29,6 @@ interface WorkspaceContextType {
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
-const DEFAULT_WORKSPACE: Workspace = {
-  id: 'main',
-  name: 'Main',
-  type: 'Main',
-  createdAt: new Date().toISOString(),
-};
-
 /**
  * Provider for workspace management.
  *
@@ -55,37 +48,53 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch('/api/workspaces');
         const data = res.ok ? await res.json() : [];
 
-        // Decode role from pfms_auth cookie client-side
-        const token = Cookies.get('pfms_auth');
-        let role = 'Staff';
-        if (token) {
-          try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            role = payload.role || 'Staff';
-          } catch (e) {
-            console.error('Failed to decode cookie role client-side', e);
-          }
-        }
+        const cookieWorkspaceId = Cookies.get('pfms_workspace')?.trim();
+        const cookieOrgId = Cookies.get('pfms_org_id')?.trim();
+        const tenantDefaultId = (cookieWorkspaceId && cookieWorkspaceId !== 'main')
+          ? cookieWorkspaceId
+          : (cookieOrgId ? `main-${cookieOrgId}` : 'main-default');
+
+        const fallbackWs: Workspace = {
+          id: tenantDefaultId,
+          name: 'Main Branch',
+          type: 'Layer Farm',
+          createdAt: new Date().toISOString(),
+        };
 
         const loadedWorkspaces = Array.isArray(data) && data.length > 0 
           ? data 
-          : (role === 'Admin' ? [] : [DEFAULT_WORKSPACE]);
+          : [fallbackWs];
 
         setWorkspaces(loadedWorkspaces);
 
         if (loadedWorkspaces.length > 0) {
-          const cookieWorkspaceId = Cookies.get('pfms_workspace');
-          const found = loadedWorkspaces.find((workspace) => workspace.id === cookieWorkspaceId) ?? loadedWorkspaces[0];
+          const found = loadedWorkspaces.find((workspace) => workspace.id === cookieWorkspaceId && workspace.id !== 'main') ?? loadedWorkspaces[0];
           setActiveWorkspaceState(found);
-          Cookies.set('pfms_workspace', found.id, { path: '/' });
+          if (found && found.id !== 'main') {
+            Cookies.set('pfms_workspace', found.id, { path: '/' });
+          }
         } else {
           setActiveWorkspaceState(null);
         }
       } catch (error) {
         console.error('Failed to load workspaces', error);
-        setWorkspaces([DEFAULT_WORKSPACE]);
-        setActiveWorkspaceState(DEFAULT_WORKSPACE);
-        Cookies.set('pfms_workspace', DEFAULT_WORKSPACE.id, { path: '/' });
+        const cookieWorkspaceId = Cookies.get('pfms_workspace')?.trim();
+        const cookieOrgId = Cookies.get('pfms_org_id')?.trim();
+        const tenantDefaultId = (cookieWorkspaceId && cookieWorkspaceId !== 'main')
+          ? cookieWorkspaceId
+          : (cookieOrgId ? `main-${cookieOrgId}` : 'main-default');
+
+        const fallbackWs: Workspace = {
+          id: tenantDefaultId,
+          name: 'Main Branch',
+          type: 'Layer Farm',
+          createdAt: new Date().toISOString(),
+        };
+        setWorkspaces([fallbackWs]);
+        setActiveWorkspaceState(fallbackWs);
+        if (fallbackWs.id !== 'main') {
+          Cookies.set('pfms_workspace', fallbackWs.id, { path: '/' });
+        }
       } finally {
         setIsLoading(false);
       }
@@ -158,9 +167,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     setWorkspaces(newWorkspaces);
 
     if (activeWorkspace?.id === id) {
-      const fallback = newWorkspaces[0] ?? DEFAULT_WORKSPACE;
-      setActiveWorkspaceState(fallback);
-      Cookies.set('pfms_workspace', fallback.id, { path: '/' });
+      const fallback = newWorkspaces[0];
+      if (fallback) {
+        setActiveWorkspaceState(fallback);
+        Cookies.set('pfms_workspace', fallback.id, { path: '/' });
+      }
       window.location.reload();
     }
   };

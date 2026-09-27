@@ -8,72 +8,90 @@ import { supabase as serviceRoleClient } from './supabase';
  * Fast, cookie-first workspace ID resolution per organization / user.
  */
 export async function getWorkspaceId(): Promise<string> {
-  try {
-    const cookieStore = await cookies();
-    const workspaceCookie = cookieStore.get('pfms_workspace')?.value;
-    if (workspaceCookie && workspaceCookie.trim().length > 0) {
-      return workspaceCookie;
-    }
-  } catch {}
+  const cookieStore = await cookies();
+  const workspaceCookie = cookieStore.get('pfms_workspace')?.value?.trim();
+  const cookieOrgId = cookieStore.get('pfms_org_id')?.value?.trim();
+
+  // If a valid tenant workspace cookie is present (and not stale generic 'main'), return it
+  if (workspaceCookie && workspaceCookie !== 'main') {
+    return workspaceCookie;
+  }
+
+  // If generic 'main' was stored in cookie but we have the tenant orgId, scope to this tenant
+  if (cookieOrgId) {
+    return `main-${cookieOrgId}`;
+  }
 
   const user = await getAuthUser();
   if (user?.email === 'owner@poultry.com') {
     return 'main-org_owner_main';
   }
 
-  if (user?.id) {
-    const userEmail = user.email || '';
-    const userClean = userEmail.split('@')[0].toLowerCase();
-    const cookieStore = await cookies();
-    const cookieOrgId = cookieStore.get('pfms_org_id')?.value || `org_${user.id.replace(/-/g, '').slice(0, 10)}`;
-
+  if (user?.email) {
+    const userClean = user.email.split('@')[0].toLowerCase();
     try {
       const { data: staffRec } = await serviceRoleClient
         .from('staff')
         .select('workspaceId, assignedBranches')
-        .or(`name.eq.${userEmail},contact.eq.${userEmail},name.eq.${userClean}`)
+        .or(`name.eq.${user.email},contact.eq.${user.email},name.eq.${userClean}`)
         .limit(1)
         .maybeSingle();
 
       if (staffRec?.assignedBranches && Array.isArray(staffRec.assignedBranches) && staffRec.assignedBranches.length > 0) {
         return staffRec.assignedBranches[0];
       }
-      if (staffRec?.workspaceId) {
+      if (staffRec?.workspaceId && staffRec.workspaceId !== 'main') {
         return staffRec.workspaceId;
       }
     } catch {}
 
-    return `main-${cookieOrgId}`;
+    try {
+      const { data: userRec } = await serviceRoleClient
+        .from('users')
+        .select('workspaceId, orgId')
+        .eq('email', user.email)
+        .limit(1)
+        .maybeSingle();
+
+      if (userRec?.workspaceId && userRec.workspaceId !== 'main') {
+        return userRec.workspaceId;
+      }
+      if (userRec?.orgId) {
+        return `main-${userRec.orgId}`;
+      }
+    } catch {}
   }
 
-  return 'main-org_owner_main';
+  if (user?.id && user.id !== 'local_user') {
+    return `main-org_${user.id.replace(/-/g, '').slice(0, 10)}`;
+  }
+
+  return workspaceCookie || 'main-default';
 }
 
 /**
- * Helper to apply robust workspace filtering to query builders (Supabase / DataAdapter).
- * Ensures that if a row was stored under 'main', 'main-org_*', or null, it remains accessible
- * under the primary workspace context.
+ * Strict tenant isolation helper for query builders (Supabase / DataAdapter).
+ * Ensures that every tenant only ever retrieves their own workspace's data.
  */
 export function applyWorkspaceFilter(query: any, workspaceId: string) {
-  const cleanId = (workspaceId || 'main').replace(/"/g, '');
-  if (!cleanId || cleanId === 'main' || cleanId.startsWith('main-') || cleanId.startsWith('org_')) {
-    return query.or(`workspaceId.eq.${cleanId},workspaceId.eq.main,workspaceId.is.null`);
+  const cleanId = (workspaceId || '').replace(/"/g, '').trim();
+  if (!cleanId) {
+    return query.eq('workspaceId', '__none__');
   }
   return query.eq('workspaceId', cleanId);
 }
-
 
 /**
  * Reusable tenant isolation helper for fetching ONLY the workspaces belonging to the authenticated user/organization.
  */
 export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
   const cookieStore = await cookies();
-  const cookieWs = cookieStore.get('pfms_workspace')?.value;
-  const orgIdVal = cookieOrgId || cookieStore.get('pfms_org_id')?.value || '';
+  const cookieWs = cookieStore.get('pfms_workspace')?.value?.trim();
+  const orgIdVal = cookieOrgId || cookieStore.get('pfms_org_id')?.value?.trim() || '';
 
   const authUser = user || (await getAuthUser());
   const userClean = (authUser?.email || 'admin').split('@')[0].toLowerCase();
-  const orgId = orgIdVal || (authUser?.id ? `org_${authUser.id.replace(/-/g, '').slice(0, 10)}` : 'org_owner_main');
+  const orgId = orgIdVal || (authUser?.id && authUser.id !== 'local_user' ? `org_${authUser.id.replace(/-/g, '').slice(0, 10)}` : '');
 
   try {
     let query = serviceRoleClient.from('workspaces').select('*');
@@ -89,11 +107,14 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
     }
   } catch {}
 
-  const primaryWsId = cookieWs || (orgId ? `main-${orgId}` : 'main-org_owner_main');
+  const primaryWsId = (cookieWs && cookieWs !== 'main')
+    ? cookieWs
+    : (orgId ? `main-${orgId}` : `main-org_${userClean}`);
+
   return [{
     id: primaryWsId,
     name: 'Main Branch',
-    type: 'Main',
+    type: 'Layer Farm',
     createdAt: new Date().toISOString(),
     ownerUsername: userClean
   }];
