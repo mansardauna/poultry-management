@@ -56,8 +56,12 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
 
   const handleExportReports = (format: 'csv' | 'pdf') => {
     if (tier === 'free') {
-      toast.error('Exporting PDF and CSV reports is a Pro feature. Upgrade to unlock!');
-      router.push('/dashboard/settings?tab=subscription');
+      if (role === 'Staff') {
+        toast.error('Exporting PDF and CSV reports is a Pro feature. Please ask your farm administrator to upgrade the subscription.');
+      } else {
+        toast.error('Exporting PDF and CSV reports is a Pro feature. Upgrade to unlock!');
+        router.push('/dashboard/settings?tab=subscription');
+      }
       return;
     }
 

@@ -493,15 +493,19 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                   </span>
                   <h3 className="text-lg font-extrabold text-slate-900 pt-1">Production Analytics & Financial Charts Locked</h3>
                   <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    Free accounts have basic flock tracking. Upgrade to Commercial Pro or Enterprise Plus to unlock daily egg production bar charts and revenue line charts.
+                    {userRole === 'Staff'
+                      ? 'Free accounts have basic flock tracking. Advanced production charts require a Commercial Pro plan. Please contact your farm administrator to request an upgrade.'
+                      : 'Free accounts have basic flock tracking. Upgrade to Commercial Pro or Enterprise Plus to unlock daily egg production bar charts and revenue line charts.'}
                   </p>
                 </div>
-                <button 
-                  onClick={() => router.push('/dashboard/settings?tab=subscription')}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl shadow cursor-pointer transition-all inline-flex items-center gap-2"
-                >
-                  <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
-                </button>
+                {userRole !== 'Staff' && (
+                  <button 
+                    onClick={() => router.push('/dashboard/settings?tab=subscription')}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase px-6 py-3 rounded-xl shadow cursor-pointer transition-all inline-flex items-center gap-2"
+                  >
+                    <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
+                  </button>
+                )}
               </div>
             ) : (
               <div className="h-80 w-full">

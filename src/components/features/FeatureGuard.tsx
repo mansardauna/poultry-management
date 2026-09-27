@@ -35,26 +35,30 @@ export function FeatureGuard({
 
         <div className="space-y-2 max-w-lg mx-auto">
           <span className="bg-amber-100 text-amber-800 border border-amber-200 font-semibold text-[11px] px-3 py-1 rounded-full">
-            Feature disabled or plan upgrade required
+            {userRole === 'Staff' ? 'Feature Restricted on Current Plan' : 'Feature disabled or plan upgrade required'}
           </span>
           <h2 className="text-2xl font-bold text-slate-900 pt-1">{featureName}</h2>
           <p className="text-xs text-slate-600 leading-relaxed font-medium">
-            {description}
+            {userRole === 'Staff' 
+              ? 'This module is not included in your farm\'s current subscription plan. Please contact your farm administrator to request an upgrade.' 
+              : description}
           </p>
         </div>
 
         <div className="pt-2 max-w-md mx-auto flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={() => router.push('/dashboard/settings?tab=subscription')}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-3 rounded-xl shadow transition-all cursor-pointer flex items-center justify-center gap-2"
-          >
-            <span>Upgrade account plan</span>
-            <ArrowRight size={15} />
-          </button>
+          {userRole !== 'Staff' && (
+            <button
+              onClick={() => router.push('/dashboard/settings?tab=subscription')}
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-3 rounded-xl shadow transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>Upgrade account plan</span>
+              <ArrowRight size={15} />
+            </button>
+          )}
           
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-3 rounded-xl transition-all cursor-pointer border border-slate-200"
+            className={`flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-3 rounded-xl transition-all cursor-pointer border border-slate-200 ${userRole === 'Staff' ? 'w-full' : ''}`}
           >
             Return to dashboard
           </button>

@@ -65,6 +65,14 @@ interface SettingsClientProps {
   workspaces: Workspace[];
   workspaceId: string;
   role?: string;
+  currentUser?: {
+    name?: string;
+    username?: string;
+    email?: string;
+    role?: string;
+    attendanceDays?: number;
+    salary?: number;
+  };
 }
 
 /**
@@ -72,14 +80,20 @@ interface SettingsClientProps {
  *
  * @param props - Component properties.
  */
-export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin' }: SettingsClientProps) {
+export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin', currentUser }: SettingsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   
   const [activeTab, setActiveTab] = useState<'profile' | 'alerts' | 'gateways' | 'subscription'>(
-    role === 'Staff' ? 'profile' : (tabParam === 'subscription' || tabParam === 'billing' ? 'subscription' : 'subscription')
+    role === 'Staff' ? 'profile' : (tabParam === 'subscription' || tabParam === 'billing' ? 'subscription' : 'profile')
   );
+
+  useEffect(() => {
+    if (role === 'Staff' && activeTab !== 'profile') {
+      setActiveTab('profile');
+    }
+  }, [role, activeTab]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
   const [currentTier, setCurrentTier] = useState('free');
@@ -381,8 +395,14 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         <div className="flex items-center gap-3">
           <Settings size={32} className="text-indigo-600" />
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Settings & Subscription</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Manage your billing plans, alert rules, and farm profile.</p>
+            <h1 className="text-2xl font-semibold text-slate-900">
+              {role === 'Staff' ? 'Staff Account & Security' : 'Settings & Subscription'}
+            </h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              {role === 'Staff' 
+                ? 'Manage your staff profile credentials and update your login password.' 
+                : 'Manage your billing plans, alert rules, and farm profile.'}
+            </p>
           </div>
         </div>
 
@@ -418,7 +438,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <User size={16} /> {role === 'Staff' ? 'My Profile & Change Password' : 'Farm Profile & Pricing'}
+          <User size={16} /> {role === 'Staff' ? 'My Profile & Security' : 'Farm Profile & Pricing'}
         </button>
         {role !== 'Staff' && (
           <>
@@ -556,37 +576,76 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       {/* Tab 2: Profile & Pricing */}
       {activeTab === 'profile' && (
         <div className="space-y-6">
-          <Card>
-            <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <User size={18} className="text-green-500" /> Farm Profile & Pricing
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TextField label="Farm / Organization Name" fullWidth variant="outlined" value={farmName} onChange={(e) => setFarmName(e.target.value)} helperText="Official farm name displayed on billing cards and invoices." />
-                <TextField label="Admin Full Name" fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
-                <TextField label="Admin Email Address" type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
-                <TextField label="Admin Contact Phone" fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
-                <TextField label="Billing Region / Currency" fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText="e.g. Nigeria & West Africa (NGN)" />
-                
-                <div className="md:col-span-2 pt-4 border-t border-slate-100">
-                  <p className="text-xs font-semibold text-slate-500 mb-3 flex items-center gap-1">
-                    <DollarSign size={14} /> Egg Pricing Configuration
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <TextField label="Egg Price Per Crate (Small) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
-                    <TextField label="Egg Price Per Crate (Large) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
+          {role === 'Staff' ? (
+            <Card>
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <User size={18} className="text-emerald-500" /> Staff Member Profile
+                  </span>
+                  <span className="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    Farm Attendant (Staff)
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Staff Full Name</span>
+                    <p className="text-sm font-bold text-slate-900">{currentUser?.name || 'Farm Attendant'}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Login Username</span>
+                    <p className="text-sm font-mono font-bold text-slate-900">{currentUser?.username || 'staff'}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Assigned Branch</span>
+                    <p className="text-sm font-bold text-indigo-600">{activeWorkspace?.name || 'Main Location'}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Farm Organization ID</span>
+                    <p className="text-sm font-mono font-medium text-slate-600">{computedFarmId}</p>
                   </div>
                 </div>
-              </div>
-              <div className="pt-6 flex justify-end">
-                <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
-                  Save Profile & Pricing
-                </MuiButton>
-              </div>
-            </CardContent>
-          </Card>
+
+                <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900 leading-relaxed">
+                  <strong>Role Permissions Notice:</strong> Farm organization details, egg pricing, payment gateways, and subscription billing are managed exclusively by the farm Administrator. As a staff attendant, you can update your login password below.
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <User size={18} className="text-green-500" /> Farm Profile & Pricing
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <TextField label="Farm / Organization Name" fullWidth variant="outlined" value={farmName} onChange={(e) => setFarmName(e.target.value)} helperText="Official farm name displayed on billing cards and invoices." />
+                  <TextField label="Admin Full Name" fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
+                  <TextField label="Admin Email Address" type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+                  <TextField label="Admin Contact Phone" fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
+                  <TextField label="Billing Region / Currency" fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText="e.g. Nigeria & West Africa (NGN)" />
+                  
+                  <div className="md:col-span-2 pt-4 border-t border-slate-100">
+                    <p className="text-xs font-semibold text-slate-500 mb-3 flex items-center gap-1">
+                      <DollarSign size={14} /> Egg Pricing Configuration
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <TextField label="Egg Price Per Crate (Small) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
+                      <TextField label="Egg Price Per Crate (Large) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-6 flex justify-end">
+                  <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
+                    Save Profile & Pricing
+                  </MuiButton>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Account Security & Change Password */}
           <Card>
@@ -711,34 +770,36 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       )}
 
       {/* Danger Zone */}
-      <Card className="border-red-100 mt-8">
-        <CardHeader className="border-b border-red-50 bg-red-50/50">
-          <CardTitle className="text-sm font-semibold uppercase text-red-600 flex items-center gap-2">
-            <Trash2 size={18} /> Danger Zone
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="text-base font-medium text-slate-900">Delete Current Workspace</h3>
-              <p className="text-sm text-slate-500 mt-1">Permanently remove this workspace and all its data. This action is irreversible.</p>
+      {role === 'Admin' && (
+        <Card className="border-red-100 mt-8">
+          <CardHeader className="border-b border-red-50 bg-red-50/50">
+            <CardTitle className="text-sm font-semibold uppercase text-red-600 flex items-center gap-2">
+              <Trash2 size={18} /> Danger Zone
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-medium text-slate-900">Delete Current Workspace</h3>
+                <p className="text-sm text-slate-500 mt-1">Permanently remove this workspace and all its data. This action is irreversible.</p>
+              </div>
+              <MuiButton 
+                disabled={workspaceId === 'main' || isDeleting}
+                onClick={handleDeleteWorkspace} 
+                variant="outlined" 
+                color="error"
+                sx={{ borderRadius: 2, px: 4, py: 1.5 }}
+              >
+                {workspaceId === 'main' ? 'Cannot Delete Main Workspace' : isDeleting ? 'Deleting...' : 'Delete Workspace'}
+              </MuiButton>
             </div>
-            <MuiButton 
-              disabled={workspaceId === 'main' || isDeleting}
-              onClick={handleDeleteWorkspace} 
-              variant="outlined" 
-              color="error"
-              sx={{ borderRadius: 2, px: 4, py: 1.5 }}
-            >
-              {workspaceId === 'main' ? 'Cannot Delete Main Workspace' : isDeleting ? 'Deleting...' : 'Delete Workspace'}
-            </MuiButton>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 3-Tier Upgrade Modal (Directly Inspired by Reference Screenshot 1) */}
       <Dialog 
-        open={showUpgradeModal} 
+        open={showUpgradeModal && role === 'Admin'} 
         onClose={() => setShowUpgradeModal(false)}
         fullWidth 
         maxWidth="lg" 

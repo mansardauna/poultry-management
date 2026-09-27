@@ -363,7 +363,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                           setIsDropdownOpen(false);
                           if (tier === 'free' && workspaces.length >= 1) {
                              toast.error('Free tier is limited to 1 branch. Upgrade to Pro for unlimited branches!');
-                             router.push('/dashboard/settings');
+                             router.push('/dashboard/settings?tab=subscription');
                              return;
                           }
                           setShowNewBranchModal(true);
@@ -417,16 +417,20 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                       item.name === 'Batches' ? 'sidebar-menu' : 
                       undefined
                     }
-                    href={isLocked ? '/dashboard/settings?tab=subscription' : item.href}
+                    href={isLocked ? (role === 'Staff' ? '#' : '/dashboard/settings?tab=subscription') : item.href}
                     onClick={(e) => {
                        if (isLocked) {
                           e.preventDefault();
-                          toast.error(
-                            item.name === 'Enterprise Hub' 
-                              ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
-                              : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
-                          );
-                          router.push('/dashboard/settings?tab=subscription');
+                          if (role === 'Staff') {
+                            toast.error(`${item.name} is not enabled on your farm's plan. Please contact your farm administrator to upgrade.`);
+                          } else {
+                            toast.error(
+                              item.name === 'Enterprise Hub' 
+                                ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
+                                : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
+                            );
+                            router.push('/dashboard/settings?tab=subscription');
+                          }
                           return;
                        }
                        setIsMobileOpen(false);
@@ -508,8 +512,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             })}
           </nav>
         </div>
-        {/* Plan Upgrade Banner in Sidebar */}
-        {!isCollapsed && role !== 'SuperAdmin' && currentTier === 'free' && (
+        {/* Plan Upgrade Banner in Sidebar - Only for Farm Admin */}
+        {!isCollapsed && role === 'Admin' && currentTier === 'free' && (
           <div className="mx-3 mb-2 p-3 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 rounded-xl text-center">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-semibold text-amber-300">Free Starter</span>

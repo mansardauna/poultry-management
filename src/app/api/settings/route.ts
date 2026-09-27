@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
+import { getAuthUser } from '@/lib/auth';
 
 /** Exported function GET */
 export async function GET() {
@@ -24,6 +25,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (user?.role === 'Staff') {
+      return NextResponse.json({ error: 'Permission denied: Staff cannot modify system settings or alert configurations.' }, { status: 403 });
+    }
+
     const workspaceId = await getWorkspaceId();
     const body = await request.json();
     
@@ -106,6 +112,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (user?.role === 'Staff') {
+      return NextResponse.json({ error: 'Permission denied: Staff cannot modify or delete payment methods and settings.' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const type = searchParams.get('type');

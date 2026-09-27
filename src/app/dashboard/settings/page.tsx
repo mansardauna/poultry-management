@@ -45,6 +45,17 @@ export default async function SettingsPage() {
   const { data: rawHist } = await supabase.from('subscription_history').select('*').eq('workspaceId', workspaceId).order('createdAt', { ascending: false });
   const subscriptionHistory = rawHist || [];
 
+  let staffRecord: any = null;
+  if (role === 'Staff') {
+    const cleanUser = (user?.username || user?.email?.split('@')[0] || '').toLowerCase();
+    const { data: staffList } = await supabase
+      .from('staff')
+      .select('*')
+      .or(`username.eq.${cleanUser},name.eq.${cleanUser}`)
+      .limit(1);
+    staffRecord = staffList?.[0] || null;
+  }
+
   return <SettingsClient 
     initialSettings={alertSettings} 
     systemSettings={systemSettings} 
@@ -53,5 +64,13 @@ export default async function SettingsPage() {
     workspaces={workspaces} 
     workspaceId={workspaceId} 
     role={role}
+    currentUser={{
+      name: staffRecord?.name || user?.username || 'Staff Member',
+      username: staffRecord?.username || user?.username || '',
+      email: user?.email || '',
+      role: staffRecord?.role || role,
+      attendanceDays: staffRecord?.attendanceDays || 0,
+      salary: staffRecord?.salary || 0
+    }}
   />;
 }

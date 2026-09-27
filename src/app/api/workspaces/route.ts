@@ -23,6 +23,9 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  if (user.role === 'Staff') {
+    return NextResponse.json({ error: 'Permission denied: Staff cannot create branches.' }, { status: 403 });
+  }
 
   const body = await request.json();
 
@@ -66,6 +69,14 @@ export async function POST(request: Request) {
 
 /** Exported function PUT */
 export async function PUT(request: Request) {
+  const user = await getAuthUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (user.role === 'Staff') {
+    return NextResponse.json({ error: 'Permission denied: Staff cannot modify branch settings.' }, { status: 403 });
+  }
+
   const body = await request.json();
   const { id, name, type } = body;
 
@@ -82,6 +93,14 @@ export async function PUT(request: Request) {
 
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
+  const user = await getAuthUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (user.role === 'Staff') {
+    return NextResponse.json({ error: 'Permission denied: Staff cannot delete workspaces.' }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 
