@@ -436,7 +436,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
         <StatCard
           title={timeRange === 'weekly' ? texts.dashboard.weeklyEggOutput : timeRange === 'monthly' ? texts.dashboard.monthlyEggOutput : timeRange === 'yearly' ? texts.dashboard.yearlyEggOutput : texts.dashboard.eggOutput}
-          value={`${formatNumber(currentYield)} ${texts.eggs.title || 'Eggs'}`}
+          value={`${formatNumber(currentYield)} ${t("Egg(s)", "Egg(s)")}`}
           subtext={`${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`}
           color="amber"
         />

@@ -1252,7 +1252,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Unpaid": "Unpaid",
     "Pending": "Pending",
     "Completed": "Completed",
-    "Active": "Active"
+    "Active": "Active",
+    "Egg(s)": "Egg(s)"
   },
   es: {
     "Multi-Farm Production & Schedule": "Producción y Calendario Multi-Granja",
@@ -1317,7 +1318,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Unpaid": "No Pagado",
     "Pending": "Pendiente",
     "Completed": "Completado",
-    "Active": "Activo"
+    "Active": "Activo",
+    "Egg(s)": "Huevo(s)"
   },
   ar: {
     "Multi-Farm Production & Schedule": "الإنتاج والجدول الزمني للمزارع المتعددة",
@@ -1382,7 +1384,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Unpaid": "غير مدفوع",
     "Pending": "معلق",
     "Completed": "مكتمل",
-    "Active": "نشط"
+    "Active": "نشط",
+    "Egg(s)": "بيضة"
   },
   de: {
     "Multi-Farm Production & Schedule": "Multi-Farm Produktion & Terminplan",
@@ -1447,7 +1450,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Unpaid": "Unbezahlt",
     "Pending": "Ausstehend",
     "Completed": "Abgeschlossen",
-    "Active": "Aktiv"
+    "Active": "Aktiv",
+    "Egg(s)": "Ei(er)"
   },
   fr: {
     "Multi-Farm Production & Schedule": "Production et Calendrier Multi-Fermes",
@@ -1512,7 +1516,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Unpaid": "Impayé",
     "Pending": "En attente",
     "Completed": "Terminé",
-    "Active": "Actif"
+    "Active": "Actif",
+    "Egg(s)": "Œuf(s)"
   },
   zh: {
     "Multi-Farm Production & Schedule": "多农场生产与排程",
@@ -1577,7 +1582,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Unpaid": "未支付",
     "Pending": "待处理",
     "Completed": "已完成",
-    "Active": "启用"
+    "Active": "启用",
+    "Egg(s)": "枚鸡蛋"
   }
 };
 
