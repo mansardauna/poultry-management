@@ -59,7 +59,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. ALWAYS insert default primary workspace into `workspaces` table
+    // 3. ALWAYS insert default organization into `organizations` table
+    await serviceRoleClient.from('organizations').insert([{
+      id: orgId,
+      name: `${userClean.charAt(0).toUpperCase() + userClean.slice(1)} Farm Org`,
+      subscriptionTier: 'free',
+      subscriptionStatus: 'active',
+      ownerId: newUserId,
+      ownerUsername: userClean,
+      ownerEmail: email,
+      createdAt: new Date().toISOString()
+    }]).catch(() => {});
+
+    // 4. ALWAYS insert default primary workspace into `workspaces` table
     await serviceRoleClient.from('workspaces').insert([{
       id: defaultWorkspaceId,
       name: 'Main Branch',

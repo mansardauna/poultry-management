@@ -45,7 +45,7 @@ interface EggsClientProps {
  */
 export function EggsClient({ initialEggs, batches, initialCushionAudits, initialMaturationLogs, role }: EggsClientProps) {
   const [eggs, setEggs] = useState<EggRecord[]>(initialEggs);
-  const { texts } = useLanguage();
+  const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
   const router = useRouter();
   const [tier, setTier] = useState('free');
@@ -526,19 +526,19 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             onClick={() => handleExportReports('pdf')}
             className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            <Printer size={15} /> Print Report
+            <Printer size={15} /> {texts.common.printReport || t("Print Report")}
           </button>
           <button 
             onClick={handleOpenAudit}
             className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
           >
-            Audit Cushioning
+            {texts.eggs.auditCushioning || t("Audit Cushioning")}
           </button>
           <button 
             onClick={handleOpenMaturation}
             className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
           >
-            Log Maturation
+            {texts.eggs.logMaturation || t("Log Maturation")}
           </button>
           <button 
             onClick={handleOpenCollect}
@@ -569,7 +569,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.totalCollected}</p>
-                <p className="text-3xl font-semibold text-slate-900 mt-2">{totalCollected.toLocaleString()}</p>
+                <p className="text-3xl font-semibold text-slate-900 mt-2">{formatNumber(totalCollected)}</p>
               </div>
               <div className="text-indigo-650">
                 <BarChart2 size={32} />
@@ -583,7 +583,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.goodEggs}</p>
-                <p className="text-3xl font-semibold text-emerald-650 mt-2">{totalGoodEggs.toLocaleString()}</p>
+                <p className="text-3xl font-semibold text-emerald-650 mt-2">{formatNumber(totalGoodEggs)}</p>
               </div>
               <div className="text-emerald-600">
                 <BarChart2 size={32} />
@@ -597,9 +597,9 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.brokenEggs}</p>
-                <p className="text-3xl font-semibold text-red-650 mt-2">{totalBrokenEggs.toLocaleString()}</p>
+                <p className="text-3xl font-semibold text-red-650 mt-2">{formatNumber(totalBrokenEggs)}</p>
               </div>
-              <div className="text-red-500">
+              <div className="text-red-600">
                 <AlertTriangle size={32} />
               </div>
             </div>
@@ -611,7 +611,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.spoiltEggs}</p>
-                <p className="text-3xl font-semibold text-amber-600 mt-2">{totalSpoiltEggs.toLocaleString()}</p>
+                <p className="text-3xl font-semibold text-amber-600 mt-2">{formatNumber(totalSpoiltEggs)}</p>
               </div>
               <div className="text-amber-500">
                 <AlertTriangle size={32} />

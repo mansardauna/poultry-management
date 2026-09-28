@@ -40,7 +40,7 @@ interface ChickensClientProps {
  */
 export function ChickensClient({ initialData, role }: ChickensClientProps) {
   const [batches, setBatches] = useState<ChickenBatch[]>(initialData);
-  const { texts } = useLanguage();
+  const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
   
   const batchesLogic = useTableLogic({
@@ -339,25 +339,25 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
         <div className="flex flex-wrap gap-2">
           <button 
             onClick={handleOpenMortality}
-            className="bg-white border-2 border-red-200 text-red-700 px-4 py-2 text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-2"
+            className="bg-white border-2 border-red-200 text-red-700 px-4 py-2 text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-2 cursor-pointer"
           >
-            <AlertTriangle size={18} /> Log Mortality
+            <AlertTriangle size={18} /> {t("Log Mortality")}
           </button>
           <button 
             onClick={handleOpenVaccine}
-            className="bg-white border-2 border-indigo-200 text-indigo-700 px-4 py-2 text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+            className="bg-white border-2 border-indigo-200 text-indigo-700 px-4 py-2 text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2 cursor-pointer"
           >
-            <Shield size={18} /> Log Vaccination
+            <Shield size={18} /> {t("Log Vaccination")}
           </button>
           <button 
             onClick={handleOpenTransfer}
-            className="bg-white border-2 border-slate-200 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
+            className="bg-white border-2 border-slate-200 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer"
           >
-            <MapPin size={18} /> Transfer Birds
+            <MapPin size={18} /> {t("Transfer Birds")}
           </button>
           <button 
             onClick={handleOpen}
-            className="bg-indigo-600 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="bg-indigo-600 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2 cursor-pointer"
           >
             <Plus size={20} /> {texts.chickens.addBatch}
           </button>
@@ -370,20 +370,20 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
           <CardTitle>{texts.chickens.activeBatches}</CardTitle>
         </CardHeader>
         <CardContent>
-          <TableControls searchTerm={batchesLogic.searchTerm} setSearchTerm={batchesLogic.setSearchTerm} placeholder="Search batches..." />
+          <TableControls searchTerm={batchesLogic.searchTerm} setSearchTerm={batchesLogic.setSearchTerm} placeholder={t("Search batches...")} />
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <TableSortHeader label="Batch ID" sortKey="id" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  <TableSortHeader label="Type" sortKey="type" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  <TableSortHeader label="Breed" sortKey="breed" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  <TableSortHeader label="Remaining birds" sortKey="quantity" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  <TableSortHeader label="Age (Weeks)" sortKey="ageInWeeks" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  <TableSortHeader label="Mortality" sortKey="mortalityCount" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  <TableSortHeader label="Section" sortKey="farmSection" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  <TableSortHeader label="Vaccination" sortKey="vaccinationStatus" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
-                  {canEdit && <th className="px-4 py-3">Actions</th>}
+                  <TableSortHeader label={t("Batch ID")} sortKey="id" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label={t("Type")} sortKey="type" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label={t("Breed")} sortKey="breed" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label={t("Remaining birds")} sortKey="quantity" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label={t("Age (Weeks)")} sortKey="ageInWeeks" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label={t("Mortality")} sortKey="mortalityCount" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label={t("Section")} sortKey="farmSection" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  <TableSortHeader label={t("Vaccination")} sortKey="vaccinationStatus" currentSort={batchesLogic.sortConfig} onSort={batchesLogic.handleSort} />
+                  {canEdit && <th className="px-4 py-3">{t("Actions")}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -400,9 +400,9 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3">{batch.breed}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-900">{batch.quantity.toLocaleString()}</td>
-                    <td className="px-4 py-3">{batch.ageInWeeks}</td>
-                    <td className="px-4 py-3 text-red-650 font-semibold">{batch.mortalityCount}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-900">{formatNumber(batch.quantity)}</td>
+                    <td className="px-4 py-3">{formatNumber(batch.ageInWeeks)}</td>
+                    <td className="px-4 py-3 text-red-650 font-semibold">{formatNumber(batch.mortalityCount)}</td>
                     <td className="px-4 py-3 font-mono text-xs">{batch.farmSection}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium px-2.5 py-0.5 rounded-md ${

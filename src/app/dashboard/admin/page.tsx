@@ -86,7 +86,41 @@ export default async function AdminCmsPage() {
     if (histData) allHistory = histData;
 
     const { data: orgData } = await serviceRoleClient.from('organizations').select('*');
-    if (orgData) allOrgs = orgData;
+    if (orgData && Array.isArray(orgData)) allOrgs = [...orgData];
+
+    // Synchronize: Ensure every registered farm admin/workspace is captured in allOrgs
+    try {
+      const { data: adminUsers } = await serviceRoleClient.from('users').select('*');
+      const { data: workspaces } = await serviceRoleClient.from('workspaces').select('*');
+
+      const existingOrgIds = new Set(allOrgs.map((o: any) => o.id));
+
+      if (adminUsers && Array.isArray(adminUsers)) {
+        for (const u of adminUsers) {
+          if (u.role === 'SuperAdmin') continue;
+          const userOrgId = u.orgId || (u.workspaceId ? `org_${u.workspaceId}` : `org_${u.username}`);
+          if (!existingOrgIds.has(userOrgId)) {
+            const farmWorkspace = workspaces?.find((w: any) => w.ownerUsername === u.username || w.id === u.workspaceId);
+            const orgName = farmWorkspace?.name && farmWorkspace.name !== 'Main Branch'
+              ? `${farmWorkspace.name} Farm`
+              : `${u.username ? u.username.charAt(0).toUpperCase() + u.username.slice(1) : 'Farm'} Organization`;
+
+            const newOrg = {
+              id: userOrgId,
+              name: orgName,
+              subscriptionTier: 'free',
+              subscriptionStatus: 'active',
+              ownerUsername: u.username,
+              ownerEmail: u.email,
+              createdAt: u.createdAt || new Date().toISOString()
+            };
+            allOrgs.push(newOrg);
+            existingOrgIds.add(userOrgId);
+            await serviceRoleClient.from('organizations').upsert([newOrg]).catch(() => {});
+          }
+        }
+      }
+    } catch (_syncErr) {}
   } catch (_err) {
     // Console log or handle fallback
   }

@@ -25,8 +25,12 @@ export function AiLogger({ role }: { role?: string }) {
     return () => window.removeEventListener('pfms_open_ai_logger', handleOpen);
   }, []);
 
-  const isSuperAdmin = role === 'SuperAdmin';
-  const hasFullAccess = isSuperAdmin || tier !== 'free';
+  if (role === 'SuperAdmin') {
+    return null;
+  }
+
+  const isSuperAdmin = false;
+  const hasFullAccess = tier !== 'free';
 
   const startListening = () => {
     if (typeof window === 'undefined') return;

@@ -61,7 +61,7 @@ export default async function DashboardLayout({
             {isAllowed ? children : <AccessDenied role={role} path={currentPath} />}
           </main>
         </div>
-        <AiLogger role={role} />
+        {role !== 'SuperAdmin' && <AiLogger role={role} />}
       </div>
     </SidebarProvider>
   );

@@ -62,7 +62,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const [data, setData] = useState<DatabaseSchema>(initialData);
   const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
   const { activeWorkspace, workspaces } = useWorkspace();
-  const { texts, language, formatDate, formatNumber, formatCurrency } = useLanguage();
+  const { texts, language, formatDate, formatNumber, formatCurrency, t } = useLanguage();
   const { timeRange, filterByTimeRange } = useTimeFilter();
 
   const [tier, setTier] = useState('free');
@@ -444,13 +444,13 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {userRole === 'Staff' ? (
           <>
             <StatCard
-              title="Feed Stock on Hand"
+              title={t("Feed Stock on Hand")}
               value={`${formatNumber(totalFeedStockKg)} kg`}
-              subtext="Available inventory in storage"
+              subtext={t("Available inventory in storage")}
               color="emerald"
             />
             <StatCard
-              title="Shift Checklist Tasks"
+              title={t("Tasks Completed")}
               value={`${formatNumber(pendingTasksCount)} Pending`}
               subtext={`${formatNumber(data.tasks.length - pendingTasksCount)} completed today`}
               color="indigo"
@@ -480,11 +480,11 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         <Card className="flex flex-col justify-between">
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold text-slate-700">
-              {texts.dashboard.eggProductionVolumeChart} & Sales Trend
+              {texts.dashboard.eggProductionVolumeChart} & {t("Sales Trend")}
             </CardTitle>
             {isPro && (
               <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
-                Live Data
+                {t("Live Data")}
               </span>
             )}
           </CardHeader>
@@ -495,7 +495,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                   <span className="bg-amber-100 text-amber-800 font-extrabold text-[10px] px-3 py-1 rounded-full border border-amber-200">
                     Pro & Enterprise Feature
                   </span>
-                  <h3 className="text-lg font-extrabold text-slate-900 pt-1">Production Analytics & Financial Charts Locked</h3>
+                  <h3 className="text-lg font-extrabold text-slate-900 pt-1">{t("Production Analytics & Financial Charts Locked")}</h3>
                   <p className="text-xs text-slate-600 leading-relaxed font-medium">
                     {userRole === 'Staff'
                       ? 'Free accounts have basic flock tracking. Advanced production charts require a Commercial Pro plan. Please contact your farm administrator to request an upgrade.'
@@ -507,7 +507,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                     onClick={() => router.push('/dashboard/settings?tab=subscription')}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow cursor-pointer transition-all inline-flex items-center gap-2"
                   >
-                    <Sparkles size={16} /> Upgrade to Commercial Pro (₦15,000/mo)
+                    <Sparkles size={16} /> {t("Upgrade to Commercial Pro")}
                   </button>
                 )}
               </div>
@@ -523,8 +523,8 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                       labelClassName="text-slate-800 text-xs font-bold"
                     />
                     <Legend />
-                    <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name="Good Eggs Collected" />
-                    <Bar dataKey="CrackedSpoilt" stackId="a" fill="#ef4444" name="Cracked / Spoilt" />
+                    <Bar dataKey="Eggs" stackId="a" fill="#4f46e5" name={t("Good Eggs Collected")} />
+                    <Bar dataKey="CrackedSpoilt" stackId="a" fill="#ef4444" name={t("Cracked / Spoilt")} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -536,7 +536,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         <Card className="flex flex-col justify-between border border-slate-200 bg-white rounded-2xl shadow-sm">
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Calendar size={18} className="text-indigo-600" /> Multi-Farm Production & Schedule
+              <Calendar size={18} className="text-indigo-600" /> {t("Multi-Farm Production & Schedule")}
             </CardTitle>
             <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2.5 py-1 rounded font-mono">
               {todayFormatted}
@@ -546,7 +546,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
               <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-emerald-700 block">Vaccination & Health</span>
+                <span className="text-[10px] font-bold text-emerald-700 block">{t("Vaccination & Health")}</span>
                 <p className="text-slate-900 font-bold text-sm">
                   {data.batches[0] ? `${data.batches[0].breed} (${data.batches[0].type || 'Layers'})` : 'Flock Health Routine'}
                 </p>
@@ -556,7 +556,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               </div>
 
               <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-indigo-700 block">Feed Stock Level</span>
+                <span className="text-[10px] font-bold text-indigo-700 block">{t("Feed Stock Level")}</span>
                 <p className="text-slate-900 font-bold text-sm">
                   {data.feeds[0] ? `${data.feeds[0].quantityKg}kg ${data.feeds[0].type}` : 'Feed Inventory Normal'}
                 </p>
@@ -566,7 +566,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               </div>
 
               <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-purple-700 block">Vet & Diagnostics</span>
+                <span className="text-[10px] font-bold text-purple-700 block">{t("Vet & Diagnostics")}</span>
                 <p className="text-slate-900 font-bold text-sm">
                   {data.alertLogs[0] ? data.alertLogs[0].message : 'Scheduled Farm Audit'}
                 </p>
@@ -576,9 +576,9 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               </div>
 
               <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-amber-800 block">Sales Dispatch Log</span>
+                <span className="text-[10px] font-bold text-amber-800 block">{t("Sales Dispatch Log")}</span>
                 <p className="text-slate-900 font-bold text-sm">
-                  {data.sales[0] ? `${data.sales[0].customerName} (₦${data.sales[0].totalAmount.toLocaleString()})` : 'Recent Wholesale Dispatch'}
+                  {data.sales[0] ? `${data.sales[0].customerName} (${formatCurrency(data.sales[0].totalAmount)})` : 'Recent Wholesale Dispatch'}
                 </p>
                 <p className="text-[10px] text-slate-500 font-mono">
                   {data.sales[0] ? `Date: ${data.sales[0].date}` : 'Dispatch Status: Dispatched'}
@@ -588,12 +588,12 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
             {!isEnterprise && (
               <div className="bg-purple-50 border border-purple-200 p-3 rounded-xl flex items-center justify-between text-xs">
-                <span className="text-purple-900 font-semibold">Unlock multi-farm branch calendar & cross-transfers</span>
+                <span className="text-purple-900 font-semibold">{t("Unlock multi-farm branch calendar & cross-transfers")}</span>
                 <button
                   onClick={() => router.push('/dashboard/settings?tab=subscription')}
                   className="bg-purple-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg cursor-pointer hover:bg-purple-700"
                 >
-                  Enterprise Tier
+                  {t("Enterprise Tier")}
                 </button>
               </div>
             )}
@@ -613,24 +613,24 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
               <span className="text-xs font-medium text-slate-500">{texts.dashboard.lastWeekYield}</span>
-              <span className="text-xs font-bold text-slate-900">{previousYield}</span>
+              <span className="text-xs font-bold text-slate-900">{formatNumber(previousYield)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
               <span className="text-xs font-medium text-slate-500">{texts.dashboard.currentWeekYield}</span>
-              <span className="text-xs font-bold text-indigo-650">{currentYield}</span>
+              <span className="text-xs font-bold text-indigo-650">{formatNumber(currentYield)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
               <span className="text-xs font-medium text-slate-500">{texts.dashboard.absoluteNetGrowth}</span>
               <span className={`text-xs font-bold ${netGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                {netGrowth >= 0 ? '+' : ''}{netGrowth} ({netGrowth >= 0 ? '+' : ''}{netGrowthPercent}%)
+                {netGrowth >= 0 ? '+' : ''}{formatNumber(netGrowth)} ({netGrowth >= 0 ? '+' : ''}{netGrowthPercent}%)
               </span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
               <span className="text-xs font-medium text-slate-500">{texts.dashboard.totalExpenses}</span>
-              <span className="text-xs font-bold text-red-600">₦{totalExpenses.toLocaleString()}</span>
+              <span className="text-xs font-bold text-red-600">{formatCurrency(totalExpenses)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-xs font-medium text-slate-500">Feed Conversion Ratio</span>
+              <span className="text-xs font-medium text-slate-500">{t("Feed Conversion Ratio")}</span>
               <span className="text-xs text-amber-600 font-bold">{currentYield > 0 ? (totalFeedKg / (currentYield / 30)).toFixed(2) : '0.00'} kg/crate</span>
             </div>
           </CardContent>
@@ -646,11 +646,11 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-500 font-medium">{texts.dashboard.incurredCost}</span>
-              <span className="text-slate-900 font-bold">₦{totalIncurredCost.toLocaleString()}</span>
+              <span className="text-slate-900 font-bold">{formatCurrency(totalIncurredCost)}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-500 font-medium">{texts.dashboard.projectedFlockValue}</span>
-              <span className="text-indigo-650 font-bold">₦{projectedRevenue.toLocaleString()}</span>
+              <span className="text-indigo-650 font-bold">{formatCurrency(projectedRevenue)}</span>
             </div>
             
             <div className="pt-2">
@@ -669,7 +669,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
               <p className="text-[10px] font-bold text-slate-800">{texts.dashboard.currentInventoryAudit}</p>
               <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                Feed Stock: <strong>{totalFeedKg} kg</strong> | Total Birds: <strong>{totalChickens}</strong>
+                {t("Feed Stock")}: <strong>{formatNumber(totalFeedKg)} kg</strong> | {t("Total Birds")}: <strong>{formatNumber(totalChickens)}</strong>
               </p>
             </div>
           </CardContent>
@@ -679,7 +679,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <MapPin size={18} className="text-indigo-650" /> {texts.dashboard.managedBranchesFarms} ({workspaces.length})
+              <MapPin size={18} className="text-indigo-650" /> {texts.dashboard.managedBranchesFarms} ({formatNumber(workspaces.length)})
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -720,19 +720,19 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               </span>
               {(isFeedCritical || hasCctvFailures) && (
                 <span className="rounded-full bg-red-500 px-2 py-1 text-[10px] uppercase text-white">
-                  Notification
+                  {t("Notification")}
                 </span>
               )}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <TableControls searchTerm={alertLogsLogic.searchTerm} setSearchTerm={alertLogsLogic.setSearchTerm} placeholder="Search alerts..." />
+            <TableControls searchTerm={alertLogsLogic.searchTerm} setSearchTerm={alertLogsLogic.setSearchTerm} placeholder={t("Search alerts...")} />
             <div className="overflow-x-auto max-h-[340px] overflow-y-auto font-mono text-xs">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
                     <TableSortHeader label={texts.common.date} sortKey="date" currentSort={alertLogsLogic.sortConfig} onSort={alertLogsLogic.handleSort} />
-                    <TableSortHeader label="Alert Incident Msg" sortKey="message" currentSort={alertLogsLogic.sortConfig} onSort={alertLogsLogic.handleSort} />
+                    <TableSortHeader label={t("Alert Incident Msg")} sortKey="message" currentSort={alertLogsLogic.sortConfig} onSort={alertLogsLogic.handleSort} />
                     <TableSortHeader label={texts.common.severity} sortKey="severity" currentSort={alertLogsLogic.sortConfig} onSort={alertLogsLogic.handleSort} />
                   </tr>
                 </thead>
@@ -749,11 +749,11 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                         <td className="px-4 py-3 text-slate-400">{log.date}</td>
                         <td className="px-4 py-3 text-slate-800">{log.message}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 text-[9px]  uppercase ${
+                          <span className={`px-2 py-0.5 text-[9px] uppercase ${
                             log.severity === 'Critical' ? 'bg-red-100 text-red-800 animate-pulse' :
                             log.severity === 'Warning' ? 'bg-amber-100 text-amber-800' :
                             'bg-slate-100 text-slate-800'
-                          }`}>{log.severity}</span>
+                          }`}>{t(log.severity)}</span>
                         </td>
                       </tr>
                     ))
@@ -783,7 +783,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
             </CardHeader>
             <CardContent className="p-6">
               <p className="text-xs text-slate-500 mb-3">
-                Active staff tasks. Check off tasks once verified:
+                {t("Active staff tasks. Check off tasks once verified:")}
               </p>
               <div className="space-y-2.5 max-h-[180px] overflow-y-auto font-mono text-[11px]">
                 {activeTasks.length === 0 ? (
@@ -819,7 +819,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                   </span>
                   {isPayday && (
                     <span className="bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full animate-pulse uppercase font-bold">
-                      Action Required
+                      {t("Action Required")}
                     </span>
                   )}
                 </CardTitle>
@@ -829,12 +829,12 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
                   <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
                     <span className="font-medium text-slate-500">{texts.dashboard.staffDuePay}</span>
                     <span className={`font-bold ${isPayday ? 'text-red-600' : 'text-slate-900'}`}>
-                      {staffNeedingPay.length} / {data.staff.length}
+                      {formatNumber(staffNeedingPay.length)} / {formatNumber(data.staff.length)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
                     <span className="font-medium text-slate-500">{texts.dashboard.pendingPayroll}</span>
-                    <span className="text-amber-600 font-bold">₦{totalPendingPayroll.toLocaleString()}</span>
+                    <span className="text-amber-600 font-bold">{formatCurrency(totalPendingPayroll)}</span>
                   </div>
 
                   {isPayday && (
