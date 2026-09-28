@@ -35,7 +35,8 @@ import {
   LucideIcon
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import Cookies from 'js-cookie';
 import { useSidebar } from './SidebarContext';
 import { useLanguage, Language } from '@/components/features/LanguageContext';
 import { useTimeFilter, TimeRange } from '@/components/features/TimeFilterContext';
@@ -110,7 +111,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     { name: 'Transactional Email (Resend)', desc: 'Resend API key and outbound sender email', href: '/dashboard/admin?tab=setup', category: 'Email Gateway', icon: Mail },
     { name: 'SaaS Plans', desc: 'Pricing packages, Stripe plan IDs, and features', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: Package },
     { name: 'Landing Page CMS', desc: 'Hero headlines, announcement banner, support contacts', href: '/dashboard/admin?tab=cms', category: 'CMS & Content', icon: Sparkles },
-    { name: 'Tenant Farm Organizations', desc: 'Directory of registered farm tenant workspaces', href: '/dashboard/admin?tab=orgs', category: 'Tenants & Farms', icon: Building2 },
+    { name: 'Farm Workspaces', desc: 'Directory of registered farm workspaces', href: '/dashboard/admin?tab=orgs', category: 'Farms & Workspaces', icon: Building2 },
     { name: 'Platform Settings & Governance', desc: 'System versioning, diagnostics and maintenance', href: '/dashboard/admin?tab=settings', category: 'System Governance', icon: Shield },
     { name: 'Super Admin Documentation', desc: 'Setup guide, installation docs and deployment', href: '/documentation/superadmin-setup-guide.html', category: 'Documentation', icon: BookOpen },
   ];
@@ -137,7 +138,9 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: Settings },
   ];
 
-  const currentSearchItems = role === 'SuperAdmin' ? SUPERADMIN_SEARCH_ITEMS : FARM_SEARCH_ITEMS;
+  const pathname = usePathname();
+  const isSuperAdmin = role === 'SuperAdmin' || (typeof window !== 'undefined' && Cookies.get('pfms_role') === 'SuperAdmin') || pathname.startsWith('/dashboard/admin');
+  const currentSearchItems = isSuperAdmin ? SUPERADMIN_SEARCH_ITEMS : FARM_SEARCH_ITEMS;
 
   const filteredSearchResults = searchQuery.trim() === '' 
     ? currentSearchItems.slice(0, 5) 
@@ -152,7 +155,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     const query = searchQuery.toLowerCase().trim();
     if (!query) return;
 
-    if (role === 'SuperAdmin') {
+    if (isSuperAdmin) {
       const matched = SUPERADMIN_SEARCH_ITEMS.find(item => 
         item.name.toLowerCase().includes(query) || 
         item.desc.toLowerCase().includes(query) ||
@@ -324,7 +327,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               isSearchFocused ? 'border-indigo-500 ring-2 ring-indigo-100' : 'border-slate-300'
             }`}
             placeholder={
-              role === 'SuperAdmin'
+              isSuperAdmin
                 ? 'Search tenants, gateways, database, SaaS plans, CMS...'
                 : `${texts.common.search || 'Search'} farm records, staff, batches, invoices...`
             }
@@ -609,7 +612,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         </button>
 
         {/* Role Badge or Desktop Upgrade CTA */}
-        {role === 'SuperAdmin' ? (
+        {isSuperAdmin ? (
           <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
             <span className="bg-indigo-600 text-white text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg whitespace-nowrap">
               Super Admin
@@ -677,7 +680,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               {/* Body */}
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 {/* Time Range Filter (Farm users only) */}
-                {role !== 'SuperAdmin' && (
+                {!isSuperAdmin && (
                   <div>
                     <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
                       <Calendar size={14} className="text-indigo-600" />
@@ -748,7 +751,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 </div>
 
                 {/* Upgrade Promo Card in Drawer for Free Tier */}
-                {role === 'Admin' && currentTier === 'free' && (
+                {!isSuperAdmin && role === 'Admin' && currentTier === 'free' && (
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100/60 border border-indigo-200 space-y-3">
                     <div className="flex items-center gap-2 text-indigo-700 font-bold text-xs uppercase tracking-wider">
                       <Sparkles size={14} className="text-indigo-600" />

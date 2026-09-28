@@ -2,13 +2,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { 
   Save, 
   RefreshCw, 
   Layers, 
   Building2, 
+  BarChart3, 
   HelpCircle,
   Lock,
   CreditCard,
@@ -72,6 +73,7 @@ export function AdminCmsClient({
   allOrgs?: any[];
 }) {
   const { formatNumber, formatCurrency, t } = useLanguage();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   
@@ -82,6 +84,11 @@ export function AdminCmsClient({
       setActiveTab(tabParam as any);
     }
   }, [tabParam]);
+
+  const handleTabChange = (newTab: 'overview' | 'setup' | 'plans' | 'cms' | 'orgs' | 'settings') => {
+    setActiveTab(newTab);
+    router.push(`/dashboard/admin?tab=${newTab}`);
+  };
 
   const [plans, setPlans] = useState<SaasPlanConfig[]>(initialPlans);
   const [isSaving, setIsSaving] = useState(false);
@@ -596,6 +603,31 @@ export function AdminCmsClient({
         </div>
       )}
 
+      {/* Mobile Top Tabs Navigation Bar */}
+      <div className="md:hidden flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none -mx-2 px-2">
+        {[
+          { tab: 'overview', label: 'Overview', icon: BarChart3 },
+          { tab: 'setup', label: 'Gateways & APIs', icon: Settings },
+          { tab: 'plans', label: 'SaaS Plans', icon: Layers },
+          { tab: 'cms', label: 'CMS & Brand', icon: Sparkles },
+          { tab: 'orgs', label: `Farm Workspaces (${allOrgs.length})`, icon: Building2 },
+          { tab: 'settings', label: 'Platform Settings', icon: Server },
+        ].map((item) => (
+          <button
+            key={item.tab}
+            onClick={() => handleTabChange(item.tab as any)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === item.tab
+                ? 'bg-purple-700 text-white shadow-sm'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <item.icon size={14} className={activeTab === item.tab ? 'text-purple-200' : 'text-slate-400'} />
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
+
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-in fade-in duration-300">
@@ -618,7 +650,7 @@ export function AdminCmsClient({
             <Card className="border border-indigo-200 bg-indigo-50/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-indigo-900 flex items-center justify-between">
-                  <span>Tenant Farm Workspaces</span>
+                  <span>Farm Workspaces</span>
                   <Building2 size={18} className="text-indigo-600" />
                 </CardTitle>
               </CardHeader>
@@ -661,7 +693,7 @@ export function AdminCmsClient({
 
           {/* Quick Summary of Recent Activity */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-slate-900">Tenant Farm Directory Overview</h3>
+            <h3 className="text-sm font-bold text-slate-900">Farm Workspaces Directory</h3>
             <p className="text-xs text-slate-500">
               Manage your tenants, inspect real-time billing history, and configure SaaS subscription tiers from the sidebar menu.
             </p>
@@ -1720,7 +1752,7 @@ export function AdminCmsClient({
 
                   {/* Editable Configuration */}
                   <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Tenant Farm Configuration</h4>
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Farm Workspace Configuration</h4>
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">Organization Name</label>

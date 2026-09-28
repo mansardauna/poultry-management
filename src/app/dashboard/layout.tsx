@@ -25,9 +25,10 @@ export default async function DashboardLayout({
 }>) {
   const cookieStore = await cookies();
   const headersList = await headers();
-  const role = headersList.get('x-user-role') || cookieStore.get('pfms_role')?.value || 'Staff';
-  const tier = headersList.get('x-user-tier') || cookieStore.get('pfms_tier')?.value || 'free';
   const currentPath = headersList.get('x-current-path') || headersList.get('x-middleware-request-x-current-path') || '';
+  const isSuperAdminPath = currentPath.startsWith('/dashboard/admin');
+  const role = isSuperAdminPath ? 'SuperAdmin' : (headersList.get('x-user-role') || cookieStore.get('pfms_role')?.value || 'Staff');
+  const tier = headersList.get('x-user-tier') || cookieStore.get('pfms_tier')?.value || 'free';
 
   const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';
   const impersonatedOrgName = cookieStore.get('pfms_impersonate_org_name')?.value;

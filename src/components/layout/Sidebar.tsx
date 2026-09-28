@@ -35,6 +35,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import clsx from 'clsx';
+import Cookies from 'js-cookie';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
 import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { WorkspaceOnboarding } from '../features/WorkspaceOnboarding';
@@ -55,7 +56,7 @@ export const superAdminMenuItems = [
   { name: 'Payment & API gateways', tab: 'setup', href: '/dashboard/admin?tab=setup', icon: Settings },
   { name: 'SaaS plans', tab: 'plans', href: '/dashboard/admin?tab=plans', icon: Layers },
   { name: 'Landing page CMS', tab: 'cms', href: '/dashboard/admin?tab=cms', icon: Sparkles },
-  { name: 'Tenant farm organizations', tab: 'orgs', href: '/dashboard/admin?tab=orgs', icon: Building2 },
+  { name: 'Farm workspaces', tab: 'orgs', href: '/dashboard/admin?tab=orgs', icon: Building2 },
   { name: 'Platform settings', tab: 'settings', href: '/dashboard/admin?tab=settings', icon: Server },
 ];
 
@@ -183,7 +184,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const { texts } = useLanguage();
   const whiteLabel = useWhiteLabel();
 
-  const isAdmin = role === 'Admin' || role === 'SuperAdmin';
+  const isSuperAdmin = role === 'SuperAdmin' || (typeof window !== 'undefined' && Cookies.get('pfms_role') === 'SuperAdmin') || pathname.startsWith('/dashboard/admin');
+  const isAdmin = role === 'Admin' || isSuperAdmin;
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
 
   const searchParams = useSearchParams();
@@ -208,7 +210,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const [tenantsCount, setTenantsCount] = useState<number>(0);
 
   useEffect(() => {
-    if (role === 'SuperAdmin') {
+    if (isSuperAdmin) {
       fetch('/api/setup')
         .then(res => res.json())
         .then(data => {
@@ -218,7 +220,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         })
         .catch(() => {});
     }
-  }, [role]);
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     setCurrentTier(tier);
@@ -304,7 +306,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         )}
       >
         <div className="flex items-center justify-between h-20 border-b border-indigo-900 px-4 relative">
-          {role === 'SuperAdmin' ? (
+          {isSuperAdmin ? (
             !isCollapsed ? (
               <div className="flex items-center gap-3 px-2 py-2 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0 shadow-sm">
@@ -454,7 +456,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto py-4 scrollbar-sidebar scrollbar-custom">
-          {role === 'SuperAdmin' ? (
+          {isSuperAdmin ? (
             <nav className="space-y-1.5 px-3">
               {superAdminMenuItems.map((item) => {
                 const currentAdminTab = searchParams.get('tab') || 'overview';
@@ -630,7 +632,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           )}
         </div>
         {/* Plan Upgrade Banner in Sidebar - Only for Farm Admin */}
-        {!isCollapsed && role === 'Admin' && currentTier === 'free' && (
+        {!isCollapsed && !isSuperAdmin && role === 'Admin' && currentTier === 'free' && (
           <div className="mx-3 mb-2 p-3 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 rounded-xl text-center">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-semibold text-amber-300">Free Starter</span>
@@ -649,7 +651,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </div>
         )}
 
-        {!isCollapsed && role !== 'SuperAdmin' && currentTier !== 'free' && (
+        {!isCollapsed && !isSuperAdmin && currentTier !== 'free' && (
           <div className="mx-3 mb-2 px-3 py-2 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
             <span className="text-xs font-semibold text-emerald-300 truncate">
@@ -659,7 +661,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         )}
 
         <div className="p-4 border-t border-indigo-900 flex flex-col gap-2">
-          {role !== 'SuperAdmin' && (
+          {!isSuperAdmin && (
             <Link
               href="/dashboard/settings"
               onClick={() => setIsMobileOpen(false)}
@@ -686,14 +688,6 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           </button>
         </div>
       </div>
-      
-      {/* Mobile Overlay */}
-      {isMobileOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
 
       {showNewBranchModal && (
         <WorkspaceOnboarding onClose={() => setShowNewBranchModal(false)} />

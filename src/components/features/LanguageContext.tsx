@@ -208,7 +208,8 @@ const translations: Record<Language, TranslationDict> = {
       "SaaS plans": "SaaS Plans",
       "SaaS plans & entitlements": "SaaS Plans",
       "Landing page CMS": "Landing Page CMS",
-      "Tenant farm organizations": "Tenant Farm Organizations",
+      "Farm workspaces": "Farm Workspaces",
+      "Tenant farm organizations": "Farm Workspaces",
       "Platform settings": "Platform Settings",
       "Super admin docs": "Super Admin Docs"
     },
@@ -377,7 +378,8 @@ const translations: Record<Language, TranslationDict> = {
       "SaaS plans": "Planes SaaS",
       "SaaS plans & entitlements": "Planes SaaS",
       "Landing page CMS": "CMS de Página de Inicio",
-      "Tenant farm organizations": "Organizaciones Agrícolas",
+      "Farm workspaces": "Espacios de trabajo",
+      "Tenant farm organizations": "Espacios de trabajo",
       "Platform settings": "Configuración de Plataforma",
       "Super admin docs": "Documentación de Super Admin"
     },
@@ -546,7 +548,8 @@ const translations: Record<Language, TranslationDict> = {
       "SaaS plans": "خطط الاشتراك",
       "SaaS plans & entitlements": "خطط الاشتراك",
       "Landing page CMS": "إدارة الصفحة الرئيسية",
-      "Tenant farm organizations": "مزارع المستأجرين",
+      "Farm workspaces": "مساحات عمل المزارع",
+      "Tenant farm organizations": "مساحات عمل المزارع",
       "Platform settings": "إعدادات المنصة",
       "Super admin docs": "وثائق المشرف العام"
     },
@@ -715,7 +718,8 @@ const translations: Record<Language, TranslationDict> = {
       "SaaS plans": "SaaS-Pläne",
       "SaaS plans & entitlements": "SaaS-Pläne",
       "Landing page CMS": "Landingpage-CMS",
-      "Tenant farm organizations": "Mandanten-Farmorganisationen",
+      "Farm workspaces": "Farm-Arbeitsbereiche",
+      "Tenant farm organizations": "Farm-Arbeitsbereiche",
       "Platform settings": "Plattformeinstellungen",
       "Super admin docs": "Super-Admin-Dokumentation"
     },
@@ -884,7 +888,8 @@ const translations: Record<Language, TranslationDict> = {
       "SaaS plans": "Plans SaaS",
       "SaaS plans & entitlements": "Plans SaaS",
       "Landing page CMS": "CMS Page d'accueil",
-      "Tenant farm organizations": "Organisations de fermes",
+      "Farm workspaces": "Espaces de travail",
+      "Tenant farm organizations": "Espaces de travail",
       "Platform settings": "Paramètres plateforme",
       "Super admin docs": "Docs Super Admin"
     },
@@ -1053,7 +1058,8 @@ const translations: Record<Language, TranslationDict> = {
       "SaaS plans": "SaaS订阅套餐",
       "SaaS plans & entitlements": "SaaS订阅套餐",
       "Landing page CMS": "门户页面CMS",
-      "Tenant farm organizations": "租户农场机构",
+      "Farm workspaces": "农场工作区",
+      "Tenant farm organizations": "农场工作区",
       "Platform settings": "平台全局设置",
       "Super admin docs": "超级管理员文档"
     },
@@ -1253,7 +1259,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Pending": "Pending",
     "Completed": "Completed",
     "Active": "Active",
-    "Egg(s)": "Egg(s)"
+    "Egg(s)": "Egg(s)",
+    "Farm workspaces": "Farm Workspaces"
   },
   es: {
     "Multi-Farm Production & Schedule": "Producción y Calendario Multi-Granja",
@@ -1319,7 +1326,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Pending": "Pendiente",
     "Completed": "Completado",
     "Active": "Activo",
-    "Egg(s)": "Huevo(s)"
+    "Egg(s)": "Huevo(s)",
+    "Farm workspaces": "Espacios de trabajo"
   },
   ar: {
     "Multi-Farm Production & Schedule": "الإنتاج والجدول الزمني للمزارع المتعددة",
@@ -1385,7 +1393,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Pending": "معلق",
     "Completed": "مكتمل",
     "Active": "نشط",
-    "Egg(s)": "بيضة"
+    "Egg(s)": "بيضة",
+    "Farm workspaces": "مساحات عمل المزارع"
   },
   de: {
     "Multi-Farm Production & Schedule": "Multi-Farm Produktion & Terminplan",
@@ -1451,7 +1460,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Pending": "Ausstehend",
     "Completed": "Abgeschlossen",
     "Active": "Aktiv",
-    "Egg(s)": "Ei(er)"
+    "Egg(s)": "Ei(er)",
+    "Farm workspaces": "Farm-Arbeitsbereiche"
   },
   fr: {
     "Multi-Farm Production & Schedule": "Production et Calendrier Multi-Fermes",
@@ -1517,7 +1527,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Pending": "En attente",
     "Completed": "Terminé",
     "Active": "Actif",
-    "Egg(s)": "Œuf(s)"
+    "Egg(s)": "Œuf(s)",
+    "Farm workspaces": "Espaces de travail"
   },
   zh: {
     "Multi-Farm Production & Schedule": "多农场生产与排程",
@@ -1583,7 +1594,8 @@ const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Pending": "待处理",
     "Completed": "已完成",
     "Active": "启用",
-    "Egg(s)": "枚鸡蛋"
+    "Egg(s)": "枚鸡蛋",
+    "Farm workspaces": "农场工作区"
   }
 };
 
