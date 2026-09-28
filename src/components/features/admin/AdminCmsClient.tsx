@@ -25,7 +25,14 @@ import {
   CheckCircle2,
   Video,
   Sparkles,
-  FileSpreadsheet
+  FileSpreadsheet,
+  UserPlus,
+  LogIn,
+  ExternalLink,
+  X,
+  ChevronRight,
+  Activity,
+  Users
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -87,11 +94,31 @@ export function AdminCmsClient({
 
   // Platform Brand Identity & Super Admin Credentials
   const [platformName, setPlatformName] = useState('PFMS');
+  const [brandTagline, setBrandTagline] = useState('Smart Poultry Operating System');
+  const [brandLogoText, setBrandLogoText] = useState('P');
+  const [footerText, setFooterText] = useState('PFMS Inc. All rights reserved.');
   const [currencySymbol, setCurrencySymbol] = useState('₦');
   const [superAdminEmailState, setSuperAdminEmailState] = useState(currentUserEmail || 'owner@poultry.com');
   const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [fromEmail, setFromEmail] = useState('support@pfms-poultry.com');
+
+  // Tenant Management & Impersonation State
+  const [orgsList, setOrgsList] = useState<any[]>(allOrgs);
+  const [selectedTenant, setSelectedTenant] = useState<any | null>(null);
+  const [tenantDetail, setTenantDetail] = useState<any | null>(null);
+  const [isLoadingTenant, setIsLoadingTenant] = useState(false);
+  const [isSavingTenant, setIsSavingTenant] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreatingTenant, setIsCreatingTenant] = useState(false);
+  const [newTenantForm, setNewTenantForm] = useState({
+    name: '',
+    adminEmail: '',
+    adminName: '',
+    password: '',
+    packageId: 'free',
+    branchName: 'Main Branch'
+  });
 
   // Merchant Payment Gateways
   const [paystackPublicKey, setPaystackPublicKey] = useState('');
@@ -189,6 +216,10 @@ export function AdminCmsClient({
     fetch('/api/admin/cms')
       .then(res => res.json())
       .then(data => {
+        if (data.brandName) setPlatformName(data.brandName);
+        if (data.brandTagline) setBrandTagline(data.brandTagline);
+        if (data.brandLogoText) setBrandLogoText(data.brandLogoText);
+        if (data.footerText) setFooterText(data.footerText);
         if (data.heroHeading) setHeroHeading(data.heroHeading);
         if (data.heroSubtitle) setHeroSubtitle(data.heroSubtitle);
         if (data.announcementBanner) setAnnouncementBanner(data.announcementBanner);
@@ -339,6 +370,10 @@ export function AdminCmsClient({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          brandName: platformName,
+          brandTagline,
+          brandLogoText,
+          footerText,
           heroHeading,
           heroSubtitle,
           announcementBanner,
@@ -348,7 +383,7 @@ export function AdminCmsClient({
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success(data.message || 'Landing Page CMS content saved & published live!');
+        toast.success(data.message || 'Landing Page CMS & Brand Identity saved & published live!');
       } else {
         toast.error(data.error || 'Failed to save CMS');
       }
@@ -356,6 +391,141 @@ export function AdminCmsClient({
       toast.error('Error saving CMS content');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Open Tenant Details Drawer/Modal
+  const handleViewTenant = async (org: any) => {
+    setSelectedTenant({ ...org });
+    setIsLoadingTenant(true);
+    try {
+      const res = await fetch(`/api/admin/tenants?id=${encodeURIComponent(org.id)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTenantDetail(data);
+      } else {
+        toast.error('Could not load tenant details');
+      }
+    } catch {
+      toast.error('Error fetching tenant telemetry');
+    } finally {
+      setIsLoadingTenant(false);
+    }
+  };
+
+  // Save Tenant Update
+  const handleUpdateTenant = async () => {
+    if (!selectedTenant) return;
+    setIsSavingTenant(true);
+    try {
+      const res = await fetch('/api/admin/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          id: selectedTenant.id,
+          name: selectedTenant.name,
+          subscriptionTier: selectedTenant.subscriptionTier,
+          subscriptionStatus: selectedTenant.subscriptionStatus
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || 'Tenant updated successfully');
+        setOrgsList(prev => prev.map(o => o.id === selectedTenant.id ? { ...o, ...selectedTenant } : o));
+      } else {
+        toast.error(data.error || 'Failed to update tenant');
+      }
+    } catch {
+      toast.error('Error updating tenant');
+    } finally {
+      setIsSavingTenant(false);
+    }
+  };
+
+  // Delete Tenant
+  const handleDeleteTenant = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
+    try {
+      const res = await fetch('/api/admin/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || 'Tenant deleted');
+        setOrgsList(prev => prev.filter(o => o.id !== id));
+        if (selectedTenant?.id === id) {
+          setSelectedTenant(null);
+          setTenantDetail(null);
+        }
+      } else {
+        toast.error(data.error || 'Failed to delete tenant');
+      }
+    } catch {
+      toast.error('Error deleting tenant');
+    }
+  };
+
+  // Impersonate Tenant
+  const handleImpersonateTenant = async (id: string, name: string) => {
+    try {
+      const toastId = toast.loading(`Logging in as ${name}...`);
+      const res = await fetch('/api/admin/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'impersonate', id })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || 'Switched to tenant session!', { id: toastId });
+        window.location.href = data.redirectUrl || '/dashboard';
+      } else {
+        toast.error(data.error || 'Failed to login as tenant', { id: toastId });
+      }
+    } catch {
+      toast.error('Error logging in as tenant');
+    }
+  };
+
+  // Create New Tenant Account
+  const handleCreateTenant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTenantForm.name.trim() || !newTenantForm.adminEmail.trim()) {
+      toast.error('Please enter farm organization name and admin email');
+      return;
+    }
+    setIsCreatingTenant(true);
+    try {
+      const res = await fetch('/api/admin/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          ...newTenantForm
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.tenant) {
+        toast.success(data.message || 'Farm tenant account created!');
+        setOrgsList(prev => [data.tenant, ...prev]);
+        setShowCreateModal(false);
+        setNewTenantForm({
+          name: '',
+          adminEmail: '',
+          adminName: '',
+          password: '',
+          packageId: 'free',
+          branchName: 'Main Branch'
+        });
+      } else {
+        toast.error(data.error || 'Failed to create farm tenant');
+      }
+    } catch {
+      toast.error('Error creating farm tenant');
+    } finally {
+      setIsCreatingTenant(false);
     }
   };
 
@@ -994,8 +1164,81 @@ export function AdminCmsClient({
               className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
-              <span>Publish Landing CMS</span>
+              <span>Publish Landing CMS & Brand</span>
             </button>
+          </div>
+
+          {/* BRAND IDENTITY & WHITE-LABEL CARD */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles size={16} className="text-indigo-600" /> Platform Brand Identity & White-Label
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Customize the platform brand name, monogram badge, currency, and footer across all public and farm pages.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Brand / Platform Name</label>
+                <input
+                  type="text"
+                  value={platformName}
+                  onChange={(e) => setPlatformName(e.target.value)}
+                  placeholder="e.g. PFMS, PoultryOS"
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-indigo-700 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Brand Logo Badge (1-3 Letters)</label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  value={brandLogoText}
+                  onChange={(e) => setBrandLogoText(e.target.value)}
+                  placeholder="e.g. P"
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-slate-900 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none uppercase text-center"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Platform Currency Symbol</label>
+                <input
+                  type="text"
+                  maxLength={5}
+                  value={currencySymbol}
+                  onChange={(e) => setCurrencySymbol(e.target.value)}
+                  placeholder="e.g. ₦, $, €, £"
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-emerald-700 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-center"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Brand Tagline / Slogan</label>
+                <input
+                  type="text"
+                  value={brandTagline}
+                  onChange={(e) => setBrandTagline(e.target.value)}
+                  placeholder="e.g. Smart Poultry Operating System"
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Footer Copyright Line</label>
+                <input
+                  type="text"
+                  value={footerText}
+                  onChange={(e) => setFooterText(e.target.value)}
+                  placeholder="e.g. PFMS Inc. All rights reserved."
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
@@ -1057,57 +1300,385 @@ export function AdminCmsClient({
       {/* TAB 5: TENANT ORGANIZATIONS */}
       {activeTab === 'orgs' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-            <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <Building2 size={20} className="text-purple-600" /> Registered Farm Tenant Accounts ({formatNumber(allOrgs.length)})
-            </h2>
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Global directory of all farm organization workspaces registered on this platform.
-            </p>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                <Building2 size={20} className="text-purple-600" /> Registered Farm Tenant Accounts ({formatNumber(orgsList.length)})
+              </h2>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                Directory of all customer and internal farm organizations. Manage subscriptions, view deep telemetry, or log in to manage/subscribe on their behalf.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
+            >
+              <UserPlus size={16} />
+              <span>Create Farm Account</span>
+            </button>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
-                <tr>
-                  <th className="p-4">Organization Name</th>
-                  <th className="p-4">Subscription Plan</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                {allOrgs.length === 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
                   <tr>
-                    <td colSpan={4} className="p-6 text-center text-slate-400">No organization workspaces registered yet.</td>
+                    <th className="p-4">Farm Organization</th>
+                    <th className="p-4">Owner / Admin</th>
+                    <th className="p-4">Subscription Plan</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
-                ) : (
-                  allOrgs.map((org) => (
-                    <tr key={org.id} className="hover:bg-slate-50/80">
-                      <td className="p-4 font-bold text-slate-900">{org.name}</td>
-                      <td className="p-4">
-                        <span className="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded capitalize">
-                          {org.subscriptionTier || 'Free Starter'}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <span className="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded capitalize">
-                          {org.subscriptionStatus || 'Active'}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <a href="/dashboard" className="text-indigo-600 font-bold hover:underline">View Telemetry →</a>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                  {orgsList.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-slate-400">
+                        No organization workspaces registered yet. Click &quot;Create Farm Account&quot; to provision a farm.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    orgsList.map((org) => (
+                      <tr key={org.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-4 font-bold text-slate-900">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shrink-0">
+                              {org.name ? org.name.charAt(0).toUpperCase() : 'F'}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-900 leading-tight">{org.name}</p>
+                              <p className="text-[10px] text-slate-400 font-mono mt-0.5">{org.id}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-xs text-slate-800 font-medium">{org.ownerEmail || 'admin@poultry.local'}</p>
+                          {org.ownerUsername && (
+                            <p className="text-[10px] text-slate-400">User: @{org.ownerUsername}</p>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded capitalize">
+                            {org.subscriptionTier || 'Free Starter'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded capitalize ${
+                            org.subscriptionStatus === 'active' 
+                              ? 'bg-emerald-100 text-emerald-800' 
+                              : org.subscriptionStatus === 'suspended'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}>
+                            {org.subscriptionStatus || 'Active'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleViewTenant(org)}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                            >
+                              <Activity size={13} className="text-indigo-600" />
+                              <span>Manage</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleImpersonateTenant(org.id, org.name)}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-sm"
+                              title="Login into customer farm account"
+                            >
+                              <LogIn size={13} />
+                              <span>Login as Farm</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* MODAL 1: CREATE FARM TENANT */}
+          {showCreateModal && (
+            <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
+                      <UserPlus size={18} />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-sm text-slate-900">Provision New Farm Tenant Account</h3>
+                      <p className="text-xs text-slate-500">Create a farm account for yourself or a customer.</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowCreateModal(false)}
+                    className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleCreateTenant} className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Farm Organization Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Sunrise Agro Farms"
+                      value={newTenantForm.name}
+                      onChange={(e) => setNewTenantForm({ ...newTenantForm, name: e.target.value })}
+                      className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-semibold bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Full Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Alex Green"
+                        value={newTenantForm.adminName}
+                        onChange={(e) => setNewTenantForm({ ...newTenantForm, adminName: e.target.value })}
+                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-medium bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Email Address *</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="alex@sunrise.com"
+                        value={newTenantForm.adminEmail}
+                        onChange={(e) => setNewTenantForm({ ...newTenantForm, adminEmail: e.target.value })}
+                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-medium bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Initial Password</label>
+                      <input
+                        type="text"
+                        placeholder="FarmAdmin123!"
+                        value={newTenantForm.password}
+                        onChange={(e) => setNewTenantForm({ ...newTenantForm, password: e.target.value })}
+                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-mono bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Initial Branch Name</label>
+                      <input
+                        type="text"
+                        placeholder="Main Branch"
+                        value={newTenantForm.branchName}
+                        onChange={(e) => setNewTenantForm({ ...newTenantForm, branchName: e.target.value })}
+                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-medium bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Assign SaaS Package Tier</label>
+                    <select
+                      value={newTenantForm.packageId}
+                      onChange={(e) => setNewTenantForm({ ...newTenantForm, packageId: e.target.value })}
+                      className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none cursor-pointer"
+                    >
+                      {plans.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} — {p.priceMonthly === 0 ? 'Free' : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Includes all custom private packages configured in the SaaS plans catalog.
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateModal(false)}
+                      className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isCreatingTenant}
+                      className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5"
+                    >
+                      {isCreatingTenant ? <RefreshCw size={14} className="animate-spin" /> : <UserPlus size={14} />}
+                      <span>Provision Farm Account</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL 2: TENANT DETAILS & MANAGEMENT */}
+          {selectedTenant && (
+            <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 font-sans">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
+                      <Building2 size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-base text-slate-900">{selectedTenant.name}</h3>
+                      <p className="text-[11px] text-slate-400 font-mono">Org ID: {selectedTenant.id}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => { setSelectedTenant(null); setTenantDetail(null); }}
+                    className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {/* Telemetry Strip */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-center">
+                      <p className="text-[10px] text-purple-600 font-bold uppercase">Branches</p>
+                      <p className="text-xl font-extrabold text-purple-900 mt-0.5">
+                        {isLoadingTenant ? '...' : (tenantDetail?.workspaces?.length || 1)}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-center">
+                      <p className="text-[10px] text-indigo-600 font-bold uppercase">Staff</p>
+                      <p className="text-xl font-extrabold text-indigo-900 mt-0.5">
+                        {isLoadingTenant ? '...' : (tenantDetail?.telemetry?.staffCount || 0)}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-center">
+                      <p className="text-[10px] text-amber-600 font-bold uppercase">Flocks</p>
+                      <p className="text-xl font-extrabold text-amber-900 mt-0.5">
+                        {isLoadingTenant ? '...' : (tenantDetail?.telemetry?.batchesCount || 0)}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-center">
+                      <p className="text-[10px] text-emerald-600 font-bold uppercase">Good Eggs</p>
+                      <p className="text-xl font-extrabold text-emerald-900 mt-0.5">
+                        {isLoadingTenant ? '...' : formatNumber(tenantDetail?.telemetry?.eggsCount || 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Editable Configuration */}
+                  <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Tenant Farm Configuration</h4>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Organization Name</label>
+                      <input
+                        type="text"
+                        value={selectedTenant.name}
+                        onChange={(e) => setSelectedTenant({ ...selectedTenant, name: e.target.value })}
+                        className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-900 bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Package Tier</label>
+                        <select
+                          value={selectedTenant.subscriptionTier || 'free'}
+                          onChange={(e) => setSelectedTenant({ ...selectedTenant, subscriptionTier: e.target.value })}
+                          className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-purple-900 bg-white cursor-pointer capitalize"
+                        >
+                          {plans.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name} ({p.priceMonthly === 0 ? 'Free' : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Subscription Status</label>
+                        <select
+                          value={selectedTenant.subscriptionStatus || 'active'}
+                          onChange={(e) => setSelectedTenant({ ...selectedTenant, subscriptionStatus: e.target.value })}
+                          className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-emerald-900 bg-white cursor-pointer capitalize"
+                        >
+                          <option value="active">Active</option>
+                          <option value="suspended">Suspended</option>
+                          <option value="canceled">Canceled</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Branches Matrix */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Associated Farm Workspaces</h4>
+                    <div className="space-y-1.5">
+                      {tenantDetail?.workspaces?.length > 0 ? (
+                        tenantDetail.workspaces.map((ws: any) => (
+                          <div key={ws.id} className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                            <span className="font-bold text-slate-800">{ws.name}</span>
+                            <span className="font-mono text-[10px] text-slate-400">{ws.type || 'Layer Farm'}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-slate-400 italic">Main Branch Workspace</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <button
+                      onClick={() => handleDeleteTenant(selectedTenant.id, selectedTenant.name)}
+                      className="text-red-600 hover:text-red-700 text-xs font-bold flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                    >
+                      <Trash2 size={14} />
+                      <span>Delete Farm Organization</span>
+                    </button>
+
+                    <div className="flex items-center gap-2 self-end sm:self-auto">
+                      <button
+                        onClick={() => handleImpersonateTenant(selectedTenant.id, selectedTenant.name)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                      >
+                        <LogIn size={14} />
+                        <span>Login as Tenant</span>
+                      </button>
+
+                      <button
+                        onClick={handleUpdateTenant}
+                        disabled={isSavingTenant}
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                      >
+                        {isSavingTenant ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                        <span>Save Changes</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* TAB 6: SYSTEM GOVERNANCE */}
+      {/* TAB 6: SYSTEM GOVERNANCE & BRAND IDENTITY */}
       {activeTab === 'settings' && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
@@ -1115,11 +1686,23 @@ export function AdminCmsClient({
               <Server size={20} className="text-purple-600" /> Platform Maintenance & System Governance
             </h2>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Global system diagnostics, database schema integrity, and platform maintenance shortcuts.
+              Global system diagnostics, database schema integrity, brand identity overview, and maintenance shortcuts.
             </p>
 
-            <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+            <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+                <h4 className="font-bold text-xs text-slate-900">Platform Brand Identity</h4>
+                <p className="text-sm font-extrabold text-indigo-700">{platformName}</p>
+                <p className="text-[11px] text-slate-500">{brandTagline}</p>
+                <button
+                  onClick={() => setActiveTab('cms')}
+                  className="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 pt-1 cursor-pointer"
+                >
+                  Edit Brand in CMS →
+                </button>
+              </div>
+
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
                 <h4 className="font-bold text-xs text-slate-900">Database Driver Engine</h4>
                 <p className="text-xs text-slate-600 font-mono">
                   Engine: Managed Database Service
@@ -1127,7 +1710,7 @@ export function AdminCmsClient({
                 <p className="text-xs text-emerald-700 font-bold">Status: Healthy & Active</p>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
                 <h4 className="font-bold text-xs text-slate-900">Deployment Environment</h4>
                 <p className="text-xs text-slate-600 font-mono">Node.js Next.js 16 (Production)</p>
                 <p className="text-xs text-indigo-700 font-bold">Mode: Production Self-Hosted</p>

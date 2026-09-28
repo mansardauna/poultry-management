@@ -5,9 +5,13 @@ import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 
 const DEFAULT_CMS = {
+  brandName: 'PFMS',
+  brandTagline: 'Smart Poultry Operating System',
+  brandLogoText: 'P',
+  footerText: 'PFMS Inc. All rights reserved.',
   heroHeading: 'AI-Driven poultry farms with human-level precision',
   heroSubtitle: 'Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.',
-  announcementBanner: '🔥 New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now!',
+  announcementBanner: 'New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now',
   ctaText: 'Get Started Free',
   supportPhone: '+234 800 768 5879',
   supportEmail: 'support@pfms-poultry.com'
@@ -36,10 +40,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.role === 'SuperAdmin';
+    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
 
     if (!user || !isSuperAdmin) {
-      return NextResponse.json({ error: 'Unauthorized: Only Super Admin (superadmin@pfms.com) can edit landing CMS content' }, { status: 403 });
+      return NextResponse.json({ error: 'Unauthorized: Only Super Admin can edit landing CMS and brand settings' }, { status: 403 });
     }
 
     const cmsData = await request.json();

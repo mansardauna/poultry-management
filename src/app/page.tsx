@@ -11,9 +11,13 @@ import { LandingFooter } from '@/components/layout/LandingFooter';
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cms, setCms] = useState({
+    brandName: 'PFMS',
+    brandTagline: 'Smart Poultry Operating System',
+    brandLogoText: 'P',
+    footerText: 'PFMS Inc. All rights reserved.',
     heroHeading: 'AI-Driven poultry farms with human-level precision',
     heroSubtitle: 'Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.',
-    announcementBanner: '🔥 New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now!',
+    announcementBanner: 'New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now',
     ctaText: 'Get Started Free'
   });
 
@@ -30,7 +34,7 @@ export default function LandingPage() {
     fetch('/api/admin/cms')
       .then(res => res.json())
       .then(data => {
-        if (data.heroHeading) setCms(data);
+        if (data.heroHeading || data.brandName) setCms(prev => ({ ...prev, ...data }));
       })
       .catch(() => {});
   }, []);
@@ -39,7 +43,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* Navigation */}
-      <LandingNav />
+      <LandingNav brandName={cms.brandName} brandLogoText={cms.brandLogoText} />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -253,7 +257,11 @@ export default function LandingPage() {
       </section>
 
       {/* Simple Footer */}
-      <LandingFooter />
+      <LandingFooter 
+        brandName={cms.brandName} 
+        brandLogoText={cms.brandLogoText} 
+        footerText={cms.footerText} 
+      />
 
     </div>
   );

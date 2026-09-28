@@ -107,11 +107,34 @@ function smartParsePoultryText(text: string, today: string) {
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const workspaceId = cookieStore.get('pfms_workspace')?.value;
+    let workspaceId: string | undefined;
+
+    // 1. Check Bearer API Key from enterprise_api_keys
+    const authHeader = request.headers.get('authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '').trim();
+      const { data: keyRec } = await serviceRoleClient
+        .from('enterprise_api_keys')
+        .select('workspaceId, status')
+        .eq('secretKey', token)
+        .limit(1)
+        .maybeSingle();
+
+      if (keyRec && keyRec.status === 'Active') {
+        workspaceId = keyRec.workspaceId;
+      } else {
+        return NextResponse.json({ error: 'Unauthorized: Invalid or inactive API key' }, { status: 401 });
+      }
+    }
+
+    // 2. Fall back to cookie session if no Bearer key
+    if (!workspaceId) {
+      const cookieStore = await cookies();
+      workspaceId = cookieStore.get('pfms_workspace')?.value;
+    }
     
     if (!workspaceId) {
-      return NextResponse.json({ error: 'No active workspace found' }, { status: 400 });
+      return NextResponse.json({ error: 'No active workspace found. Provide Authorization: Bearer <API_KEY> or log in.' }, { status: 400 });
     }
 
     const { text } = await request.json();
