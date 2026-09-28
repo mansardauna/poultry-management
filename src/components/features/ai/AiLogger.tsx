@@ -5,7 +5,7 @@ import { X, Send, Loader2, CheckCircle, Mic, MicOff, FileText } from 'lucide-rea
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
-export function AiLogger() {
+export function AiLogger({ role }: { role?: string }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
@@ -18,6 +18,15 @@ export function AiLogger() {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setTier(match[1]);
   }, [isOpen]);
+
+  React.useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('pfms_open_ai_logger', handleOpen);
+    return () => window.removeEventListener('pfms_open_ai_logger', handleOpen);
+  }, []);
+
+  const isSuperAdmin = role === 'SuperAdmin';
+  const hasFullAccess = isSuperAdmin || tier !== 'free';
 
   const startListening = () => {
     if (typeof window === 'undefined') return;
@@ -136,7 +145,7 @@ export function AiLogger() {
 
             {/* Content */}
             <div className="p-6 overflow-y-auto max-h-[70vh]">
-              {tier === 'free' ? (
+              {!hasFullAccess ? (
                 <div className="text-center py-6 space-y-4">
                   <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto border border-indigo-100">
                     <Mic size={28} />

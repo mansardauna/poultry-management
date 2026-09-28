@@ -52,8 +52,8 @@ interface SidebarProps {
 
 export const superAdminMenuItems = [
   { name: 'Platform overview', tab: 'overview', href: '/dashboard/admin?tab=overview', icon: Activity },
-  { name: 'Setup & gateways', tab: 'setup', href: '/dashboard/admin?tab=setup', icon: Settings },
-  { name: 'SaaS plans & entitlements', tab: 'plans', href: '/dashboard/admin?tab=plans', icon: Layers },
+  { name: 'Payment & API gateways', tab: 'setup', href: '/dashboard/admin?tab=setup', icon: Settings },
+  { name: 'SaaS plans', tab: 'plans', href: '/dashboard/admin?tab=plans', icon: Layers },
   { name: 'Landing page CMS', tab: 'cms', href: '/dashboard/admin?tab=cms', icon: Sparkles },
   { name: 'Tenant farm organizations', tab: 'orgs', href: '/dashboard/admin?tab=orgs', icon: Building2 },
   { name: 'Platform settings', tab: 'settings', href: '/dashboard/admin?tab=settings', icon: Server },
@@ -459,9 +459,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               {superAdminMenuItems.map((item) => {
                 const currentAdminTab = searchParams.get('tab') || 'overview';
                 const isActive = pathname === '/dashboard/admin' && currentAdminTab === item.tab;
+                const translatedName = texts.menu[item.name] || item.name;
                 const displayName = item.tab === 'orgs' 
-                  ? `Tenant farm organizations (${tenantsCount})`
-                  : item.name;
+                  ? `${translatedName} (${tenantsCount})`
+                  : translatedName;
 
                 return (
                   <div key={item.name}>
@@ -503,10 +504,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                     'hover:bg-indigo-900 text-indigo-300 hover:text-white group flex items-center px-3 py-2.5 text-xs font-semibold rounded-md transition-colors',
                     isCollapsed ? 'justify-center' : ''
                   )}
-                  title={isCollapsed ? 'Super admin docs' : undefined}
+                  title={isCollapsed ? (texts.menu['Super admin docs'] || 'Super admin docs') : undefined}
                 >
                   <BookOpen size={18} className={clsx('text-indigo-400 group-hover:text-purple-300 flex-shrink-0', isCollapsed ? 'mr-0' : 'mr-3')} />
-                  {!isCollapsed && <span>Super admin docs</span>}
+                  {!isCollapsed && <span>{texts.menu['Super admin docs'] || 'Super admin docs'}</span>}
                 </a>
               </div>
             </nav>
@@ -667,10 +668,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 pathname === '/dashboard/admin' && searchParams.get('tab') === 'settings' ? 'bg-purple-800 text-white' : 'text-indigo-200',
                 isCollapsed ? 'justify-center' : ''
               )}
-              title={isCollapsed ? 'Platform settings' : undefined}
+              title={isCollapsed ? (texts.menu['Platform settings'] || 'Platform settings') : undefined}
             >
               <Server size={22} className={clsx("text-indigo-400 group-hover:text-purple-300 flex-shrink-0 transition-colors", isCollapsed ? 'mr-0' : 'mr-3')} />
-              {!isCollapsed && 'Platform settings'}
+              {!isCollapsed && (texts.menu['Platform settings'] || 'Platform settings')}
             </Link>
           ) : (
             <Link

@@ -199,8 +199,18 @@ const translations: Record<Language, TranslationDict> = {
       "Sales & Invoices": "Sales & Invoices",
       "Staff Management": "Staff & Tasks",
       "CCTV Monitoring": "CCTV Surveillance",
+      "Enterprise Hub": "Enterprise Hub",
       "Settings": "System Settings",
-      "Logout": "Log Out"
+      "Logout": "Log Out",
+      "Platform overview": "Platform Overview",
+      "Payment & API gateways": "Payment & API Gateways",
+      "Setup & gateways": "Payment & API Gateways",
+      "SaaS plans": "SaaS Plans",
+      "SaaS plans & entitlements": "SaaS Plans",
+      "Landing page CMS": "Landing Page CMS",
+      "Tenant farm organizations": "Tenant Farm Organizations",
+      "Platform settings": "Platform Settings",
+      "Super admin docs": "Super Admin Docs"
     },
     dashboard: {
       title: "Farm Overview",
@@ -358,8 +368,18 @@ const translations: Record<Language, TranslationDict> = {
       "Sales & Invoices": "Ventas y Facturas",
       "Staff Management": "Personal y Tareas",
       "CCTV Monitoring": "Videovigilancia",
+      "Enterprise Hub": "Centro Empresarial",
       "Settings": "Configuraciones",
-      "Logout": "Cerrar Sesión"
+      "Logout": "Cerrar Sesión",
+      "Platform overview": "Resumen de la Plataforma",
+      "Payment & API gateways": "Pasarelas de Pago y APIs",
+      "Setup & gateways": "Pasarelas de Pago y APIs",
+      "SaaS plans": "Planes SaaS",
+      "SaaS plans & entitlements": "Planes SaaS",
+      "Landing page CMS": "CMS de Página de Inicio",
+      "Tenant farm organizations": "Organizaciones Agrícolas",
+      "Platform settings": "Configuración de Plataforma",
+      "Super admin docs": "Documentación de Super Admin"
     },
     dashboard: {
       title: "Resumen de la Granja",
@@ -517,8 +537,18 @@ const translations: Record<Language, TranslationDict> = {
       "Sales & Invoices": "المبيعات والفواتير",
       "Staff Management": "الموظفين والمهام",
       "CCTV Monitoring": "المراقبة بالكاميرات",
+      "Enterprise Hub": "مركز المؤسسة",
       "Settings": "إعدادات النظام",
-      "Logout": "تسجيل الخروج"
+      "Logout": "تسجيل الخروج",
+      "Platform overview": "نظرة عامة على المنصة",
+      "Payment & API gateways": "بوابات الدفع وواجهات البرمجة",
+      "Setup & gateways": "بوابات الدفع وواجهات البرمجة",
+      "SaaS plans": "خطط الاشتراك",
+      "SaaS plans & entitlements": "خطط الاشتراك",
+      "Landing page CMS": "إدارة الصفحة الرئيسية",
+      "Tenant farm organizations": "مزارع المستأجرين",
+      "Platform settings": "إعدادات المنصة",
+      "Super admin docs": "وثائق المشرف العام"
     },
     dashboard: {
       title: "نظرة عامة على المزرعة",
@@ -676,8 +706,18 @@ const translations: Record<Language, TranslationDict> = {
       "Sales & Invoices": "Verkäufe & Rechnungen",
       "Staff Management": "Personal & Aufgaben",
       "CCTV Monitoring": "Kameraüberwachung",
+      "Enterprise Hub": "Unternehmens-Hub",
       "Settings": "Einstellungen",
-      "Logout": "Abmelden"
+      "Logout": "Abmelden",
+      "Platform overview": "Plattform-Übersicht",
+      "Payment & API gateways": "Zahlung & API-Gateways",
+      "Setup & gateways": "Zahlung & API-Gateways",
+      "SaaS plans": "SaaS-Pläne",
+      "SaaS plans & entitlements": "SaaS-Pläne",
+      "Landing page CMS": "Landingpage-CMS",
+      "Tenant farm organizations": "Mandanten-Farmorganisationen",
+      "Platform settings": "Plattformeinstellungen",
+      "Super admin docs": "Super-Admin-Dokumentation"
     },
     dashboard: {
       title: "Betriebsübersicht",
@@ -835,8 +875,18 @@ const translations: Record<Language, TranslationDict> = {
       "Sales & Invoices": "Ventes & Factures",
       "Staff Management": "Personnel & Tâches",
       "CCTV Monitoring": "Surveillance Vidéo",
+      "Enterprise Hub": "Centre Entreprise",
       "Settings": "Paramètres",
-      "Logout": "Se Déconnecter"
+      "Logout": "Se Déconnecter",
+      "Platform overview": "Vue d'ensemble",
+      "Payment & API gateways": "Passerelles de paiement & API",
+      "Setup & gateways": "Passerelles de paiement & API",
+      "SaaS plans": "Plans SaaS",
+      "SaaS plans & entitlements": "Plans SaaS",
+      "Landing page CMS": "CMS Page d'accueil",
+      "Tenant farm organizations": "Organisations de fermes",
+      "Platform settings": "Paramètres plateforme",
+      "Super admin docs": "Docs Super Admin"
     },
     dashboard: {
       title: "Vue d'ensemble de la Ferme",
@@ -994,8 +1044,18 @@ const translations: Record<Language, TranslationDict> = {
       "Sales & Invoices": "销售与发票",
       "Staff Management": "员工与任务",
       "CCTV Monitoring": "视频监控",
+      "Enterprise Hub": "企业合作中心",
       "Settings": "系统设置",
-      "Logout": "退出登录"
+      "Logout": "退出登录",
+      "Platform overview": "平台概览",
+      "Payment & API gateways": "支付与API网关",
+      "Setup & gateways": "支付与API网关",
+      "SaaS plans": "SaaS订阅套餐",
+      "SaaS plans & entitlements": "SaaS订阅套餐",
+      "Landing page CMS": "门户页面CMS",
+      "Tenant farm organizations": "租户农场机构",
+      "Platform settings": "平台全局设置",
+      "Super admin docs": "超级管理员文档"
     },
     dashboard: {
       title: "农场概览",
@@ -1117,11 +1177,15 @@ const translations: Record<Language, TranslationDict> = {
 /**
  * Context type for language settings.
  */
-interface LanguageContextType {
+export interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   texts: TranslationDict;
   dir: 'ltr' | 'rtl';
+  formatNumber: (value: number | string, options?: Intl.NumberFormatOptions) => string;
+  formatDate: (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => string;
+  formatCurrency: (amount: number | string, currencySymbol?: string) => string;
+  t: (term: string, fallback?: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -1147,10 +1211,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (translations[lang]) {
       setLanguageState(lang);
       Cookies.set('pfms_lang', lang, { path: '/' });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pfms_language_changed', { detail: lang }));
+      }
     }
   };
 
   const dir = language === 'ar' ? 'rtl' : 'ltr';
+  const locale = language === 'ar' ? 'ar-EG' : language;
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -1159,10 +1227,47 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [language, dir]);
 
-  const texts = translations[language];
+  const texts = translations[language] || translations.en;
+
+  const formatNumber = (value: number | string, options?: Intl.NumberFormatOptions) => {
+    const num = typeof value === 'number' ? value : Number(value);
+    if (isNaN(num)) return String(value);
+    try {
+      return new Intl.NumberFormat(locale, options).format(num);
+    } catch {
+      return num.toLocaleString();
+    }
+  };
+
+  const formatDate = (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => {
+    try {
+      const d = date instanceof Date ? date : new Date(date);
+      if (isNaN(d.getTime())) return String(date);
+      return new Intl.DateTimeFormat(locale, options || {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(d);
+    } catch {
+      return String(date);
+    }
+  };
+
+  const formatCurrency = (amount: number | string, currencySymbol = '₦') => {
+    const formattedNum = formatNumber(amount);
+    return `${currencySymbol}${formattedNum}`;
+  };
+
+  const t = (term: string, fallback?: string) => {
+    if (!term) return fallback || '';
+    if (texts.menu && texts.menu[term]) return texts.menu[term];
+    if (texts.common && (texts.common as any)[term]) return (texts.common as any)[term];
+    return fallback || term;
+  };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, texts, dir }}>
+    <LanguageContext.Provider value={{ language, setLanguage, texts, dir, formatNumber, formatDate, formatCurrency, t }}>
       {children}
     </LanguageContext.Provider>
   );

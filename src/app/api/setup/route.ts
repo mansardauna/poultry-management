@@ -293,20 +293,10 @@ export async function POST(request: Request) {
     }
 
     if (isSetupCompleted) {
-      const authUser = await getAuthUser();
-      const isSuperAdmin = Boolean(
-        authUser &&
-        (authUser.role === 'SuperAdmin' ||
-          authUser.email === 'superadmin@pfms.com' ||
-          authUser.email === 'owner@poultry.com')
+      return NextResponse.json(
+        { error: 'Setup is permanently locked: installation has already been completed.' },
+        { status: 403 }
       );
-
-      if (!isSuperAdmin) {
-        return NextResponse.json(
-          { error: 'Installation has already been completed. Please log in and use the Admin settings to manage the platform.' },
-          { status: 403 }
-        );
-      }
     }
 
     // 1. Provision / Update Super Admin in Auth

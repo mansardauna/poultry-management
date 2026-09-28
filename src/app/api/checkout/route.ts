@@ -192,20 +192,24 @@ export async function POST(request: Request) {
     // Convert Naira to USD cents equivalent (approx $1 = ₦1500 exchange rate)
     const unitAmountCents = Math.max(50, Math.round((planPriceNaira / 1500) * 100));
 
-    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: `${planName} (${isAnnual ? 'Annual' : 'Monthly'})`,
-          description: planDesc,
-        },
-        unit_amount: unitAmountCents,
-        recurring: {
-          interval: isAnnual ? 'year' : 'month',
-        },
-      },
-      quantity: 1,
-    };
+    const stripePriceId = isAnnual ? targetPlan?.stripeAnnualPlanId?.trim() : targetPlan?.stripeMonthlyPlanId?.trim();
+
+    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = stripePriceId
+      ? { price: stripePriceId, quantity: 1 }
+      : {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${planName} (${isAnnual ? 'Annual' : 'Monthly'})`,
+              description: planDesc,
+            },
+            unit_amount: unitAmountCents,
+            recurring: {
+              interval: isAnnual ? 'year' : 'month',
+            },
+          },
+          quantity: 1,
+        };
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

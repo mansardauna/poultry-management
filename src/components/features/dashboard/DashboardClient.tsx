@@ -62,7 +62,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const [data, setData] = useState<DatabaseSchema>(initialData);
   const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
   const { activeWorkspace, workspaces } = useWorkspace();
-  const { texts, language } = useLanguage();
+  const { texts, language, formatDate, formatNumber, formatCurrency } = useLanguage();
   const { timeRange, filterByTimeRange } = useTimeFilter();
 
   const [tier, setTier] = useState('free');
@@ -112,7 +112,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
-  const todayFormatted = today.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const todayFormatted = formatDate(today);
 
   // Period setup
   let periodDays = 7;
@@ -429,14 +429,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       <div data-tour="kpi-cards" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 sm:mt-6">
         <StatCard
           title={texts.dashboard.activeFlock}
-          value={Number(totalChickens).toLocaleString()}
+          value={formatNumber(totalChickens)}
           subtext={`${recentMortality === 0 ? '0.0%' : `−${flockPct}%`} ${texts.dashboard.flockMortalityRate}`}
           color="blue"
         />
 
         <StatCard
           title={timeRange === 'weekly' ? texts.dashboard.weeklyEggOutput : timeRange === 'monthly' ? texts.dashboard.monthlyEggOutput : timeRange === 'yearly' ? texts.dashboard.yearlyEggOutput : texts.dashboard.eggOutput}
-          value={`${Number(currentYield).toLocaleString()} Eggs`}
+          value={`${formatNumber(currentYield)} ${texts.eggs.title || 'Eggs'}`}
           subtext={`${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`}
           color="amber"
         />
@@ -445,14 +445,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <>
             <StatCard
               title="Feed Stock on Hand"
-              value={`${Number(totalFeedStockKg).toLocaleString()} kg`}
+              value={`${formatNumber(totalFeedStockKg)} kg`}
               subtext="Available inventory in storage"
               color="emerald"
             />
             <StatCard
               title="Shift Checklist Tasks"
-              value={`${pendingTasksCount} Pending`}
-              subtext={`${data.tasks.length - pendingTasksCount} completed today`}
+              value={`${formatNumber(pendingTasksCount)} Pending`}
+              subtext={`${formatNumber(data.tasks.length - pendingTasksCount)} completed today`}
               color="indigo"
             />
           </>
@@ -460,13 +460,13 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           <>
             <StatCard
               title={timeRange === 'weekly' ? texts.dashboard.weeklyEggRevenue : timeRange === 'monthly' ? texts.dashboard.monthlyEggRevenue : timeRange === 'yearly' ? texts.dashboard.yearlyEggRevenue : texts.dashboard.eggRevenue}
-              value={`₦${Number(totalRevenue).toLocaleString()}`}
+              value={formatCurrency(totalRevenue)}
               subtext={`${revenueGrowth >= 0 ? '+' : ''}${revenueGrowthPct}% revenue trend`}
               color="indigo"
             />
             <StatCard
               title={texts.dashboard.operationalProfit}
-              value={`₦${Number(netProfit).toLocaleString()}`}
+              value={formatCurrency(netProfit)}
               subtext={`${profitGrowth >= 0 ? '+' : ''}${profitGrowthPct}% net margin`}
               color="emerald"
             />

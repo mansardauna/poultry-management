@@ -5,34 +5,30 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { 
-  ShieldAlert, 
   Save, 
   RefreshCw, 
   Layers, 
-  CheckCircle, 
-  Video, 
-  Sparkles, 
-  FileSpreadsheet, 
   Building2, 
   HelpCircle,
-  Database,
-  Key,
   Lock,
   CreditCard,
   Mail,
   Settings,
-  Activity,
   Server,
   Eye,
   EyeOff,
-  AlertCircle,
-  TrendingUp,
-  Users,
   DollarSign,
-  ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Plus,
+  Trash2,
+  Mic,
+  CheckCircle2,
+  Video,
+  Sparkles,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 export interface SaasPlanConfig {
   id: string;
@@ -40,6 +36,10 @@ export interface SaasPlanConfig {
   description: string;
   priceMonthly: number;
   priceAnnual: number;
+  stripeMonthlyPlanId?: string;
+  stripeAnnualPlanId?: string;
+  paystackMonthlyPlanCode?: string;
+  paystackAnnualPlanCode?: string;
   maxBranches: number;
   cctvEnabled: boolean;
   aiLoggerEnabled: boolean;
@@ -63,6 +63,7 @@ export function AdminCmsClient({
   allHistory?: any[];
   allOrgs?: any[];
 }) {
+  const { formatNumber, formatCurrency, t } = useLanguage();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   
@@ -84,22 +85,7 @@ export function AdminCmsClient({
   const [supportPhone, setSupportPhone] = useState('+234 800 768 5879');
   const [supportEmail, setSupportEmail] = useState('support@pfms-poultry.com');
 
-  // Setup Parameters & Gateways State (Populated from /api/setup)
-  const [isLoadingSetup, setIsLoadingSetup] = useState(true);
-  const [isDbTesting, setIsDbTesting] = useState(false);
-  const [dbStatus, setDbStatus] = useState<{ connected: boolean; message: string } | null>(null);
-
-  const [databaseType, setDatabaseType] = useState<'supabase' | 'postgres' | 'mysql'>('supabase');
-  const [postgresHost, setPostgresHost] = useState('localhost');
-  const [postgresPort, setPostgresPort] = useState(5432);
-  const [postgresDb, setPostgresDb] = useState('poultry_db');
-  const [postgresUser, setPostgresUser] = useState('postgres');
-
-  const [mysqlHost, setMysqlHost] = useState('localhost');
-  const [mysqlPort, setMysqlPort] = useState(3306);
-  const [mysqlDatabase, setMysqlDatabase] = useState('poultry_db');
-  const [mysqlUser, setMysqlUser] = useState('root');
-
+  // Platform Brand Identity & Super Admin Credentials
   const [platformName, setPlatformName] = useState('PFMS');
   const [currencySymbol, setCurrencySymbol] = useState('₦');
   const [superAdminEmailState, setSuperAdminEmailState] = useState(currentUserEmail || 'owner@poultry.com');
@@ -107,6 +93,7 @@ export function AdminCmsClient({
   const [showPassword, setShowPassword] = useState(false);
   const [fromEmail, setFromEmail] = useState('support@pfms-poultry.com');
 
+  // Merchant Payment Gateways
   const [paystackPublicKey, setPaystackPublicKey] = useState('');
   const [paystackSecretKey, setPaystackSecretKey] = useState('');
   const [showPaystackSecret, setShowPaystackSecret] = useState(false);
@@ -116,15 +103,11 @@ export function AdminCmsClient({
   const [stripeWebhookSecret, setStripeWebhookSecret] = useState('');
   const [showStripeSecret, setShowStripeSecret] = useState(false);
 
+  // Email Notification Gateway
   const [resendApiKey, setResendApiKey] = useState('');
   const [showResendKey, setShowResendKey] = useState(false);
 
-  const [proPriceMonthly, setProPriceMonthly] = useState(15000);
-  const [proPriceAnnual, setProPriceAnnual] = useState(144000);
-  const [enterprisePriceMonthly, setEnterprisePriceMonthly] = useState(45000);
-  const [enterprisePriceAnnual, setEnterprisePriceAnnual] = useState(432000);
-
-  // System Versioning & Database Upgrade State
+  // System Versioning & Upgrade State
   const [versionInfo, setVersionInfo] = useState<{
     currentVersion: string;
     installedVersion: string;
@@ -151,7 +134,7 @@ export function AdminCmsClient({
     } catch (_e) {}
   };
 
-  // Run System Upgrade & Database Migrations
+  // Run System Upgrade
   const handleRunUpgrade = async () => {
     setIsUpgrading(true);
     try {
@@ -164,7 +147,7 @@ export function AdminCmsClient({
           installedVersion: data.installedVersion,
           updateAvailable: false,
         });
-        loadSetupParams();
+        loadGatewayParams();
       } else {
         toast.error(data.error || 'System upgrade failed');
       }
@@ -175,61 +158,31 @@ export function AdminCmsClient({
     }
   };
 
-  // Load Setup Parameters from GET /api/setup
-  const loadSetupParams = async () => {
-    setIsLoadingSetup(true);
+  // Load Gateway & Platform Parameters
+  const loadGatewayParams = async () => {
     try {
-      const res = await fetch('/api/setup');
-      const data = await res.json();
-
-      if (data.isDatabaseConnected) {
-        setDbStatus({ connected: true, message: 'Database connection verified 100%! Connection is live.' });
-      } else {
-        setDbStatus({ connected: false, message: data.error || 'Database connection check failed.' });
+      const res = await fetch('/api/admin/gateways');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.superAdminEmail) setSuperAdminEmailState(data.superAdminEmail);
+        if (data.gateways) {
+          const g = data.gateways;
+          if (g.platformName) setPlatformName(g.platformName);
+          if (g.currencySymbol) setCurrencySymbol(g.currencySymbol);
+          if (g.fromEmail) setFromEmail(g.fromEmail);
+          if (g.paystackPublicKey) setPaystackPublicKey(g.paystackPublicKey);
+          if (g.paystackSecretKey) setPaystackSecretKey(g.paystackSecretKey);
+          if (g.stripePublicKey) setStripePublicKey(g.stripePublicKey);
+          if (g.stripeSecretKey) setStripeSecretKey(g.stripeSecretKey);
+          if (g.stripeWebhookSecret) setStripeWebhookSecret(g.stripeWebhookSecret);
+          if (g.resendApiKey) setResendApiKey(g.resendApiKey);
+        }
       }
-
-      if (data.superAdminEmail) {
-        setSuperAdminEmailState(data.superAdminEmail);
-      }
-
-      if (data.databaseConfig) {
-        const dbConf = data.databaseConfig;
-        if (dbConf.databaseType) setDatabaseType(dbConf.databaseType);
-        if (dbConf.postgresHost) setPostgresHost(dbConf.postgresHost);
-        if (dbConf.postgresPort) setPostgresPort(dbConf.postgresPort);
-        if (dbConf.postgresDb) setPostgresDb(dbConf.postgresDb);
-        if (dbConf.postgresUser) setPostgresUser(dbConf.postgresUser);
-        if (dbConf.mysqlHost) setMysqlHost(dbConf.mysqlHost);
-        if (dbConf.mysqlPort) setMysqlPort(dbConf.mysqlPort);
-        if (dbConf.mysqlDatabase) setMysqlDatabase(dbConf.mysqlDatabase);
-        if (dbConf.mysqlUser) setMysqlUser(dbConf.mysqlUser);
-      }
-
-      if (data.gateways) {
-        const g = data.gateways;
-        if (g.platformName) setPlatformName(g.platformName);
-        if (g.currencySymbol) setCurrencySymbol(g.currencySymbol);
-        if (g.fromEmail) setFromEmail(g.fromEmail);
-        if (g.paystackPublicKey) setPaystackPublicKey(g.paystackPublicKey);
-        if (g.paystackSecretKey) setPaystackSecretKey(g.paystackSecretKey);
-        if (g.stripePublicKey) setStripePublicKey(g.stripePublicKey);
-        if (g.stripeSecretKey) setStripeSecretKey(g.stripeSecretKey);
-        if (g.stripeWebhookSecret) setStripeWebhookSecret(g.stripeWebhookSecret);
-        if (g.resendApiKey) setResendApiKey(g.resendApiKey);
-        if (g.proPriceMonthly) setProPriceMonthly(g.proPriceMonthly);
-        if (g.proPriceAnnual) setProPriceAnnual(g.proPriceAnnual);
-        if (g.enterprisePriceMonthly) setEnterprisePriceMonthly(g.enterprisePriceMonthly);
-        if (g.enterprisePriceAnnual) setEnterprisePriceAnnual(g.enterprisePriceAnnual);
-      }
-    } catch (_e) {
-      toast.error('Unable to fetch live setup parameters');
-    } finally {
-      setIsLoadingSetup(false);
-    }
+    } catch (_e) {}
   };
 
   useEffect(() => {
-    loadSetupParams();
+    loadGatewayParams();
     loadVersionInfo();
 
     // Fetch CMS Content
@@ -245,61 +198,18 @@ export function AdminCmsClient({
       .catch(() => {});
   }, []);
 
-  // Test Database Connection via POST /api/setup/test
-  const testDatabaseConnection = async () => {
-    setIsDbTesting(true);
-    try {
-      const res = await fetch('/api/setup/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          databaseType,
-          postgresHost,
-          postgresPort,
-          postgresDb,
-          postgresUser,
-          mysqlHost,
-          mysqlPort,
-          mysqlDatabase,
-          mysqlUser,
-        })
-      });
-      const data = await res.json();
-      if (res.ok && data.connected) {
-        setDbStatus({ connected: true, message: data.message || 'Database connection verified 100%!' });
-        toast.success(data.message || 'Database connection verified!');
-      } else {
-        setDbStatus({ connected: false, message: data.error || 'Connection failed.' });
-        toast.error(data.error || 'Database connection failed');
-      }
-    } catch (_e) {
-      toast.error('Error testing database connection');
-    } finally {
-      setIsDbTesting(false);
-    }
-  };
-
-  // Save Setup Parameters via POST /api/setup
-  const handleSaveSetupParams = async () => {
+  // Save Gateway Parameters via POST /api/admin/gateways
+  const handleSaveGateways = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch('/api/setup', {
+      const res = await fetch('/api/admin/gateways', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          databaseType,
-          postgresHost,
-          postgresPort,
-          postgresDb,
-          postgresUser,
-          mysqlHost,
-          mysqlPort,
-          mysqlDatabase,
-          mysqlUser,
-          superAdminEmail: superAdminEmailState,
-          superAdminPassword: superAdminPassword || undefined,
           platformName,
           currencySymbol,
+          superAdminEmail: superAdminEmailState,
+          superAdminPassword: superAdminPassword || undefined,
           paystackPublicKey,
           paystackSecretKey,
           stripePublicKey,
@@ -307,33 +217,97 @@ export function AdminCmsClient({
           stripeWebhookSecret,
           resendApiKey,
           fromEmail,
-          proPriceMonthly,
-          proPriceAnnual,
-          enterprisePriceMonthly,
-          enterprisePriceAnnual,
         })
       });
 
       const data = await res.json();
       if (res.ok) {
-        toast.success('Setup parameters & merchant keys saved successfully!');
-        loadSetupParams();
+        toast.success(data.message || 'Payment gateways & settings saved successfully!');
+        setSuperAdminPassword('');
+        loadGatewayParams();
       } else {
-        toast.error(data.error || 'Failed to save setup parameters');
+        toast.error(data.error || 'Failed to save gateway settings');
       }
     } catch (_e) {
-      toast.error('Error saving setup parameters');
+      toast.error('Error saving gateway configuration');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const totalRevenue = allHistory.reduce((sum, h) => sum + Number(h.amount || 0), 0);
-  const activeProCount = allOrgs.filter(o => o.subscriptionTier === 'pro').length;
-  const activeEnterpriseCount = allOrgs.filter(o => o.subscriptionTier === 'enterprise' || o.subscriptionTier === 'entrepreneur').length;
-
+  // Plan Handlers
   const handleFieldChange = (planId: string, field: keyof SaasPlanConfig, value: any) => {
     setPlans(prev => prev.map(p => p.id === planId ? { ...p, [field]: value } : p));
+  };
+
+  const handleAddPlan = () => {
+    const newId = `custom_${Date.now().toString().slice(-4)}`;
+    const newPlan: SaasPlanConfig = {
+      id: newId,
+      name: 'Custom Tier',
+      description: 'Custom tier tailored for specialized poultry operations.',
+      priceMonthly: 25000,
+      priceAnnual: 240000,
+      stripeMonthlyPlanId: '',
+      stripeAnnualPlanId: '',
+      paystackMonthlyPlanCode: '',
+      paystackAnnualPlanCode: '',
+      maxBranches: 3,
+      cctvEnabled: false,
+      aiLoggerEnabled: true,
+      exportReportsEnabled: true,
+      enterpriseHubEnabled: false,
+      features: [
+        'Up to 3 Regional Farm Branches',
+        'AI Voice Auto-Logger Integration',
+        'Production Performance Telemetry'
+      ]
+    };
+    setPlans(prev => [...prev, newPlan]);
+    toast.success('New package added to draft. Click "Save All SaaS Plans" to publish.');
+  };
+
+  const handleDeletePlan = (planId: string) => {
+    if (planId === 'free') {
+      toast.error('The default Free Starter plan cannot be deleted.');
+      return;
+    }
+    const target = plans.find(p => p.id === planId);
+    if (window.confirm(`Are you sure you want to delete "${target?.name || planId}"?`)) {
+      setPlans(prev => prev.filter(p => p.id !== planId));
+      toast.success('Plan removed from draft. Click "Save All SaaS Plans" to apply.');
+    }
+  };
+
+  const handleAddFeature = (planId: string) => {
+    setPlans(prev => prev.map(p => {
+      if (p.id === planId) {
+        return { ...p, features: [...(p.features || []), 'New feature entitlement'] };
+      }
+      return p;
+    }));
+  };
+
+  const handleUpdateFeature = (planId: string, index: number, value: string) => {
+    setPlans(prev => prev.map(p => {
+      if (p.id === planId) {
+        const feats = [...(p.features || [])];
+        feats[index] = value;
+        return { ...p, features: feats };
+      }
+      return p;
+    }));
+  };
+
+  const handleRemoveFeature = (planId: string, index: number) => {
+    setPlans(prev => prev.map(p => {
+      if (p.id === planId) {
+        const feats = [...(p.features || [])];
+        feats.splice(index, 1);
+        return { ...p, features: feats };
+      }
+      return p;
+    }));
   };
 
   const handleSaveAllPlans = async () => {
@@ -347,11 +321,11 @@ export function AdminCmsClient({
 
       const data = await res.json();
       if (res.ok) {
-        toast.success(data.message || 'SaaS plans & feature entitlements updated successfully!');
+        toast.success(data.message || 'SaaS plans updated successfully!');
       } else {
         toast.error(data.error || 'Failed to save configuration');
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('Error saving plans configuration');
     } finally {
       setIsSaving(false);
@@ -385,73 +359,64 @@ export function AdminCmsClient({
     }
   };
 
+  const totalRevenue = allHistory.reduce((sum, h) => sum + Number(h.amount || 0), 0);
+  const activeProCount = allOrgs.filter(o => o.subscriptionTier === 'pro').length;
+  const activeEnterpriseCount = allOrgs.filter(o => o.subscriptionTier === 'enterprise' || o.subscriptionTier === 'entrepreneur').length;
+  const activePaidSubsCount = allSubscriptions.filter(s => s.status === 'active' || s.status === 'trialing').length || (activeProCount + activeEnterpriseCount);
+
   return (
-    <div className="w-full space-y-8 pb-16 font-sans">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="bg-purple-100 text-purple-800 border border-purple-200 text-xs font-semibold px-3 py-1 rounded-full">
-              Super Admin Control Center ({currentUserEmail || superAdminEmailState || 'Super Admin'})
-            </span>
-            <span className={`border text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 ${
-              versionInfo.updateAvailable
-                ? 'bg-amber-50 text-amber-800 border-amber-300'
-                : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-            }`}>
-              <span className={`w-2 h-2 rounded-full ${versionInfo.updateAvailable ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
-              <span>v{versionInfo.installedVersion} {versionInfo.updateAvailable ? '(Upgrade Available)' : '(Up to date)'}</span>
-            </span>
+    <div className="w-full space-y-6 pb-16 font-sans">
+      {/* Sleek Top Header with AI Logger & Super Admin Context */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-md shadow-purple-600/20 shrink-0">
+            <ShieldCheck size={22} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mt-2">{platformName} Master Super Admin Portal</h1>
-          <p className="text-sm text-slate-500 font-medium mt-1">
-            Manage live platform setup parameters, database drivers, payment keys, SaaS plans, and landing CMS.
-          </p>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl font-bold text-slate-900">{platformName} Super Admin</h1>
+              <span className="bg-purple-100 text-purple-800 border border-purple-200 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                {currentUserEmail || superAdminEmailState || 'Super Admin'}
+              </span>
+              <span className={`border text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${
+                versionInfo.updateAvailable
+                  ? 'bg-amber-50 text-amber-800 border-amber-300'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${versionInfo.updateAvailable ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                <span>v{versionInfo.installedVersion}</span>
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Platform governance, payment gateways, dynamic SaaS plans, and CMS configuration.
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('pfms_open_ai_logger'));
+              }
+            }}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+            title="Open AI Voice Auto-Logger"
+          >
+            <Mic size={15} />
+            <span>AI Voice Logger</span>
+          </button>
+
           <a
             href="/documentation/superadmin-setup-guide.html"
             target="_blank"
             rel="noreferrer"
-            className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <HelpCircle size={16} />
-            <span>Super admin docs</span>
+            <HelpCircle size={15} />
+            <span>Super Admin Docs</span>
           </a>
-
-          {activeTab === 'setup' && (
-            <button
-              onClick={handleSaveSetupParams}
-              disabled={isSaving}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Save & apply setup</span>
-            </button>
-          )}
-
-          {activeTab === 'cms' && (
-            <button
-              onClick={handleSaveCms}
-              disabled={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Publish landing CMS</span>
-            </button>
-          )}
-
-          {activeTab === 'plans' && (
-            <button
-              onClick={handleSaveAllPlans}
-              disabled={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Save plan features</span>
-            </button>
-          )}
         </div>
       </div>
 
@@ -488,7 +453,6 @@ export function AdminCmsClient({
         </div>
       )}
 
-      {/* Active Tab Content (Controlled from Sidebar) */}
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-in fade-in duration-300">
@@ -502,7 +466,7 @@ export function AdminCmsClient({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-extrabold text-purple-950">
-                  {currencySymbol}{totalRevenue.toLocaleString()}
+                  {formatCurrency(totalRevenue, currencySymbol)}
                 </div>
                 <p className="text-xs text-purple-700 font-medium mt-1">Aggregated merchant subscriptions</p>
               </CardContent>
@@ -516,9 +480,9 @@ export function AdminCmsClient({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-extrabold text-indigo-950">{allOrgs.length}</div>
+                <div className="text-2xl font-extrabold text-indigo-950">{formatNumber(allOrgs.length)}</div>
                 <p className="text-xs text-indigo-700 font-medium mt-1">
-                  Pro: {activeProCount} | Enterprise: {activeEnterpriseCount}
+                  Pro: {formatNumber(activeProCount)} | Enterprise: {formatNumber(activeEnterpriseCount)}
                 </p>
               </CardContent>
             </Card>
@@ -526,24 +490,22 @@ export function AdminCmsClient({
             <Card className="border border-emerald-200 bg-emerald-50/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-emerald-900 flex items-center justify-between">
-                  <span>Database Engine Driver</span>
-                  <Database size={18} className="text-emerald-600" />
+                  <span>Active Subscriptions</span>
+                  <CheckCircle2 size={18} className="text-emerald-600" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-extrabold text-emerald-950">
-                  {databaseType === 'mysql' ? 'MySQL / MariaDB' : databaseType === 'postgres' ? 'PostgreSQL' : 'Supabase Cloud'}
+                  {formatNumber(activePaidSubsCount)}
                 </div>
-                <p className="text-xs text-emerald-700 font-medium mt-1">
-                  {dbStatus?.connected ? '✓ Real-time status live' : '⚠ Connection check required'}
-                </p>
+                <p className="text-xs text-emerald-700 font-medium mt-1">Paid accounts on live billing</p>
               </CardContent>
             </Card>
 
             <Card className="border border-amber-200 bg-amber-50/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-amber-900 flex items-center justify-between">
-                  <span>Platform Application Title</span>
+                  <span>Platform Brand Title</span>
                   <ShieldCheck size={18} className="text-amber-600" />
                 </CardTitle>
               </CardHeader>
@@ -554,191 +516,56 @@ export function AdminCmsClient({
             </Card>
           </div>
 
-          {/* Real-time DB Guard Status Bar */}
-          <div className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between border shadow-sm ${
-            dbStatus?.connected ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-red-50 text-red-900 border-red-200'
-          }`}>
-            <div className="flex items-center gap-3">
-              {dbStatus?.connected ? <CheckCircle size={20} className="text-emerald-600" /> : <AlertCircle size={20} className="text-red-600" />}
-              <div>
-                <span className="font-bold block text-sm">{dbStatus?.message || 'Database status unknown'}</span>
-                <span className="text-[11px] opacity-80">
-                  Engine: {databaseType === 'mysql' ? 'MySQL / MariaDB' : databaseType === 'postgres' ? 'PostgreSQL' : 'Supabase Cloud'} Driver
+          {/* Quick Summary of Recent Activity */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-slate-900">Tenant Farm Directory Overview</h3>
+            <p className="text-xs text-slate-500">
+              Manage your tenants, inspect real-time billing history, and configure SaaS subscription tiers from the sidebar menu.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Workspaces</span>
+                <span className="text-xl font-bold text-slate-900 mt-1 block">{formatNumber(allOrgs.length)}</span>
+              </div>
+              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">SaaS Packages Active</span>
+                <span className="text-xl font-bold text-slate-900 mt-1 block">{formatNumber(plans.length)}</span>
+              </div>
+              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">System Status</span>
+                <span className="text-xl font-bold text-emerald-600 mt-1 block flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Operational
                 </span>
               </div>
             </div>
-
-            <button
-              onClick={testDatabaseConnection}
-              disabled={isDbTesting}
-              className="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-bold text-xs px-4 py-2 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-sm"
-            >
-              {isDbTesting ? <RefreshCw className="animate-spin" size={14} /> : <Database size={14} />}
-              <span>Test Connection</span>
-            </button>
           </div>
         </div>
       )}
 
-      {/* TAB 2: SETUP PARAMETERS & GATEWAYS */}
+      {/* TAB 2: PAYMENT & API GATEWAYS (Setup) */}
       {activeTab === 'setup' && (
-        <div className="space-y-8 animate-in fade-in duration-300">
-          <div className="bg-purple-50/80 border border-purple-200 p-6 rounded-2xl space-y-2">
-            <h2 className="text-lg font-extrabold text-purple-950 flex items-center gap-2">
-              <Settings size={20} className="text-purple-700" /> Live Setup Parameters & Gateway Management
-            </h2>
-            <p className="text-xs text-purple-800 font-medium leading-relaxed">
-              Below are the live parameter values populated from installation. You can test database connectivity, edit merchant API keys, change platform currency, update superadmin credentials, and save changes live without re-running installer scripts!
-            </p>
-          </div>
-
-          {/* 1. Database Driver & Connection Parameters */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                  <Database size={18} className="text-indigo-600" /> Database Engine Driver & Connection Parameters
-                </h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Select your database engine driver and verify live host connectivity.
-                </p>
-              </div>
-
-              <button
-                onClick={testDatabaseConnection}
-                disabled={isDbTesting}
-                className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs px-4 py-2 rounded-lg transition-all flex items-center gap-2 cursor-pointer"
-              >
-                {isDbTesting ? <RefreshCw className="animate-spin" size={14} /> : <Database size={14} />}
-                <span>Test Live Connection</span>
-              </button>
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                <Settings size={20} className="text-purple-600" /> Payment & API Gateways
+              </h2>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Configure merchant keys, billing webhooks, email delivery, and platform currency. Database parameters are locked to ensure security.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div
-                onClick={() => setDatabaseType('supabase')}
-                className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                  databaseType === 'supabase' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white hover:border-slate-300'
-                }`}
-              >
-                <div className="flex items-center justify-between font-bold text-xs text-slate-900">
-                  <span className="text-emerald-700">Supabase Cloud</span>
-                  {databaseType === 'supabase' && <CheckCircle size={16} className="text-indigo-600" />}
-                </div>
-                <p className="text-[11px] text-slate-500 font-medium mt-1">Cloud PostgreSQL with Auth & Storage API</p>
-              </div>
-
-              <div
-                onClick={() => setDatabaseType('postgres')}
-                className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                  databaseType === 'postgres' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white hover:border-slate-300'
-                }`}
-              >
-                <div className="flex items-center justify-between font-bold text-xs text-slate-900">
-                  <span className="text-indigo-700">Standard PostgreSQL</span>
-                  {databaseType === 'postgres' && <CheckCircle size={16} className="text-indigo-600" />}
-                </div>
-                <p className="text-[11px] text-slate-500 font-medium mt-1">Self-hosted Postgres / AWS RDS / Neon</p>
-              </div>
-
-              <div
-                onClick={() => setDatabaseType('mysql')}
-                className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                  databaseType === 'mysql' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white hover:border-slate-300'
-                }`}
-              >
-                <div className="flex items-center justify-between font-bold text-xs text-slate-900">
-                  <span className="text-blue-700">MySQL / MariaDB</span>
-                  {databaseType === 'mysql' && <CheckCircle size={16} className="text-indigo-600" />}
-                </div>
-                <p className="text-[11px] text-slate-500 font-medium mt-1">MySQL 8.0 / MariaDB / cPanel hosting</p>
-              </div>
-            </div>
-
-            {databaseType === 'postgres' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Postgres host</label>
-                  <input
-                    type="text"
-                    value={postgresHost}
-                    onChange={(e) => setPostgresHost(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Postgres port</label>
-                  <input
-                    type="number"
-                    value={postgresPort}
-                    onChange={(e) => setPostgresPort(Number(e.target.value))}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Database name</label>
-                  <input
-                    type="text"
-                    value={postgresDb}
-                    onChange={(e) => setPostgresDb(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Database user</label>
-                  <input
-                    type="text"
-                    value={postgresUser}
-                    onChange={(e) => setPostgresUser(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-              </div>
-            )}
-
-            {databaseType === 'mysql' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">MySQL host</label>
-                  <input
-                    type="text"
-                    value={mysqlHost}
-                    onChange={(e) => setMysqlHost(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">MySQL port</label>
-                  <input
-                    type="number"
-                    value={mysqlPort}
-                    onChange={(e) => setMysqlPort(Number(e.target.value))}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Database name</label>
-                  <input
-                    type="text"
-                    value={mysqlDatabase}
-                    onChange={(e) => setMysqlDatabase(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Database user</label>
-                  <input
-                    type="text"
-                    value={mysqlUser}
-                    onChange={(e) => setMysqlUser(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs font-mono bg-white"
-                  />
-                </div>
-              </div>
-            )}
+            <button
+              onClick={handleSaveGateways}
+              disabled={isSaving}
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
+            >
+              {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
+              <span>Save Gateway Settings</span>
+            </button>
           </div>
 
-          {/* 2. Platform Brand Identity & Super Admin Credentials */}
+          {/* Platform Identity & Master Super Admin Credentials */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
               <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
@@ -746,7 +573,7 @@ export function AdminCmsClient({
               </h3>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Application title</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Application Title</label>
                 <input
                   type="text"
                   value={platformName}
@@ -756,7 +583,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Primary currency symbol</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Primary Currency Symbol</label>
                 <select
                   value={currencySymbol}
                   onChange={(e) => setCurrencySymbol(e.target.value)}
@@ -778,7 +605,7 @@ export function AdminCmsClient({
               </h3>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Super admin email</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Super Admin Email</label>
                 <input
                   type="email"
                   value={superAdminEmailState}
@@ -809,7 +636,7 @@ export function AdminCmsClient({
             </div>
           </div>
 
-          {/* 3. Merchant Payment Gateways */}
+          {/* Payment Gateways: Paystack & Stripe */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Paystack Gateway */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
@@ -828,24 +655,24 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack public key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack Public Key</label>
                 <input
                   type="text"
                   value={paystackPublicKey}
                   onChange={(e) => setPaystackPublicKey(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-emerald-800 bg-slate-50 focus:bg-white"
-                  placeholder="pk_PAYSTACK_PUBLIC_KEY"
+                  placeholder="pk_live_..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack secret key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack Secret Key</label>
                 <input
                   type={showPaystackSecret ? 'text' : 'password'}
                   value={paystackSecretKey}
                   onChange={(e) => setPaystackSecretKey(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-emerald-800 bg-slate-50 focus:bg-white"
-                  placeholder="sk_PAYSTACK_SECRET_KEY"
+                  placeholder="sk_live_..."
                 />
               </div>
             </div>
@@ -854,7 +681,7 @@ export function AdminCmsClient({
             <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                  <CreditCard size={16} className="text-indigo-600" /> Stripe Merchant Keys (USD)
+                  <CreditCard size={16} className="text-indigo-600" /> Stripe Merchant Keys (USD / Global)
                 </h3>
                 <button
                   type="button"
@@ -867,69 +694,175 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe publishable key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe Publishable Key</label>
                 <input
                   type="text"
                   value={stripePublicKey}
                   onChange={(e) => setStripePublicKey(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 bg-slate-50 focus:bg-white"
-                  placeholder="pk_STRIPE_PUBLIC_KEY"
+                  placeholder="pk_live_..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe secret key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe Secret Key</label>
                 <input
                   type={showStripeSecret ? 'text' : 'password'}
                   value={stripeSecretKey}
                   onChange={(e) => setStripeSecretKey(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 bg-slate-50 focus:bg-white"
-                  placeholder="sk_STRIPE_SECRET_KEY"
+                  placeholder="sk_live_..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe Webhook Signing Secret</label>
+                <input
+                  type={showStripeSecret ? 'text' : 'password'}
+                  value={stripeWebhookSecret}
+                  onChange={(e) => setStripeWebhookSecret(e.target.value)}
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 bg-slate-50 focus:bg-white"
+                  placeholder="whsec_..."
                 />
               </div>
             </div>
           </div>
 
-          {/* Save Setup Parameters Button */}
-          <div className="flex justify-end pt-4">
+          {/* Email Gateway */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <Mail size={16} className="text-purple-600" /> Transactional Email Gateway (Resend)
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowResendKey(!showResendKey)}
+                className="text-xs font-bold text-purple-700 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                {showResendKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                <span>{showResendKey ? 'Hide Key' : 'Show Key'}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Resend API Key</label>
+                <input
+                  type={showResendKey ? 'text' : 'password'}
+                  value={resendApiKey}
+                  onChange={(e) => setResendApiKey(e.target.value)}
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-purple-900 bg-slate-50 focus:bg-white"
+                  placeholder="re_..."
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">From Sender Email</label>
+                <input
+                  type="email"
+                  value={fromEmail}
+                  onChange={(e) => setFromEmail(e.target.value)}
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 bg-slate-50 focus:bg-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
             <button
-              onClick={handleSaveSetupParams}
+              onClick={handleSaveGateways}
               disabled={isSaving}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-8 py-3.5 rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Save & Apply Setup Configuration</span>
+              <span>Save & Apply Gateway Configuration</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* TAB 3: SAAS PLANS & ENTITLEMENTS */}
+      {/* TAB 3: SAAS PLANS (Dynamic Packages & Entitlements) */}
       {activeTab === 'plans' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <Layers size={20} className="text-purple-600" /> SaaS Subscription Pricing Tiers & Feature Entitlements
-            </h2>
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Customize pricing and toggle feature flags (CCTV, AI Logger, PDF/Excel Exports, White-Label) for each subscription tier.
-            </p>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                <Layers size={20} className="text-purple-600" /> SaaS Plans
+              </h2>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                Create, rename, configure, and delete subscription tiers. Link Stripe Plan IDs & Paystack Plan Codes for automated recurring merchant billing.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <button
+                type="button"
+                onClick={handleAddPlan}
+                className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Plus size={16} />
+                <span>Add New Package</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveAllPlans}
+                disabled={isSaving}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              >
+                {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
+                <span>Save All SaaS Plans</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <Card key={plan.id} className="border-2 border-slate-200 shadow-sm flex flex-col justify-between">
+              <Card key={plan.id} className="border-2 border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
                 <CardHeader className="bg-slate-50/80 border-b border-slate-200 pb-4">
-                  <CardTitle className="text-base font-extrabold text-slate-900 flex items-center justify-between">
-                    <span>{plan.name}</span>
-                    <span className="text-xs uppercase bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded font-extrabold">
-                      {plan.id}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-extrabold">
+                      ID: {plan.id}
                     </span>
-                  </CardTitle>
-                  <p className="text-xs text-slate-500 font-medium mt-1">{plan.description}</p>
+                    {plan.id !== 'free' && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePlan(plan.id)}
+                        className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors cursor-pointer"
+                        title="Delete Plan"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mt-2">
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Package Name
+                    </label>
+                    <input
+                      type="text"
+                      value={plan.name}
+                      onChange={(e) => handleFieldChange(plan.id, 'name', e.target.value)}
+                      className="w-full border-2 border-slate-200 rounded-lg p-2 text-sm font-bold text-slate-900 bg-white focus:border-indigo-500"
+                      placeholder="e.g. Commercial Pro"
+                    />
+                  </div>
+
+                  <div className="mt-2">
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={plan.description}
+                      onChange={(e) => handleFieldChange(plan.id, 'description', e.target.value)}
+                      className="w-full border-2 border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-700 bg-white focus:border-indigo-500"
+                    />
+                  </div>
                 </CardHeader>
 
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-5 space-y-4">
+                  {/* Pricing Inputs */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-600 mb-1">Monthly ({currencySymbol})</label>
@@ -937,7 +870,7 @@ export function AdminCmsClient({
                         type="number"
                         value={plan.priceMonthly}
                         onChange={(e) => handleFieldChange(plan.id, 'priceMonthly', Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 font-extrabold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-lg p-2 text-xs text-slate-900 font-extrabold bg-white"
                       />
                     </div>
                     <div>
@@ -946,51 +879,148 @@ export function AdminCmsClient({
                         type="number"
                         value={plan.priceAnnual}
                         onChange={(e) => handleFieldChange(plan.id, 'priceAnnual', Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 font-extrabold bg-white"
+                        className="w-full border-2 border-slate-200 rounded-lg p-2 text-xs text-slate-900 font-extrabold bg-white"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2 border-t border-slate-100 pt-3 text-xs font-semibold text-slate-700">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                  {/* Stripe Plan / Price IDs */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                    <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <CreditCard size={13} className="text-indigo-600" /> Stripe Plan Price IDs
+                    </span>
+                    <div className="space-y-1.5">
                       <input
-                        type="checkbox"
-                        checked={plan.cctvEnabled}
-                        onChange={(e) => handleFieldChange(plan.id, 'cctvEnabled', e.target.checked)}
-                        className="rounded text-purple-600 w-4 h-4"
+                        type="text"
+                        value={plan.stripeMonthlyPlanId || ''}
+                        onChange={(e) => handleFieldChange(plan.id, 'stripeMonthlyPlanId', e.target.value)}
+                        placeholder="Monthly Price ID (price_1N...)"
+                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
                       />
-                      <span>CCTV Live Surveillance</span>
-                    </label>
+                      <input
+                        type="text"
+                        value={plan.stripeAnnualPlanId || ''}
+                        onChange={(e) => handleFieldChange(plan.id, 'stripeAnnualPlanId', e.target.value)}
+                        placeholder="Annual Price ID (price_1N...)"
+                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
+                      />
+                    </div>
+                  </div>
 
-                    <label className="flex items-center gap-2 cursor-pointer">
+                  {/* Paystack Plan Codes */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                    <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <CreditCard size={13} className="text-emerald-600" /> Paystack Plan Codes
+                    </span>
+                    <div className="space-y-1.5">
                       <input
-                        type="checkbox"
-                        checked={plan.aiLoggerEnabled}
-                        onChange={(e) => handleFieldChange(plan.id, 'aiLoggerEnabled', e.target.checked)}
-                        className="rounded text-purple-600 w-4 h-4"
+                        type="text"
+                        value={plan.paystackMonthlyPlanCode || ''}
+                        onChange={(e) => handleFieldChange(plan.id, 'paystackMonthlyPlanCode', e.target.value)}
+                        placeholder="Monthly Plan Code (PLN_...)"
+                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
                       />
-                      <span>AI Voice Auto-Logger</span>
-                    </label>
+                      <input
+                        type="text"
+                        value={plan.paystackAnnualPlanCode || ''}
+                        onChange={(e) => handleFieldChange(plan.id, 'paystackAnnualPlanCode', e.target.value)}
+                        placeholder="Annual Plan Code (PLN_...)"
+                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
+                      />
+                    </div>
+                  </div>
 
-                    <label className="flex items-center gap-2 cursor-pointer">
+                  {/* Entitlements & Feature Toggles */}
+                  <div className="space-y-2 border-t border-slate-100 pt-3">
+                    <div className="flex items-center justify-between pb-1">
+                      <label className="text-xs font-bold text-slate-700">Max Branches Allowed</label>
                       <input
-                        type="checkbox"
-                        checked={plan.exportReportsEnabled}
-                        onChange={(e) => handleFieldChange(plan.id, 'exportReportsEnabled', e.target.checked)}
-                        className="rounded text-purple-600 w-4 h-4"
+                        type="number"
+                        value={plan.maxBranches}
+                        onChange={(e) => handleFieldChange(plan.id, 'maxBranches', Number(e.target.value))}
+                        className="w-20 border-2 border-slate-200 rounded-lg p-1.5 text-xs text-center font-bold bg-white"
                       />
-                      <span>PDF & Excel Report Exports</span>
-                    </label>
+                    </div>
 
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={plan.enterpriseHubEnabled}
-                        onChange={(e) => handleFieldChange(plan.id, 'enterpriseHubEnabled', e.target.checked)}
-                        className="rounded text-purple-600 w-4 h-4"
-                      />
-                      <span>Multi-Branch Enterprise Hub</span>
-                    </label>
+                    <div className="space-y-2 text-xs font-semibold text-slate-700">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={plan.cctvEnabled}
+                          onChange={(e) => handleFieldChange(plan.id, 'cctvEnabled', e.target.checked)}
+                          className="rounded text-purple-600 w-4 h-4"
+                        />
+                        <span>CCTV Live Surveillance</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={plan.aiLoggerEnabled}
+                          onChange={(e) => handleFieldChange(plan.id, 'aiLoggerEnabled', e.target.checked)}
+                          className="rounded text-purple-600 w-4 h-4"
+                        />
+                        <span>AI Voice Auto-Logger</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={plan.exportReportsEnabled}
+                          onChange={(e) => handleFieldChange(plan.id, 'exportReportsEnabled', e.target.checked)}
+                          className="rounded text-purple-600 w-4 h-4"
+                        />
+                        <span>PDF & Excel Report Exports</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={plan.enterpriseHubEnabled}
+                          onChange={(e) => handleFieldChange(plan.id, 'enterpriseHubEnabled', e.target.checked)}
+                          className="rounded text-purple-600 w-4 h-4"
+                        />
+                        <span>Multi-Branch Enterprise Hub</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Bullet Points Feature List */}
+                  <div className="border-t border-slate-100 pt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        Feature Bullet Points
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleAddFeature(plan.id)}
+                        className="text-[11px] font-bold text-indigo-600 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Plus size={12} />
+                        <span>Add Bullet</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                      {(plan.features || []).map((feat, idx) => (
+                        <div key={idx} className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            value={feat}
+                            onChange={(e) => handleUpdateFeature(plan.id, idx, e.target.value)}
+                            className="w-full border border-slate-200 rounded p-1.5 text-xs text-slate-800 bg-white"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFeature(plan.id, idx)}
+                            className="text-slate-400 hover:text-red-600 p-1 cursor-pointer shrink-0"
+                            title="Remove bullet"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -1002,65 +1032,76 @@ export function AdminCmsClient({
       {/* TAB 4: LANDING PAGE CMS */}
       {activeTab === 'cms' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <Sparkles size={20} className="text-purple-600" /> Public Landing Page Content Editor
-            </h2>
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Edit public hero headlines, announcement banners, and support contact details live on your homepage.
-            </p>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                <Sparkles size={20} className="text-purple-600" /> Public Landing Page Content Editor
+              </h2>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
+                Edit public hero headlines, announcement banners, and support contact details live on your homepage.
+              </p>
+            </div>
 
-            <div className="space-y-4 pt-2">
+            <button
+              onClick={handleSaveCms}
+              disabled={isSaving}
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
+            >
+              {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
+              <span>Publish Landing CMS</span>
+            </button>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero Headline</label>
+              <input
+                type="text"
+                value={heroHeading}
+                onChange={(e) => setHeroHeading(e.target.value)}
+                className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero Subtitle</label>
+              <textarea
+                rows={3}
+                value={heroSubtitle}
+                onChange={(e) => setHeroSubtitle(e.target.value)}
+                className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">Top Announcement Banner</label>
+              <input
+                type="text"
+                value={announcementBanner}
+                onChange={(e) => setAnnouncementBanner(e.target.value)}
+                className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero headline</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Support Phone</label>
                 <input
                   type="text"
-                  value={heroHeading}
-                  onChange={(e) => setHeroHeading(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero subtitle</label>
-                <textarea
-                  rows={3}
-                  value={heroSubtitle}
-                  onChange={(e) => setHeroSubtitle(e.target.value)}
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Top announcement banner</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Support Email</label>
                 <input
-                  type="text"
-                  value={announcementBanner}
-                  onChange={(e) => setAnnouncementBanner(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white"
+                  type="email"
+                  value={supportEmail}
+                  onChange={(e) => setSupportEmail(e.target.value)}
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Support phone</label>
-                  <input
-                    type="text"
-                    value={supportPhone}
-                    onChange={(e) => setSupportPhone(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Support email</label>
-                  <input
-                    type="email"
-                    value={supportEmail}
-                    onChange={(e) => setSupportEmail(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -1070,9 +1111,9 @@ export function AdminCmsClient({
       {/* TAB 5: TENANT ORGANIZATIONS */}
       {activeTab === 'orgs' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
             <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <Building2 size={20} className="text-purple-600" /> Registered Farm Tenant Accounts ({allOrgs.length})
+              <Building2 size={20} className="text-purple-600" /> Registered Farm Tenant Accounts ({formatNumber(allOrgs.length)})
             </h2>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
               Global directory of all farm organization workspaces registered on this platform.
@@ -1133,9 +1174,9 @@ export function AdminCmsClient({
 
             <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-                <h4 className="font-bold text-xs text-slate-900">Database Driver Status</h4>
+                <h4 className="font-bold text-xs text-slate-900">Database Driver Engine</h4>
                 <p className="text-xs text-slate-600 font-mono">
-                  Engine: {databaseType === 'mysql' ? 'MySQL / MariaDB' : databaseType === 'postgres' ? 'PostgreSQL' : 'Supabase Cloud'}
+                  Engine: Managed Database Service
                 </p>
                 <p className="text-xs text-emerald-700 font-bold">Status: Healthy & Active</p>
               </div>

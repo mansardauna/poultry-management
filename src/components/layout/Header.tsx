@@ -105,11 +105,10 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     icon: LucideIcon;
   }> = [
     { name: 'Platform Overview', desc: 'Real-time telemetry, revenue & tenant count', href: '/dashboard/admin?tab=overview', category: 'Platform Telemetry', icon: BarChart3 },
-    { name: 'Setup & Gateways', desc: 'Database drivers, Paystack, Stripe & Resend config', href: '/dashboard/admin?tab=setup', category: 'Infrastructure & APIs', icon: Settings },
-    { name: 'Database Engine Driver', desc: 'MySQL / PostgreSQL / Supabase connection parameters', href: '/dashboard/admin?tab=setup', category: 'Database Config', icon: Database },
+    { name: 'Payment & API Gateways', desc: 'Paystack, Stripe, and Resend API configurations', href: '/dashboard/admin?tab=setup', category: 'Infrastructure & APIs', icon: Settings },
     { name: 'Payment Gateways', desc: 'Paystack & Stripe API keys, webhooks, currency', href: '/dashboard/admin?tab=setup', category: 'Payment Gateways', icon: CreditCard },
     { name: 'Transactional Email (Resend)', desc: 'Resend API key and outbound sender email', href: '/dashboard/admin?tab=setup', category: 'Email Gateway', icon: Mail },
-    { name: 'SaaS Plans & Entitlements', desc: 'Free, Pro, Enterprise pricing & feature entitlements', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: Package },
+    { name: 'SaaS Plans', desc: 'Pricing packages, Stripe plan IDs, and features', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: Package },
     { name: 'Landing Page CMS', desc: 'Hero headlines, announcement banner, support contacts', href: '/dashboard/admin?tab=cms', category: 'CMS & Content', icon: Sparkles },
     { name: 'Tenant Farm Organizations', desc: 'Directory of registered farm tenant workspaces', href: '/dashboard/admin?tab=orgs', category: 'Tenants & Farms', icon: Building2 },
     { name: 'Platform Settings & Governance', desc: 'System versioning, diagnostics and maintenance', href: '/dashboard/admin?tab=settings', category: 'System Governance', icon: Shield },
