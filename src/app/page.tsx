@@ -14,6 +14,8 @@ export default function LandingPage() {
     brandName: 'PFMS',
     brandTagline: 'Smart Poultry Operating System',
     brandLogoText: 'P',
+    logoUrl: '',
+    primaryColor: '#4f46e5',
     footerText: 'PFMS Inc. All rights reserved.',
     heroHeading: 'AI-Driven poultry farms with human-level precision',
     heroSubtitle: 'Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.',
@@ -43,7 +45,12 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* Navigation */}
-      <LandingNav brandName={cms.brandName} brandLogoText={cms.brandLogoText} />
+      <LandingNav 
+        brandName={cms.brandName} 
+        brandLogoText={cms.brandLogoText} 
+        logoUrl={cms.logoUrl}
+        primaryColor={cms.primaryColor}
+      />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -260,6 +267,8 @@ export default function LandingPage() {
       <LandingFooter 
         brandName={cms.brandName} 
         brandLogoText={cms.brandLogoText} 
+        logoUrl={cms.logoUrl}
+        primaryColor={cms.primaryColor}
         footerText={cms.footerText} 
       />
 

@@ -6,15 +6,21 @@ import Link from 'next/link';
 export function LandingNav({ 
   activePath, 
   brandName: propBrandName,
-  brandLogoText: propBrandLogoText
+  brandLogoText: propBrandLogoText,
+  logoUrl: propLogoUrl,
+  primaryColor: propPrimaryColor
 }: { 
   activePath?: string;
   brandName?: string;
   brandLogoText?: string;
+  logoUrl?: string;
+  primaryColor?: string;
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [brandName, setBrandName] = useState(propBrandName || 'PFMS');
   const [brandLogoText, setBrandLogoText] = useState(propBrandLogoText || 'P');
+  const [logoUrl, setLogoUrl] = useState(propLogoUrl || '');
+  const [primaryColor, setPrimaryColor] = useState(propPrimaryColor || '#4f46e5');
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -33,6 +39,8 @@ export function LandingNav({
           if (data?.brandName) setBrandName(data.brandName);
           if (data?.brandLogoText) setBrandLogoText(data.brandLogoText);
           else if (data?.brandName) setBrandLogoText(data.brandName.charAt(0).toUpperCase());
+          if (data?.logoUrl !== undefined) setLogoUrl(data.logoUrl || '');
+          if (data?.primaryColor) setPrimaryColor(data.primaryColor);
         })
         .catch(() => {});
     }
@@ -42,10 +50,18 @@ export function LandingNav({
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
-              {brandLogoText}
-            </div>
+          <Link href="/" className="flex items-center gap-2.5 cursor-pointer">
+            {logoUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={logoUrl} alt={brandName} className="h-8 max-w-[160px] object-contain" />
+            ) : (
+              <div 
+                className="w-8 h-8 rounded-lg text-white font-bold flex items-center justify-center text-sm shadow-sm"
+                style={{ backgroundColor: primaryColor }}
+              >
+                {brandLogoText}
+              </div>
+            )}
             <span className="font-bold text-xl tracking-tight text-slate-800">
               {brandName}
             </span>

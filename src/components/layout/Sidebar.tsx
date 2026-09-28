@@ -659,21 +659,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         )}
 
         <div className="p-4 border-t border-indigo-900 flex flex-col gap-2">
-          {role === 'SuperAdmin' ? (
-            <Link
-              href="/dashboard/admin?tab=settings"
-              onClick={() => setIsMobileOpen(false)}
-              className={clsx(
-                "group flex items-center px-3 py-3 text-sm font-semibold rounded-md hover:bg-indigo-900 hover:text-white transition-colors",
-                pathname === '/dashboard/admin' && searchParams.get('tab') === 'settings' ? 'bg-purple-800 text-white' : 'text-indigo-200',
-                isCollapsed ? 'justify-center' : ''
-              )}
-              title={isCollapsed ? (texts.menu['Platform settings'] || 'Platform settings') : undefined}
-            >
-              <Server size={22} className={clsx("text-indigo-400 group-hover:text-purple-300 flex-shrink-0 transition-colors", isCollapsed ? 'mr-0' : 'mr-3')} />
-              {!isCollapsed && (texts.menu['Platform settings'] || 'Platform settings')}
-            </Link>
-          ) : (
+          {role !== 'SuperAdmin' && (
             <Link
               href="/dashboard/settings"
               onClick={() => setIsMobileOpen(false)}

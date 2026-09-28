@@ -97,7 +97,8 @@ export default async function AdminCmsPage() {
 
       if (adminUsers && Array.isArray(adminUsers)) {
         for (const u of adminUsers) {
-          if (u.role === 'SuperAdmin') continue;
+          // Strictly only registered farm Admins represent tenant organizations (exclude Staff and Managers)
+          if (u.role !== 'Admin') continue;
           const userOrgId = u.orgId || (u.workspaceId ? `org_${u.workspaceId}` : `org_${u.username}`);
           if (!existingOrgIds.has(userOrgId)) {
             const farmWorkspace = workspaces?.find((w: any) => w.ownerUsername === u.username || w.id === u.workspaceId);

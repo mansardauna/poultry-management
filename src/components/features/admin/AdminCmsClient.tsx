@@ -32,7 +32,8 @@ import {
   X,
   ChevronRight,
   Activity,
-  Users
+  Users,
+  Upload
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -96,12 +97,32 @@ export function AdminCmsClient({
   const [platformName, setPlatformName] = useState('PFMS');
   const [brandTagline, setBrandTagline] = useState('Smart Poultry Operating System');
   const [brandLogoText, setBrandLogoText] = useState('P');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [primaryColor, setPrimaryColor] = useState('#4f46e5');
+  const [accentColor, setAccentColor] = useState('#7c3aed');
   const [footerText, setFooterText] = useState('PFMS Inc. All rights reserved.');
   const [currencySymbol, setCurrencySymbol] = useState('₦');
   const [superAdminEmailState, setSuperAdminEmailState] = useState(currentUserEmail || 'owner@poultry.com');
   const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [fromEmail, setFromEmail] = useState('support@pfms-poultry.com');
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size must be less than 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setLogoUrl(reader.result);
+        toast.success('Logo uploaded! Click "Publish Landing CMS & Brand" to apply.');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Tenant Management & Impersonation State
   const [orgsList, setOrgsList] = useState<any[]>(allOrgs);
@@ -219,6 +240,9 @@ export function AdminCmsClient({
         if (data.brandName) setPlatformName(data.brandName);
         if (data.brandTagline) setBrandTagline(data.brandTagline);
         if (data.brandLogoText) setBrandLogoText(data.brandLogoText);
+        if (data.logoUrl !== undefined) setLogoUrl(data.logoUrl || '');
+        if (data.primaryColor) setPrimaryColor(data.primaryColor);
+        if (data.accentColor) setAccentColor(data.accentColor);
         if (data.footerText) setFooterText(data.footerText);
         if (data.heroHeading) setHeroHeading(data.heroHeading);
         if (data.heroSubtitle) setHeroSubtitle(data.heroSubtitle);
@@ -373,6 +397,9 @@ export function AdminCmsClient({
           brandName: platformName,
           brandTagline,
           brandLogoText,
+          logoUrl,
+          primaryColor,
+          accentColor,
           footerText,
           heroHeading,
           heroSubtitle,
@@ -1237,6 +1264,117 @@ export function AdminCmsClient({
                   placeholder="e.g. PFMS Inc. All rights reserved."
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
                 />
+              </div>
+            </div>
+
+            {/* LOGO UPLOAD & BRAND COLORS ROW */}
+            <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Brand Logo Upload */}
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Brand Logo Image (PNG, JPG, SVG, WebP)
+                </label>
+                
+                {logoUrl ? (
+                  <div className="flex items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <div className="h-14 w-28 bg-white border border-slate-200 rounded-xl p-2 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={logoUrl} alt="Brand Logo Preview" className="max-h-full max-w-full object-contain" />
+                    </div>
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-900 truncate">Custom Logo Uploaded</p>
+                      <div className="flex items-center gap-2">
+                        <label className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors">
+                          Change Logo
+                          <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => { setLogoUrl(''); toast.success('Logo removed, falling back to logo badge'); }}
+                          className="text-red-500 hover:text-red-700 text-[11px] font-bold cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/30 rounded-2xl cursor-pointer transition-colors">
+                    <Upload size={20} className="text-indigo-600 mb-1" />
+                    <span className="text-xs font-bold text-slate-800">Upload Brand Logo</span>
+                    <span className="text-[10px] text-slate-400 mt-0.5">PNG, JPG, SVG up to 2MB</span>
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                  </label>
+                )}
+              </div>
+
+              {/* Brand Colors Config */}
+              <div className="space-y-3">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Brand Colors (Primary & Accent)
+                </label>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Primary Color */}
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                    <span className="text-[11px] font-bold text-slate-600">Primary Color</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="w-8 h-8 rounded-lg border-0 cursor-pointer p-0 bg-transparent"
+                      />
+                      <input
+                        type="text"
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-mono font-bold uppercase bg-white outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Accent Color */}
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                    <span className="text-[11px] font-bold text-slate-600">Accent Color</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={accentColor}
+                        onChange={(e) => setAccentColor(e.target.value)}
+                        className="w-8 h-8 rounded-lg border-0 cursor-pointer p-0 bg-transparent"
+                      />
+                      <input
+                        type="text"
+                        value={accentColor}
+                        onChange={(e) => setAccentColor(e.target.value)}
+                        className="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-mono font-bold uppercase bg-white outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-slate-400 font-semibold">Presets:</span>
+                  {[
+                    { name: 'Indigo', prim: '#4f46e5', acc: '#7c3aed' },
+                    { name: 'Emerald', prim: '#059669', acc: '#10b981' },
+                    { name: 'Navy', prim: '#1e3a8a', acc: '#3b82f6' },
+                    { name: 'Amber', prim: '#d97706', acc: '#f59e0b' },
+                    { name: 'Rose', prim: '#e11d48', acc: '#f43f5e' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      onClick={() => { setPrimaryColor(preset.prim); setAccentColor(preset.acc); }}
+                      className="px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 cursor-pointer flex items-center gap-1 transition-colors"
+                    >
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: preset.prim }} />
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

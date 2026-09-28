@@ -6,14 +6,20 @@ import Link from 'next/link';
 export function LandingFooter({
   brandName: propBrandName,
   brandLogoText: propBrandLogoText,
+  logoUrl: propLogoUrl,
+  primaryColor: propPrimaryColor,
   footerText: propFooterText
 }: {
   brandName?: string;
   brandLogoText?: string;
+  logoUrl?: string;
+  primaryColor?: string;
   footerText?: string;
 }) {
   const [brandName, setBrandName] = useState(propBrandName || 'PFMS');
   const [brandLogoText, setBrandLogoText] = useState(propBrandLogoText || 'P');
+  const [logoUrl, setLogoUrl] = useState(propLogoUrl || '');
+  const [primaryColor, setPrimaryColor] = useState(propPrimaryColor || '#4f46e5');
   const [footerText, setFooterText] = useState(propFooterText || 'PFMS Inc. All rights reserved.');
 
   useEffect(() => {
@@ -24,6 +30,8 @@ export function LandingFooter({
           if (data?.brandName) setBrandName(data.brandName);
           if (data?.brandLogoText) setBrandLogoText(data.brandLogoText);
           else if (data?.brandName) setBrandLogoText(data.brandName.charAt(0).toUpperCase());
+          if (data?.logoUrl !== undefined) setLogoUrl(data.logoUrl || '');
+          if (data?.primaryColor) setPrimaryColor(data.primaryColor);
           if (data?.footerText) setFooterText(data.footerText);
           else if (data?.brandName) setFooterText(`${data.brandName} Inc. All rights reserved.`);
         })
@@ -35,9 +43,17 @@ export function LandingFooter({
     <footer className="bg-white border-t border-slate-200 py-12 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
         <Link href="/" className="flex items-center gap-2 cursor-pointer">
-          <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
-            {brandLogoText}
-          </div>
+          {logoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={logoUrl} alt={brandName} className="h-6 max-w-[120px] object-contain" />
+          ) : (
+            <div 
+              className="w-6 h-6 rounded text-white font-bold text-xs flex items-center justify-center shadow-sm"
+              style={{ backgroundColor: primaryColor }}
+            >
+              {brandLogoText}
+            </div>
+          )}
           <span className="font-bold text-slate-800">{brandName}</span>
         </Link>
         <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 font-medium">
