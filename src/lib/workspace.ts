@@ -253,10 +253,44 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
   }];
 }
 
-/**
- * Reusable tenant tier helper for fetching ONLY the authoritative subscription tier of the authenticated user/organization.
- */
 export async function getTenantTier(user?: any, cookieOrgId?: string, cookieTier?: string) {
+  const authUser = user || (await getAuthUser());
+  const isSuperAdmin = authUser?.email === 'superadmin@pfms.com' || authUser?.email === 'owner@poultry.com' || authUser?.role === 'SuperAdmin';
+  if (isSuperAdmin) {
+    return 'enterprise';
+  }
+
+  // If user is authenticated, query the real tier from organization or subscriptions table
+  if (authUser?.id) {
+    try {
+      const { data: memberData } = await serviceRoleClient
+        .from('organization_members')
+        .select('orgId')
+        .eq('userId', authUser.id)
+        .limit(1)
+        .maybeSingle();
+
+      const targetOrgId = memberData?.orgId || cookieOrgId;
+      if (targetOrgId) {
+        const { data: org } = await serviceRoleClient
+          .from('organizations')
+          .select('subscriptionTier, subscriptionStatus, subscriptionEndsAt')
+          .eq('id', targetOrgId)
+          .limit(1)
+          .maybeSingle();
+
+        if (org?.subscriptionTier) {
+          if (org.subscriptionEndsAt && new Date(org.subscriptionEndsAt).getTime() < Date.now()) {
+            return 'free';
+          }
+          const tier = (org.subscriptionTier || '').toLowerCase();
+          if (tier === 'enterprise' || tier === 'entrepreneur' || tier === 'enterprise_plus') return 'enterprise';
+          if (tier === 'pro') return 'pro';
+        }
+      }
+    } catch {}
+  }
+
   try {
     const cookieStore = await cookies();
     const cTier = cookieTier || cookieStore.get('pfms_tier')?.value || '';
@@ -269,11 +303,6 @@ export async function getTenantTier(user?: any, cookieOrgId?: string, cookieTier
       return 'pro';
     }
   } catch {}
-
-  const authUser = user || (await getAuthUser());
-  if (authUser?.email === 'owner@poultry.com') {
-    return 'pro';
-  }
 
   return 'free';
 }

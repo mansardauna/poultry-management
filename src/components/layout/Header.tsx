@@ -76,20 +76,25 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   }, [tier]);
 
   useEffect(() => {
-    if (isUpgraded && queryTier) {
-      fetch('/api/checkout/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planTier: queryTier, demo: true })
-      }).then(res => res.json()).then(data => {
-        if (data.tier) {
-          setCurrentTier(data.tier);
-          toast.success(`Account upgraded to ${data.tier === 'enterprise' || data.tier === 'entrepreneur' ? 'Enterprise & Cooperative' : 'Commercial Pro'}!`, { id: 'tier-upgrade-toast' });
-          router.refresh();
-        }
-      });
+    if (isUpgraded) {
+      const sessionId = searchParams.get('session_id');
+      if (sessionId) {
+        fetch('/api/checkout/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        }).then(res => res.json()).then(data => {
+          if (data.tier) {
+            setCurrentTier(data.tier);
+            toast.success(`Account upgraded to ${data.tier === 'enterprise' || data.tier === 'entrepreneur' ? 'Enterprise & Cooperative' : 'Commercial Pro'}!`, { id: 'tier-upgrade-toast' });
+            router.refresh();
+          } else if (data.error) {
+            toast.error(data.error, { id: 'tier-upgrade-error' });
+          }
+        }).catch(() => {});
+      }
     }
-  }, [isUpgraded, queryTier, router]);
+  }, [isUpgraded, searchParams, router]);
 
   const { setIsMobileOpen } = useSidebar();
   const { language, setLanguage, texts } = useLanguage();

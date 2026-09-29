@@ -29,8 +29,8 @@ export function AiLogger({ role }: { role?: string }) {
     return null;
   }
 
-  const isSuperAdmin = false;
-  const hasFullAccess = tier !== 'free';
+  const isSuperAdmin = role === 'SuperAdmin' || tier === 'enterprise';
+  const hasFullAccess = tier !== 'free' || role === 'Admin' || role === 'Manager' || role === 'SuperAdmin';
 
   const startListening = () => {
     if (typeof window === 'undefined') return;
@@ -103,6 +103,10 @@ export function AiLogger({ role }: { role?: string }) {
         setResult(data.parsed);
         toast.success('Data logged successfully');
         setText('');
+        router.refresh();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pfms_data_updated', { detail: data.parsed }));
+        }
       } else {
         toast.error(data.error || 'Failed to parse data');
       }
@@ -139,6 +143,7 @@ export function AiLogger({ role }: { role?: string }) {
               <button 
                 onClick={() => {
                   if (isListening) stopListening();
+                  setResult(null);
                   setIsOpen(false);
                 }}
                 className="p-1 rounded-full hover:bg-slate-200 text-slate-400 transition-colors"
@@ -270,10 +275,11 @@ export function AiLogger({ role }: { role?: string }) {
                       onClick={() => {
                         setResult(null);
                         setIsOpen(false);
+                        router.refresh();
                       }}
-                      className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                      className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-sm"
                     >
-                      Done
+                      Done & View Updates
                     </button>
                   </div>
                 </div>

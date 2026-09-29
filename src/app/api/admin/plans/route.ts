@@ -91,7 +91,9 @@ export async function GET() {
       .single();
 
     if (data?.adminName) {
-      const parsedPlans = JSON.parse(data.adminName);
+      const parsedPlans = typeof data.adminName === 'string'
+        ? JSON.parse(data.adminName)
+        : data.adminName;
       if (Array.isArray(parsedPlans) && parsedPlans.length > 0) {
         return NextResponse.json(parsedPlans);
       }

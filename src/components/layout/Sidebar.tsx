@@ -232,17 +232,17 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
 
   useEffect(() => {
     if (isUpgraded) {
-      const qTier = searchParams.get('tier');
-      if (qTier) {
+      const sessionId = searchParams.get('session_id');
+      if (sessionId) {
         fetch('/api/checkout/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ planTier: qTier, demo: true })
+          body: JSON.stringify({ sessionId })
         }).then(res => res.json()).then(data => {
           if (data.tier) {
             setCurrentTier(data.tier);
           }
-        });
+        }).catch(() => {});
       }
     }
   }, [isUpgraded, searchParams]);
@@ -261,6 +261,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           const data = await res.json();
           if (data.url) {
             window.location.href = data.url;
+          } else {
+            toast.error(data.error || 'Failed to redirect to checkout');
           }
         } catch (e) {
           toast.error('Failed to redirect to checkout');

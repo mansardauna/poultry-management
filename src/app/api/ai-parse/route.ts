@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 import { GoogleGenAI } from '@google/genai';
+import { getWorkspaceId } from '@/lib/workspace';
 import crypto from 'crypto';
 
 /**
@@ -127,12 +128,28 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Fall back to cookie session if no Bearer key
-    if (!workspaceId) {
-      const cookieStore = await cookies();
-      workspaceId = cookieStore.get('pfms_workspace')?.value;
+    // 2. Fall back to active workspace if no Bearer key
+    if (!workspaceId || workspaceId === 'org_superadmin') {
+      try {
+        workspaceId = await getWorkspaceId();
+      } catch {}
     }
     
+    // Ensure workspaceId is mapped to a real existing farm workspace
+    const { data: realWs } = await serviceRoleClient
+      .from('workspaces')
+      .select('id')
+      .eq('id', workspaceId || '')
+      .limit(1)
+      .maybeSingle();
+
+    if (!realWs) {
+      const { data: firstWs } = await serviceRoleClient.from('workspaces').select('id').limit(1).maybeSingle();
+      if (firstWs?.id) {
+        workspaceId = firstWs.id;
+      }
+    }
+
     if (!workspaceId) {
       return NextResponse.json({ error: 'No active workspace found. Provide Authorization: Bearer <API_KEY> or log in.' }, { status: 400 });
     }
@@ -159,11 +176,15 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       if (gatewayData?.adminName) {
-        const parsedGw = JSON.parse(gatewayData.adminName);
-        if (parsedGw.aiProvider) aiProvider = String(parsedGw.aiProvider).toLowerCase().trim();
-        if (parsedGw.aiApiKey) aiApiKey = String(parsedGw.aiApiKey).trim();
-        if (parsedGw.aiModel) aiModel = String(parsedGw.aiModel).trim();
-        if (parsedGw.aiBaseUrl) aiBaseUrl = String(parsedGw.aiBaseUrl).trim();
+        const parsedGw = typeof gatewayData.adminName === 'string'
+          ? JSON.parse(gatewayData.adminName)
+          : gatewayData.adminName;
+        if (parsedGw && typeof parsedGw === 'object') {
+          if (parsedGw.aiProvider) aiProvider = String(parsedGw.aiProvider).toLowerCase().trim();
+          if (parsedGw.aiApiKey) aiApiKey = String(parsedGw.aiApiKey).trim();
+          if (parsedGw.aiModel) aiModel = String(parsedGw.aiModel).trim();
+          if (parsedGw.aiBaseUrl) aiBaseUrl = String(parsedGw.aiBaseUrl).trim();
+        }
       }
     } catch (_e) {}
 
@@ -181,6 +202,12 @@ export async function POST(request: Request) {
       else if (aiProvider === 'perplexity') aiApiKey = process.env.PERPLEXITY_API_KEY || '';
       else if (aiProvider === 'ollama') aiApiKey = 'ollama-local';
       else aiApiKey = process.env.GEMINI_API_KEY || '';
+    }
+
+    if (aiProvider === 'gemini') {
+      if (!aiModel || aiModel === 'gemini-2.0-flash' || aiModel === 'gemini-1.5-flash' || aiModel === 'gemini-2.5-flash') {
+        aiModel = 'gemini-3.5-flash';
+      }
     }
 
     if (aiApiKey) {
@@ -377,11 +404,14 @@ Return a JSON object with this exact structure:
          await serviceRoleClient.from('batches').insert({
             id: batchId,
             workspaceId,
-            name: 'AI Auto-Logged Batch',
+            breed: 'ISA Brown',
             type: 'Layers',
             quantity: 100,
-            startDate: today,
-            status: 'Active'
+            purchaseDate: today,
+            ageInWeeks: 20,
+            mortalityCount: 0,
+            vaccinationStatus: 'Up to Date',
+            farmSection: 'Layer House 1'
          });
       }
 
@@ -426,30 +456,22 @@ Return a JSON object with this exact structure:
       await serviceRoleClient.from('sales').insert(salesInsert);
     }
 
-    // 5. Handle Health / Mortality
+    // 5. Handle Health / Mortality on Batches
     if (parsed.mortalityCount > 0) {
       const { data: batches } = await serviceRoleClient
         .from('batches')
-        .select('id, quantity')
+        .select('*')
         .eq('workspaceId', workspaceId)
         .limit(1);
       
       if (batches?.[0]) {
-        const newQty = Math.max(0, (batches[0].quantity || 100) - parsed.mortalityCount);
-        await serviceRoleClient.from('batches').update({ quantity: newQty }).eq('id', batches[0].id);
+        const curMort = Number(batches[0].mortalityCount) || 0;
+        const curQty = Number(batches[0].quantity) || 100;
+        await serviceRoleClient.from('batches').update({
+          quantity: Math.max(0, curQty - parsed.mortalityCount),
+          mortalityCount: curMort + parsed.mortalityCount
+        }).eq('id', batches[0].id);
       }
-
-      await serviceRoleClient.from('health').insert({
-        id: crypto.randomUUID(),
-        workspaceId,
-        date: today,
-        batchId: batches?.[0]?.id || 'main',
-        mortalityCount: parsed.mortalityCount,
-        symptoms: 'AI Auto-Logged Mortality',
-        diagnosis: 'Routine Log',
-        treatment: 'None',
-        status: 'Resolved'
-      });
     }
 
     // 6. Handle Feed Used
@@ -457,11 +479,10 @@ Return a JSON object with this exact structure:
       await serviceRoleClient.from('feeds').insert({
         id: crypto.randomUUID(),
         workspaceId,
-        date: today,
-        feedType: 'Layer Mash',
+        type: 'Layer Mash',
         quantityKg: parsed.feedUsedKg,
-        cost: 0,
-        recordedBy: 'AI Auto-Logger'
+        supplier: 'AI Auto-Logger',
+        lastRestock: today
       });
     }
 

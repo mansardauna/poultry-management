@@ -132,20 +132,25 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
     if (match) setCurrentTier(match[1]);
 
-    if (isUpgraded && queryTier) {
-      fetch('/api/checkout/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planTier: queryTier, demo: true })
-      }).then(res => res.json()).then(data => {
-        if (data.tier) {
-          setCurrentTier(data.tier);
-          toast.success(`Subscription active! Upgraded to ${data.tier === 'enterprise' || data.tier === 'entrepreneur' ? 'Enterprise & Cooperative' : 'Commercial Pro'}.`, { id: 'settings-upgrade-toast' });
-          router.refresh();
-        }
-      });
+    if (isUpgraded) {
+      const sessionId = searchParams.get('session_id');
+      if (sessionId) {
+        fetch('/api/checkout/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        }).then(res => res.json()).then(data => {
+          if (data.tier) {
+            setCurrentTier(data.tier);
+            toast.success(`Subscription active! Upgraded to ${data.tier === 'enterprise' || data.tier === 'entrepreneur' ? 'Enterprise & Cooperative' : 'Commercial Pro'}.`, { id: 'settings-upgrade-toast' });
+            router.refresh();
+          } else if (data.error) {
+            toast.error(data.error, { id: 'settings-upgrade-error' });
+          }
+        }).catch(() => {});
+      }
     }
-  }, [isUpgraded, queryTier, router]);
+  }, [isUpgraded, searchParams, router]);
   const [feedThresholdKg, setFeedThresholdKg] = useState(String(initialSettings?.feedThresholdKg || 50));
   const [eggDropPercentage, setEggDropPercentage] = useState(String(initialSettings?.eggDropPercentage || 15));
   const [notifySms, setNotifySms] = useState(initialSettings?.notifySms || false);
@@ -380,9 +385,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       const data = await res.json();
       toast.dismiss('chk-toast');
       if (data.url) {
-        document.cookie = `pfms_tier=${planId}; path=/; max-age=31536000`;
-        setCurrentTier(planId);
-        toast.success(`Plan updated to ${planId === 'enterprise' || planId === 'entrepreneur' ? 'Enterprise Plus' : 'Commercial Pro'}!`);
+        toast.loading('Redirecting to secure payment checkout...', { id: 'chk-toast' });
         window.location.href = data.url;
       } else {
         toast.error(data.error || 'Failed to start checkout');

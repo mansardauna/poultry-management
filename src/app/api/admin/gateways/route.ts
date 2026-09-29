@@ -23,8 +23,8 @@ export async function GET() {
     let gateways = {
       paystackPublicKey: '',
       paystackSecretKey: '',
-      stripePublicKey: '',
-      stripeSecretKey: '',
+      stripePublicKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
       stripeWebhookSecret: '',
       resendApiKey: '',
       fromEmail: 'support@pfms-poultry.com',
@@ -32,15 +32,27 @@ export async function GET() {
       currencySymbol: '₦',
       aiProvider: 'gemini',
       aiApiKey: process.env.GEMINI_API_KEY || '',
-      aiModel: 'gemini-2.0-flash',
+      aiModel: 'gemini-3.5-flash',
       aiBaseUrl: '',
     };
 
     if (gatewayData?.adminName) {
       try {
-        const parsed = JSON.parse(gatewayData.adminName);
-        gateways = { ...gateways, ...parsed };
+        const parsed = typeof gatewayData.adminName === 'string'
+          ? JSON.parse(gatewayData.adminName)
+          : gatewayData.adminName;
+        if (parsed && typeof parsed === 'object') {
+          gateways = { ...gateways, ...parsed };
+        }
       } catch (_e) {}
+    }
+
+    // Ensure fallback to env if empty
+    if (!gateways.stripePublicKey) gateways.stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
+    if (!gateways.stripeSecretKey) gateways.stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+    if (!gateways.aiApiKey) gateways.aiApiKey = process.env.GEMINI_API_KEY || '';
+    if (!gateways.aiModel || gateways.aiModel === 'gemini-2.0-flash' || gateways.aiModel === 'gemini-1.5-flash') {
+      gateways.aiModel = 'gemini-3.5-flash';
     }
 
     return NextResponse.json({
@@ -91,7 +103,9 @@ export async function POST(request: Request) {
     let existingConfig = {};
     if (existingData?.adminName) {
       try {
-        existingConfig = JSON.parse(existingData.adminName);
+        existingConfig = typeof existingData.adminName === 'string'
+          ? JSON.parse(existingData.adminName)
+          : existingData.adminName;
       } catch (_e) {}
     }
 

@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
+import { getGatewaysConfig } from '@/lib/gateways';
 
 export async function POST(req: Request) {
+  const gateways = await getGatewaysConfig();
+  const stripeSecretKey = gateways.stripeSecretKey || process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
+  const webhookSecret = gateways.stripeWebhookSecret || process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
+
+  const stripe = new Stripe(stripeSecretKey);
   const body = await req.text();
   const signature = req.headers.get('stripe-signature') as string;
 
@@ -15,10 +17,14 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
-    console.error(`Webhook Error: ${err.message}`);
-    // If webhook secret is a placeholder, we shouldn't fail completely during dev
-    if (webhookSecret === 'whsec_placeholder') {
-      event = JSON.parse(body);
+    console.error(`Webhook signature verification failed: ${err.message}`);
+    // If webhook secret is a placeholder or unconfigured in dev/testing, allow parsed body
+    if (webhookSecret === 'whsec_placeholder' || !webhookSecret) {
+      try {
+        event = JSON.parse(body);
+      } catch {
+        return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+      }
     } else {
       return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
@@ -39,13 +45,13 @@ export async function POST(req: Request) {
         const normTier = (targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') ? 'enterprise' : 'pro';
 
         const subAny = subscription as any;
-        await serviceRoleClient.from('subscriptions').insert({
+        await serviceRoleClient.from('subscriptions').upsert({
           id: subAny.id,
           orgId,
           stripeSubscriptionId: subAny.id,
           status: subAny.status,
           currentPeriodEnd: new Date(subAny.current_period_end * 1000).toISOString(),
-          planId: subAny.items.data[0].price.id
+          planId: subAny.items.data[0]?.price?.id || normTier
         });
 
         await serviceRoleClient.from('organizations').update({
@@ -55,7 +61,7 @@ export async function POST(req: Request) {
 
         const workspaceId = `main-${orgId}`;
         await serviceRoleClient.from('systemSettings').upsert([{
-          id: 'sys-' + Date.now().toString().slice(-6),
+          id: 'sys-' + orgId,
           workspaceId,
           subscriptionTier: normTier,
           plan: normTier,
@@ -84,7 +90,7 @@ export async function POST(req: Request) {
         await serviceRoleClient.from('subscriptions').update({
           status: subAny.status,
           currentPeriodEnd: new Date(subAny.current_period_end * 1000).toISOString(),
-          planId: subAny.items.data[0].price.id
+          planId: subAny.items.data[0]?.price?.id || 'pro'
         }).eq('stripeSubscriptionId', subAny.id);
 
         const newTier = subscription.status === 'active' || subscription.status === 'trialing' ? 'pro' : 'free';
@@ -96,7 +102,7 @@ export async function POST(req: Request) {
 
         const workspaceId = `main-${dbSub.orgId}`;
         await serviceRoleClient.from('systemSettings').upsert([{
-          id: 'sys-' + Date.now().toString().slice(-6),
+          id: 'sys-' + dbSub.orgId,
           workspaceId,
           subscriptionTier: newTier,
           plan: newTier,
@@ -108,7 +114,7 @@ export async function POST(req: Request) {
       break;
     }
     default:
-      console.log(`Unhandled event type ${event.type}`);
+      console.warn(`Unhandled Stripe event type ${event.type}`);
   }
 
   return NextResponse.json({ received: true });

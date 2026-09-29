@@ -3,13 +3,7 @@ import Stripe from 'stripe';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 import { cookies } from 'next/headers';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
-
-// For demonstration, use a fallback price ID if not provided in env.
-// In reality, these should be created in the Stripe Dashboard.
-const PRO_MONTHLY_PRICE_ID = process.env.STRIPE_PRO_MONTHLY_PRICE_ID || 'price_monthly_placeholder';
-const PRO_ANNUAL_PRICE_ID = process.env.STRIPE_PRO_ANNUAL_PRICE_ID || 'price_annual_placeholder';
+import { getGatewaysConfig } from '@/lib/gateways';
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +12,7 @@ export async function POST(request: Request) {
     const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
     const { planId, isAnnual } = await request.json();
-    const targetTier = planId || 'pro';
+    const targetTier = (planId || 'pro').toLowerCase();
 
     let orgId: string | null = null;
     let userEmail = 'admin@example.com';
@@ -66,80 +60,25 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check if valid Stripe key is configured
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
-    const isRealStripe = stripeKey && !stripeKey.includes('placeholder');
+    // Check if valid Stripe key is configured dynamically from SuperAdmin or env
+    const gateways = await getGatewaysConfig();
+    const stripeSecretKey = gateways.stripeSecretKey?.trim();
+    const isRealStripe = !!(stripeSecretKey && !stripeSecretKey.includes('placeholder') && (stripeSecretKey.startsWith('sk_test_') || stripeSecretKey.startsWith('sk_live_')));
+
+    if (!isRealStripe) {
+      return NextResponse.json({
+        error: 'Online payment gateway is not configured yet. Please configure valid Stripe API keys in the SuperAdmin portal or contact support.'
+      }, { status: 503 });
+    }
 
     const host = request.headers.get('host');
     const protocol = host?.includes('localhost') ? 'http' : 'https';
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
 
-    if (!isRealStripe) {
-      // Demo Mode Fallback: Automatically process instant upgrade
-      const durationDays = isAnnual ? 365 : 30;
-      const now = new Date();
-      const endsAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString();
+    // Initialize Stripe client dynamically with configured key
+    const stripe = new Stripe(stripeSecretKey as string);
 
-      await serviceRoleClient
-        .from('organizations')
-        .update({
-          subscriptionTier: targetTier,
-          subscriptionStatus: 'active',
-          subscriptionEndsAt: endsAt,
-        })
-        .eq('id', orgId);
-
-      const workspaceId = `main-${orgId}`;
-      await serviceRoleClient
-        .from('systemSettings')
-        .upsert([{
-          workspaceId,
-          subscriptionTier: targetTier,
-          plan: targetTier,
-          cctvEnabled: true,
-          aiLoggerEnabled: true,
-          exportReportsEnabled: true,
-          enterpriseHubEnabled: targetTier === 'enterprise' || targetTier === 'entrepreneur'
-        }], { onConflict: 'workspaceId' });
-
-      const subId = `sub_${Date.now()}`;
-      const isEnt = targetTier === 'enterprise' || targetTier === 'entrepreneur';
-      const amount = isEnt ? (isAnnual ? 432000 : 45000) : (isAnnual ? 144000 : 15000);
-      const displayTitle = targetTier === 'entrepreneur' ? 'Entrepreneur Plan' : targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro';
-
-      try {
-        await serviceRoleClient.from('subscriptions').upsert([{
-          id: subId,
-          orgId,
-          stripeSubscriptionId: subId,
-          status: 'active',
-          currentPeriodEnd: endsAt,
-          planId: targetTier
-        }]);
-
-        await serviceRoleClient.from('subscription_history').insert([{
-          id: subId,
-          workspaceId,
-          planName: `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`,
-          amount,
-          status: 'Paid',
-          receiptUrl: `https://pay.stripe.com/receipts/invoices/${subId}`,
-          createdAt: now.toISOString()
-        }]);
-      } catch (e) {
-        console.error('Failed to record subscription entry:', e);
-      }
-
-      const response = NextResponse.json({ 
-        url: `${siteUrl}/dashboard?upgraded=true&tier=${targetTier}&duration=${durationDays}`,
-        demo: true 
-      });
-
-      response.cookies.set('pfms_tier', targetTier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
-      return response;
-    }
-
-    // Real Stripe Mode
+    // Retrieve or create Stripe customer
     const { data: org } = await serviceRoleClient
       .from('organizations')
       .select('*')
@@ -194,7 +133,7 @@ export async function POST(request: Request) {
 
     const stripePriceId = isAnnual ? targetPlan?.stripeAnnualPlanId?.trim() : targetPlan?.stripeMonthlyPlanId?.trim();
 
-    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = stripePriceId
+    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = (stripePriceId && !stripePriceId.includes('placeholder'))
       ? { price: stripePriceId, quantity: 1 }
       : {
           price_data: {
@@ -217,7 +156,11 @@ export async function POST(request: Request) {
       mode: 'subscription',
       success_url: `${siteUrl}/dashboard?upgraded=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/pricing`,
-      metadata: { orgId, isAnnual: isAnnual ? 'true' : 'false' },
+      metadata: { 
+        orgId, 
+        planId: targetTier,
+        isAnnual: isAnnual ? 'true' : 'false' 
+      },
     });
 
     return NextResponse.json({ url: session.url });

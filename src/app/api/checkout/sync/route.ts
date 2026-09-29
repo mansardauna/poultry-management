@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 import { cookies } from 'next/headers';
+import { getGatewaysConfig } from '@/lib/gateways';
 
 export async function POST(request: Request) {
   try {
@@ -10,15 +12,54 @@ export async function POST(request: Request) {
     const cookieOrgId = cookieStore.get('pfms_org_id')?.value;
 
     const body = await request.json().catch(() => ({}));
-    const { isAnnual = false } = body;
-    let targetTier = (body.planTier || 'pro').toLowerCase();
+    const sessionId = body.sessionId || body.session_id;
+
+    if (!sessionId || typeof sessionId !== 'string') {
+      return NextResponse.json({
+        error: 'A verified Stripe session ID is required to upgrade your account.'
+      }, { status: 400 });
+    }
+
+    // Retrieve configured Stripe gateway key dynamically
+    const gateways = await getGatewaysConfig();
+    const stripeSecretKey = gateways.stripeSecretKey?.trim();
+
+    if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
+      return NextResponse.json({
+        error: 'Payment gateway is not properly configured on this server.'
+      }, { status: 503 });
+    }
+
+    const stripe = new Stripe(stripeSecretKey);
+
+    // Retrieve and verify the checkout session from Stripe
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await stripe.checkout.sessions.retrieve(sessionId);
+    } catch (err: any) {
+      console.error('Stripe session retrieval error:', err);
+      return NextResponse.json({
+        error: 'Invalid or expired payment session ID.'
+      }, { status: 400 });
+    }
+
+    const isPaid = session.payment_status === 'paid' || session.status === 'complete';
+    if (!isPaid) {
+      return NextResponse.json({
+        error: 'Payment has not been completed. Upgrade declined.'
+      }, { status: 400 });
+    }
+
+    // Extract metadata from verified session
+    const metaOrgId = session.metadata?.orgId;
+    let targetTier = (session.metadata?.planId || 'pro').toLowerCase();
     if (targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') {
       targetTier = 'enterprise';
     }
+    const isAnnual = session.metadata?.isAnnual === 'true';
 
-    let orgId = cookieOrgId || '';
+    let orgId = metaOrgId || cookieOrgId || '';
 
-    // Look up or create organization for authenticated user strictly
     if (user?.id) {
       if (!orgId) {
         const { data: memberData } = await serviceRoleClient
@@ -39,28 +80,10 @@ export async function POST(request: Request) {
           .maybeSingle();
         orgId = userOrg?.id || '';
       }
-
-      if (!orgId) {
-        orgId = `org_${user.id.replace(/-/g, '').slice(0, 10)}`;
-        try {
-          await serviceRoleClient.from('organizations').upsert([{
-            id: orgId,
-            name: `${(user.email || 'User').split('@')[0]}'s Farm`,
-            ownerId: user.id,
-            subscriptionTier: targetTier,
-            subscriptionStatus: 'active'
-          }]);
-          await serviceRoleClient.from('organization_members').upsert([{
-            orgId,
-            userId: user.id,
-            role: 'Admin'
-          }]);
-        } catch (_e) {}
-      }
     }
 
     if (!orgId) {
-      orgId = 'org_owner_main';
+      orgId = 'org-main';
     }
 
     // Calculate subscription duration
@@ -68,7 +91,7 @@ export async function POST(request: Request) {
     const durationDays = isAnnual ? 365 : 30;
     const endsAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString();
 
-    // 1. Permanently Save Subscription to Database Organization Record
+    // 1. Permanently update Organization subscription in database
     await serviceRoleClient
       .from('organizations')
       .upsert([{
@@ -94,8 +117,8 @@ export async function POST(request: Request) {
         enterpriseHubEnabled: targetTier === 'enterprise'
       }]);
 
-    // 3. Record Subscription History Entry in subscription_history table
-    const subId = `sub_${Date.now()}`;
+    // 3. Record subscription & transaction history
+    const stripeSubId = (typeof session.subscription === 'string' ? session.subscription : null) || session.id;
     const isEnt = targetTier === 'enterprise';
     const amount = isEnt ? (isAnnual ? 432000 : 45000) : (isAnnual ? 144000 : 15000);
     const displayTitle = isEnt ? 'Enterprise & Cooperative' : 'Commercial Pro';
@@ -103,21 +126,21 @@ export async function POST(request: Request) {
 
     try {
       await serviceRoleClient.from('subscriptions').upsert([{
-        id: subId,
+        id: stripeSubId,
         orgId,
-        stripeSubscriptionId: subId,
+        stripeSubscriptionId: stripeSubId,
         status: 'active',
         currentPeriodEnd: endsAt,
         planId: targetTier
       }]);
 
       await serviceRoleClient.from('subscription_history').insert([{
-        id: subId,
+        id: stripeSubId,
         workspaceId,
         planName,
         amount,
         status: 'Paid',
-        receiptUrl: `https://pay.stripe.com/receipts/invoices/${subId}`,
+        receiptUrl: `https://pay.stripe.com/receipts/invoices/${stripeSubId}`,
         createdAt: now.toISOString()
       }]);
     } catch (e) {
@@ -130,7 +153,7 @@ export async function POST(request: Request) {
       tier: targetTier,
       endsAt,
       durationDays,
-      message: `Successfully upgraded to ${displayTitle}!`,
+      message: `Payment verified! Successfully upgraded to ${displayTitle}.`,
     });
 
     response.cookies.set('pfms_tier', targetTier, {
@@ -145,6 +168,6 @@ export async function POST(request: Request) {
     return response;
   } catch (err: any) {
     console.error('Checkout Sync Error:', err);
-    return NextResponse.json({ error: err?.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: err?.message || 'Internal server error verifying payment' }, { status: 500 });
   }
 }
