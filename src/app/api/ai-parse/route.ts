@@ -149,6 +149,7 @@ export async function POST(request: Request) {
     let aiProvider = 'gemini';
     let aiApiKey = '';
     let aiModel = '';
+    let aiBaseUrl = '';
 
     try {
       const { data: gatewayData } = await serviceRoleClient
@@ -162,6 +163,7 @@ export async function POST(request: Request) {
         if (parsedGw.aiProvider) aiProvider = String(parsedGw.aiProvider).toLowerCase().trim();
         if (parsedGw.aiApiKey) aiApiKey = String(parsedGw.aiApiKey).trim();
         if (parsedGw.aiModel) aiModel = String(parsedGw.aiModel).trim();
+        if (parsedGw.aiBaseUrl) aiBaseUrl = String(parsedGw.aiBaseUrl).trim();
       }
     } catch (_e) {}
 
@@ -172,6 +174,12 @@ export async function POST(request: Request) {
       else if (aiProvider === 'groq') aiApiKey = process.env.GROQ_API_KEY || '';
       else if (aiProvider === 'deepseek') aiApiKey = process.env.DEEPSEEK_API_KEY || '';
       else if (aiProvider === 'anthropic') aiApiKey = process.env.ANTHROPIC_API_KEY || '';
+      else if (aiProvider === 'openrouter') aiApiKey = process.env.OPENROUTER_API_KEY || '';
+      else if (aiProvider === 'mistral') aiApiKey = process.env.MISTRAL_API_KEY || '';
+      else if (aiProvider === 'xai') aiApiKey = process.env.XAI_API_KEY || '';
+      else if (aiProvider === 'cohere') aiApiKey = process.env.COHERE_API_KEY || '';
+      else if (aiProvider === 'perplexity') aiApiKey = process.env.PERPLEXITY_API_KEY || '';
+      else if (aiProvider === 'ollama') aiApiKey = 'ollama-local';
       else aiApiKey = process.env.GEMINI_API_KEY || '';
     }
 
@@ -193,6 +201,46 @@ Return a JSON object with this exact structure:
   "mortalityCount": number
 }`;
 
+        // OpenAI-compatible providers registry
+        const openAiCompatibleEndpoints: Record<string, { url: string; defaultModel: string; extraHeaders?: Record<string, string> }> = {
+          openai: {
+            url: 'https://api.openai.com/v1/chat/completions',
+            defaultModel: 'gpt-4o-mini',
+          },
+          groq: {
+            url: 'https://api.groq.com/openai/v1/chat/completions',
+            defaultModel: 'llama-3.3-70b-versatile',
+          },
+          deepseek: {
+            url: 'https://api.deepseek.com/chat/completions',
+            defaultModel: 'deepseek-chat',
+          },
+          openrouter: {
+            url: 'https://openrouter.ai/api/v1/chat/completions',
+            defaultModel: 'google/gemini-2.0-flash-001',
+            extraHeaders: {
+              'HTTP-Referer': 'https://pfms-poultry.com',
+              'X-Title': 'PFMS Multi-Tenant AI Gateway',
+            }
+          },
+          mistral: {
+            url: 'https://api.mistral.ai/v1/chat/completions',
+            defaultModel: 'mistral-small-latest',
+          },
+          xai: {
+            url: 'https://api.x.ai/v1/chat/completions',
+            defaultModel: 'grok-beta',
+          },
+          perplexity: {
+            url: 'https://api.perplexity.ai/chat/completions',
+            defaultModel: 'sonar',
+          },
+          ollama: {
+            url: `${(aiBaseUrl || 'http://localhost:11434').replace(/\/+$/, '')}/v1/chat/completions`,
+            defaultModel: 'llama3.2',
+          },
+        };
+
         if (aiProvider === 'gemini') {
           const ai = new GoogleGenAI({ apiKey: aiApiKey });
           const response = await ai.models.generateContent({
@@ -207,71 +255,32 @@ Return a JSON object with this exact structure:
           if (response.text) {
             parsed = JSON.parse(response.text);
           }
-        } else if (aiProvider === 'openai') {
-          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        } else if (openAiCompatibleEndpoints[aiProvider]) {
+          const target = openAiCompatibleEndpoints[aiProvider];
+          const res = await fetch(target.url, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${aiApiKey}`
+              'Authorization': `Bearer ${aiApiKey}`,
+              ...(target.extraHeaders || {}),
             },
             body: JSON.stringify({
-              model: aiModel || 'gpt-4o-mini',
+              model: aiModel || target.defaultModel,
               messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: text }
               ],
-              response_format: { type: 'json_object' }
+              ...(aiProvider !== 'perplexity' ? { response_format: { type: 'json_object' } } : {})
             })
           });
 
           if (res.ok) {
             const data = await res.json();
             const content = data?.choices?.[0]?.message?.content;
-            if (content) parsed = JSON.parse(content);
-          }
-        } else if (aiProvider === 'groq') {
-          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${aiApiKey}`
-            },
-            body: JSON.stringify({
-              model: aiModel || 'llama-3.3-70b-versatile',
-              messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: text }
-              ],
-              response_format: { type: 'json_object' }
-            })
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            const content = data?.choices?.[0]?.message?.content;
-            if (content) parsed = JSON.parse(content);
-          }
-        } else if (aiProvider === 'deepseek') {
-          const res = await fetch('https://api.deepseek.com/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${aiApiKey}`
-            },
-            body: JSON.stringify({
-              model: aiModel || 'deepseek-chat',
-              messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: text }
-              ],
-              response_format: { type: 'json_object' }
-            })
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            const content = data?.choices?.[0]?.message?.content;
-            if (content) parsed = JSON.parse(content);
+            if (content) {
+              const clean = content.replace(/```json/gi, '').replace(/```/g, '').trim();
+              parsed = JSON.parse(clean);
+            }
           }
         } else if (aiProvider === 'anthropic') {
           const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -296,6 +305,31 @@ Return a JSON object with this exact structure:
             const rawText = data?.content?.[0]?.text;
             if (rawText) {
               const clean = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+              parsed = JSON.parse(clean);
+            }
+          }
+        } else if (aiProvider === 'cohere') {
+          const res = await fetch('https://api.cohere.com/v2/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${aiApiKey}`
+            },
+            body: JSON.stringify({
+              model: aiModel || 'command-r-plus',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: text }
+              ],
+              response_format: { type: 'json_object' }
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const textMsg = data?.message?.content?.[0]?.text;
+            if (textMsg) {
+              const clean = textMsg.replace(/```json/gi, '').replace(/```/g, '').trim();
               parsed = JSON.parse(clean);
             }
           }

@@ -41,9 +41,18 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useLanguage } from '@/components/features/LanguageContext';
 
-export const AI_PRESETS: Record<string, { name: string; defaultModel: string; models: string[]; keyPlaceholder: string; consoleUrl: string }> = {
+export const AI_PRESETS: Record<string, { 
+  name: string; 
+  badge: string;
+  defaultModel: string; 
+  models: string[]; 
+  keyPlaceholder: string; 
+  consoleUrl: string;
+  defaultBaseUrl?: string;
+}> = {
   gemini: {
     name: 'Google Gemini',
+    badge: 'Recommended',
     defaultModel: 'gemini-2.0-flash',
     models: ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'],
     keyPlaceholder: 'AIzaSy...',
@@ -51,20 +60,23 @@ export const AI_PRESETS: Record<string, { name: string; defaultModel: string; mo
   },
   openai: {
     name: 'OpenAI (ChatGPT)',
+    badge: 'Industry Standard',
     defaultModel: 'gpt-4o-mini',
-    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
+    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'o1-mini'],
     keyPlaceholder: 'sk-proj-...',
     consoleUrl: 'https://platform.openai.com/api-keys',
   },
   groq: {
     name: 'Groq Cloud (Llama 3.3)',
+    badge: 'Ultra Fast',
     defaultModel: 'llama-3.3-70b-versatile',
-    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
+    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
     keyPlaceholder: 'gsk_...',
     consoleUrl: 'https://console.groq.com/keys',
   },
   deepseek: {
     name: 'DeepSeek AI',
+    badge: 'High Value',
     defaultModel: 'deepseek-chat',
     models: ['deepseek-chat', 'deepseek-reasoner'],
     keyPlaceholder: 'sk-...',
@@ -72,10 +84,60 @@ export const AI_PRESETS: Record<string, { name: string; defaultModel: string; mo
   },
   anthropic: {
     name: 'Anthropic Claude',
+    badge: 'High Precision',
     defaultModel: 'claude-3-5-sonnet-20241022',
-    models: ['claude-3-5-sonnet-20241022', 'claude-3-haiku-20240307'],
+    models: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
     keyPlaceholder: 'sk-ant-api03-...',
     consoleUrl: 'https://console.anthropic.com/settings/keys',
+  },
+  openrouter: {
+    name: 'OpenRouter (200+ Unified Models)',
+    badge: 'All-in-One Hub',
+    defaultModel: 'google/gemini-2.0-flash-001',
+    models: ['google/gemini-2.0-flash-001', 'meta-llama/llama-3.3-70b-instruct', 'anthropic/claude-3.5-sonnet', 'deepseek/deepseek-chat', 'mistralai/mistral-large-2411'],
+    keyPlaceholder: 'sk-or-v1-...',
+    consoleUrl: 'https://openrouter.ai/keys',
+  },
+  mistral: {
+    name: 'Mistral AI',
+    badge: 'Open Weights Leader',
+    defaultModel: 'mistral-small-latest',
+    models: ['mistral-small-latest', 'mistral-large-latest', 'codestral-latest', 'pixtral-large-latest'],
+    keyPlaceholder: '...',
+    consoleUrl: 'https://console.mistral.ai/api-keys/',
+  },
+  xai: {
+    name: 'xAI (Grok)',
+    badge: 'Frontier AI',
+    defaultModel: 'grok-beta',
+    models: ['grok-beta', 'grok-2-latest', 'grok-vision-beta'],
+    keyPlaceholder: 'xai-...',
+    consoleUrl: 'https://console.x.ai/',
+  },
+  cohere: {
+    name: 'Cohere',
+    badge: 'Enterprise NLP',
+    defaultModel: 'command-r-plus',
+    models: ['command-r-plus', 'command-r', 'command-light'],
+    keyPlaceholder: '...',
+    consoleUrl: 'https://dashboard.cohere.com/api-keys',
+  },
+  perplexity: {
+    name: 'Perplexity AI',
+    badge: 'Web Grounded',
+    defaultModel: 'sonar',
+    models: ['sonar', 'sonar-pro', 'sonar-reasoning'],
+    keyPlaceholder: 'pplx-...',
+    consoleUrl: 'https://www.perplexity.ai/settings/api',
+  },
+  ollama: {
+    name: 'Ollama (Local / Self-Hosted)',
+    badge: '100% Offline / Private',
+    defaultModel: 'llama3.2',
+    models: ['llama3.2', 'deepseek-r1', 'mistral', 'qwen2.5', 'llama3.1'],
+    keyPlaceholder: 'Optional (e.g. ollama-local)',
+    consoleUrl: 'https://ollama.com/',
+    defaultBaseUrl: 'http://localhost:11434',
   },
 };
 
@@ -203,9 +265,10 @@ export function AdminCmsClient({
   const [showResendKey, setShowResendKey] = useState(false);
 
   // Artificial Intelligence (AI) Gateway
-  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai' | 'groq' | 'deepseek' | 'anthropic'>('gemini');
+  const [aiProvider, setAiProvider] = useState<string>('gemini');
   const [aiApiKey, setAiApiKey] = useState('');
   const [aiModel, setAiModel] = useState('');
+  const [aiBaseUrl, setAiBaseUrl] = useState('');
   const [showAiSecret, setShowAiSecret] = useState(false);
 
   // System Versioning & Upgrade State
@@ -280,6 +343,7 @@ export function AdminCmsClient({
           if (g.aiProvider) setAiProvider(g.aiProvider);
           if (g.aiApiKey) setAiApiKey(g.aiApiKey);
           if (g.aiModel) setAiModel(g.aiModel);
+          if (g.aiBaseUrl) setAiBaseUrl(g.aiBaseUrl);
         }
       }
     } catch (_e) {}
@@ -331,6 +395,7 @@ export function AdminCmsClient({
           aiProvider,
           aiApiKey,
           aiModel,
+          aiBaseUrl,
         })
       });
 
@@ -1008,7 +1073,7 @@ export function AdminCmsClient({
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1.5 whitespace-nowrap">
                   <Cpu size={12} />
-                  Active: {AI_PRESETS[aiProvider]?.name || 'Google Gemini'}
+                  Active: {AI_PRESETS[aiProvider]?.name || 'Google Gemini'} {AI_PRESETS[aiProvider]?.badge && `(${AI_PRESETS[aiProvider].badge})`}
                 </span>
                 <button
                   type="button"
@@ -1033,15 +1098,24 @@ export function AdminCmsClient({
                     setAiProvider(newProvider);
                     if (AI_PRESETS[newProvider]) {
                       setAiModel(AI_PRESETS[newProvider].defaultModel);
+                      if (AI_PRESETS[newProvider].defaultBaseUrl) {
+                        setAiBaseUrl(AI_PRESETS[newProvider].defaultBaseUrl!);
+                      }
                     }
                   }}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 bg-slate-50 focus:bg-white"
                 >
-                  <option value="gemini">Google Gemini (Recommended / High Speed)</option>
-                  <option value="openai">OpenAI (ChatGPT / GPT-4o)</option>
-                  <option value="groq">Groq Cloud (Llama 3.3 / Ultra-Fast)</option>
-                  <option value="deepseek">DeepSeek AI (DeepSeek-V3)</option>
-                  <option value="anthropic">Anthropic Claude (Claude 3.5)</option>
+                  <option value="gemini">Google Gemini (Recommended / Ultra-Fast)</option>
+                  <option value="openai">OpenAI (ChatGPT / GPT-4o / GPT-4o-mini)</option>
+                  <option value="groq">Groq Cloud (Llama 3.3 / Instant Inference)</option>
+                  <option value="deepseek">DeepSeek AI (DeepSeek-V3 / Economical)</option>
+                  <option value="anthropic">Anthropic Claude (Claude 3.5 Sonnet)</option>
+                  <option value="openrouter">OpenRouter (200+ Unified Models Hub)</option>
+                  <option value="mistral">Mistral AI (Mistral Small / Large)</option>
+                  <option value="xai">xAI Grok (Grok-Beta / Grok-2)</option>
+                  <option value="cohere">Cohere (Command R+)</option>
+                  <option value="perplexity">Perplexity AI (Sonar / Web Grounded)</option>
+                  <option value="ollama">Ollama (Local / Self-Hosted Offline)</option>
                 </select>
               </div>
 
@@ -1091,6 +1165,26 @@ export function AdminCmsClient({
                 />
               </div>
             </div>
+
+            {/* Optional Custom Base URL for Local Ollama or Private Proxy */}
+            {aiProvider === 'ollama' && (
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                  <span>Local / Self-Hosted Server Endpoint</span>
+                  <span className="text-[10px] text-slate-400">Default: http://localhost:11434</span>
+                </label>
+                <input
+                  type="text"
+                  value={aiBaseUrl}
+                  onChange={(e) => setAiBaseUrl(e.target.value)}
+                  placeholder="http://localhost:11434"
+                  className="w-full border border-slate-300 rounded-lg p-2 text-xs font-mono text-slate-800 bg-white outline-none"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Connects to your local Ollama daemon or vLLM / LiteLLM server over LAN or localhost.
+                </p>
+              </div>
+            )}
 
             <div className="p-3 bg-gradient-to-r from-purple-50/70 via-indigo-50/50 to-blue-50/70 border border-purple-100 rounded-xl flex items-start gap-2.5 text-[11px] text-slate-600">
               <Sparkles size={16} className="text-purple-600 shrink-0 mt-0.5" />
