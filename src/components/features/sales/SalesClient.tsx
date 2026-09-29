@@ -8,22 +8,35 @@ import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, Coins, FileText, MessageSquare, Printer, Trash2, X, Link as LinkIcon, Copy, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { 
+  Plus, 
+  Coins, 
+  FileText, 
+  MessageSquare, 
+  Printer, 
+  Trash2, 
+  X, 
+  Link as LinkIcon, 
+  Copy, 
+  CheckCircle2, 
+  ShieldCheck,
+  Building2,
+  Calendar,
+  CreditCard,
+  Clock,
+  Sparkles,
+  Phone,
+  Mail,
+  Receipt
+} from 'lucide-react';
 import { TEXTS } from "@/lib/constants/texts";
 import { Sale, Invoice, ChickenBatch } from "@/data/types";
 import { downloadCSV, printBrandedReport, printInvoiceReceipt } from '@/lib/exportReports';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
-  Select, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  Button as MuiButton 
-} from '@mui/material';
+import { Modal } from '@/components/ui/Modal';
+import { Input, Select } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { useWorkspace } from '@/components/features/WorkspaceContext';
+import { useWhiteLabel } from '@/components/features/WhiteLabelContext';
 
 interface SalesClientProps {
   initialSales: Sale[];
@@ -33,6 +46,14 @@ interface SalesClientProps {
 }
 
 export function SalesClient({ initialSales, initialInvoices, batches, role = 'Staff' }: SalesClientProps) {
+  const { activeWorkspace } = useWorkspace();
+  const whiteLabel = useWhiteLabel();
+  const farmName = activeWorkspace?.name || whiteLabel?.coopName || 'Poultry Farm Enterprise';
+  const farmType = activeWorkspace?.type || 'Layer & Broiler Operations';
+  const farmEmail = 'billing@poultryfarm.com';
+  const farmPhone = '+234 800 000 0000';
+  const currencySymbol = '₦';
+
   const canEdit = role === 'Admin';
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
@@ -206,7 +227,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
   const handlePrint = () => {
     if (selectedInvoice) {
-      printInvoiceReceipt(selectedInvoice, 'Poultry Farm Enterprise');
+      printInvoiceReceipt(selectedInvoice, farmName);
     } else {
       window.print();
     }
@@ -564,428 +585,392 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         </Card>
       )}
 
-      {/* 1. Record New Sale Modal */}
-      <Dialog 
-        open={open} 
-        onClose={handleClose} 
-        fullWidth 
-        maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}
+      {/* 1. Record New Farm Sale Modal */}
+      <Modal
+        isOpen={open}
+        onClose={handleClose}
+        title="Record New Farm Sale"
+        subtitle={`Log an immediate commercial sales transaction for ${farmName}`}
+        size="lg"
       >
-        <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-lg shadow-lg shadow-indigo-600/30">
-              <Plus size={22} />
-            </div>
-            <div>
-              <h3 className="font-extrabold text-base sm:text-lg tracking-tight">Record New Farm Sale</h3>
-              <p className="text-xs text-indigo-200">Log immediate farm sales transaction to record revenue</p>
-            </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!customerName.trim() || !quantity || !totalAmount) {
+              toast.error('Please enter customer name, quantity, and total amount');
+              return;
+            }
+            handleAddSale();
+          }}
+          className="space-y-4 font-sans"
+        >
+          <Input
+            label="Customer Name / Business *"
+            placeholder="e.g. John Doe / City Hotel"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label="Product Type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="Eggs">Eggs (Cracked / Fresh)</option>
+              <option value="Chickens">Chickens (Spent Layers / Broilers)</option>
+              <option value="Manure">Organic Manure / Fertilizer</option>
+              <option value="Feeds">Feed Inventory Resale</option>
+            </Select>
+
+            <Select
+              label="Flock Batch"
+              value={selectedBatchId}
+              onChange={(e) => setSelectedBatchId(e.target.value)}
+            >
+              {activeBatches.map(b => (
+                <option key={b.id} value={b.id}>
+                  {b.breed} ({b.id} - {b.quantity} birds)
+                </option>
+              ))}
+            </Select>
           </div>
-          <button onClick={handleClose} className="text-slate-400 hover:text-white cursor-pointer">
-            <X size={20} />
-          </button>
-        </div>
 
-        <DialogContent className="p-5 sm:p-6 space-y-6 bg-slate-50">
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            <div>
-              <TextField 
-                label="Customer Name / Business *" 
-                placeholder="e.g. John Doe / City Hotel" 
-                fullWidth 
-                size="small"
-                variant="outlined"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
-                sx={{ mb: 1 }}
-              />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Quantity Sold *"
+              type="number"
+              min="1"
+              placeholder="e.g. 50"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              required
+            />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-5">
-              <FormControl fullWidth size="small" variant="outlined">
-                <InputLabel shrink>Product Type</InputLabel>
-                <Select value={type} label="Product Type" onChange={(e) => setType(e.target.value)}>
-                  <MenuItem value="Eggs">Eggs (Cracked / Fresh)</MenuItem>
-                  <MenuItem value="Chickens">Chickens (Spent Layers / Broilers)</MenuItem>
-                  <MenuItem value="Manure">Organic Manure / Fertilizer</MenuItem>
-                  <MenuItem value="Feeds">Feed Inventory Resale</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth size="small" variant="outlined">
-                <InputLabel shrink>Flock Batch</InputLabel>
-                <Select value={selectedBatchId} label="Flock Batch" onChange={(e) => setSelectedBatchId(e.target.value)}>
-                  {activeBatches.map(b => (
-                    <MenuItem key={b.id} value={b.id}>{b.breed} ({b.id} - {b.quantity} birds)</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-5">
-              <TextField 
-                label="Quantity Sold *" 
-                type="number"
-                placeholder="e.g. 50" 
-                size="small"
-                variant="outlined"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-
-              <TextField 
-                label="Total Amount Received (₦) *" 
-                type="number"
-                placeholder="e.g. 225000" 
-                size="small"
-                variant="outlined"
-                value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-5">
-              <FormControl fullWidth size="small" variant="outlined">
-                <InputLabel shrink>Payment Method</InputLabel>
-                <Select value={paymentMethod} label="Payment Method" onChange={(e) => setPaymentMethod(e.target.value)}>
-                  <MenuItem value="Bank transfer">Bank Transfer</MenuItem>
-                  <MenuItem value="Cash">Cash</MenuItem>
-                  <MenuItem value="POS">POS Terminal</MenuItem>
-                  <MenuItem value="Paystack">Paystack Online</MenuItem>
-                </Select>
-              </FormControl>
-
-              <TextField 
-                label="Sale Date" 
-                type="date"
-                size="small"
-                variant="outlined"
-                value={saleDate}
-                onChange={(e) => setSaleDate(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-            </div>
+            <Input
+              label={`Total Amount Received (${currencySymbol}) *`}
+              type="number"
+              min="0"
+              step="any"
+              placeholder="e.g. 225000"
+              value={totalAmount}
+              onChange={(e) => setTotalAmount(e.target.value)}
+              required
+            />
           </div>
-        </DialogContent>
 
-        <DialogActions className="p-4 bg-white border-t border-slate-200 flex justify-end gap-2">
-          <MuiButton onClick={handleClose} variant="text" sx={{ textTransform: 'none', color: '#64748b' }}>
-            Cancel
-          </MuiButton>
-          <MuiButton 
-            onClick={() => {
-              if (!customerName || !quantity || !totalAmount) {
-                toast.error('Please enter customer name, quantity, and total amount');
-                return;
-              }
-              handleAddSale();
-            }} 
-            variant="contained" 
-            sx={{ 
-              bgcolor: '#0f172a', 
-              '&:hover': { bgcolor: '#1e293b' }, 
-              textTransform: 'none', 
-              fontWeight: 700, 
-              px: 3, 
-              py: 1, 
-              borderRadius: 2.5 
-            }}
-          >
-            Save New Sale
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label="Payment Method"
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <option value="Bank transfer">Bank Transfer</option>
+              <option value="Cash">Cash</option>
+              <option value="POS">POS Terminal</option>
+              <option value="Paystack">Paystack Online</option>
+            </Select>
+
+            <Input
+              label="Sale Date"
+              type="date"
+              value={saleDate}
+              onChange={(e) => setSaleDate(e.target.value)}
+            />
+          </div>
+
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <Button variant="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Save New Sale
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* 2. World-Class Executive Invoice Generator Modal */}
-      <Dialog 
-        open={openInvoiceModal} 
-        onClose={() => setOpenInvoiceModal(false)} 
-        fullWidth 
-        maxWidth="md"
-        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}
+      <Modal
+        isOpen={openInvoiceModal}
+        onClose={() => setOpenInvoiceModal(false)}
+        title="Generate Commercial Invoice"
+        subtitle={`Issue an authentic merchant invoice on behalf of ${farmName}`}
+        size="xl"
       >
-        <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-lg shadow-lg shadow-indigo-600/30">
-              <FileText size={22} />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateInvoice();
+          }}
+          className="space-y-5 font-sans"
+        >
+          {/* Section 1: Customer Details */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center">1</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Customer & Billing Details</h4>
             </div>
-            <div>
-              <h3 className="font-extrabold text-base sm:text-lg tracking-tight">World-Class Invoice Generator</h3>
-              <p className="text-xs text-indigo-200">Create merchant customer invoices with instant online payment links</p>
-            </div>
-          </div>
-          <button onClick={() => setOpenInvoiceModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
-            <X size={20} />
-          </button>
-        </div>
-
-        <DialogContent className="p-5 sm:p-6 space-y-6 bg-slate-50">
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">1. Customer & Billing Details</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-5">
-              <TextField 
-                label="Customer / Business Name *" 
-                placeholder="e.g. Maitama Supermarket Ltd" 
-                fullWidth 
-                size="small"
-                variant="outlined"
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Input
+                label="Customer / Business Name *"
+                placeholder="e.g. Maitama Supermarket Ltd"
                 value={invCustomerName}
                 onChange={(e) => setInvCustomerName(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
+                required
               />
-              <TextField 
-                label="Customer Phone / WhatsApp" 
-                placeholder="e.g. +234 803 123 4567" 
-                fullWidth 
-                size="small"
-                variant="outlined"
+              <Input
+                label="Customer Phone / WhatsApp"
+                placeholder="e.g. +234 803 123 4567"
                 value={invPhone}
                 onChange={(e) => setInvPhone(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
               />
-              <TextField 
-                label="Customer Email" 
-                placeholder="e.g. billing@maitama.com" 
-                fullWidth 
-                size="small"
-                variant="outlined"
+              <Input
+                label="Customer Email"
+                type="email"
+                placeholder="e.g. billing@maitama.com"
                 value={invEmail}
                 onChange={(e) => setInvEmail(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
               />
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">2. Line Items & Pricing</h4>
-            <div className="space-y-6">
-              <div>
-                <TextField 
-                  label="Invoice Items / Description *" 
-                  placeholder="e.g. 50 Crates of Large Eggs + Packaging" 
-                  fullWidth 
-                  size="small"
-                  variant="outlined"
-                  value={invItems}
-                  onChange={(e) => setInvItems(e.target.value)}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  sx={{ mb: 1 }}
-                />
-              </div>
+          {/* Section 2: Items & Pricing */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center">2</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Line Items & Pricing</h4>
+            </div>
+            
+            <Input
+              label="Invoice Items / Description *"
+              placeholder="e.g. 50 Crates of Large Eggs + Packaging"
+              value={invItems}
+              onChange={(e) => setInvItems(e.target.value)}
+              required
+            />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-5">
-                <TextField 
-                  label="Quantity *" 
-                  type="number"
-                  placeholder="50" 
-                  size="small"
-                  variant="outlined"
-                  value={invQuantity}
-                  onChange={(e) => setInvQuantity(e.target.value)}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-
-                <TextField 
-                  label="Unit Price (₦) *" 
-                  type="number"
-                  placeholder="4400" 
-                  size="small"
-                  variant="outlined"
-                  value={invUnitPrice}
-                  onChange={(e) => setInvUnitPrice(e.target.value)}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-
-                <TextField 
-                  label="Payment Due Date" 
-                  type="date"
-                  size="small"
-                  variant="outlined"
-                  value={invDueDate}
-                  onChange={(e) => setInvDueDate(e.target.value)}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Input
+                label="Quantity *"
+                type="number"
+                min="1"
+                placeholder="50"
+                value={invQuantity}
+                onChange={(e) => setInvQuantity(e.target.value)}
+                required
+              />
+              <Input
+                label={`Unit Price (${currencySymbol}) *`}
+                type="number"
+                min="0"
+                step="any"
+                placeholder="4400"
+                value={invUnitPrice}
+                onChange={(e) => setInvUnitPrice(e.target.value)}
+                required
+              />
+              <Input
+                label="Payment Due Date"
+                type="date"
+                value={invDueDate}
+                onChange={(e) => setInvDueDate(e.target.value)}
+              />
             </div>
 
-            <div className="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 flex items-center justify-between">
+            <div className="p-4 bg-indigo-50/80 rounded-xl border border-indigo-100 flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 block">Total Invoice Amount</span>
-                <span className="text-[11px] text-slate-500">Calculated based on quantity × unit price</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-900 block">Total Invoice Valuation</span>
+                <span className="text-[11px] text-slate-500">Calculated as Quantity × Unit Price</span>
               </div>
-              <div className="text-xl sm:text-2xl font-black font-mono text-indigo-650">
-                ₦{(Number(invQuantity || 1) * Number(invUnitPrice || 0)).toLocaleString()}
+              <div className="text-xl sm:text-2xl font-black font-mono text-indigo-700">
+                {currencySymbol}{(Number(invQuantity || 1) * Number(invUnitPrice || 0)).toLocaleString()}
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">3. Initial Payment Status</h4>
-            <FormControl fullWidth size="small">
-              <InputLabel>Status</InputLabel>
-              <Select value={invStatus} label="Status" onChange={(e) => setInvStatus(e.target.value)}>
-                <MenuItem value="Unpaid">Unpaid (Generate Paystack Online Link)</MenuItem>
-                <MenuItem value="Paid">Paid (Already Settled Offline)</MenuItem>
-              </Select>
-            </FormControl>
-          </div>
-        </DialogContent>
-
-        <DialogActions className="p-4 bg-white border-t border-slate-200 flex justify-between items-center flex-wrap gap-2">
-          <span className="text-xs text-slate-400 font-medium hidden sm:inline">Generates a shareable Paystack online payment link.</span>
-          <div className="flex gap-2 w-full sm:w-auto justify-end">
-            <MuiButton onClick={() => setOpenInvoiceModal(false)} variant="text" sx={{ textTransform: 'none', color: '#64748b' }}>
-              Cancel
-            </MuiButton>
-            <MuiButton 
-              onClick={handleCreateInvoice} 
-              variant="contained" 
-              sx={{ 
-                bgcolor: '#4f46e5', 
-                '&:hover': { bgcolor: '#4338ca' }, 
-                textTransform: 'none', 
-                fontWeight: 700, 
-                px: 3, 
-                py: 1.2, 
-                borderRadius: 2.5 
-              }}
+          {/* Section 3: Status */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center">3</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Initial Payment Status</h4>
+            </div>
+            <Select
+              value={invStatus}
+              onChange={(e) => setInvStatus(e.target.value)}
             >
-              Generate & Open Invoice
-            </MuiButton>
+              <option value="Unpaid">Unpaid (Generate Paystack/Online Checkout Link)</option>
+              <option value="Paid">Paid (Already Settled Offline via Cash/Bank Transfer)</option>
+            </Select>
           </div>
-        </DialogActions>
-      </Dialog>
 
-      {/* 3. Responsive Invoice Viewer Modal */}
-      <Dialog 
-        open={openInvoiceView} 
-        onClose={handleCloseInvoiceView} 
-        fullWidth 
-        maxWidth="md" 
-        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs text-slate-500 hidden sm:inline">
+              Generates an official record with live payment link and PDF generation.
+            </span>
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <Button variant="secondary" onClick={() => setOpenInvoiceModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" leftIcon={<FileText size={16} />}>
+                Generate & Issue Invoice
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Modal>
+
+      {/* 3. World-Class Authentic Invoice Viewer Modal */}
+      <Modal
+        isOpen={openInvoiceView}
+        onClose={handleCloseInvoiceView}
+        title={`Commercial Invoice #${selectedInvoice?.id || ''}`}
+        subtitle={`Issued by ${farmName} • Status: ${selectedInvoice?.status || 'Unpaid'}`}
+        size="2xl"
       >
-        <DialogContent className="p-0 overflow-y-auto bg-slate-50">
-          <div className="bg-slate-900 text-white p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30 shrink-0">
-                <FileText size={24} />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 flex-wrap">
-                  Invoice #{selectedInvoice?.id}
-                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${
-                    selectedInvoice?.status === 'Paid' 
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                      : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  }`}>
-                    {selectedInvoice?.status}
-                  </span>
-                </h3>
-                <p className="text-xs text-slate-400">Issued on {selectedInvoice?.date}</p>
-              </div>
+        <div className="space-y-6 font-sans">
+          {/* Quick Action Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${
+                selectedInvoice?.status === 'Paid'
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  : 'bg-amber-100 text-amber-800 border border-amber-300'
+              }`}>
+                {selectedInvoice?.status === 'Paid' ? <CheckCircle2 size={13} /> : <Clock size={13} />}
+                {selectedInvoice?.status || 'Unpaid'}
+              </span>
+              <span className="text-xs text-slate-500 font-mono hidden sm:inline">
+                Issued {selectedInvoice?.date}
+              </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-              <button 
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Copy size={13} />}
                 onClick={() => selectedInvoice && handleCopyPaymentLink(selectedInvoice)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
-                <Copy size={14} /> Copy Online Link
-              </button>
-              <button 
-                onClick={() => selectedInvoice && handleShareWhatsApp(selectedInvoice)} 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                Copy Link
+              </Button>
+              <Button
+                variant="success"
+                size="sm"
+                leftIcon={<MessageSquare size={13} />}
+                onClick={() => selectedInvoice && handleShareWhatsApp(selectedInvoice)}
               >
-                <MessageSquare size={14} /> Share WhatsApp
-              </button>
-              <button onClick={handlePrint} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
-                <Printer size={14} /> Print PDF
-              </button>
-              <button onClick={handleCloseInvoiceView} className="text-slate-400 hover:text-white p-2 cursor-pointer">
-                <X size={20} />
-              </button>
+                WhatsApp
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<Printer size={13} />}
+                onClick={handlePrint}
+              >
+                Print PDF
+              </Button>
             </div>
           </div>
 
           {/* Shareable Online Payment Link Notice Banner */}
           {selectedInvoice && selectedInvoice.status !== 'Paid' && (
-            <div className="p-4 bg-indigo-50 border-b border-indigo-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div className="flex items-start sm:items-center gap-2 text-indigo-900 font-medium min-w-0">
-                <ShieldCheck size={18} className="text-indigo-600 shrink-0 mt-0.5 sm:mt-0" />
-                <span className="truncate">Shareable Online Payment Link: <strong className="font-mono text-indigo-700 truncate">{typeof window !== 'undefined' ? window.location.origin : ''}/pay-invoice/{selectedInvoice.id}</strong></span>
+            <div className="p-3.5 bg-indigo-50 border border-indigo-200/80 rounded-xl flex items-center justify-between gap-3 text-xs text-indigo-900">
+              <div className="flex items-center gap-2 min-w-0">
+                <ShieldCheck size={16} className="text-indigo-600 shrink-0" />
+                <span className="truncate">
+                  Direct Payment Link: <strong className="font-mono text-indigo-700">{typeof window !== 'undefined' ? window.location.origin : ''}/pay-invoice/{selectedInvoice.id}</strong>
+                </span>
               </div>
-              <button 
+              <button
+                type="button"
                 onClick={() => handleCopyPaymentLink(selectedInvoice)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
+                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline shrink-0 cursor-pointer"
               >
-                <Copy size={12} /> Copy Link
+                Copy
               </button>
             </div>
           )}
 
-          {/* Printable Professional Invoice Body */}
-          <div className="p-4 sm:p-8 md:p-12 bg-white text-slate-800 space-y-6 font-sans overflow-x-hidden">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6 sm:pb-8">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-base shrink-0">
-                    P
-                  </div>
-                  <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900 break-words">POULTRY FARM ENTERPRISE</h2>
+          {/* Authentic Commercial Merchant Invoice Dossier */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 space-y-6 shadow-sm">
+            {/* Farm Letterhead */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-indigo-600 pb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black flex items-center justify-center text-xl shadow-md shadow-indigo-600/30 shrink-0">
+                  <Building2 size={24} />
                 </div>
-                <p className="text-xs text-slate-500">Official Merchant Invoice</p>
-                <p className="text-xs text-slate-500">Support: billing@poultryfarm.com</p>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">
+                    {farmName}
+                  </h2>
+                  <p className="text-xs text-slate-500 font-semibold">{farmType} • Commercial Farm Operations</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Support: {farmEmail} | Tel: {farmPhone}</p>
+                </div>
               </div>
 
               <div className="text-left sm:text-right">
-                <span className="text-xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-mono block">INVOICE</span>
-                <p className="text-xs font-bold text-indigo-600 font-mono mt-0.5">#{selectedInvoice?.id}</p>
-                <p className="text-xs text-slate-500 mt-1">Date: <strong>{selectedInvoice?.date}</strong></p>
+                <span className="text-2xl font-black tracking-tight text-slate-900 font-mono block">INVOICE</span>
+                <p className="text-xs font-bold text-indigo-600 font-mono">#{selectedInvoice?.id}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Date: <strong className="text-slate-800 font-mono">{selectedInvoice?.date}</strong></p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 p-4 sm:p-6 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+            {/* Billing Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 sm:p-5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed To:</span>
-                <h4 className="text-sm sm:text-base font-extrabold text-slate-900 break-words">{selectedInvoice?.customerName}</h4>
-                <p className="text-slate-500 mt-1">Status: <strong className={selectedInvoice?.status === 'Paid' ? 'text-emerald-600' : 'text-amber-600'}>{selectedInvoice?.status}</strong></p>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed Customer</span>
+                <h4 className="text-sm sm:text-base font-extrabold text-slate-900">{selectedInvoice?.customerName}</h4>
+                <p className="text-slate-500 text-[11px] mt-0.5">Commercial Wholesale Client</p>
               </div>
-              <div className="text-left sm:text-right">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Due Amount:</span>
-                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-indigo-650">
-                  ₦{selectedInvoice?.totalAmount.toLocaleString()}
+              <div className="sm:text-right">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Valuation Due</span>
+                <div className="text-2xl sm:text-3xl font-black font-mono text-indigo-700">
+                  {currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}
                 </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">Payment Terms: Immediate Settlement</p>
               </div>
             </div>
 
+            {/* Line Items Table */}
             <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full text-left text-xs min-w-[400px]">
+              <table className="w-full text-left text-xs min-w-[420px]">
                 <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-[10px] tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-3 px-4">Item Description</th>
                     <th className="py-3 px-4 text-center">Qty</th>
                     <th className="py-3 px-4 text-right">Unit Price</th>
-                    <th className="py-3 px-4 text-right">Total</th>
+                    <th className="py-3 px-4 text-right">Line Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-mono">
+                <tbody className="divide-y divide-slate-100 font-mono text-xs">
                   <tr>
                     <td className="py-4 px-4 font-semibold text-slate-900 font-sans">{selectedInvoice?.items}</td>
                     <td className="py-4 px-4 text-center text-slate-600">{selectedInvoice?.quantity}</td>
-                    <td className="py-4 px-4 text-right text-slate-600">₦{selectedInvoice?.unitPrice.toLocaleString()}</td>
-                    <td className="py-4 px-4 text-right font-extrabold text-slate-900">₦{selectedInvoice?.totalAmount.toLocaleString()}</td>
+                    <td className="py-4 px-4 text-right text-slate-600">{currencySymbol}{selectedInvoice?.unitPrice.toLocaleString()}</td>
+                    <td className="py-4 px-4 text-right font-extrabold text-slate-900">{currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}</td>
+                  </tr>
+                  <tr className="bg-slate-50/70 font-sans text-[11px]">
+                    <td colSpan={3} className="py-2.5 px-4 text-right text-slate-500 font-semibold">Subtotal:</td>
+                    <td className="py-2.5 px-4 text-right font-mono font-bold text-slate-800">{currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}</td>
+                  </tr>
+                  <tr className="bg-slate-50/70 font-sans text-[11px]">
+                    <td colSpan={3} className="py-2 px-4 text-right text-slate-500 font-semibold">VAT / Farm Produce Tax (0%):</td>
+                    <td className="py-2 px-4 text-right font-mono text-slate-500">{currencySymbol}0.00</td>
+                  </tr>
+                  <tr className="bg-indigo-50/60 font-sans text-xs">
+                    <td colSpan={3} className="py-3 px-4 text-right text-indigo-950 font-black uppercase tracking-wider">Grand Total Due:</td>
+                    <td className="py-3 px-4 text-right font-mono font-black text-indigo-700 text-sm">{currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                <span className="text-xs font-bold text-slate-500 uppercase">Change Status:</span>
+            {/* Payment Settlement & Status Modifier Drawer */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="text-xs font-bold text-slate-600 uppercase">Change Status:</span>
                 <select
                   value={selectedInvoice?.status || 'Unpaid'}
                   onChange={(e) => selectedInvoice && handleUpdateInvoiceStatus(selectedInvoice.id, e.target.value)}
@@ -997,33 +982,37 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 </select>
 
                 {selectedInvoice?.status !== 'Paid' && (
-                  <button
+                  <Button
+                    variant="success"
+                    size="sm"
+                    leftIcon={<CheckCircle2 size={13} />}
                     onClick={() => selectedInvoice && handleUpdateInvoiceStatus(selectedInvoice.id, 'Paid')}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1 cursor-pointer active:scale-95"
                   >
-                    <CheckCircle2 size={13} /> Mark as Paid (Offline)
-                  </button>
+                    Mark as Paid (Offline)
+                  </Button>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <button
-                  onClick={handlePrint}
-                  className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-                >
-                  <Printer size={14} /> Print Receipt PDF
-                </button>
-                <button 
-                  onClick={handleCloseInvoiceView} 
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
-                >
-                  Close Preview
-                </button>
+              <div className="text-[11px] text-slate-400 font-medium sm:text-right">
+                Verified Commercial Transaction • {farmName}
               </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+
+          {/* Modal Footer Controls */}
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-mono">Invoice #{selectedInvoice?.id}</span>
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" onClick={handleCloseInvoiceView}>
+                Close Preview
+              </Button>
+              <Button variant="primary" leftIcon={<Printer size={15} />} onClick={handlePrint}>
+                Print Receipt PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

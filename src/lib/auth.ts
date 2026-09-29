@@ -1,6 +1,6 @@
 'use strict';
 import { createClient } from './supabaseServer';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 export interface AuthUser {
   id: string;
@@ -26,10 +26,12 @@ export async function getAuthUser(): Promise<AuthUser | null> {
       ]);
 
       if (!error && user) {
+        const email = user.email || '';
+        const isSuper = email === 'owner@poultry.com' || email === 'superadmin@pfms.com' || user.user_metadata?.role === 'SuperAdmin';
         return {
           id: user.id,
-          email: user.email || '',
-          role: user.user_metadata?.role || 'Admin',
+          email,
+          role: isSuper ? 'SuperAdmin' : (user.user_metadata?.role || 'Admin'),
         };
       }
     }
@@ -39,8 +41,21 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
   try {
     const cookieStore = await cookies();
-    const role = cookieStore.get('pfms_role')?.value;
-    const email = cookieStore.get('pfms_email')?.value || 'admin@poultry.local';
+    const headersList = await headers().catch(() => null);
+    const headerRole = headersList?.get('x-user-role');
+    const headerEmail = headersList?.get('x-user-email');
+    const role = headerRole || cookieStore.get('pfms_role')?.value;
+    const email = headerEmail || cookieStore.get('pfms_email')?.value || '';
+
+    if (email === 'owner@poultry.com' || email === 'superadmin@pfms.com' || role === 'SuperAdmin') {
+      return {
+        id: 'superadmin',
+        email: email || 'owner@poultry.com',
+        role: 'SuperAdmin',
+        username: 'superadmin',
+      };
+    }
+
     if (role) {
       try {
         const { supabase } = await import('./supabase');
@@ -62,7 +77,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
       return {
         id: 'local_user',
-        email,
+        email: email || 'admin@poultry.local',
         role,
       };
     }

@@ -687,63 +687,26 @@ export function AdminCmsClient({
 
   return (
     <div className="w-full space-y-6 pb-16 font-sans">
-      {/* Version Upgrade Banner (Displays when code version constant differs from DB version) */}
+      {/* Compact & Responsive System Upgrade Alert Banner */}
       {versionInfo.updateAvailable && (
-        <div className="bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-blue-500/10 border-2 border-amber-400/80 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in duration-300">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shadow-amber-500/30 shrink-0">
-              <RefreshCw className={isUpgrading ? 'animate-spin' : ''} size={22} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300/80 px-2.5 py-0.5 rounded-full">
-                  System Upgrade Required
-                </span>
-                <span className="text-xs text-slate-500 font-medium">
-                  DB Version: <strong className="text-slate-700">v{versionInfo.installedVersion}</strong> → Target: <strong className="text-indigo-600 font-bold">v{versionInfo.currentVersion}</strong>
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-slate-800 mt-1">
-                A newer application version is available. Run the upgrade to execute database migrations, apply schema updates, and synchronize system settings.
-              </p>
+        <div className="border border-amber-300 bg-amber-50/95 px-3 sm:px-4 py-2.5 rounded-xl flex items-center justify-between gap-3 text-xs shadow-sm animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <RefreshCw className={`text-amber-600 shrink-0 ${isUpgrading ? 'animate-spin' : ''}`} size={16} />
+            <div className="min-w-0 truncate">
+              <span className="font-bold text-amber-950">Upgrade Available: </span>
+              <span className="text-amber-900 font-medium">v{versionInfo.installedVersion} → v{versionInfo.currentVersion} (DB migrations ready).</span>
             </div>
           </div>
-
           <button
             onClick={handleRunUpgrade}
             disabled={isUpgrading}
-            className="shrink-0 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-xs uppercase tracking-wider px-5 py-3 rounded-xl transition-all shadow-md shadow-indigo-600/20 active:scale-95 flex items-center gap-2 cursor-pointer"
+            className="text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 text-white px-3 py-1 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap flex items-center gap-1.5 transition-all"
           >
-            <RefreshCw size={15} className={isUpgrading ? 'animate-spin' : ''} />
-            <span>{isUpgrading ? 'Applying Upgrade & Migrations…' : 'Run System Upgrade Now'}</span>
+            <RefreshCw size={12} className={isUpgrading ? 'animate-spin' : ''} />
+            <span>{isUpgrading ? 'Upgrading…' : 'Run Upgrade'}</span>
           </button>
         </div>
       )}
-
-      {/* Mobile Top Tabs Navigation Bar */}
-      <div className="md:hidden flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none -mx-2 px-2">
-        {[
-          { tab: 'overview', label: 'Overview', icon: BarChart3 },
-          { tab: 'setup', label: 'Gateways & APIs', icon: Settings },
-          { tab: 'plans', label: 'SaaS Plans', icon: Layers },
-          { tab: 'cms', label: 'CMS & Brand', icon: Sparkles },
-          { tab: 'orgs', label: `Farm Workspaces (${allOrgs.length})`, icon: Building2 },
-          { tab: 'settings', label: 'Platform Settings', icon: Server },
-        ].map((item) => (
-          <button
-            key={item.tab}
-            onClick={() => handleTabChange(item.tab as any)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === item.tab
-                ? 'bg-purple-700 text-white shadow-sm'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <item.icon size={14} className={activeTab === item.tab ? 'text-purple-200' : 'text-slate-400'} />
-            <span>{item.label}</span>
-          </button>
-        ))}
-      </div>
 
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
@@ -831,6 +794,95 @@ export function AdminCmsClient({
               </div>
             </div>
           </div>
+
+          {/* Recent Farm Workspaces & Direct Quick Access */}
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                  <Building2 size={18} className="text-purple-600" /> Recent Farm Workspaces
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Quick oversight of latest customer farm deployments and tenants</p>
+              </div>
+              <button
+                onClick={() => handleTabChange('orgs')}
+                className="text-xs font-bold text-purple-700 hover:text-purple-900 flex items-center gap-1 cursor-pointer"
+              >
+                <span>View All ({allOrgs.length})</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
+                  <tr>
+                    <th className="p-4">Farm Workspace</th>
+                    <th className="p-4">Owner / Admin</th>
+                    <th className="p-4">Plan Tier</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Quick Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                  {orgsList.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-6 text-center text-slate-400">
+                        No farm workspaces registered yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    orgsList.slice(0, 5).map((org) => (
+                      <tr key={org.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-4 font-bold text-slate-900">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-bold">
+                              {org.name ? org.name.charAt(0).toUpperCase() : 'F'}
+                            </div>
+                            <div>
+                              <div>{org.name}</div>
+                              <span className="text-[10px] text-slate-400 font-mono">ID: {org.id}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="text-slate-800">{org.ownerUsername || 'System Admin'}</div>
+                          <div className="text-[11px] text-slate-500 font-mono">{org.ownerEmail || 'admin@farm.local'}</div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                            org.subscriptionTier === 'enterprise' || org.subscriptionTier === 'entrepreneur'
+                              ? 'bg-purple-100 text-purple-800'
+                              : org.subscriptionTier === 'pro'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}>
+                            {org.subscriptionTier || 'Free'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                            org.subscriptionStatus === 'active'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {org.subscriptionStatus || 'Active'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <button
+                            onClick={() => handleImpersonateTenant(org.id, org.name)}
+                            className="text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1"
+                          >
+                            <LogIn size={13} /> Login as Tenant
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
@@ -858,7 +910,7 @@ export function AdminCmsClient({
           </div>
 
           {/* Master Super Admin Credentials */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm max-w-2xl">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm w-full">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
               <Lock size={16} className="text-indigo-600" /> Master Super Admin Credentials
             </h3>

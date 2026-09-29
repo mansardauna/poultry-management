@@ -97,13 +97,20 @@ export async function proxy(request: NextRequest) {
     const isSuperAdmin = email === 'superadmin@pfms.com' || email === 'owner@poultry.com' || roleCookie === 'SuperAdmin' || path.startsWith('/dashboard/admin');
     const userRole = isSuperAdmin ? 'SuperAdmin' : (roleCookie || user?.user_metadata?.role || 'Admin');
     
+    // Auto-redirect SuperAdmin from regular dashboard to SuperAdmin console
+    if (isSuperAdmin && (path === '/dashboard' || path === '/dashboard/')) {
+      const adminUrl = request.nextUrl.clone();
+      adminUrl.pathname = '/dashboard/admin';
+      return NextResponse.redirect(adminUrl);
+    }
+
     requestHeaders.set('x-user-role', userRole);
     requestHeaders.set('x-user-email', email);
     supabaseResponse.headers.set('x-user-role', userRole);
     supabaseResponse.headers.set('x-user-email', email);
     
-    const tier = request.cookies.get('pfms_tier')?.value || 'free';
-    const orgId = orgIdCookie || '';
+    const tier = isSuperAdmin ? 'enterprise' : (request.cookies.get('pfms_tier')?.value || 'free');
+    const orgId = orgIdCookie || (isSuperAdmin ? 'org_superadmin' : '');
     requestHeaders.set('x-user-tier', tier);
     requestHeaders.set('x-org-id', orgId);
     supabaseResponse.headers.set('x-user-tier', tier);

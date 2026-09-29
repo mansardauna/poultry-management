@@ -21,7 +21,11 @@ export default function LoginPage() {
       .then(res => res.json())
       .then(data => {
         if (data.authenticated) {
-          router.push('/dashboard');
+          if (data.role === 'SuperAdmin' || data.user?.role === 'SuperAdmin') {
+            router.push('/dashboard/admin');
+          } else {
+            router.push('/dashboard');
+          }
         }
       })
       .catch(() => {});
@@ -51,7 +55,9 @@ export default function LoginPage() {
       const body = await response.json().catch(() => null);
 
       if (response.ok) {
-        window.location.href = '/dashboard';
+        const cleanEmail = email.trim().toLowerCase();
+        const isSuper = body?.role === 'SuperAdmin' || cleanEmail === 'owner@poultry.com' || cleanEmail === 'superadmin@pfms.com';
+        window.location.href = isSuper ? '/dashboard/admin' : '/dashboard';
         return;
       }
 

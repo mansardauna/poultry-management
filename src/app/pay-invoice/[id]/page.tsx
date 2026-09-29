@@ -35,6 +35,15 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
   let isPaidPlan = true;
 
   if (invoice.workspaceId) {
+    const { data: ws } = await supabase
+      .from("workspaces")
+      .select("name, ownerUsername, orgId")
+      .eq("id", invoice.workspaceId)
+      .maybeSingle();
+    if (ws?.name) {
+      farmName = ws.name;
+    }
+
     const { data: systemSettings } = await supabase
       .from("systemSettings")
       .select("*")
@@ -48,7 +57,7 @@ export default async function PayInvoicePage({ params }: { params: Promise<{ id:
       if (systemSettings.bankName) bankName = systemSettings.bankName;
       if (systemSettings.accountNumber) accountNumber = systemSettings.accountNumber;
       if (systemSettings.accountName) accountName = systemSettings.accountName;
-      if (systemSettings.adminName) farmName = systemSettings.adminName;
+      if (systemSettings.adminName && systemSettings.adminName !== 'Poultry Farm Enterprise') farmName = systemSettings.adminName;
       if (systemSettings.adminEmail) farmEmail = systemSettings.adminEmail;
 
       if (systemSettings.subscriptionTier === 'free' || systemSettings.plan === 'free') {

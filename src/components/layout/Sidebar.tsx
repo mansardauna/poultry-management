@@ -184,7 +184,11 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const { texts } = useLanguage();
   const whiteLabel = useWhiteLabel();
 
-  const isSuperAdmin = role === 'SuperAdmin' || (typeof window !== 'undefined' && Cookies.get('pfms_role') === 'SuperAdmin') || pathname.startsWith('/dashboard/admin');
+  const isSuperAdmin = 
+    role === 'SuperAdmin' || 
+    (typeof window !== 'undefined' && Cookies.get('pfms_role') === 'SuperAdmin') || 
+    (typeof window !== 'undefined' && (Cookies.get('pfms_email') === 'owner@poultry.com' || Cookies.get('pfms_email') === 'superadmin@pfms.com')) ||
+    pathname.startsWith('/dashboard/admin');
   const isAdmin = role === 'Admin' || isSuperAdmin;
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
 

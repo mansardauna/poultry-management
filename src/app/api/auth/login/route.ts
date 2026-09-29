@@ -43,9 +43,10 @@ export async function POST(request: Request) {
       }
 
       if (isPasswordValid) {
-        const staffRole = userRec.role || 'Admin';
-        const targetWorkspaceId = userRec.workspaceId || `main-org_${userRec.id}`;
-        let orgId = userRec.orgId || '';
+        const isSuperAdminUser = userRec.role === 'SuperAdmin' || emailInput === 'owner@poultry.com' || emailInput === 'superadmin@pfms.com';
+        const staffRole = isSuperAdminUser ? 'SuperAdmin' : (userRec.role || 'Admin');
+        const targetWorkspaceId = isSuperAdminUser ? 'org_superadmin' : (userRec.workspaceId || `main-org_${userRec.id}`);
+        let orgId = isSuperAdminUser ? 'org_superadmin' : (userRec.orgId || '');
         if (!orgId && targetWorkspaceId) {
           const match = targetWorkspaceId.match(/org_[a-zA-Z0-9]+/);
           if (match) orgId = match[0];
@@ -53,15 +54,16 @@ export async function POST(request: Request) {
         if (!orgId) {
           orgId = targetWorkspaceId.startsWith('main-') ? targetWorkspaceId.slice(5) : 'org_owner_main';
         }
-        const tier = userRec.subscriptionTier || (emailInput === 'owner@poultry.com' ? 'pro' : 'free');
+        const tier = isSuperAdminUser ? 'enterprise' : (userRec.subscriptionTier || 'free');
 
+        const cookieOptions = { path: '/', maxAge: 60 * 60 * 24 * 30, sameSite: 'lax' as const };
         const response = NextResponse.json({ ok: true, role: staffRole });
-        response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/' });
-        response.cookies.set('pfms_org_id', orgId, { path: '/' });
-        response.cookies.set('pfms_tier', tier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
-        response.cookies.set('pfms_role', staffRole, { path: '/' });
-        response.cookies.set('pfms_email', userRec.email || emailInput, { path: '/' });
-        response.cookies.set('pfms_name', userRec.name || userRec.username || '', { path: '/' });
+        response.cookies.set('pfms_workspace', targetWorkspaceId, cookieOptions);
+        response.cookies.set('pfms_org_id', orgId, cookieOptions);
+        response.cookies.set('pfms_tier', tier, cookieOptions);
+        response.cookies.set('pfms_role', staffRole, cookieOptions);
+        response.cookies.set('pfms_email', userRec.email || emailInput, cookieOptions);
+        response.cookies.set('pfms_name', userRec.name || userRec.username || '', cookieOptions);
         return response;
       }
     }
@@ -124,17 +126,19 @@ export async function POST(request: Request) {
       (emailInput === adminUser.toLowerCase() || emailInput === 'owner@poultry.com' || userClean === adminUser.toLowerCase()) &&
       password === adminPass
     ) {
-      const staffRole = 'Admin';
-      const targetWorkspaceId = 'main-org_owner_main';
-      const orgId = 'org_owner_main';
-      const tier = 'pro';
+      const staffRole = 'SuperAdmin';
+      const targetWorkspaceId = 'org_superadmin';
+      const orgId = 'org_superadmin';
+      const tier = 'enterprise';
 
+      const cookieOptions = { path: '/', maxAge: 60 * 60 * 24 * 30, sameSite: 'lax' as const };
       const response = NextResponse.json({ ok: true, role: staffRole });
-      response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/' });
-      response.cookies.set('pfms_org_id', orgId, { path: '/' });
-      response.cookies.set('pfms_tier', tier, { path: '/', maxAge: 60 * 60 * 24 * 365 });
-      response.cookies.set('pfms_role', staffRole, { path: '/' });
-      response.cookies.set('pfms_email', 'owner@poultry.com', { path: '/' });
+      response.cookies.set('pfms_workspace', targetWorkspaceId, cookieOptions);
+      response.cookies.set('pfms_org_id', orgId, cookieOptions);
+      response.cookies.set('pfms_tier', tier, cookieOptions);
+      response.cookies.set('pfms_role', staffRole, cookieOptions);
+      response.cookies.set('pfms_email', 'owner@poultry.com', cookieOptions);
+      response.cookies.set('pfms_name', 'Super Admin', cookieOptions);
       return response;
     }
 

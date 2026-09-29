@@ -1,4 +1,4 @@
-'use strict';
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
@@ -32,8 +32,26 @@ import type {
 
 /** Exported function default */
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const headersList = await headers().catch(() => null);
+  const cookieStore = await cookies();
+  const headerRole = headersList?.get('x-user-role');
+  const headerEmail = headersList?.get('x-user-email');
+  const cookieRole = cookieStore.get('pfms_role')?.value;
+  const cookieEmail = cookieStore.get('pfms_email')?.value;
   const user = await getAuthUser();
-  if (user?.email === 'superadmin@pfms.com' || user?.role === 'SuperAdmin') {
+
+  const isSuperAdminUser = 
+    headerRole === 'SuperAdmin' ||
+    cookieRole === 'SuperAdmin' ||
+    user?.role === 'SuperAdmin' ||
+    user?.email === 'superadmin@pfms.com' ||
+    user?.email === 'owner@poultry.com' ||
+    headerEmail === 'superadmin@pfms.com' ||
+    headerEmail === 'owner@poultry.com' ||
+    cookieEmail === 'superadmin@pfms.com' ||
+    cookieEmail === 'owner@poultry.com';
+
+  if (isSuperAdminUser) {
     redirect('/dashboard/admin');
   }
 
