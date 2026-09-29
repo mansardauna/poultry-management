@@ -209,24 +209,24 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <h1 className="text-2xl font-semibold text-slate-900">{texts.finance.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{texts.finance.subtitle}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button 
             onClick={handleExportPDF}
-            className="bg-white border-2 border-slate-200 text-slate-700 px-4 py-2 rounded-md text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
+            className="bg-white border border-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
             Export PDF
           </button>
           <button 
             onClick={handleProcessPayroll}
-            className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+            className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <User size={18} /> Process Payroll
+            <User size={17} /> Process Payroll
           </button>
           <button 
             onClick={handleOpen}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={20} /> {texts.finance.logExpense}
+            <Plus size={18} /> {texts.finance.logExpense}
           </button>
         </div>
       </div>

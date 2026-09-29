@@ -102,29 +102,41 @@ export function StatCard({
     <div 
       data-tour={dataTour}
       onClick={onClick}
-      className={onClick ? 'cursor-pointer' : ''}
+      className={onClick ? 'cursor-pointer group' : ''}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
     >
-      <Card className={`hover:border-indigo-300 transition-all duration-200 shadow-sm ${className}`}>
+      <Card className={`transition-all duration-200 shadow-sm ${
+        onClick 
+          ? 'hover:border-indigo-400 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer' 
+          : 'hover:border-indigo-200'
+      } ${className}`}>
         <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-medium text-slate-500">{title}</p>
-            <p className={`text-2xl sm:text-3xl font-bold ${styles.valueText}`}>{value}</p>
-            {subtext && (
-              <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1`}>
-                {subtext}
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-semibold text-slate-500 group-hover:text-indigo-600 transition-colors">{title}</p>
+                {onClick && (
+                  <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                )}
+              </div>
+              <p className={`text-2xl sm:text-3xl font-extrabold ${styles.valueText}`}>{value}</p>
+              {subtext && (
+                <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1`}>
+                  {subtext}
+                </p>
+              )}
+            </div>
+
+            {Icon && (
+              <div className={`w-12 h-12 rounded-2xl ${styles.iconBg} ${styles.iconText} flex items-center justify-center shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                <Icon size={24} />
+              </div>
             )}
           </div>
-
-          {Icon && (
-            <div className={`w-12 h-12 rounded-2xl ${styles.iconBg} ${styles.iconText} flex items-center justify-center shadow-sm shrink-0`}>
-              <Icon size={24} />
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
     </div>
   );
 }

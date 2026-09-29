@@ -19,8 +19,13 @@ import {
   Calendar,
   Sparkles,
   Lock,
-  Printer
+  Printer,
+  Plus,
+  Egg
 } from 'lucide-react';
+import { Modal } from "@/components/ui/Modal";
+import { Input, Select } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import { DatabaseSchema, StaffTask, AlertLog } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
@@ -113,6 +118,48 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   const todayFormatted = formatDate(today);
+
+  // Quick Egg Modal State
+  const [showQuickEggModal, setShowQuickEggModal] = useState(false);
+  const [quickEggBatchId, setQuickEggBatchId] = useState('');
+  const [quickEggDate, setQuickEggDate] = useState(todayStr);
+  const [quickGoodEggs, setQuickGoodEggs] = useState('');
+  const [quickBrokenEggs, setQuickBrokenEggs] = useState('0');
+  const [quickSpoiltEggs, setQuickSpoiltEggs] = useState('0');
+  const [isSubmittingEgg, setIsSubmittingEgg] = useState(false);
+
+  const handleQuickLogEgg = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickGoodEggs) return;
+    setIsSubmittingEgg(true);
+    try {
+      const res = await fetch('/api/eggs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          batchId: quickEggBatchId || (normalizedBatches[0]?.id || 'b1'),
+          date: quickEggDate || todayStr,
+          goodEggs: Number(quickGoodEggs) || 0,
+          brokenEggs: Number(quickBrokenEggs) || 0,
+          spoiltEggs: Number(quickSpoiltEggs) || 0,
+        })
+      });
+      if (res.ok) {
+        toast.success('Egg collection logged successfully!');
+        setShowQuickEggModal(false);
+        setQuickGoodEggs('');
+        setQuickBrokenEggs('0');
+        setQuickSpoiltEggs('0');
+        refreshData();
+      } else {
+        toast.error('Failed to log egg collection');
+      }
+    } catch {
+      toast.error('Error logging egg collection');
+    } finally {
+      setIsSubmittingEgg(false);
+    }
+  };
 
   // Period setup
   let periodDays = 7;
@@ -383,9 +430,23 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         </div>
         <div className="shrink-0 flex items-center gap-2">
           <button 
+            onClick={() => {
+              if (normalizedBatches.length > 0 && !quickEggBatchId) {
+                setQuickEggBatchId(normalizedBatches[0].id);
+              }
+              setShowQuickEggModal(true);
+            }}
+            className="bg-amber-600 hover:bg-amber-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-amber-600/20 flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap active:scale-95"
+            title="Log Egg Collection"
+          >
+            <Plus size={15} className="shrink-0" />
+            <Egg size={15} className="shrink-0" />
+            <span>Log Eggs</span>
+          </button>
+          <button 
             data-tour="print-report-btn"
             onClick={() => window.print()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap active:scale-95"
           >
             <Printer size={15} className="shrink-0" />
             <span className="hidden sm:inline">{texts.common.printReport}</span>
@@ -432,6 +493,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           value={formatNumber(totalChickens)}
           subtext={`${recentMortality === 0 ? '0.0%' : `−${flockPct}%`} ${texts.dashboard.flockMortalityRate}`}
           color="blue"
+          onClick={() => router.push('/dashboard/chickens')}
         />
 
         <StatCard
@@ -439,6 +501,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           value={`${formatNumber(currentYield)} ${t("Egg(s)", "Egg(s)")}`}
           subtext={`${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`}
           color="amber"
+          onClick={() => router.push('/dashboard/eggs')}
         />
 
         {userRole === 'Staff' ? (
@@ -448,12 +511,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               value={`${formatNumber(totalFeedStockKg)} kg`}
               subtext={t("Available inventory in storage")}
               color="emerald"
+              onClick={() => router.push('/dashboard/feed')}
             />
             <StatCard
               title={t("Tasks Completed")}
               value={`${formatNumber(pendingTasksCount)} Pending`}
               subtext={`${formatNumber(data.tasks.length - pendingTasksCount)} completed today`}
               color="indigo"
+              onClick={() => router.push('/dashboard/staff')}
             />
           </>
         ) : (
@@ -463,12 +528,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               value={formatCurrency(totalRevenue)}
               subtext={`${revenueGrowth >= 0 ? '+' : ''}${revenueGrowthPct}% revenue trend`}
               color="indigo"
+              onClick={() => router.push('/dashboard/finance')}
             />
             <StatCard
               title={texts.dashboard.operationalProfit}
               value={formatCurrency(netProfit)}
               subtext={`${profitGrowth >= 0 ? '+' : ''}${profitGrowthPct}% net margin`}
               color="emerald"
+              onClick={() => router.push('/dashboard/finance')}
             />
           </>
         )}
@@ -850,6 +917,86 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           )}
         </div>
       </div>
+
+      {/* Quick Egg Logging Modal */}
+      <Modal
+        isOpen={showQuickEggModal}
+        onClose={() => setShowQuickEggModal(false)}
+        title="Log Egg Collection"
+        subtitle="Quickly record daily collection counts into the database."
+        size="md"
+      >
+        <form onSubmit={handleQuickLogEgg} className="space-y-4">
+          <Select
+            label="Chicken Batch"
+            value={quickEggBatchId || (normalizedBatches[0]?.id || '')}
+            onChange={(e) => setQuickEggBatchId(e.target.value)}
+          >
+            {normalizedBatches.length === 0 ? (
+              <option value="">No batches available</option>
+            ) : (
+              normalizedBatches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.id} ({b.breed || 'Layer'} - {b.quantity} birds)
+                </option>
+              ))
+            )}
+          </Select>
+
+          <Input
+            label="Collection Date"
+            type="date"
+            value={quickEggDate}
+            onChange={(e) => setQuickEggDate(e.target.value)}
+            required
+          />
+
+          <Input
+            label="Good Eggs Collected (Pieces)"
+            type="number"
+            min="0"
+            placeholder="e.g. 450"
+            value={quickGoodEggs}
+            onChange={(e) => setQuickGoodEggs(e.target.value)}
+            required
+            autoFocus
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Broken / Cracked"
+              type="number"
+              min="0"
+              value={quickBrokenEggs}
+              onChange={(e) => setQuickBrokenEggs(e.target.value)}
+            />
+            <Input
+              label="Spoilt / Rejects"
+              type="number"
+              min="0"
+              value={quickSpoiltEggs}
+              onChange={(e) => setQuickSpoiltEggs(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button
+              variant="secondary"
+              onClick={() => setShowQuickEggModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isSubmittingEgg}
+              leftIcon={<Egg size={15} />}
+            >
+              Save Egg Collection
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

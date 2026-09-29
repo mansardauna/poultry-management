@@ -14,18 +14,9 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
-  Select, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  Button as MuiButton 
-} from '@mui/material';
+import { Modal } from '@/components/ui/Modal';
+import { Input, Select } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 /**
  * Props for the FeedClient component.
@@ -405,19 +396,19 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
     }
   };
 
-  const totalFeedKg = feeds.reduce((sum, f) => sum + f.quantityKg, 0);
-  const layerMash = feeds.find(f => f.type === 'Layer mash');
-  const isLayerMashCritical = layerMash && layerMash.quantityKg <= 50;
+  const totalFeedKg = (feeds || []).reduce((sum, f) => sum + Number(f.quantityKg || 0), 0);
+  const layerMash = (feeds || []).find(f => f.type === 'Layer mash');
+  const isLayerMashCritical = layerMash && Number(layerMash.quantityKg || 0) <= 50;
 
   // Filter consumption logs based on the active timeframe
-  const filteredLogs = filterByTimeRange(logs);
-  const weeklyKgTotal = filteredLogs.reduce((sum, l) => sum + l.quantityConsumedKg, 0);
+  const filteredLogs = filterByTimeRange(logs || []);
+  const weeklyKgTotal = filteredLogs.reduce((sum, l) => sum + Number(l.quantityConsumedKg || 0), 0);
 
   // Per-type weekly breakdown
   const weeklyByType: Record<string, number> = {};
   filteredLogs.forEach(l => {
-    const feed = feeds.find(f => f.id === l.feedId);
-    if (feed) weeklyByType[feed.type] = (weeklyByType[feed.type] || 0) + l.quantityConsumedKg;
+    const feed = (feeds || []).find(f => f.id === l.feedId);
+    if (feed) weeklyByType[feed.type] = (weeklyByType[feed.type] || 0) + Number(l.quantityConsumedKg || 0);
   });
 
   const divisor = timeRange === 'weekly' ? 7 : timeRange === 'monthly' ? 30 : timeRange === 'yearly' ? 365 : 30;
@@ -435,47 +426,53 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <div className="flex flex-wrap items-center gap-2">
           <button 
             onClick={() => handleExportReports('csv')}
-            className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           >
             <Download size={15} /> Export CSV
           </button>
           <button 
             onClick={() => handleExportReports('pdf')}
-            className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           >
             <Printer size={15} /> Print Report
           </button>
           <button 
             onClick={() => setOpenLogistics(true)}
-            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5"
+            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
           >
             <Truck size={15} /> Logistics Pipeline
           </button>
           <button 
             onClick={handleOpenUsage}
-            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer shadow-sm active:scale-95"
           >
             Log Usage
           </button>
           <button 
             onClick={handleOpenRestock}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
           >
-            <Plus size={20} /> {texts.feed.receiveStock}
+            <Plus size={16} /> {texts.feed.receiveStock}
           </button>
         </div>
       </div>
 
-      {/* Critical Shortfall Alert Banner */}
+      {/* Critical Shortfall Alert Banner - Compact & Responsive */}
       {isLayerMashCritical && (
-        <div className="border-2 border-red-500 bg-red-50 p-4 flex items-center gap-4">
-          <AlertTriangle size={36} className="text-red-600 animate-pulse flex-shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-red-950">Flock nutrition critical shortage alert</p>
-            <p className="text-xs text-red-800 mt-0.5">
-              Layer bird feed stock has plummeted to <strong>{layerMash.quantityKg} kg</strong> (below 50kg safety baseline). Restocking required immediately!
-            </p>
+        <div className="border border-red-300 bg-red-50/90 px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertTriangle size={18} className="text-red-600 shrink-0 animate-pulse" />
+            <div className="min-w-0 truncate">
+              <span className="font-bold text-red-950">Low Feed Alert: </span>
+              <span className="text-red-800 font-medium">Layer mash is at {Number(layerMash?.quantityKg || 0)}kg (below 50kg threshold).</span>
+            </div>
           </div>
+          <button 
+            onClick={handleOpenRestock}
+            className="text-[11px] font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
+          >
+            Restock
+          </button>
         </div>
       )}
 
@@ -673,8 +670,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                       <td className="px-4 py-3 text-slate-655 font-semibold">{pipe.supplier}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 text-[9px] font-semibold ${
-                          pipe.status.includes('Secured') ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
-                        }`}>{pipe.status}</span>
+                          pipe.status && String(pipe.status).includes('Secured') ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
+                        }`}>{pipe.status || 'Under Contract'}</span>
                       </td>
                       <td className="px-4 py-3 text-slate-700 font-semibold">{pipe.eta}</td>
                       {canEdit && (
@@ -783,267 +780,228 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       </Card>
 
       {/* Log Feed Usage Modal */}
-      <Dialog open={openUsage} onClose={handleCloseUsage} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Log feed consumption</DialogTitle>
-        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
-          <div className="h-2" />
-          <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Feed Type</InputLabel>
-            <Select
-              value={useFeedId}
-              onChange={(e) => setUseFeedId(e.target.value)}
-              label="Feed Type"
-              className="rounded-sm"
-            >
-              {feeds.map(f => (
-                <MenuItem key={f.id} value={f.id}>{f.type} ({f.quantityKg}kg available)</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Chicken Batch</InputLabel>
-            <Select
-              value={useBatchId}
-              onChange={(e) => setUseBatchId(e.target.value)}
-              label="Chicken Batch"
-              className="rounded-sm"
-            >
-              {batches.map(b => (
-                <MenuItem key={b.id} value={b.id}>{b.id} ({b.breed} - {b.type})</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
+      <Modal
+        isOpen={openUsage}
+        onClose={handleCloseUsage}
+        title="Log Feed Consumption"
+        subtitle="Record daily feed bags or kg consumed by batch"
+        size="md"
+      >
+        <div className="space-y-4">
+          <Select
+            label="Feed Type"
+            value={useFeedId}
+            onChange={(e) => setUseFeedId(e.target.value)}
+          >
+            {feeds.map(f => (
+              <option key={f.id} value={f.id}>{f.type} ({Number(f.quantityKg || 0)}kg available)</option>
+            ))}
+          </Select>
+
+          <Select
+            label="Chicken Batch"
+            value={useBatchId}
+            onChange={(e) => setUseBatchId(e.target.value)}
+          >
+            {batches.map(b => (
+              <option key={b.id} value={b.id}>{b.id} ({b.breed || 'Flock'} - {b.type})</option>
+            ))}
+          </Select>
+
+          <Input
             label="Quantity Consumed (kg)"
             type="number"
-            fullWidth
-            variant="outlined"
+            min="0"
+            step="0.1"
+            placeholder="e.g. 50"
             value={useQty}
             onChange={(e) => setUseQty(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseUsage} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton 
-            onClick={handleLogUsage} 
-            variant="contained" 
-            disabled={!useQty}
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
-          >
-            Log Usage
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button variant="secondary" onClick={handleCloseUsage}>Cancel</Button>
+            <Button variant="primary" disabled={!useQty} onClick={handleLogUsage}>Log Usage</Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Receive Stock Modal */}
-      <Dialog open={openRestock} onClose={handleCloseRestock} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Receive stock (Restock)</DialogTitle>
-        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
-          <div className="h-2" />
-          <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Feed Type</InputLabel>
-            <Select
-              value={restockFeedId}
-              onChange={(e) => setRestockFeedId(e.target.value)}
-              label="Feed Type"
-              className="rounded-sm"
-            >
-              {feeds.map(f => (
-                <MenuItem key={f.id} value={f.id}>{f.type}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
+      <Modal
+        isOpen={openRestock}
+        onClose={handleCloseRestock}
+        title="Receive Stock (Restock)"
+        subtitle="Add new feed bags to inventory & log expense"
+        size="md"
+      >
+        <div className="space-y-4">
+          <Select
+            label="Feed Type"
+            value={restockFeedId}
+            onChange={(e) => setRestockFeedId(e.target.value)}
+          >
+            {feeds.map(f => (
+              <option key={f.id} value={f.id}>{f.type}</option>
+            ))}
+          </Select>
+
+          <Input
             label="Restock Quantity (kg)"
             type="number"
-            fullWidth
-            variant="outlined"
+            min="0"
+            placeholder="e.g. 500"
             value={restockQty}
             onChange={(e) => setRestockQty(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-          <TextField
-            label="Supplier / Mill"
-            fullWidth
-            variant="outlined"
+
+          <Input
+            label="Supplier / Feed Mill"
+            type="text"
+            placeholder="e.g. Supreme Feed Mills Ltd."
             value={restockSupplier}
             onChange={(e) => setRestockSupplier(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-          <TextField
+
+          <Input
             label="Procurement Cost (₦) - Auto Logs Expense"
             type="number"
-            fullWidth
-            variant="outlined"
-            placeholder="e.g. 12000"
+            min="0"
+            placeholder="e.g. 150000"
             value={restockCost}
             onChange={(e) => setRestockCost(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseRestock} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton 
-            onClick={handleRestock} 
-            variant="contained" 
-            disabled={!restockQty}
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
-          >
-            Log Restock
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button variant="secondary" onClick={handleCloseRestock}>Cancel</Button>
+            <Button variant="primary" disabled={!restockQty} onClick={handleRestock}>Log Restock</Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Logistics Procurement Pipeline Modal */}
-      <Dialog open={openLogistics} onClose={handleCloseLogistics} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Log logistics procurement step</DialogTitle>
-        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
-          <div className="h-2" />
-          <TextField
+      <Modal
+        isOpen={openLogistics}
+        onClose={handleCloseLogistics}
+        title="Log Logistics Procurement Step"
+        subtitle="Track partner contracts, supply routes & expected deliveries"
+        size="md"
+      >
+        <div className="space-y-4">
+          <Input
             label="Pipeline Milestone Action"
-            fullWidth
-            variant="outlined"
+            type="text"
             placeholder="e.g. Completed supply contract negotiations"
             value={pipelineMilestone}
             onChange={(e) => setPipelineMilestone(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-          <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Partner Supplier</InputLabel>
-            <Select
-              value={pipelineSupplier}
-              onChange={(e) => setPipelineSupplier(e.target.value)}
-              label="Partner Supplier"
-              className="rounded-sm"
-            >
-              <MenuItem value="Supreme Feed Mills Ltd.">Supreme Feed Mills Ltd.</MenuItem>
-              <MenuItem value="AgroFeeds Logistics Team">AgroFeeds Logistics Team</MenuItem>
-              <MenuItem value="Local Coop Supplier Hub">Local Coop Supplier Hub</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Restructured Status</InputLabel>
-            <Select
-              value={pipelineStatus}
-              onChange={(e) => setPipelineStatus(e.target.value)}
-              label="Restructured Status"
-              className="rounded-sm"
-            >
-              <MenuItem value="Secured (Awaiting Transit)">Secured (Contract signed & awaiting transit)</MenuItem>
-              <MenuItem value="In Transit (Shipping)">In Transit (Shipping via verified route)</MenuItem>
-              <MenuItem value="Under Contract">Under Contract / Negotiations</MenuItem>
-              <MenuItem value="Completed System Check">Completed System Check</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
+
+          <Select
+            label="Partner Supplier"
+            value={pipelineSupplier}
+            onChange={(e) => setPipelineSupplier(e.target.value)}
+          >
+            <option value="Supreme Feed Mills Ltd.">Supreme Feed Mills Ltd.</option>
+            <option value="AgroFeeds Logistics Team">AgroFeeds Logistics Team</option>
+            <option value="Local Coop Supplier Hub">Local Coop Supplier Hub</option>
+          </Select>
+
+          <Select
+            label="Restructured Status"
+            value={pipelineStatus}
+            onChange={(e) => setPipelineStatus(e.target.value)}
+          >
+            <option value="Secured (Awaiting Transit)">Secured (Contract signed & awaiting transit)</option>
+            <option value="In Transit (Shipping)">In Transit (Shipping via verified route)</option>
+            <option value="Under Contract">Under Contract / Negotiations</option>
+            <option value="Completed System Check">Completed System Check</option>
+          </Select>
+
+          <Input
             label="Estimated Arrival (ETA)"
-            fullWidth
-            variant="outlined"
-            placeholder="e.g. May 22, 2026 or Immediate"
+            type="text"
+            placeholder="e.g. Immediate, or 2026-06-15"
             value={pipelineEta}
             onChange={(e) => setPipelineEta(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseLogistics} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton 
-            onClick={handleLogLogistics} 
-            variant="contained" 
-            disabled={!pipelineMilestone}
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
-          >
-            Log Logistics Step
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button variant="secondary" onClick={handleCloseLogistics}>Cancel</Button>
+            <Button variant="primary" disabled={!pipelineMilestone} onClick={handleLogLogistics}>Log Logistics Step</Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Edit Consumption Log Modal */}
-      <Dialog open={openEditLog} onClose={handleCloseEditLog} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Edit feed consumption</DialogTitle>
-        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
-          <div className="h-2" />
-          <TextField
+      <Modal
+        isOpen={openEditLog}
+        onClose={handleCloseEditLog}
+        title="Edit Feed Consumption"
+        subtitle="Update quantity consumed for this log entry"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <Input
             label="Quantity Consumed (kg)"
             type="number"
-            fullWidth
-            variant="outlined"
+            min="0"
             value={editLogQty}
             onChange={(e) => setEditLogQty(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseEditLog} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton 
-            onClick={handleUpdateLog} 
-            variant="contained" 
-            disabled={!editLogQty}
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
-          >
-            Update Log
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button variant="secondary" onClick={handleCloseEditLog}>Cancel</Button>
+            <Button variant="primary" disabled={!editLogQty} onClick={handleUpdateLog}>Update Log</Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Edit Pipeline Modal */}
-      <Dialog open={openEditPipeline} onClose={handleCloseEditPipeline} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>Edit procurement pipeline</DialogTitle>
-        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
-          <div className="h-2" />
-          <TextField
+      <Modal
+        isOpen={openEditPipeline}
+        onClose={handleCloseEditPipeline}
+        title="Edit Procurement Pipeline"
+        subtitle="Update milestone status and estimated arrival date"
+        size="md"
+      >
+        <div className="space-y-4">
+          <Input
             label="Milestone Action"
-            fullWidth
-            variant="outlined"
+            type="text"
             value={editPipelineMilestone}
             onChange={(e) => setEditPipelineMilestone(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-          <TextField
+
+          <Input
             label="Supplier / Mill"
-            fullWidth
-            variant="outlined"
+            type="text"
             value={editPipelineSupplier}
             onChange={(e) => setEditPipelineSupplier(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
-          <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Status</InputLabel>
-            <Select
-              value={editPipelineStatus}
-              onChange={(e) => setEditPipelineStatus(e.target.value)}
-              label="Status"
-              className="rounded-sm"
-            >
-              <MenuItem value="Under Negotiations">Under Negotiations</MenuItem>
-              <MenuItem value="Under Contract">Under Contract</MenuItem>
-              <MenuItem value="Secured">Secured</MenuItem>
-              <MenuItem value="Delivered">Delivered</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="ETA"
-            fullWidth
-            variant="outlined"
-            placeholder="e.g., 2026-06-15"
-            value={editPipelineEta}
-            onChange={(e) => setEditPipelineEta(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseEditPipeline} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton 
-            onClick={handleUpdatePipeline} 
-            variant="contained" 
-            disabled={!editPipelineMilestone}
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
+
+          <Select
+            label="Status"
+            value={editPipelineStatus}
+            onChange={(e) => setEditPipelineStatus(e.target.value)}
           >
-            Update Pipeline
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+            <option value="Under Negotiations">Under Negotiations</option>
+            <option value="Under Contract">Under Contract</option>
+            <option value="Secured">Secured</option>
+            <option value="Delivered">Delivered</option>
+          </Select>
+
+          <Input
+            label="Estimated Arrival (ETA)"
+            type="text"
+            placeholder="e.g. 2026-06-15"
+            value={editPipelineEta}
+            onChange={(e) => setPipelineEta(e.target.value)}
+          />
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button variant="secondary" onClick={handleCloseEditPipeline}>Cancel</Button>
+            <Button variant="primary" disabled={!editPipelineMilestone} onClick={handleUpdatePipeline}>Update Pipeline</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

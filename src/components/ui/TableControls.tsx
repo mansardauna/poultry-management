@@ -20,7 +20,7 @@ export function TableControls({ searchTerm, setSearchTerm, placeholder = "Search
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50"
+          className="w-full pl-9 pr-4 py-2 sm:py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all bg-white shadow-sm"
         />
       </div>
       {actions && (

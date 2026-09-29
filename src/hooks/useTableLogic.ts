@@ -24,18 +24,20 @@ export function useTableLogic<T>({ data, searchFields = [], initialPageSize = 20
     });
   };
 
+  const safeData = Array.isArray(data) ? data : [];
+
   const filteredData = useMemo(() => {
-    if (!searchTerm || searchFields.length === 0) return data;
+    if (!searchTerm || searchFields.length === 0) return safeData;
     const lowerSearch = searchTerm.toLowerCase();
     
-    return data.filter(item => {
+    return safeData.filter(item => {
       return searchFields.some(field => {
         const val = item[field];
         if (val === null || val === undefined) return false;
         return String(val).toLowerCase().includes(lowerSearch);
       });
     });
-  }, [data, searchTerm, searchFields]);
+  }, [safeData, searchTerm, searchFields]);
 
   const sortedData = useMemo(() => {
     if (!sortConfig) return filteredData;

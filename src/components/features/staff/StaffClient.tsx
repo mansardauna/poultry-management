@@ -356,37 +356,37 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           <h1 className="text-2xl font-semibold text-slate-900">{TEXTS.staff.title}</h1>
           <p className="text-sm text-slate-500 mt-1">{TEXTS.staff.subtitle}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button 
             onClick={handleOpenTaskModal}
-            className="bg-white border-2 border-indigo-200 text-indigo-750 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+            className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <CheckSquare size={18} /> Assign Task
+            <CheckSquare size={17} /> Assign Task
           </button>
           <button 
             onClick={handleOpen}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={20} /> {TEXTS.staff.addStaff}
+            <Plus size={18} /> {TEXTS.staff.addStaff}
           </button>
         </div>
       </div>
 
-      {/* Free Plan Staff Limit Warning Banner */}
+      {/* Free Plan Staff Limit Warning Banner - Compact & Responsive */}
       {tier === 'free' && (
-        <div className="bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-amber-500/10 border-2 border-amber-400 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⚡</span>
-            <div>
-              <h4 className="text-sm font-bold text-slate-900">Free Starter Plan Limit ({staff.length}/2 Staff Members Registered)</h4>
-              <p className="text-xs text-slate-600">Upgrade to Commercial Pro to add unlimited farm workers, managers, and biometric tracking.</p>
+        <div className="border border-amber-300 bg-amber-50/90 px-3.5 py-2.5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-base shrink-0">⚡</span>
+            <div className="min-w-0">
+              <span className="font-bold text-amber-950">Free Starter Plan: </span>
+              <span className="text-amber-800 font-medium">({staff.length}/2 staff registered). Upgrade to Commercial Pro for unlimited workers.</span>
             </div>
           </div>
           <button
             onClick={() => router.push('/dashboard/settings')}
-            className="bg-gradient-to-r from-amber-500 to-indigo-600 text-white font-extrabold text-xs px-4 py-2 rounded-lg shadow hover:opacity-90 transition-opacity whitespace-nowrap"
+            className="text-[11px] font-bold bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
           >
-            Upgrade to Commercial Pro (₦15,000/mo)
+            Upgrade Plan
           </button>
         </div>
       )}

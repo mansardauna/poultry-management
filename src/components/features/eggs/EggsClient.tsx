@@ -549,16 +549,22 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         </div>
       </div>
 
-      {/* Quality Loss Warning Alerts Banner */}
+      {/* Quality Loss Warning Alerts Banner - Compact & Responsive */}
       {totalBrokenEggs > 0 && (
-        <div className="border-2 border-red-500 bg-red-50 p-4 flex items-center gap-4">
-          <AlertTriangle size={36} className="text-red-600 animate-pulse flex-shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-red-950 uppercase">Nesting Box Quality Loss Alert</p>
-            <p className="text-xs text-red-800 mt-0.5">
-              Quality control isolated <strong>{totalBrokenEggs} cracked/broken eggs</strong> during collection protocols. Audit laying box cushioning immediately to aggressively mitigate egg breakage rates.
-            </p>
+        <div className="border border-amber-300 bg-amber-50/90 px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertTriangle size={18} className="text-amber-600 shrink-0 animate-pulse" />
+            <div className="min-w-0 truncate">
+              <span className="font-bold text-amber-950">Egg Breakage Alert: </span>
+              <span className="text-amber-800 font-medium">{totalBrokenEggs} cracked/broken eggs detected. Cushioning check suggested.</span>
+            </div>
           </div>
+          <button 
+            onClick={handleOpenAudit}
+            className="text-[11px] font-bold bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
+          >
+            Audit Padding
+          </button>
         </div>
       )}
 

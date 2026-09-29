@@ -111,9 +111,9 @@ export function HousingClient({ role }: { role: string }) {
         {role !== 'Staff' && (
           <button 
             onClick={() => setOpen(true)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={20} /> Add Pen
+            <Plus size={18} /> Add Pen
           </button>
         )}
       </div>

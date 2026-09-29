@@ -339,27 +339,27 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
         <div className="flex flex-wrap gap-2">
           <button 
             onClick={handleOpenMortality}
-            className="bg-white border-2 border-red-200 text-red-700 px-4 py-2 text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-2 cursor-pointer"
+            className="bg-white border border-red-200 text-red-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <AlertTriangle size={18} /> {t("Log Mortality")}
+            <AlertTriangle size={17} /> {t("Log Mortality")}
           </button>
           <button 
             onClick={handleOpenVaccine}
-            className="bg-white border-2 border-indigo-200 text-indigo-700 px-4 py-2 text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2 cursor-pointer"
+            className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <Shield size={18} /> {t("Log Vaccination")}
+            <Shield size={17} /> {t("Log Vaccination")}
           </button>
           <button 
             onClick={handleOpenTransfer}
-            className="bg-white border-2 border-slate-200 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer"
+            className="bg-white border border-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <MapPin size={18} /> {t("Transfer Birds")}
+            <MapPin size={17} /> {t("Transfer Birds")}
           </button>
           <button 
             onClick={handleOpen}
-            className="bg-indigo-600 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2 cursor-pointer"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={20} /> {texts.chickens.addBatch}
+            <Plus size={18} /> {texts.chickens.addBatch}
           </button>
         </div>
       </div>

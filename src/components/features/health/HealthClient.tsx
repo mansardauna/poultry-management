@@ -189,18 +189,18 @@ export function HealthClient({ role }: { role: string }) {
           <p className="text-sm text-slate-500 mt-1">Manage flock medication routines and vaccination schedules.</p>
         </div>
         {role !== 'Staff' && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button 
               onClick={() => setOpenApply(true)}
-              className="bg-white border-2 border-indigo-200 text-indigo-700 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+              className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
             >
-              <Calendar size={20} /> Apply Template
+              <Calendar size={17} /> Apply Template
             </button>
             <button 
               onClick={() => setOpenTemplate(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
             >
-              <Plus size={20} /> Define New Template
+              <Plus size={18} /> Define New Template
             </button>
           </div>
         )}

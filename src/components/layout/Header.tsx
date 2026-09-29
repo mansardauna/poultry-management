@@ -297,17 +297,6 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         <Menu size={22} />
       </button>
 
-      {/* Mobile Search Icon Button (visible when search is NOT active on mobile) */}
-      {!isSearchFocused && (
-        <button
-          onClick={() => setIsSearchFocused(true)}
-          className="sm:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer ml-1"
-          aria-label="Search"
-        >
-          <Search size={20} />
-        </button>
-      )}
-
       {/* Expanding & Active Search Bar Container */}
       <div 
         ref={searchContainerRef}
@@ -433,6 +422,18 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     </div>
 
       <div className="flex items-center space-x-1.5 sm:space-x-3">
+        {/* Mobile Search Button (grouped with right items) */}
+        {!isSearchFocused && (
+          <button
+            onClick={() => setIsSearchFocused(true)}
+            className="sm:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            aria-label="Search"
+            title="Search"
+          >
+            <Search size={20} />
+          </button>
+        )}
+
         {/* Desktop Time Range Filter (Hidden on mobile & hidden for SuperAdmin) */}
         {role !== 'SuperAdmin' && (
           <div className="hidden md:flex relative items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors">
@@ -489,7 +490,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
 
           {/* Dropdown */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-[360px] sm:max-w-[384px] bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="fixed top-16 right-3 sm:absolute sm:top-auto sm:right-0 mt-1 w-[calc(100vw-1.5rem)] sm:w-96 max-w-[360px] sm:max-w-[384px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">
                 <div className="flex items-center gap-2">

@@ -68,3 +68,68 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(129, 140, 248, 0.3) transparent;
 }
+
+/* Universal UI Uniformity Enforcements (Buttons, Inputs, Modals, Cards) */
+@layer components {
+  /* Harmonize MUI Outlined Inputs to match PFMS Input standard */
+  .MuiOutlinedInput-root {
+    border-radius: 0.75rem !important; /* rounded-xl */
+    font-family: inherit !important;
+    font-size: 0.875rem !important;
+    background-color: #ffffff !important;
+    transition: all 0.15s ease-in-out !important;
+  }
+  
+  .MuiOutlinedInput-notchedOutline {
+    border-color: #cbd5e1 !important; /* slate-300 */
+    border-width: 1px !important;
+  }
+  
+  .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #4f46e5 !important; /* indigo-600 */
+    border-width: 1.5px !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+  }
+
+  .MuiInputLabel-root {
+    font-family: inherit !important;
+    font-size: 0.8125rem !important;
+    color: #475569 !important; /* slate-600 */
+    font-weight: 500 !important;
+  }
+
+  .MuiInputLabel-root.Mui-focused {
+    color: #4f46e5 !important;
+  }
+
+  /* Harmonize MUI Dialogs to match PFMS Modal standard */
+  .MuiDialog-paper {
+    border-radius: 1.5rem !important; /* rounded-3xl */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid #e2e8f0 !important;
+    font-family: inherit !important;
+  }
+
+  .MuiDialogTitle-root {
+    font-family: inherit !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    padding: 1.25rem 1.5rem 0.75rem 1.5rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+
+  /* Harmonize MUI Buttons */
+  .MuiButton-root {
+    border-radius: 0.75rem !important; /* rounded-xl */
+    text-transform: none !important;
+    font-family: inherit !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 1rem !important;
+    box-shadow: none !important;
+    transition: all 0.15s ease-in-out !important;
+  }
+
+  .MuiButton-root:active {
+    transform: scale(0.97);
+  }
+}
