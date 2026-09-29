@@ -145,10 +145,38 @@ export async function POST(request: Request) {
     const today = new Date().toISOString().split('T')[0];
     let parsed: any = null;
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
+    // 1. Fetch AI Configuration from systemSettings or environment
+    let aiProvider = 'gemini';
+    let aiApiKey = '';
+    let aiModel = '';
+
+    try {
+      const { data: gatewayData } = await serviceRoleClient
+        .from('systemSettings')
+        .select('adminName')
+        .eq('id', 'gateways_config')
+        .maybeSingle();
+
+      if (gatewayData?.adminName) {
+        const parsedGw = JSON.parse(gatewayData.adminName);
+        if (parsedGw.aiProvider) aiProvider = String(parsedGw.aiProvider).toLowerCase().trim();
+        if (parsedGw.aiApiKey) aiApiKey = String(parsedGw.aiApiKey).trim();
+        if (parsedGw.aiModel) aiModel = String(parsedGw.aiModel).trim();
+      }
+    } catch (_e) {}
+
+    // Fallback environment variables
+    if (!aiApiKey) {
+      if (aiProvider === 'gemini') aiApiKey = process.env.GEMINI_API_KEY || '';
+      else if (aiProvider === 'openai') aiApiKey = process.env.OPENAI_API_KEY || '';
+      else if (aiProvider === 'groq') aiApiKey = process.env.GROQ_API_KEY || '';
+      else if (aiProvider === 'deepseek') aiApiKey = process.env.DEEPSEEK_API_KEY || '';
+      else if (aiProvider === 'anthropic') aiApiKey = process.env.ANTHROPIC_API_KEY || '';
+      else aiApiKey = process.env.GEMINI_API_KEY || '';
+    }
+
+    if (aiApiKey) {
       try {
-        const ai = new GoogleGenAI({ apiKey });
         const systemPrompt = `You are a Poultry Farm Management AI Assistant. Your job is to extract data from natural language daily reports and output them in strict JSON format. 
 Here are the farm rules:
 - 1 crate of eggs = 30 pieces.
@@ -165,20 +193,115 @@ Return a JSON object with this exact structure:
   "mortalityCount": number
 }`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: text,
-          config: {
-            systemInstruction: systemPrompt,
-            responseMimeType: 'application/json',
-          }
-        });
+        if (aiProvider === 'gemini') {
+          const ai = new GoogleGenAI({ apiKey: aiApiKey });
+          const response = await ai.models.generateContent({
+            model: aiModel || 'gemini-2.0-flash',
+            contents: text,
+            config: {
+              systemInstruction: systemPrompt,
+              responseMimeType: 'application/json',
+            }
+          });
 
-        if (response.text) {
-          parsed = JSON.parse(response.text);
+          if (response.text) {
+            parsed = JSON.parse(response.text);
+          }
+        } else if (aiProvider === 'openai') {
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${aiApiKey}`
+            },
+            body: JSON.stringify({
+              model: aiModel || 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: text }
+              ],
+              response_format: { type: 'json_object' }
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const content = data?.choices?.[0]?.message?.content;
+            if (content) parsed = JSON.parse(content);
+          }
+        } else if (aiProvider === 'groq') {
+          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${aiApiKey}`
+            },
+            body: JSON.stringify({
+              model: aiModel || 'llama-3.3-70b-versatile',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: text }
+              ],
+              response_format: { type: 'json_object' }
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const content = data?.choices?.[0]?.message?.content;
+            if (content) parsed = JSON.parse(content);
+          }
+        } else if (aiProvider === 'deepseek') {
+          const res = await fetch('https://api.deepseek.com/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${aiApiKey}`
+            },
+            body: JSON.stringify({
+              model: aiModel || 'deepseek-chat',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: text }
+              ],
+              response_format: { type: 'json_object' }
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const content = data?.choices?.[0]?.message?.content;
+            if (content) parsed = JSON.parse(content);
+          }
+        } else if (aiProvider === 'anthropic') {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': aiApiKey,
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: aiModel || 'claude-3-5-sonnet-20241022',
+              max_tokens: 1024,
+              system: systemPrompt + ' Output ONLY raw valid JSON, with no markdown ticks or explanation.',
+              messages: [
+                { role: 'user', content: text }
+              ]
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const rawText = data?.content?.[0]?.text;
+            if (rawText) {
+              const clean = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+              parsed = JSON.parse(clean);
+            }
+          }
         }
-      } catch (geminiError) {
-        console.warn('Gemini API call failed, falling back to smart NLP parser:', geminiError);
+      } catch (providerError) {
+        console.warn(`[AI-Parse] ${aiProvider} API call failed, falling back to smart NLP parser:`, providerError);
       }
     }
 

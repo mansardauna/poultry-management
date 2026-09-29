@@ -30,6 +30,9 @@ export async function GET() {
       fromEmail: 'support@pfms-poultry.com',
       platformName: 'PFMS',
       currencySymbol: '₦',
+      aiProvider: 'gemini',
+      aiApiKey: process.env.GEMINI_API_KEY || '',
+      aiModel: 'gemini-2.0-flash',
     };
 
     if (gatewayData?.adminName) {
@@ -71,6 +74,9 @@ export async function POST(request: Request) {
       stripeWebhookSecret = '',
       resendApiKey = '',
       fromEmail = 'support@pfms-poultry.com',
+      aiProvider = 'gemini',
+      aiApiKey = '',
+      aiModel = '',
     } = body;
 
     // Fetch existing gateway config to merge
@@ -98,6 +104,9 @@ export async function POST(request: Request) {
       stripeWebhookSecret: String(stripeWebhookSecret).trim(),
       resendApiKey: String(resendApiKey).trim(),
       fromEmail: String(fromEmail).trim(),
+      aiProvider: String(aiProvider).trim() || 'gemini',
+      aiApiKey: String(aiApiKey).trim(),
+      aiModel: String(aiModel).trim(),
       updatedAt: new Date().toISOString(),
     };
 

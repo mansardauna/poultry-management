@@ -34,10 +34,50 @@ import {
   ChevronRight,
   Activity,
   Users,
-  Upload
+  Upload,
+  Bot,
+  Cpu
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useLanguage } from '@/components/features/LanguageContext';
+
+export const AI_PRESETS: Record<string, { name: string; defaultModel: string; models: string[]; keyPlaceholder: string; consoleUrl: string }> = {
+  gemini: {
+    name: 'Google Gemini',
+    defaultModel: 'gemini-2.0-flash',
+    models: ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'],
+    keyPlaceholder: 'AIzaSy...',
+    consoleUrl: 'https://aistudio.google.com/app/apikey',
+  },
+  openai: {
+    name: 'OpenAI (ChatGPT)',
+    defaultModel: 'gpt-4o-mini',
+    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
+    keyPlaceholder: 'sk-proj-...',
+    consoleUrl: 'https://platform.openai.com/api-keys',
+  },
+  groq: {
+    name: 'Groq Cloud (Llama 3.3)',
+    defaultModel: 'llama-3.3-70b-versatile',
+    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
+    keyPlaceholder: 'gsk_...',
+    consoleUrl: 'https://console.groq.com/keys',
+  },
+  deepseek: {
+    name: 'DeepSeek AI',
+    defaultModel: 'deepseek-chat',
+    models: ['deepseek-chat', 'deepseek-reasoner'],
+    keyPlaceholder: 'sk-...',
+    consoleUrl: 'https://platform.deepseek.com/api_keys',
+  },
+  anthropic: {
+    name: 'Anthropic Claude',
+    defaultModel: 'claude-3-5-sonnet-20241022',
+    models: ['claude-3-5-sonnet-20241022', 'claude-3-haiku-20240307'],
+    keyPlaceholder: 'sk-ant-api03-...',
+    consoleUrl: 'https://console.anthropic.com/settings/keys',
+  },
+};
 
 export interface SaasPlanConfig {
   id: string;
@@ -162,6 +202,12 @@ export function AdminCmsClient({
   const [resendApiKey, setResendApiKey] = useState('');
   const [showResendKey, setShowResendKey] = useState(false);
 
+  // Artificial Intelligence (AI) Gateway
+  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai' | 'groq' | 'deepseek' | 'anthropic'>('gemini');
+  const [aiApiKey, setAiApiKey] = useState('');
+  const [aiModel, setAiModel] = useState('');
+  const [showAiSecret, setShowAiSecret] = useState(false);
+
   // System Versioning & Upgrade State
   const [versionInfo, setVersionInfo] = useState<{
     currentVersion: string;
@@ -231,6 +277,9 @@ export function AdminCmsClient({
           if (g.stripeSecretKey) setStripeSecretKey(g.stripeSecretKey);
           if (g.stripeWebhookSecret) setStripeWebhookSecret(g.stripeWebhookSecret);
           if (g.resendApiKey) setResendApiKey(g.resendApiKey);
+          if (g.aiProvider) setAiProvider(g.aiProvider);
+          if (g.aiApiKey) setAiApiKey(g.aiApiKey);
+          if (g.aiModel) setAiModel(g.aiModel);
         }
       }
     } catch (_e) {}
@@ -279,6 +328,9 @@ export function AdminCmsClient({
           stripeWebhookSecret,
           resendApiKey,
           fromEmail,
+          aiProvider,
+          aiApiKey,
+          aiModel,
         })
       });
 
@@ -938,6 +990,113 @@ export function AdminCmsClient({
                   onChange={(e) => setFromEmail(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 bg-slate-50 focus:bg-white"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Artificial Intelligence (AI) Gateway */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                  <Bot size={18} className="text-indigo-600" /> Artificial Intelligence (AI) Gateway
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Select your preferred LLM provider and enter your API key to power the Voice & Quick Text Auto-Logger.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1.5 whitespace-nowrap">
+                  <Cpu size={12} />
+                  Active: {AI_PRESETS[aiProvider]?.name || 'Google Gemini'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowAiSecret(!showAiSecret)}
+                  className="text-xs font-bold text-indigo-700 hover:underline flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                >
+                  {showAiSecret ? <EyeOff size={14} /> : <Eye size={14} />}
+                  <span>{showAiSecret ? 'Hide Key' : 'Show Key'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  AI Provider
+                </label>
+                <select
+                  value={aiProvider}
+                  onChange={(e) => {
+                    const newProvider = e.target.value as any;
+                    setAiProvider(newProvider);
+                    if (AI_PRESETS[newProvider]) {
+                      setAiModel(AI_PRESETS[newProvider].defaultModel);
+                    }
+                  }}
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 bg-slate-50 focus:bg-white"
+                >
+                  <option value="gemini">Google Gemini (Recommended / High Speed)</option>
+                  <option value="openai">OpenAI (ChatGPT / GPT-4o)</option>
+                  <option value="groq">Groq Cloud (Llama 3.3 / Ultra-Fast)</option>
+                  <option value="deepseek">DeepSeek AI (DeepSeek-V3)</option>
+                  <option value="anthropic">Anthropic Claude (Claude 3.5)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                  <span>Model ID</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Preset or custom</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={aiModel || (AI_PRESETS[aiProvider]?.defaultModel || '')}
+                    onChange={(e) => setAiModel(e.target.value)}
+                    list="ai-model-options"
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono font-medium text-slate-800 bg-slate-50 focus:bg-white"
+                    placeholder={AI_PRESETS[aiProvider]?.defaultModel || 'Model identifier'}
+                  />
+                  <datalist id="ai-model-options">
+                    {AI_PRESETS[aiProvider]?.models.map((m) => (
+                      <option key={m} value={m} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                  <span>API Key</span>
+                  {AI_PRESETS[aiProvider]?.consoleUrl && (
+                    <a
+                      href={AI_PRESETS[aiProvider].consoleUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[10px] text-indigo-600 hover:underline flex items-center gap-0.5"
+                    >
+                      <span>Get API Key</span>
+                      <ExternalLink size={10} />
+                    </a>
+                  )}
+                </label>
+                <input
+                  type={showAiSecret ? 'text' : 'password'}
+                  value={aiApiKey}
+                  onChange={(e) => setAiApiKey(e.target.value)}
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-purple-900 bg-slate-50 focus:bg-white"
+                  placeholder={AI_PRESETS[aiProvider]?.keyPlaceholder || 'Enter API Key...'}
+                />
+              </div>
+            </div>
+
+            <div className="p-3 bg-gradient-to-r from-purple-50/70 via-indigo-50/50 to-blue-50/70 border border-purple-100 rounded-xl flex items-start gap-2.5 text-[11px] text-slate-600">
+              <Sparkles size={16} className="text-purple-600 shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-slate-800 font-bold">Zero-Downtime Smart Fallback: </strong>
+                If the selected provider is unreachable, out of credits, or no API key is specified, the system automatically falls back to the built-in offline smart poultry rule parser with 100% continuous uptime.
               </div>
             </div>
           </div>
