@@ -857,45 +857,13 @@ export function AdminCmsClient({
             </button>
           </div>
 
-          {/* Platform Identity & Master Super Admin Credentials */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
-              <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <Building2 size={16} className="text-indigo-600" /> Platform Brand & Currency Symbol
-              </h3>
+          {/* Master Super Admin Credentials */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm max-w-2xl">
+            <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+              <Lock size={16} className="text-indigo-600" /> Master Super Admin Credentials
+            </h3>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Application Title</label>
-                <input
-                  type="text"
-                  value={platformName}
-                  onChange={(e) => setPlatformName(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-800 bg-slate-50 focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Primary Currency Symbol</label>
-                <select
-                  value={currencySymbol}
-                  onChange={(e) => setCurrencySymbol(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-slate-800 bg-slate-50 focus:bg-white"
-                >
-                  <option value="₦">₦ - Nigerian Naira (NGN)</option>
-                  <option value="$">$ - US Dollar (USD)</option>
-                  <option value="€">€ - Euro (EUR)</option>
-                  <option value="£">£ - British Pound (GBP)</option>
-                  <option value="KSh">KSh - Kenyan Shilling (KES)</option>
-                  <option value="GH₵">GH₵ - Ghanaian Cedi (GHS)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
-              <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <Lock size={16} className="text-indigo-600" /> Master Super Admin Credentials
-              </h3>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">Super Admin Email</label>
                 <input
@@ -908,19 +876,19 @@ export function AdminCmsClient({
 
               <div className="relative">
                 <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                  Update Super Admin Password (Optional)
+                  Update Password (Optional)
                 </label>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={superAdminPassword}
                   onChange={(e) => setSuperAdminPassword(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 pr-10 text-xs font-mono text-slate-800 bg-slate-50 focus:bg-white"
-                  placeholder="Leave blank to keep current password"
+                  placeholder="Leave blank to keep current"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-8 text-slate-400 hover:text-indigo-600 p-1"
+                  className="absolute right-3 top-8 text-slate-400 hover:text-indigo-600 p-1 cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -1516,15 +1484,22 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Platform Currency Symbol</label>
-                <input
-                  type="text"
-                  maxLength={5}
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Platform Currency</label>
+                <select
                   value={currencySymbol}
                   onChange={(e) => setCurrencySymbol(e.target.value)}
-                  placeholder="e.g. ₦, $, €, £"
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-emerald-700 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none text-center"
-                />
+                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-emerald-700 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none cursor-pointer"
+                >
+                  <option value="₦">₦ - Nigerian Naira (NGN)</option>
+                  <option value="$">$ - US Dollar (USD)</option>
+                  <option value="€">€ - Euro (EUR)</option>
+                  <option value="£">£ - British Pound (GBP)</option>
+                  <option value="KSh">KSh - Kenyan Shilling (KES)</option>
+                  <option value="GH₵">GH₵ - Ghanaian Cedi (GHS)</option>
+                  <option value="CFA">CFA - West African Franc (XOF)</option>
+                  <option value="R">R - South African Rand (ZAR)</option>
+                  <option value="UGX">UGX - Ugandan Shilling (UGX)</option>
+                </select>
               </div>
             </div>
 

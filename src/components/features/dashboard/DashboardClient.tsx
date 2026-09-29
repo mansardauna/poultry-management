@@ -31,6 +31,7 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
+import { printComprehensiveFarmReport } from '@/lib/exportReports';
 import { useWorkspace } from "../WorkspaceContext";
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
@@ -159,6 +160,23 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
     } finally {
       setIsSubmittingEgg(false);
     }
+  };
+
+  const handlePrintComprehensiveReport = () => {
+    printComprehensiveFarmReport({
+      farmName: activeWorkspace?.name || 'Poultry Farm Enterprise',
+      workspaceName: activeWorkspace?.name || 'Main Farm Workspace',
+      currencySymbol: '₦',
+      batches: data.batches || [],
+      eggs: data.eggs || [],
+      feeds: data.feeds || [],
+      sales: data.sales || [],
+      invoices: data.invoices || [],
+      expenses: data.expenses || [],
+      staff: data.staff || [],
+      tasks: data.tasks || [],
+      pens: (data as any).housing || (data as any).pens || []
+    });
   };
 
   // Period setup
@@ -445,7 +463,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </button>
           <button 
             data-tour="print-report-btn"
-            onClick={() => window.print()}
+            onClick={handlePrintComprehensiveReport}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap active:scale-95"
           >
             <Printer size={15} className="shrink-0" />

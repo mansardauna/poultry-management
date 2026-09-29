@@ -7,6 +7,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+  icon?: ReactNode;
+  fullWidth?: boolean;
   children: ReactNode;
 }
 
@@ -36,6 +38,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     isLoading = false,
     leftIcon,
     rightIcon,
+    icon,
+    fullWidth = false,
     className = '',
     disabled,
     children,
@@ -46,13 +50,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 ) {
   const variantClass = VARIANT_MAPS[variant] || VARIANT_MAPS.primary;
   const sizeClass = SIZE_MAPS[size] || SIZE_MAPS.md;
+  const effectiveLeftIcon = leftIcon || icon;
 
   return (
     <button
       ref={ref}
       type={type}
       disabled={disabled || isLoading}
-      className={`inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none ${variantClass} ${sizeClass} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none ${fullWidth ? 'w-full' : ''} ${variantClass} ${sizeClass} ${className}`}
       {...props}
     >
       {isLoading ? (
@@ -60,7 +65,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-      ) : leftIcon}
+      ) : effectiveLeftIcon}
       {children}
       {!isLoading && rightIcon}
     </button>

@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, Coins, FileText, MessageSquare, Printer, Trash2, X, Link as LinkIcon, Copy, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { TEXTS } from "@/lib/constants/texts";
 import { Sale, Invoice, ChickenBatch } from "@/data/types";
-import { downloadCSV, printBrandedReport } from '@/lib/exportReports';
+import { downloadCSV, printBrandedReport, printInvoiceReceipt } from '@/lib/exportReports';
 import { 
   Dialog, 
   DialogTitle, 
@@ -205,7 +205,40 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   };
 
   const handlePrint = () => {
-    window.print();
+    if (selectedInvoice) {
+      printInvoiceReceipt(selectedInvoice, 'Poultry Farm Enterprise');
+    } else {
+      window.print();
+    }
+  };
+
+  const handleUpdateInvoiceStatus = async (id: string, newStatus: string) => {
+    try {
+      toast.loading(`Updating invoice status to ${newStatus}...`, { id: 'status-toast' });
+      const res = await fetch('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateInvoiceStatus',
+          id,
+          status: newStatus
+        })
+      });
+      toast.dismiss('status-toast');
+      if (res.ok) {
+        setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, status: newStatus } : inv));
+        if (selectedInvoice && selectedInvoice.id === id) {
+          setSelectedInvoice({ ...selectedInvoice, status: newStatus });
+        }
+        toast.success(`Invoice marked as ${newStatus}!`);
+        refreshData();
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch {
+      toast.dismiss('status-toast');
+      toast.error('Error updating status');
+    }
   };
 
   const handleCreateInvoice = async () => {
@@ -408,6 +441,15 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                         </td>
                         <td className="px-4 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">
+                            {inv.status !== 'Paid' && (
+                              <button
+                                onClick={() => handleUpdateInvoiceStatus(inv.id, 'Paid')}
+                                className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold transition-colors cursor-pointer border border-emerald-200 shrink-0"
+                                title="Mark as Paid"
+                              >
+                                Mark Paid
+                              </button>
+                            )}
                             <button
                               onClick={() => handleViewInvoice(inv)}
                               className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
@@ -941,10 +983,43 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               </table>
             </div>
 
-            <div className="pt-4 flex justify-end">
-              <MuiButton onClick={handleCloseInvoiceView} variant="outlined" sx={{ textTransform: 'none', color: '#64748b', borderColor: '#cbd5e1' }}>
-                Close Preview
-              </MuiButton>
+            <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <span className="text-xs font-bold text-slate-500 uppercase">Change Status:</span>
+                <select
+                  value={selectedInvoice?.status || 'Unpaid'}
+                  onChange={(e) => selectedInvoice && handleUpdateInvoiceStatus(selectedInvoice.id, e.target.value)}
+                  className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-sm"
+                >
+                  <option value="Unpaid">Unpaid</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Paid">Paid</option>
+                </select>
+
+                {selectedInvoice?.status !== 'Paid' && (
+                  <button
+                    onClick={() => selectedInvoice && handleUpdateInvoiceStatus(selectedInvoice.id, 'Paid')}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1 cursor-pointer active:scale-95"
+                  >
+                    <CheckCircle2 size={13} /> Mark as Paid (Offline)
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <button
+                  onClick={handlePrint}
+                  className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Printer size={14} /> Print Receipt PDF
+                </button>
+                <button 
+                  onClick={handleCloseInvoiceView} 
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                >
+                  Close Preview
+                </button>
+              </div>
             </div>
           </div>
         </DialogContent>

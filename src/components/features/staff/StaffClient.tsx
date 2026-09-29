@@ -320,29 +320,56 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
 
   const handleDeleteStaff = async (id: string) => {
     if (!confirm('Remove this staff member?')) return;
+    setStaff((prev) => prev.filter((s) => s.id !== id));
     try {
       const res = await fetch(`/api/staff?id=${id}`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Staff member removed.'); }
-      else toast.error('Failed to remove staff');
-    } catch (err) { console.error(err); }
+      if (res.ok) {
+        refreshData();
+        toast.success('Staff member removed.');
+      } else {
+        refreshData();
+        toast.error('Failed to remove staff');
+      }
+    } catch (err) {
+      console.error(err);
+      refreshData();
+    }
   };
 
   const handleDeleteTask = async (id: string) => {
     if (!confirm('Delete this task?')) return;
+    setTasks((prev) => prev.filter((t) => t.id !== id));
     try {
       const res = await fetch(`/api/staff?id=${id}&type=task`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Task deleted.'); }
-      else toast.error('Failed to delete task');
-    } catch (err) { console.error(err); }
+      if (res.ok) {
+        refreshData();
+        toast.success('Task deleted.');
+      } else {
+        refreshData();
+        toast.error('Failed to delete task');
+      }
+    } catch (err) {
+      console.error(err);
+      refreshData();
+    }
   };
 
   const handleDeletePayrollLog = async (id: string) => {
     if (!confirm('Delete this payroll log?')) return;
+    setPayrollLogs((prev) => prev.filter((p) => p.id !== id));
     try {
       const res = await fetch(`/api/staff?id=${id}&type=payroll`, { method: 'DELETE' });
-      if (res.ok) { refreshData(); toast.success('Payroll log deleted.'); }
-      else toast.error('Failed to delete payroll log');
-    } catch (err) { console.error(err); }
+      if (res.ok) {
+        refreshData();
+        toast.success('Payroll log deleted.');
+      } else {
+        refreshData();
+        toast.error('Failed to delete payroll log');
+      }
+    } catch (err) {
+      console.error(err);
+      refreshData();
+    }
   };
 
   const totalStaff = staff.length;
