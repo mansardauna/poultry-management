@@ -203,22 +203,37 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
-    const body = await request.json();
+    const { searchParams } = new URL(request.url);
+    let id = searchParams.get('id');
+    let action = searchParams.get('action');
 
-    if (body.action === 'deleteAudit') {
-      await supabase.from('cushionAudits').delete().eq('id', body.id).eq('workspaceId', workspaceId);
-      return NextResponse.json({ success: true });
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+      action = body.action || action;
     }
 
-    if (body.action === 'deleteMaturation') {
-      await supabase.from('maturationLogs').delete().eq('id', body.id).eq('workspaceId', workspaceId);
-      return NextResponse.json({ success: true });
+    if (!id) {
+      return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
     }
 
-    await supabase.from('eggs').delete().eq('id', body.id).eq('workspaceId', workspaceId);
-    return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
+    if (action === 'deleteAudit') {
+      const { error } = await supabase.from('cushionAudits').delete().eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, deleted: 'audit' });
+    }
+
+    if (action === 'deleteMaturation') {
+      const { error } = await supabase.from('maturationLogs').delete().eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, deleted: 'maturation' });
+    }
+
+    const { error } = await supabase.from('eggs').delete().eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, deleted: 'egg' });
+  } catch (err: any) {
+    console.error('Delete egg error:', err);
+    return NextResponse.json({ error: 'Failed to delete record: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

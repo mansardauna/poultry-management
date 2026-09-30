@@ -101,18 +101,27 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const type = searchParams.get('type');
+    let id = searchParams.get('id');
+    let type = searchParams.get('type');
+
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+      type = body.type || type;
+    }
+
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
     if (type === 'template') {
-      await supabase.from('medicationTemplates').delete().eq('id', id).eq('workspaceId', workspaceId);
+      const { error } = await supabase.from('medicationTemplates').delete().eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     } else {
-      await supabase.from('medicationSchedules').delete().eq('id', id).eq('workspaceId', workspaceId);
+      const { error } = await supabase.from('medicationSchedules').delete().eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: 'Failed to delete: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

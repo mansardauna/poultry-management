@@ -144,3 +144,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to complete CCTV action' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    let id = searchParams.get('id');
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+    }
+    if (!id) return NextResponse.json({ error: 'Camera ID required' }, { status: 400 });
+    const { error } = await supabase.from('cctv_cameras').delete().eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: 'Failed to delete camera: ' + (err?.message || String(err)) }, { status: 500 });
+  }
+}

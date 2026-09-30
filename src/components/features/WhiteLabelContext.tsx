@@ -8,6 +8,11 @@ export interface WhiteLabelSettings {
   subdomain: string;
   logoUrl: string;
   brandColor: 'indigo' | 'emerald' | 'purple' | 'amber' | 'slate';
+  brandName: string;
+  platformName: string;
+  brandLogoText: string;
+  primaryColor: string;
+  currencySymbol: string;
   customReportHeader: string;
   customInvoiceFooter: string;
   themeMode: string;
@@ -19,6 +24,11 @@ const DEFAULT_SETTINGS: WhiteLabelSettings = {
   subdomain: 'main',
   logoUrl: '',
   brandColor: 'indigo',
+  brandName: 'PFMS',
+  platformName: 'PFMS',
+  brandLogoText: 'P',
+  primaryColor: '#4f46e5',
+  currencySymbol: '₦',
   customReportHeader: 'Official Farm Management Analytics Report',
   customInvoiceFooter: 'Thank you for buying from our certified organic poultry farm!',
   themeMode: 'modern',
@@ -33,10 +43,55 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
     subdomain: DEFAULT_SETTINGS.subdomain,
     logoUrl: DEFAULT_SETTINGS.logoUrl,
     brandColor: DEFAULT_SETTINGS.brandColor,
+    brandName: DEFAULT_SETTINGS.brandName,
+    platformName: DEFAULT_SETTINGS.platformName,
+    brandLogoText: DEFAULT_SETTINGS.brandLogoText,
+    primaryColor: DEFAULT_SETTINGS.primaryColor,
+    currencySymbol: DEFAULT_SETTINGS.currencySymbol,
     customReportHeader: DEFAULT_SETTINGS.customReportHeader,
     customInvoiceFooter: DEFAULT_SETTINGS.customInvoiceFooter,
     themeMode: DEFAULT_SETTINGS.themeMode,
   });
+
+  const loadBrandAndSettings = () => {
+    // 1. Fetch Global Platform CMS / Branding / Currency (propagate to all tenants)
+    fetch('/api/admin/cms')
+      .then(res => res.ok ? res.json() : null)
+      .then(cms => {
+        if (cms) {
+          setSettings(prev => ({
+            ...prev,
+            brandName: cms.brandName || prev.brandName,
+            platformName: cms.platformName || cms.brandName || prev.platformName,
+            brandLogoText: cms.brandLogoText || prev.brandLogoText,
+            logoUrl: cms.logoUrl !== undefined && cms.logoUrl !== '' ? cms.logoUrl : prev.logoUrl,
+            primaryColor: cms.primaryColor || prev.primaryColor,
+            currencySymbol: cms.currencySymbol || prev.currencySymbol,
+          }));
+        }
+      })
+      .catch(() => {});
+
+    // 2. Fetch authoritative database settings from /api/enterprise for the current workspace
+    fetch('/api/enterprise')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.cooperative) {
+          const c = data.cooperative;
+          setSettings(prev => ({
+            ...prev,
+            coopName: c.coopName || prev.coopName,
+            subdomain: c.subdomain || prev.subdomain,
+            logoUrl: c.logoUrl || prev.logoUrl,
+            brandColor: (c.brandColor || prev.brandColor) as any,
+            customReportHeader: c.customReportHeader || prev.customReportHeader,
+            customInvoiceFooter: c.customInvoiceFooter || prev.customInvoiceFooter,
+            themeMode: c.themeMode || prev.themeMode,
+          }));
+        }
+      })
+      .catch(() => {});
+  };
 
   useEffect(() => {
     // Purge legacy un-scoped browser localStorage white-label settings to prevent cross-account leakage
@@ -46,25 +101,14 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
       }
     } catch (_e) {}
 
-    // Fetch authoritative database settings from /api/enterprise for the current workspace ONLY
-    fetch('/api/enterprise')
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data?.cooperative) {
-          const c = data.cooperative;
-          const newSet = {
-            coopName: c.coopName || '',
-            subdomain: c.subdomain || DEFAULT_SETTINGS.subdomain,
-            logoUrl: c.logoUrl || DEFAULT_SETTINGS.logoUrl,
-            brandColor: (c.brandColor || DEFAULT_SETTINGS.brandColor) as any,
-            customReportHeader: c.customReportHeader || DEFAULT_SETTINGS.customReportHeader,
-            customInvoiceFooter: c.customInvoiceFooter || DEFAULT_SETTINGS.customInvoiceFooter,
-            themeMode: c.themeMode || DEFAULT_SETTINGS.themeMode,
-          };
-          setSettings(newSet);
-        }
-      })
-      .catch(() => {});
+    loadBrandAndSettings();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pfms_brand_updated', loadBrandAndSettings);
+      return () => {
+        window.removeEventListener('pfms_brand_updated', loadBrandAndSettings);
+      };
+    }
   }, []);
 
   const updateWhiteLabel = async (newSettings: Partial<WhiteLabelSettings>) => {

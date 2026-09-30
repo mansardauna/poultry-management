@@ -330,15 +330,20 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             <div className="relative flex-1">
               {role === 'Staff' && workspaces.length <= 1 ? (
                 <div className="w-full flex items-center justify-between py-2 px-2 rounded-md text-left">
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-2.5 truncate">
                     {whiteLabel.logoUrl ? (
-                      <img src={whiteLabel.logoUrl} alt="Logo" className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                      <img src={whiteLabel.logoUrl} alt="Logo" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 shadow-sm" />
                     ) : (
-                      <Box size={24} className="text-blue-400 flex-shrink-0" />
+                      <div 
+                        className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs text-white shadow-sm flex-shrink-0"
+                        style={{ backgroundColor: whiteLabel.primaryColor || '#4f46e5' }}
+                      >
+                        {whiteLabel.brandLogoText || 'P'}
+                      </div>
                     )}
                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Assigned Branch'}</span>
-                      <span className="text-xs text-indigo-400">Assigned Branch</span>
+                      <span className="text-xs text-indigo-400">{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
                     </div>
                   </div>
                 </div>
@@ -348,15 +353,20 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="w-full flex items-center justify-between py-2 px-2 hover:bg-indigo-900 rounded-md transition-colors text-left"
                   >
-                    <div className="flex items-center gap-2 truncate">
+                    <div className="flex items-center gap-2.5 truncate">
                       {whiteLabel.logoUrl ? (
-                        <img src={whiteLabel.logoUrl} alt="Logo" className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                        <img src={whiteLabel.logoUrl} alt="Logo" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 shadow-sm" />
                       ) : (
-                        <Box size={24} className="text-blue-400 flex-shrink-0" />
+                        <div 
+                          className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs text-white shadow-sm flex-shrink-0"
+                          style={{ backgroundColor: whiteLabel.primaryColor || '#4f46e5' }}
+                        >
+                          {whiteLabel.brandLogoText || 'P'}
+                        </div>
                       )}
                       <div className="flex flex-col truncate">
                         <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Main'}</span>
-                        <span className="text-xs text-indigo-400">{whiteLabel.coopName || activeWorkspace?.type || 'Farm Branch'}</span>
+                        <span className="text-xs text-indigo-400">{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
                       </div>
                     </div>
                     <ChevronDown size={16} className={clsx("text-indigo-400 transition-transform", isDropdownOpen && "rotate-180")} />
@@ -443,8 +453,15 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             </>
           )}
         </div>
+          ) : whiteLabel.logoUrl ? (
+            <img src={whiteLabel.logoUrl} alt="Logo" className="w-8 h-8 rounded-lg object-cover mx-auto shadow-sm" />
           ) : (
-            <Box size={28} className="text-blue-400 mx-auto" />
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm text-white mx-auto shadow-sm"
+              style={{ backgroundColor: whiteLabel.primaryColor || '#4f46e5' }}
+            >
+              {whiteLabel.brandLogoText || 'P'}
+            </div>
           )}
           
           <button 
@@ -468,9 +485,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 const currentAdminTab = searchParams.get('tab') || 'overview';
                 const isActive = pathname === '/dashboard/admin' && currentAdminTab === item.tab;
                 const translatedName = texts.menu[item.name] || item.name;
-                const displayName = item.tab === 'orgs' 
-                  ? `${translatedName} (${tenantsCount})`
-                  : translatedName;
+                const displayName = translatedName;
 
                 return (
                   <div key={item.name}>

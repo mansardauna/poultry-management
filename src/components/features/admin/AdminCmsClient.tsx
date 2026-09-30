@@ -402,6 +402,9 @@ export function AdminCmsClient({
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message || 'Payment gateways & settings saved successfully!');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pfms_brand_updated', { detail: { currencySymbol, platformName } }));
+        }
         setSuperAdminPassword('');
         loadGatewayParams();
       } else {
@@ -525,6 +528,7 @@ export function AdminCmsClient({
           primaryColor,
           accentColor,
           footerText,
+          currencySymbol,
           heroHeading,
           heroSubtitle,
           announcementBanner,
@@ -535,6 +539,9 @@ export function AdminCmsClient({
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message || 'Landing Page CMS & Brand Identity saved & published live!');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pfms_brand_updated', { detail: { currencySymbol, platformName } }));
+        }
       } else {
         toast.error(data.error || 'Failed to save CMS');
       }
@@ -584,6 +591,16 @@ export function AdminCmsClient({
       if (res.ok) {
         toast.success(data.message || 'Tenant updated successfully');
         setOrgsList(prev => prev.map(o => o.id === selectedTenant.id ? { ...o, ...selectedTenant } : o));
+        fetch('/api/admin/tenants?action=list')
+          .then(r => r.json())
+          .then(d => {
+            if (Array.isArray(d?.organizations)) {
+              setOrgsList(d.organizations);
+            }
+          })
+          .catch(() => {});
+        setSelectedTenant(null);
+        setTenantDetail(null);
       } else {
         toast.error(data.error || 'Failed to update tenant');
       }
@@ -611,6 +628,14 @@ export function AdminCmsClient({
           setSelectedTenant(null);
           setTenantDetail(null);
         }
+        fetch('/api/admin/tenants')
+          .then(r => r.json())
+          .then(d => {
+            if (Array.isArray(d.organizations)) {
+              setOrgsList(d.organizations);
+            }
+          })
+          .catch(() => {});
       } else {
         toast.error(data.error || 'Failed to delete tenant');
       }
@@ -1841,6 +1866,15 @@ export function AdminCmsClient({
                             >
                               <LogIn size={13} />
                               <span>Login as Farm</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteTenant(org.id, org.name)}
+                              className="bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 border border-red-200"
+                              title="Delete customer farm account"
+                            >
+                              <Trash2 size={13} />
+                              <span>Delete</span>
                             </button>
                           </div>
                         </td>

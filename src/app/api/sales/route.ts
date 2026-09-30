@@ -180,18 +180,22 @@ export async function PUT(request: Request) {
       const { id, status } = body;
       if (!id || !status) return NextResponse.json({ error: 'Invoice ID and status required' }, { status: 400 });
 
-      await supabase.from('invoices').update({ status }).eq('id', id).eq('workspaceId', workspaceId);
+      const { error: updateErr } = await supabase.from('invoices').update({ status }).eq('id', id);
+      if (updateErr) {
+        return NextResponse.json({ error: updateErr.message }, { status: 500 });
+      }
+
+      const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).limit(1).maybeSingle();
 
       if (status === 'Paid') {
-        const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).eq('workspaceId', workspaceId).limit(1).maybeSingle();
         if (invData) {
           const targetSaleId = invData.saleId || ('sa' + Date.now().toString().slice(-8));
-          const { data: existingSale } = await supabase.from('sales').select('id').eq('id', targetSaleId).eq('workspaceId', workspaceId).limit(1).maybeSingle();
+          const { data: existingSale } = await supabase.from('sales').select('id').eq('id', targetSaleId).limit(1).maybeSingle();
           
           if (!existingSale) {
             await supabase.from('sales').insert([{
               id: targetSaleId,
-              workspaceId,
+              workspaceId: invData.workspaceId || workspaceId,
               date: invData.date || new Date().toISOString().split('T')[0],
               type: (invData.items || '').toLowerCase().includes('chicken') ? 'Chickens' : 'Eggs',
               quantity: invData.quantity || 1,
@@ -201,22 +205,25 @@ export async function PUT(request: Request) {
               status: 'Paid'
             }]);
           } else {
-            await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId).eq('workspaceId', workspaceId);
+            await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId);
           }
 
           // Log alert
           await supabase.from('alertLogs').insert([{
             id: 'al' + Date.now().toString().slice(-8),
-            workspaceId,
+            workspaceId: invData.workspaceId || workspaceId,
             date: invData.date || new Date().toISOString().split('T')[0],
             message: `INVOICE SETTLED: Invoice #${invData.id} for ${invData.customerName} (₦${Number(invData.totalAmount).toLocaleString()}) marked as Paid and added to Completed Sales.`,
             severity: 'Info',
             read: false
           }]);
         }
+      } else if (invData?.saleId) {
+        // If status changed from Paid to Unpaid/Pending/Cancelled, update the associated sale
+        await supabase.from('sales').update({ status }).eq('id', invData.saleId);
       }
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, message: `Invoice status updated to ${status}` });
     }
 
     const { id, ...fields } = body;
@@ -231,15 +238,20 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const type = searchParams.get('type');
+    let id = searchParams.get('id');
+    let type = searchParams.get('type');
+
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+      type = body.type || type;
+    }
 
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
     if (type === 'invoice' || id.startsWith('inv')) {
-      const { error: invErr } = await supabase.from('invoices').delete().eq('id', id).eq('workspaceId', workspaceId);
+      const { error: invErr } = await supabase.from('invoices').delete().eq('id', id);
       if (invErr) {
         console.error("Delete Invoice Error:", invErr);
         return NextResponse.json({ error: invErr.message }, { status: 500 });
@@ -249,8 +261,8 @@ export async function DELETE(request: Request) {
 
     // Delete sale and associated invoice if exists
     await Promise.all([
-      supabase.from('sales').delete().eq('id', id).eq('workspaceId', workspaceId),
-      supabase.from('invoices').delete().eq('saleId', id).eq('workspaceId', workspaceId)
+      supabase.from('sales').delete().eq('id', id),
+      supabase.from('invoices').delete().eq('saleId', id)
     ]);
 
     return NextResponse.json({ success: true, message: 'Sale deleted' });

@@ -17,25 +17,49 @@ const DEFAULT_CMS = {
   announcementBanner: 'New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now',
   ctaText: 'Get Started Free',
   supportPhone: '+234 800 768 5879',
-  supportEmail: 'support@pfms-poultry.com'
+  supportEmail: 'support@pfms-poultry.com',
+  currencySymbol: '₦'
 };
 
 export async function GET() {
   try {
-    const { data } = await serviceRoleClient
+    const { data: cmsRow } = await serviceRoleClient
       .from('systemSettings')
       .select('adminName')
       .eq('id', 'landing_page_cms')
-      .single();
+      .maybeSingle();
 
-    if (data?.adminName) {
-      const parsed = JSON.parse(data.adminName);
-      if (parsed && typeof parsed === 'object') {
-        return NextResponse.json({ ...DEFAULT_CMS, ...parsed });
-      }
+    const { data: gatewayRow } = await serviceRoleClient
+      .from('systemSettings')
+      .select('adminName')
+      .eq('id', 'gateways_config')
+      .maybeSingle();
+
+    let cmsParsed: any = {};
+    if (cmsRow?.adminName) {
+      try {
+        cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
+      } catch (_e) {}
     }
-    return NextResponse.json(DEFAULT_CMS);
-  } catch (err: any) {
+
+    let gatewayParsed: any = {};
+    if (gatewayRow?.adminName) {
+      try {
+        gatewayParsed = typeof gatewayRow.adminName === 'string' ? JSON.parse(gatewayRow.adminName) : gatewayRow.adminName;
+      } catch (_e) {}
+    }
+
+    const merged = {
+      ...DEFAULT_CMS,
+      ...gatewayParsed,
+      ...cmsParsed,
+      currencySymbol: cmsParsed.currencySymbol || gatewayParsed.currencySymbol || DEFAULT_CMS.currencySymbol || '₦',
+      brandName: cmsParsed.brandName || gatewayParsed.platformName || DEFAULT_CMS.brandName,
+      platformName: cmsParsed.brandName || gatewayParsed.platformName || DEFAULT_CMS.brandName,
+    };
+
+    return NextResponse.json(merged);
+  } catch (_err: any) {
     return NextResponse.json(DEFAULT_CMS);
   }
 }
@@ -61,7 +85,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: upsertErr.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Landing page CMS content saved & published live to Supabase successfully!' });
+    // Synchronize currencySymbol & platformName to gateways_config for platform-wide consistency
+    try {
+      const { data: gwRow } = await serviceRoleClient
+        .from('systemSettings')
+        .select('adminName')
+        .eq('id', 'gateways_config')
+        .maybeSingle();
+
+      let gwParsed: any = {};
+      if (gwRow?.adminName) {
+        try {
+          gwParsed = typeof gwRow.adminName === 'string' ? JSON.parse(gwRow.adminName) : gwRow.adminName;
+        } catch (_e) {}
+      }
+
+      const updatedGw = {
+        ...gwParsed,
+        ...(cmsData.currencySymbol ? { currencySymbol: cmsData.currencySymbol } : {}),
+        ...(cmsData.brandName ? { platformName: cmsData.brandName } : {})
+      };
+
+      await serviceRoleClient.from('systemSettings').upsert([{
+        id: 'gateways_config',
+        workspaceId: 'global',
+        adminName: JSON.stringify(updatedGw)
+      }]);
+    } catch (_syncErr) {}
+
+    return NextResponse.json({ success: true, message: 'Platform Brand Identity & CMS content saved and propagated live!' });
   } catch (err: any) {
     console.error('Landing CMS Error:', err);
     return NextResponse.json({ error: err?.message || 'Failed to save landing page CMS content' }, { status: 500 });

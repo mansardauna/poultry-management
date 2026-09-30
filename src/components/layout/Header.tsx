@@ -505,11 +505,6 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 <div className="flex items-center gap-2">
                   <Bell size={16} className="text-indigo-600" />
                   <span className="text-sm font-semibold text-slate-800">{texts.dashboard.alertLogsQueue}</span>
-                  {unreadNotifications.length > 0 && (
-                    <span className="text-[10px] font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded-full">
-                      {unreadNotifications.length}
-                    </span>
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   {unreadNotifications.length > 0 && (

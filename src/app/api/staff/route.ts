@@ -274,17 +274,26 @@ export async function DELETE(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const type = searchParams.get('type');
+    let id = searchParams.get('id');
+    let type = searchParams.get('type');
+
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+      type = body.type || type;
+    }
+
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
-    if (type === 'task' || id.startsWith('t')) {
-      await supabase.from('tasks').delete().eq('id', id);
+    if (type === 'task' || (id.startsWith('t') && !id.startsWith('s'))) {
+      const { error } = await supabase.from('tasks').delete().eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true, deleted: 'task' });
     }
 
     if (type === 'payroll' || id.startsWith('pay_') || id.startsWith('pl_')) {
-      await supabase.from('payrollLogs').delete().eq('id', id);
+      const { error } = await supabase.from('payrollLogs').delete().eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true, deleted: 'payroll' });
     }
 
@@ -293,7 +302,8 @@ export async function DELETE(request: Request) {
     const staffMember = staffMembers?.[0];
 
     // Delete staff record
-    await supabase.from('staff').delete().eq('id', id);
+    const { error: staffErr } = await supabase.from('staff').delete().eq('id', id);
+    if (staffErr) return NextResponse.json({ error: staffErr.message }, { status: 500 });
 
     // Delete associated login credentials and tasks
     if (staffMember) {
@@ -325,6 +335,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true, deleted: 'staff' });
   } catch (err: any) {
     console.error('Delete staff error:', err);
-    return NextResponse.json({ error: 'Failed to delete staff: ' + err.message }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete staff: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

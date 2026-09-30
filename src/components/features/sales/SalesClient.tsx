@@ -52,15 +52,15 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   const farmType = activeWorkspace?.type || 'Layer & Broiler Operations';
   const farmEmail = 'billing@poultryfarm.com';
   const farmPhone = '+234 800 000 0000';
-  const currencySymbol = '₦';
+  const currencySymbol = (whiteLabel as any)?.currencySymbol || '₦';
 
   const canEdit = role === 'Admin';
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [activeBatches, setActiveBatches] = useState<ChickenBatch[]>(batches);
   
-  // Navigation tabs: 'invoices' displays ALL invoices, 'sales' displays completed sales
-  const [activeTab, setActiveTab] = useState<'invoices' | 'sales' | 'unpaid-invoices'>('invoices');
+  // Navigation tabs: 'invoices', 'unpaid-invoices', 'paid-invoices', 'sales'
+  const [activeTab, setActiveTab] = useState<'invoices' | 'sales' | 'unpaid-invoices' | 'paid-invoices'>('invoices');
 
   const salesTable = useTableLogic({ 
     data: sales, 
@@ -68,9 +68,13 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
     initialPageSize: 20 
   });
 
+  const paidCount = invoices.filter(inv => inv.status === 'Paid').length;
+  const unpaidCount = invoices.filter(inv => inv.status !== 'Paid').length;
+
   const filteredInvoices = invoices.filter(inv => {
     if (activeTab === 'unpaid-invoices') return inv.status !== 'Paid';
-    return true; // Show ALL invoices (Paid, Unpaid, Pending) on main invoices tab
+    if (activeTab === 'paid-invoices') return inv.status === 'Paid';
+    return true; // Show ALL invoices on main invoices tab
   });
 
   const invoicesTable = useTableLogic({ 
@@ -204,7 +208,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
   const handleShareWhatsApp = (inv: Invoice) => {
     const linkUrl = `${window.location.origin}/pay-invoice/${inv.id}`;
-    const text = `Official Farm Invoice #${inv.id}\nCustomer: ${inv.customerName}\nItem: ${inv.items}\nQty: ${inv.quantity}\nTotal Amount: ₦${inv.totalAmount.toLocaleString()}\nStatus: ${inv.status}\n\nPay Online or View Receipt here:\n${linkUrl}`;
+    const text = `Official Farm Invoice #${inv.id}\nCustomer: ${inv.customerName}\nItem: ${inv.items}\nQty: ${inv.quantity}\nTotal Amount: ${currencySymbol}${inv.totalAmount.toLocaleString()}\nStatus: ${inv.status}\n\nPay Online or View Receipt here:\n${linkUrl}`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -252,6 +256,12 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           setSelectedInvoice({ ...selectedInvoice, status: newStatus });
         }
         toast.success(`Invoice marked as ${newStatus}!`);
+        // Automatically switch to the right tab
+        if (newStatus === 'Paid') {
+          setActiveTab('paid-invoices');
+        } else if (newStatus === 'Unpaid' || newStatus === 'Pending' || newStatus === 'Overdue') {
+          setActiveTab('unpaid-invoices');
+        }
         refreshData();
       } else {
         toast.error('Failed to update status');
@@ -332,7 +342,6 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
   const totalSales = sales.reduce((sum, s) => sum + s.totalAmount, 0);
   const avgSale = sales.length > 0 ? Math.round(totalSales / sales.length) : 0;
-  const unpaidCount = invoices.filter(i => i.status !== 'Paid').length;
 
   return (
     <div className="space-y-6 font-sans">
@@ -376,30 +385,40 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-slate-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab('invoices')}
-          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${
+          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'invoices' 
               ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
               : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
-          <FileText size={16} /> Customer Invoices ({invoices.length})
+          <FileText size={16} /> All Invoices ({invoices.length})
         </button>
         <button
           onClick={() => setActiveTab('unpaid-invoices')}
-          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${
+          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'unpaid-invoices' 
               ? 'border-amber-500 text-amber-700 bg-amber-50/50' 
               : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
-          <Coins size={16} className="text-amber-500" /> Unpaid & Pending ({unpaidCount})
+          <Coins size={16} className="text-amber-500" /> Unpaid & Due ({unpaidCount})
+        </button>
+        <button
+          onClick={() => setActiveTab('paid-invoices')}
+          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'paid-invoices' 
+              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50' 
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <CheckCircle2 size={16} className="text-emerald-500" /> Paid Invoices ({paidCount})
         </button>
         <button
           onClick={() => setActiveTab('sales')}
-          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${
+          className={`py-3 px-5 font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'sales' 
               ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
               : 'border-transparent text-slate-500 hover:text-slate-700'
@@ -410,12 +429,12 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       </div>
 
       {/* Tab 1: Customer Invoices */}
-      {(activeTab === 'invoices' || activeTab === 'unpaid-invoices') && (
+      {(activeTab === 'invoices' || activeTab === 'unpaid-invoices' || activeTab === 'paid-invoices') && (
         <Card className="border border-slate-200 shadow-sm">
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
               <FileText size={18} className="text-indigo-600" />
-              {activeTab === 'unpaid-invoices' ? 'Awaiting Payment Invoices' : 'All Merchant Invoices'}
+              {activeTab === 'unpaid-invoices' ? 'Awaiting Payment Invoices' : activeTab === 'paid-invoices' ? 'Settled & Paid Invoices' : 'All Merchant Invoices'}
             </CardTitle>
             <span className="text-xs text-slate-500 font-medium">Click any row to view full invoice & share payment links</span>
           </CardHeader>
@@ -450,7 +469,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                         <td className="px-4 py-3.5 font-bold text-slate-900">{inv.customerName}</td>
                         <td className="px-4 py-3.5 text-slate-600 max-w-xs truncate">{inv.items}</td>
                         <td className="px-4 py-3.5 text-slate-600 font-mono">{inv.quantity}</td>
-                        <td className="px-4 py-3.5 font-extrabold text-slate-900 font-mono">₦{inv.totalAmount.toLocaleString()}</td>
+                        <td className="px-4 py-3.5 font-extrabold text-slate-900 font-mono">{currencySymbol}{inv.totalAmount.toLocaleString()}</td>
                         <td className="px-4 py-3.5">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                             inv.status === 'Paid'
@@ -554,7 +573,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                           {sale.type} ({sale.quantity} items)
                         </span>
                       </td>
-                      <td className="px-4 py-3.5 font-extrabold text-slate-900 font-mono">₦{sale.totalAmount.toLocaleString()}</td>
+                      <td className="px-4 py-3.5 font-extrabold text-slate-900 font-mono">{currencySymbol}{sale.totalAmount.toLocaleString()}</td>
                       <td className="px-4 py-3.5 text-slate-600">{sale.paymentMethod}</td>
                       <td className="px-4 py-3.5">
                         <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
@@ -898,9 +917,16 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             {/* Farm Letterhead */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-indigo-600 pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black flex items-center justify-center text-xl shadow-md shadow-indigo-600/30 shrink-0">
-                  <Building2 size={24} />
-                </div>
+                {whiteLabel?.logoUrl ? (
+                  <img src={whiteLabel.logoUrl} alt="Logo" className="w-12 h-12 rounded-2xl object-cover shadow-md shrink-0" />
+                ) : (
+                  <div 
+                    className="w-12 h-12 rounded-2xl text-white font-black flex items-center justify-center text-xl shadow-md shrink-0"
+                    style={{ backgroundColor: whiteLabel?.primaryColor || '#4f46e5' }}
+                  >
+                    {whiteLabel?.brandLogoText || <Building2 size={24} />}
+                  </div>
+                )}
                 <div>
                   <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">
                     {farmName}

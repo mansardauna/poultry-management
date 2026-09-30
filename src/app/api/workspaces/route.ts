@@ -102,12 +102,17 @@ export async function DELETE(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  let id = searchParams.get('id');
+  if (!id) {
+    const body = await request.json().catch(() => ({}));
+    id = body.id;
+  }
 
   if (!id) {
     return NextResponse.json({ error: 'Missing workspace id' }, { status: 400 });
   }
 
-  await supabase.from('workspaces').delete().eq('id', id);
+  const { error } = await supabase.from('workspaces').delete().eq('id', id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

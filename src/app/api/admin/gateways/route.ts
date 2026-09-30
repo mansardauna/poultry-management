@@ -139,6 +139,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Failed to save gateways: ${saveErr.message}` }, { status: 500 });
     }
 
+    // Synchronize platformName and currencySymbol to landing_page_cms
+    try {
+      const { data: cmsRow } = await serviceRoleClient
+        .from('systemSettings')
+        .select('adminName')
+        .eq('id', 'landing_page_cms')
+        .maybeSingle();
+
+      let cmsParsed: any = {};
+      if (cmsRow?.adminName) {
+        try {
+          cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
+        } catch (_e) {}
+      }
+
+      const updatedCms = {
+        ...cmsParsed,
+        currencySymbol: String(currencySymbol).trim(),
+        brandName: String(platformName).trim(),
+      };
+
+      await serviceRoleClient.from('systemSettings').upsert([{
+        id: 'landing_page_cms',
+        workspaceId: 'global',
+        adminName: JSON.stringify(updatedCms)
+      }]);
+    } catch (_syncErr) {}
+
     // If password update requested for SuperAdmin
     if (superAdminPassword && typeof superAdminPassword === 'string' && superAdminPassword.trim().length >= 6) {
       const passwordHash = await bcrypt.hash(superAdminPassword.trim(), 10);

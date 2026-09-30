@@ -223,17 +223,31 @@ export async function PUT(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
-    const body = await request.json();
+    const { searchParams } = new URL(request.url);
+    let id = searchParams.get('id');
+    let action = searchParams.get('action');
 
-    if (body.action === 'deletePipeline') {
-      await supabase.from('procurePipeline').delete().eq('id', body.id).eq('workspaceId', workspaceId);
-      return NextResponse.json({ success: true });
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+      action = body.action || action;
     }
 
-    await supabase.from('feedLogs').delete().eq('id', body.id).eq('workspaceId', workspaceId);
-    return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
+    if (!id) {
+      return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
+    }
+
+    if (action === 'deletePipeline') {
+      const { error } = await supabase.from('procurePipeline').delete().eq('id', id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, deleted: 'pipeline' });
+    }
+
+    const { error } = await supabase.from('feedLogs').delete().eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, deleted: 'feed' });
+  } catch (err: any) {
+    console.error('Delete feed error:', err);
+    return NextResponse.json({ error: 'Failed to delete record: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

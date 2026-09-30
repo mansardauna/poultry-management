@@ -206,11 +206,31 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
       }
 
-      const updates: any = {};
+      const updates: any = {
+        updatedAt: new Date().toISOString()
+      };
       if (name) updates.name = name.trim();
-      if (subscriptionTier) updates.subscriptionTier = subscriptionTier.trim();
-      if (subscriptionStatus) updates.subscriptionStatus = subscriptionStatus.trim();
 
+      const targetTier = subscriptionTier ? subscriptionTier.trim().toLowerCase() : undefined;
+      const targetStatus = subscriptionStatus ? subscriptionStatus.trim().toLowerCase() : undefined;
+
+      const isPaidTier = targetTier === 'pro' || targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus';
+
+      if (targetTier) {
+        updates.subscriptionTier = targetTier;
+        if (isPaidTier) {
+          updates.subscriptionStatus = targetStatus || 'active';
+          // Extend subscription end date by 1 full year (365 days) so the manual upgrade is immediately active
+          updates.subscriptionEndsAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+        } else {
+          updates.subscriptionStatus = targetStatus || 'active';
+          updates.subscriptionEndsAt = null;
+        }
+      } else if (targetStatus) {
+        updates.subscriptionStatus = targetStatus;
+      }
+
+      // 1. Update organizations table
       const { error: updateErr } = await serviceRoleClient
         .from('organizations')
         .update(updates)
@@ -220,7 +240,90 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: updateErr.message }, { status: 500 });
       }
 
-      return NextResponse.json({ success: true, message: 'Tenant updated successfully!' });
+      // 2. Fetch organization to get owner info
+      const { data: org } = await serviceRoleClient
+        .from('organizations')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      // 3. Update users table for all users under this tenant
+      if (targetTier) {
+        await serviceRoleClient
+          .from('users')
+          .update({
+            subscriptionTier: targetTier,
+            updatedAt: new Date().toISOString()
+          })
+          .eq('orgId', id);
+
+        if (org?.ownerUsername) {
+          await serviceRoleClient
+            .from('users')
+            .update({
+              subscriptionTier: targetTier,
+              updatedAt: new Date().toISOString()
+            })
+            .eq('username', org.ownerUsername);
+        }
+      }
+
+      // 4. Update workspaces table (name) if name was updated
+      if (name) {
+        await serviceRoleClient
+          .from('workspaces')
+          .update({
+            name: name.trim(),
+            updatedAt: new Date().toISOString()
+          })
+          .or(`orgId.eq.${id},id.eq.main-${id}`);
+      }
+
+      // 5. Update / Upsert systemSettings for the tenant's workspace
+      try {
+        const featureSettings: any = {
+          updatedAt: new Date().toISOString()
+        };
+        if (name) featureSettings.farmName = name.trim();
+        if (targetTier) {
+          featureSettings.subscriptionTier = targetTier;
+          featureSettings.plan = targetTier;
+          featureSettings.cctvEnabled = isPaidTier;
+          featureSettings.aiLoggerEnabled = isPaidTier;
+          featureSettings.exportReportsEnabled = isPaidTier;
+          featureSettings.enterpriseHubEnabled = targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus';
+          featureSettings.maxUsers = (targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') ? 100 : (targetTier === 'pro' ? 25 : 3);
+          featureSettings.maxBirds = (targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') ? 1000000 : (targetTier === 'pro' ? 50000 : 2000);
+        }
+
+        // Upsert for sys-${id}
+        await serviceRoleClient.from('systemSettings').upsert([{
+          id: `sys-${id}`,
+          workspaceId: `main-${id}`,
+          ...featureSettings
+        }]);
+      } catch (_settingErr) {}
+
+      // 6. Upsert subscriptions record
+      if (targetTier) {
+        try {
+          await serviceRoleClient.from('subscriptions').upsert([{
+            id: `admin_grant_${id}`,
+            orgId: id,
+            status: updates.subscriptionStatus || 'active',
+            plan: targetTier,
+            currentPeriodEnd: isPaidTier 
+              ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() 
+              : new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }]);
+        } catch (_subErr) {}
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: `Tenant account updated successfully! Plan set to "${targetTier || org?.subscriptionTier || 'current'}" and active with all feature switches enabled.` 
+      });
     }
 
     if (action === 'delete') {
@@ -229,8 +332,33 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
       }
 
-      await serviceRoleClient.from('organizations').delete().eq('id', id);
-      return NextResponse.json({ success: true, message: 'Tenant deleted successfully' });
+      // 1. Fetch organization to check owner
+      const { data: org } = await serviceRoleClient
+        .from('organizations')
+        .select('id, ownerUsername, ownerEmail')
+        .eq('id', id)
+        .maybeSingle();
+
+      // 2. Cascade cleanup related records to satisfy foreign keys and clear dependencies
+      await serviceRoleClient.from('organization_members').delete().eq('orgId', id);
+      await serviceRoleClient.from('subscriptions').delete().eq('orgId', id);
+      await serviceRoleClient.from('subscription_history').delete().eq('orgId', id);
+      await serviceRoleClient.from('systemSettings').delete().or(`id.eq.sys-${id},workspaceId.ilike.%${id}%`);
+      await serviceRoleClient.from('workspaces').delete().or(`id.ilike.%${id}%`);
+      
+      if (org?.ownerUsername && org.ownerUsername !== 'owner' && org.ownerUsername !== 'superadmin') {
+        await serviceRoleClient.from('users').delete().eq('username', org.ownerUsername);
+      }
+      await serviceRoleClient.from('users').delete().eq('orgId', id);
+
+      // 3. Delete the organization
+      const { error: delErr } = await serviceRoleClient.from('organizations').delete().eq('id', id);
+      if (delErr) {
+        console.error('Delete organization error:', delErr);
+        return NextResponse.json({ error: 'Failed to delete organization: ' + (delErr.message || String(delErr)) }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, message: 'Tenant organization and all associated data deleted successfully' });
     }
 
     if (action === 'impersonate') {
@@ -290,5 +418,53 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error('Tenant POST Error:', err);
     return NextResponse.json({ error: err.message || 'Operation failed' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await getAuthUser();
+    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
+    if (!user || !isSuperAdmin) {
+      return NextResponse.json({ error: 'Unauthorized: Super Admin access required' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    let id = searchParams.get('id');
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
+    }
+
+    const { data: org } = await serviceRoleClient
+      .from('organizations')
+      .select('id, ownerUsername, ownerEmail')
+      .eq('id', id)
+      .maybeSingle();
+
+    await serviceRoleClient.from('organization_members').delete().eq('orgId', id);
+    await serviceRoleClient.from('subscriptions').delete().eq('orgId', id);
+    await serviceRoleClient.from('subscription_history').delete().eq('orgId', id);
+    await serviceRoleClient.from('systemSettings').delete().or(`id.eq.sys-${id},workspaceId.ilike.%${id}%`);
+    await serviceRoleClient.from('workspaces').delete().or(`id.ilike.%${id}%`);
+
+    if (org?.ownerUsername && org.ownerUsername !== 'owner' && org.ownerUsername !== 'superadmin') {
+      await serviceRoleClient.from('users').delete().eq('username', org.ownerUsername);
+    }
+    await serviceRoleClient.from('users').delete().eq('orgId', id);
+
+    const { error: delErr } = await serviceRoleClient.from('organizations').delete().eq('id', id);
+    if (delErr) {
+      return NextResponse.json({ error: 'Failed to delete organization: ' + (delErr.message || String(delErr)) }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, message: 'Tenant deleted successfully' });
+  } catch (err: any) {
+    console.error('Tenant DELETE Error:', err);
+    return NextResponse.json({ error: err.message || 'Failed to delete tenant' }, { status: 500 });
   }
 }

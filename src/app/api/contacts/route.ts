@@ -59,14 +59,19 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    let id = searchParams.get('id');
+
+    if (!id) {
+      const body = await request.json().catch(() => ({}));
+      id = body.id;
+    }
+
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    const { error } = await supabase.from('contacts').delete().eq('id', id).eq('workspaceId', workspaceId);
+    const { error } = await supabase.from('contacts').delete().eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete contact' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: 'Failed to delete contact: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

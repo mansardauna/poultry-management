@@ -272,10 +272,18 @@ async function runSql(ops: QueryOp[], table: string): Promise<QueryResult> {
   }
 
   if (deleteOp) {
-    const whereSql = buildWhere(filters, params, ph, qi, likeKw);
-    const sql = `DELETE FROM ${qi(table)}${whereSql ? ` WHERE ${whereSql}` : ''}`;
-    await run(engine, pool, sql, []);
-    return { data: null, error: null };
+    try {
+      const whereSql = buildWhere(filters, params, ph, qi, likeKw);
+      const sql = `DELETE FROM ${qi(table)}${whereSql ? ` WHERE ${whereSql}` : ''}`;
+      await run(engine, pool, sql, params);
+      return { data: null, error: null };
+    } catch (err) {
+      const msg = (err as Error).message || '';
+      if (msg.toLowerCase().includes("doesn't exist") || msg.toLowerCase().includes('does not exist')) {
+        return { data: null, error: null };
+      }
+      return { data: null, error: err };
+    }
   }
 
   // ---- Reads ----

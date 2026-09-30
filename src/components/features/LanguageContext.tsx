@@ -1188,6 +1188,7 @@ export interface LanguageContextType {
   setLanguage: (lang: Language) => void;
   texts: TranslationDict;
   dir: 'ltr' | 'rtl';
+  currencySymbol: string;
   formatNumber: (value: number | string, options?: Intl.NumberFormatOptions) => string;
   formatDate: (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => string;
   formatCurrency: (amount: number | string, currencySymbol?: string) => string;
@@ -1665,9 +1666,32 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const formatCurrency = (amount: number | string, currencySymbol = '₦') => {
+  const [currencySymbol, setCurrencySymbol] = useState<string>('₦');
+
+  useEffect(() => {
+    const fetchCurrency = () => {
+      fetch('/api/admin/cms')
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.currencySymbol) setCurrencySymbol(data.currencySymbol);
+        })
+        .catch(() => {});
+    };
+
+    fetchCurrency();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pfms_brand_updated', fetchCurrency);
+      return () => {
+        window.removeEventListener('pfms_brand_updated', fetchCurrency);
+      };
+    }
+  }, []);
+
+  const formatCurrency = (amount: number | string, customSymbol?: string) => {
+    const sym = (customSymbol !== undefined && customSymbol !== null && customSymbol !== '') ? customSymbol : currencySymbol;
     const formattedNum = formatNumber(amount);
-    return `${currencySymbol}${formattedNum}`;
+    return `${sym}${formattedNum}`;
   };
 
   const t = (term: string, fallback?: string) => {
@@ -1688,7 +1712,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, texts, dir, formatNumber, formatDate, formatCurrency, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, texts, dir, currencySymbol, formatNumber, formatDate, formatCurrency, t }}>
       {children}
     </LanguageContext.Provider>
   );
