@@ -148,7 +148,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: 'success' }, { status: 200 });
   } catch (err: any) {
-    console.error('Paystack Webhook Error:', err);
     return NextResponse.json({ error: err?.message || 'Webhook processing failed' }, { status: 500 });
   }
 }

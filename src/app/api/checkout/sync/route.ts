@@ -37,7 +37,6 @@ export async function POST(request: Request) {
     try {
       session = await stripe.checkout.sessions.retrieve(sessionId);
     } catch (err: any) {
-      console.error('Stripe session retrieval error:', err);
       return NextResponse.json({
         error: 'Invalid or expired payment session ID.'
       }, { status: 400 });
@@ -143,8 +142,8 @@ export async function POST(request: Request) {
         receiptUrl: `https://pay.stripe.com/receipts/invoices/${stripeSubId}`,
         createdAt: now.toISOString()
       }]);
-    } catch (e) {
-      console.error('Failed to insert into subscriptions / subscription_history table', e);
+    } catch (_e) {
+      // Graceful fallback if history logging fails
     }
 
     // Set Response & Update pfms_tier cookie to targetTier
@@ -167,7 +166,6 @@ export async function POST(request: Request) {
 
     return response;
   } catch (err: any) {
-    console.error('Checkout Sync Error:', err);
     return NextResponse.json({ error: err?.message || 'Internal server error verifying payment' }, { status: 500 });
   }
 }

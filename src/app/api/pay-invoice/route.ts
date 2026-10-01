@@ -57,7 +57,7 @@ export async function POST(request: Request) {
             isVerified = true;
           }
         } catch (_err) {
-          console.error('Paystack verification fetch error:', _err);
+          // Handled gracefully below
         }
       }
 
@@ -116,7 +116,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, status: targetStatus, paymentMethod: methodUsed });
   } catch (error) {
-    console.error('Paystack verify error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

@@ -153,9 +153,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         setCushionAudits(data.cushionAudits);
         setMaturationLogs(data.maturationLogs);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -225,9 +223,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to record collection');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleLogAudit = async () => {
@@ -261,9 +257,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to register audit');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleLogMaturation = async () => {
@@ -302,9 +296,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to record maturation log');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   // Edit Collection Handlers
@@ -345,9 +337,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to update collection');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeleteCollection = async (id: string) => {
@@ -365,9 +355,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to delete collection');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   // Edit Audit Handlers
@@ -409,9 +397,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to update audit');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeleteAudit = async (id: string) => {
@@ -429,9 +415,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to delete audit');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   // Edit Maturation Handlers
@@ -476,9 +460,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to update maturation record');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeleteMaturation = async (id: string) => {
@@ -496,9 +478,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
       } else {
         toast.error('Failed to delete maturation record');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const filteredEggs = filterByTimeRange(eggs);

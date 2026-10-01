@@ -361,8 +361,7 @@ Return a JSON object with this exact structure:
             }
           }
         }
-      } catch (providerError) {
-        console.warn(`[AI-Parse] ${aiProvider} API call failed, falling back to smart NLP parser:`, providerError);
+      } catch (_providerError) {
       }
     }
 
@@ -488,7 +487,6 @@ Return a JSON object with this exact structure:
 
     return NextResponse.json({ success: true, parsed, extracted: parsed });
   } catch (error: any) {
-    console.error('AI Parse Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to process AI parsing' }, { status: 500 });
   }
 }

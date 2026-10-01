@@ -17,7 +17,6 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
     // If webhook secret is a placeholder or unconfigured in dev/testing, allow parsed body
     if (webhookSecret === 'whsec_placeholder' || !webhookSecret) {
       try {
@@ -114,7 +113,7 @@ export async function POST(req: Request) {
       break;
     }
     default:
-      console.warn(`Unhandled Stripe event type ${event.type}`);
+      break;
   }
 
   return NextResponse.json({ received: true });

@@ -125,9 +125,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             setUsernameAvailable(false);
           }
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
+      } catch {} finally {
         setUsernameChecking(false);
       }
     }, 350);
@@ -148,9 +146,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
         setTasks(data.tasks);
         setPayrollLogs(data.payrollLogs || []);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -228,9 +224,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       } else {
         toast.error('Failed to add staff');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleMarkAttendance = async (staffId: string) => {
@@ -253,9 +247,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       } else {
         toast.error('Failed to log attendance');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleAssignTask = async () => {
@@ -291,9 +283,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       } else {
         toast.error('Failed to assign task');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleCompleteTask = async (taskId: string) => {
@@ -313,9 +303,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       } else {
         toast.error('Failed to complete task');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeleteStaff = async (id: string) => {
@@ -330,8 +318,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
         refreshData();
         toast.error('Failed to remove staff');
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       refreshData();
     }
   };
@@ -348,8 +335,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
         refreshData();
         toast.error('Failed to delete task');
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       refreshData();
     }
   };
@@ -366,8 +352,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
         refreshData();
         toast.error('Failed to delete payroll log');
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       refreshData();
     }
   };

@@ -88,8 +88,7 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
         setIsProcessing(false);
         toast.error('Failed to parse report. Please try again.');
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setIsProcessing(false);
       toast.error('Error contacting the parser service.');
     }

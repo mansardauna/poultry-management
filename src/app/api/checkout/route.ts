@@ -165,7 +165,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err: any) {
-    console.error('Checkout Route Error:', err);
     return NextResponse.json({ error: err?.message || 'Failed to initiate checkout' }, { status: 500 });
   }
 }

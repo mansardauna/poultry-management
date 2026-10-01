@@ -52,7 +52,6 @@ export async function POST(request: Request) {
     }]);
 
     if (userInsertErr) {
-      console.error('Signup user insert error:', userInsertErr);
       return NextResponse.json(
         { error: `Database error while creating user: ${userInsertErr?.message || userInsertErr}` },
         { status: 500 }
@@ -104,7 +103,6 @@ export async function POST(request: Request) {
     response.cookies.set('pfms_email', email, { path: '/' });
     return response;
   } catch (error: any) {
-    console.error('Signup Error:', error);
     return NextResponse.json(
       { error: `Internal server error: ${error?.message || error}` },
       { status: 500 }

@@ -47,9 +47,7 @@ export function HousingClient({ role }: { role: string }) {
         setPens(data.farmPens || []);
         setBatches(data.batches || []);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -67,7 +65,7 @@ export function HousingClient({ role }: { role: string }) {
         toast.success('Pen deleted.'); 
       }
       else toast.error('Failed to delete pen');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const handleEdit = (pen: FarmPen) => {
@@ -98,7 +96,7 @@ export function HousingClient({ role }: { role: string }) {
       } else {
         toast.error('Failed to save pen');
       }
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   return (

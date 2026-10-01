@@ -58,8 +58,7 @@ export function AiLogger({ role }: { role?: string }) {
       }
     };
 
-    recognition.onerror = (event: any) => {
-      console.error(event.error);
+    recognition.onerror = (_event: any) => {
       setIsListening(false);
     };
 

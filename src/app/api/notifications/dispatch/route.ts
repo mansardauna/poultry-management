@@ -66,7 +66,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, digest: summaryDigest }, { status: 200 });
   } catch (err: any) {
-    console.error('Notification Dispatch Error:', err);
     return NextResponse.json({ error: err?.message || 'Failed to dispatch daily digest' }, { status: 500 });
   }
 }

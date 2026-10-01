@@ -224,9 +224,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         const data = await res.json();
         setNotifications(data);
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
+    } catch {} finally {
       isFetchingRef.current = false;
     }
   }, []);

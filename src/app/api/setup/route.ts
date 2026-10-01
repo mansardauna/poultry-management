@@ -260,7 +260,6 @@ export async function POST(request: Request) {
         localResponse.cookies.set('pfms_org_id', 'org_superadmin', { path: '/' });
         return localResponse;
       } catch (err: unknown) {
-        console.error('Local Database Setup Error:', err);
         return NextResponse.json(
           { error: err instanceof Error ? err.message : 'Installation failed while configuring the local database.' },
           { status: 500 }
@@ -326,8 +325,8 @@ export async function POST(request: Request) {
         }
         userId = createdAuth.user.id;
       }
-    } catch (authErr: any) {
-      console.error('Setup Auth Provisioning Error:', authErr);
+    } catch (_authErr: any) {
+      // Graceful fallback
     }
 
     // 2. Ensure Super Admin Organization & Workspace Exist
@@ -487,7 +486,6 @@ export async function POST(request: Request) {
 
     return response;
   } catch (err: unknown) {
-    console.error('Setup API Error:', err);
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error during setup' }, { status: 500 });
   }
 }

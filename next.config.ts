@@ -9,6 +9,9 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  compiler: {
+    removeConsole: true,
+  },
 };
 
 export default withPWA(nextConfig);

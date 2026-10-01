@@ -92,9 +92,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       } else {
         toast.error('Failed to delete batch');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleOpenEdit = (batch: ChickenBatch) => {
@@ -139,9 +137,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       } else {
         toast.error('Failed to update batch');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const refreshData = async () => {
@@ -151,9 +147,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
         const updated = await res.json();
         setBatches(updated);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -241,9 +235,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       } else {
         toast.error('Failed to add batch');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleLogMortality = async () => {
@@ -269,9 +261,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       } else {
         toast.error('Failed to log mortality');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleLogVaccine = async () => {
@@ -296,9 +286,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       } else {
         toast.error('Failed to log vaccination');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleTransfer = async () => {
@@ -323,9 +311,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
       } else {
         toast.error('Failed to transfer birds');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   return (

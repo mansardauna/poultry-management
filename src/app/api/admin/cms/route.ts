@@ -115,7 +115,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Platform Brand Identity & CMS content saved and propagated live!' });
   } catch (err: any) {
-    console.error('Landing CMS Error:', err);
     return NextResponse.json({ error: err?.message || 'Failed to save landing page CMS content' }, { status: 500 });
   }
 }

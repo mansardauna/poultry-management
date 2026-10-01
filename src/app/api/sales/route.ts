@@ -79,7 +79,6 @@ export async function POST(request: Request) {
 
       const { error } = await supabase.from('invoices').insert([newInvoice]);
       if (error) {
-        console.error("Create Invoice Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
@@ -253,7 +252,6 @@ export async function DELETE(request: Request) {
     if (type === 'invoice' || id.startsWith('inv')) {
       const { error: invErr } = await supabase.from('invoices').delete().eq('id', id);
       if (invErr) {
-        console.error("Delete Invoice Error:", invErr);
         return NextResponse.json({ error: invErr.message }, { status: 500 });
       }
       return NextResponse.json({ success: true, message: 'Invoice deleted' });
@@ -267,7 +265,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Sale deleted' });
   } catch (err: any) {
-    console.error("DELETE Sales API Error:", err);
     return NextResponse.json({ error: err?.message || 'Failed to delete record' }, { status: 500 });
   }
 }

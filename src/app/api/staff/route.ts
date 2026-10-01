@@ -250,7 +250,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newStaff, { status: 201 });
   } catch (err: any) {
-    console.error('Staff creation failed:', err);
     return NextResponse.json({ error: 'Failed to manage staff operations: ' + err.message }, { status: 500 });
   }
 }
@@ -334,7 +333,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, deleted: 'staff' });
   } catch (err: any) {
-    console.error('Delete staff error:', err);
     return NextResponse.json({ error: 'Failed to delete staff: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

@@ -233,7 +233,6 @@ export async function DELETE(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, deleted: 'egg' });
   } catch (err: any) {
-    console.error('Delete egg error:', err);
     return NextResponse.json({ error: 'Failed to delete record: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

@@ -77,9 +77,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
             setIsUsernameAvailable(false);
           }
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
+      } catch {} finally {
         setIsCheckingUsername(false);
       }
     }, 350);
@@ -192,8 +190,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
       }
       toast.success('Setup initialized. Welcome to Poultry Management System.');
       handleClose();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Initialization failed.');
     } finally {
       setIsSaving(false);
@@ -326,8 +323,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
 
       toast.success('Farm onboarding setup submitted successfully.');
       handleClose();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Error submitting onboarding setup');
     } finally {
       setIsSaving(false);

@@ -247,7 +247,6 @@ export async function DELETE(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, deleted: 'feed' });
   } catch (err: any) {
-    console.error('Delete feed error:', err);
     return NextResponse.json({ error: 'Failed to delete record: ' + (err?.message || String(err)) }, { status: 500 });
   }
 }

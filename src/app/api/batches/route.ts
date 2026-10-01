@@ -144,7 +144,6 @@ export async function POST(request: Request) {
     
     const { error: insertError } = await supabase.from('batches').insert([newBatch]);
     if (insertError) {
-      console.error('Batch insert failed:', insertError);
       return NextResponse.json({ error: insertError.message || 'Failed to insert batch' }, { status: 500 });
     }
     
@@ -158,7 +157,6 @@ export async function POST(request: Request) {
     
     return NextResponse.json(newBatch, { status: 201 });
   } catch (err: any) {
-    console.error('Batch POST exception:', err);
     return NextResponse.json({ error: err?.message || 'Failed to manage batch operations' }, { status: 500 });
   }
 }

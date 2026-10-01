@@ -61,9 +61,7 @@ export function HealthClient({ role }: { role: string }) {
         setSchedules(data.medicationSchedules || []);
         setBatches(data.batches || []);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -96,9 +94,7 @@ export function HealthClient({ role }: { role: string }) {
       } else {
         toast.error('Failed to save template');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleApplyTemplate = async () => {
@@ -127,9 +123,7 @@ export function HealthClient({ role }: { role: string }) {
       } else {
         toast.error('Failed to apply template');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleCompleteSchedule = async (id: string) => {
@@ -146,9 +140,7 @@ export function HealthClient({ role }: { role: string }) {
       } else {
         toast.error('Failed to complete schedule');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeleteSchedule = async (id: string) => {
@@ -161,7 +153,7 @@ export function HealthClient({ role }: { role: string }) {
         toast.success('Schedule deleted.'); 
       }
       else toast.error('Failed to delete');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const handleDeleteTemplate = async (id: string) => {
@@ -174,7 +166,7 @@ export function HealthClient({ role }: { role: string }) {
         toast.success('Template deleted.'); 
       }
       else toast.error('Failed to delete');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const addStageRow = () => {

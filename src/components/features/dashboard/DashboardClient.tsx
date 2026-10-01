@@ -106,9 +106,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         const updated = await res.json();
         setData(updated);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -419,9 +417,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         refreshData();
         toast.success('Task marked as completed!');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const normTier = (tier || '').toLowerCase();

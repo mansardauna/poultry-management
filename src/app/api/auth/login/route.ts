@@ -168,7 +168,6 @@ export async function POST(request: Request) {
       { status: 401 }
     );
   } catch (error: any) {
-    console.error('Login Error:', error);
     return NextResponse.json(
       { error: 'Internal server error while processing login.' },
       { status: 500 }

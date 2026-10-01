@@ -44,9 +44,7 @@ export function ContactsClient({ role }: { role: string }) {
         const data = await res.json();
         setContacts(data.contacts || []);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -64,7 +62,7 @@ export function ContactsClient({ role }: { role: string }) {
         toast.success('Contact deleted.'); 
       }
       else toast.error('Failed to delete');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const handleEdit = (c: ContactRecord) => {
@@ -93,7 +91,7 @@ export function ContactsClient({ role }: { role: string }) {
       } else {
         toast.error('Failed to save contact');
       }
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   return (

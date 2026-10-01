@@ -118,9 +118,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         setLogs(data.feedLogs);
         setProcurePipeline(data.procurePipeline);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -189,9 +187,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       } else {
         toast.error('Failed to log feed usage');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleRestock = async () => {
@@ -228,9 +224,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       } else {
         toast.error('Failed to record restock');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleLogLogistics = async () => {
@@ -267,9 +261,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       } else {
         toast.error('Failed to log logistics step');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   // Edit Log Handlers
@@ -304,9 +296,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       } else {
         toast.error('Failed to update log');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeleteLog = async (id: string) => {
@@ -324,9 +314,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       } else {
         toast.error('Failed to delete log');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   // Edit Pipeline Handlers
@@ -371,9 +359,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       } else {
         toast.error('Failed to update pipeline');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeletePipeline = async (id: string) => {
@@ -391,9 +377,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       } else {
         toast.error('Failed to delete pipeline');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const totalFeedKg = (feeds || []).reduce((sum, f) => sum + Number(f.quantityKg || 0), 0);

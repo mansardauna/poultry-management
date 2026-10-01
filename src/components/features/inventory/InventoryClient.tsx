@@ -45,9 +45,7 @@ export function InventoryClient({ role }: { role: string }) {
         const data = await res.json();
         setEquipment(data.equipment || []);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -65,7 +63,7 @@ export function InventoryClient({ role }: { role: string }) {
         toast.success('Equipment deleted.'); 
       }
       else toast.error('Failed to delete');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const handleEdit = (item: EquipmentInventory) => {
@@ -94,7 +92,7 @@ export function InventoryClient({ role }: { role: string }) {
       } else {
         toast.error('Failed to save equipment');
       }
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   return (

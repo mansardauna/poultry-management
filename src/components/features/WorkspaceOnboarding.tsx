@@ -36,8 +36,7 @@ export function WorkspaceOnboarding({ onClose }: { onClose: () => void }) {
 
       toast.success('Branch created successfully.');
       onClose();
-    } catch (error) {
-      console.error('Workspace creation failed', error);
+    } catch {
       toast.error('Failed to create branch. Please try again.');
     } finally {
       setIsSaving(false);

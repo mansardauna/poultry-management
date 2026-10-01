@@ -72,9 +72,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
         setSales(updated.sales);
         setExpenses(updated.expenses);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -111,9 +109,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
       } else {
         toast.error('Failed to log expense');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleDeleteExpense = async (id: string) => {
@@ -122,7 +118,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
       const res = await fetch(`/api/finance?id=${id}`, { method: 'DELETE' });
       if (res.ok) { refreshData(); toast.success('Expense deleted.'); }
       else toast.error('Failed to delete expense');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const handleOpenEdit = (expense: Expense) => {
@@ -143,7 +139,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
       });
       if (res.ok) { refreshData(); setOpenEdit(false); setEditingExpense(null); toast.success('Expense updated!'); }
       else toast.error('Failed to update expense');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const handleProcessPayroll = async () => {
@@ -167,9 +163,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
       } else {
         toast.error('Failed to process payroll');
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   const handleExportPDF = () => {

@@ -95,7 +95,6 @@ export async function GET(request: Request) {
       history: history || []
     });
   } catch (err: any) {
-    console.error('Tenant GET Error:', err);
     return NextResponse.json({ error: err.message || 'Failed to fetch tenant' }, { status: 500 });
   }
 }
@@ -354,7 +353,6 @@ export async function POST(request: Request) {
       // 3. Delete the organization
       const { error: delErr } = await serviceRoleClient.from('organizations').delete().eq('id', id);
       if (delErr) {
-        console.error('Delete organization error:', delErr);
         return NextResponse.json({ error: 'Failed to delete organization: ' + (delErr.message || String(delErr)) }, { status: 500 });
       }
 
@@ -416,7 +414,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (err: any) {
-    console.error('Tenant POST Error:', err);
     return NextResponse.json({ error: err.message || 'Operation failed' }, { status: 500 });
   }
 }
@@ -464,7 +461,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Tenant deleted successfully' });
   } catch (err: any) {
-    console.error('Tenant DELETE Error:', err);
     return NextResponse.json({ error: err.message || 'Failed to delete tenant' }, { status: 500 });
   }
 }

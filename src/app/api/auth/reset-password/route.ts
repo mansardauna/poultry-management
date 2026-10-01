@@ -92,9 +92,6 @@ export async function POST(request: Request) {
 
       // Update Supabase Auth password (source of truth for real login)
       const { error: authUpdateErr } = await supabase.auth.admin.updateUserById(authUser.id, { password: newPassword });
-      if (authUpdateErr) {
-        console.warn('Failed to update Supabase Auth password:', authUpdateErr.message);
-      }
 
       // Keep legacy users-table hash in sync for fallback login paths
       const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -141,8 +138,8 @@ export async function POST(request: Request) {
           if (authAccount?.id) {
             await supabase.auth.admin.updateUserById(authAccount.id, { password: newPassword });
           }
-        } catch (listErr) {
-          console.warn('Failed to sync Supabase Auth password reset:', listErr);
+        } catch (_listErr) {
+          // Ignore auth account sync failure gracefully
         }
 
         return NextResponse.json({
@@ -157,7 +154,6 @@ export async function POST(request: Request) {
       message: 'If an account exists with this email, password reset instructions have been dispatched.' 
     });
   } catch (err: any) {
-    console.error('Password Reset API Error:', err);
     return NextResponse.json({ error: 'Failed to process password reset' }, { status: 500 });
   }
 }

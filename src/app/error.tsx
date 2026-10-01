@@ -12,7 +12,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    // Client error boundary
   }, [error]);
 
   return (

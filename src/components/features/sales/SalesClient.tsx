@@ -116,9 +116,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         setInvoices(data.invoices || []);
         setActiveBatches(data.batches || []);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -203,7 +201,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
         setInvoices(prev => prev.filter(i => i.id !== id));
         refreshData();
       } else toast.error('Failed to delete invoice');
-    } catch (err) { console.error(err); }
+    } catch {}
   };
 
   const handleShareWhatsApp = (inv: Invoice) => {

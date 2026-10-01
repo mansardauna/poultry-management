@@ -76,8 +76,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         } else {
           setActiveWorkspaceState(null);
         }
-      } catch (error) {
-        console.error('Failed to load workspaces', error);
+      } catch (_error) {
         const cookieWorkspaceId = Cookies.get('pfms_workspace')?.trim();
         const cookieOrgId = Cookies.get('pfms_org_id')?.trim();
         const tenantDefaultId = (cookieWorkspaceId && cookieWorkspaceId !== 'main')

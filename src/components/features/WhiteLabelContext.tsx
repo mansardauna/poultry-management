@@ -124,9 +124,7 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
           ...updated
         })
       });
-    } catch (e) {
-      console.error('Failed to sync white-label settings to API:', e);
-    }
+    } catch {}
   };
 
   return (
