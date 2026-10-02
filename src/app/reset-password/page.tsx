@@ -61,11 +61,11 @@ function ResetPasswordForm() {
       const data = await res.json();
       toast.dismiss(toastId);
 
-      if (res.ok) {
+      if (res.ok && data?.success) {
         toast.success(data.message || t('Verification code sent!', 'Verification code sent!'));
         setStep(2);
       } else {
-        toast.error(data.error || t('Failed to send verification code', 'Failed to send verification code'));
+        toast.error(data?.error || t('Failed to send verification code', 'Failed to send verification code'));
       }
     } catch (_e) {
       toast.dismiss(toastId);
@@ -126,10 +126,10 @@ function ResetPasswordForm() {
       const data = await res.json();
       toast.dismiss(toastId);
 
-      if (res.ok) {
+      if (res.ok && data?.success) {
         toast.success(t('A new code has been sent!', 'A new code has been sent!'));
       } else {
-        toast.error(data.error || t('Failed to resend code', 'Failed to resend code'));
+        toast.error(data?.error || t('Failed to resend code', 'Failed to resend code'));
       }
     } catch (_e) {
       toast.dismiss(toastId);

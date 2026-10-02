@@ -15,6 +15,7 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
   Dialog, 
   DialogTitle, 
@@ -47,6 +48,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   const [eggs, setEggs] = useState<EggRecord[]>(initialEggs);
   const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
+  const { confirm } = useConfirm();
   const router = useRouter();
   const [tier, setTier] = useState('free');
   useEffect(() => {
@@ -341,7 +343,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   };
 
   const handleDeleteCollection = async (id: string) => {
-    if (!window.confirm("Delete this collection record?")) return;
+    if (!await confirm(t("Delete this collection record?", "Delete this collection record?"))) return;
     try {
       const res = await fetch('/api/eggs', {
         method: 'DELETE',
@@ -401,7 +403,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   };
 
   const handleDeleteAudit = async (id: string) => {
-    if (!window.confirm("Delete this audit record?")) return;
+    if (!await confirm(t("Delete this audit record?", "Delete this audit record?"))) return;
     try {
       const res = await fetch('/api/eggs', {
         method: 'DELETE',
@@ -464,7 +466,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   };
 
   const handleDeleteMaturation = async (id: string) => {
-    if (!window.confirm("Delete this maturation record?")) return;
+    if (!await confirm(t("Delete this maturation record?", "Delete this maturation record?"))) return;
     try {
       const res = await fetch('/api/eggs', {
         method: 'DELETE',

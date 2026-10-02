@@ -22,6 +22,7 @@ import { useSearchParams } from 'next/navigation';
 import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap, Crown, ShieldCheck, QrCode, Copy, Check } from 'lucide-react';
 import { useWorkspace } from '../WorkspaceContext';
 import { useLanguage } from '../LanguageContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 /**
  * Represents a workspace.
@@ -83,6 +84,7 @@ interface SettingsClientProps {
  */
 export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin', currentUser }: SettingsClientProps) {
   const { texts, t, formatNumber } = useLanguage();
+  const { confirm } = useConfirm();
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -293,7 +295,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   };
 
   const handleDisable2FA = async () => {
-    if (!confirm(t("Are you sure you want to disable Two-Factor Authentication?", "Are you sure you want to disable Two-Factor Authentication?"))) return;
+    if (!await confirm(t("Are you sure you want to disable Two-Factor Authentication?", "Are you sure you want to disable Two-Factor Authentication?"))) return;
     setIs2FASubmitting(true);
     try {
       const res = await fetch('/api/auth/2fa', {
@@ -386,7 +388,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       toast.error("Cannot delete the main workspace.");
       return;
     }
-    if (!confirm("Are you sure you want to delete this workspace? This action cannot be undone.")) return;
+    if (!await confirm(t("Are you sure you want to delete this workspace? This action cannot be undone.", "Are you sure you want to delete this workspace? This action cannot be undone."))) return;
     
     setIsDeleting(true);
     try {
@@ -449,7 +451,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   };
 
   const handleDeletePaymentMethod = async (id: string) => {
-    if (!confirm('Remove this payment method?')) return;
+    if (!await confirm(t('Remove this payment method?', 'Remove this payment method?'))) return;
     try {
       const res = await fetch(`/api/settings?id=${id}&type=paymentMethod`, { method: 'DELETE' });
       if (res.ok) {
@@ -640,7 +642,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   {currentTier !== 'free' && (
                     <button
                       onClick={async () => {
-                        if (confirm(t('Cancel your active subscription? Your account will downgrade to Free Starter.'))) {
+                        if (await confirm(t('Cancel your active subscription? Your account will downgrade to Free Starter.'))) {
                           try {
                             toast.loading(t('Cancelling subscription...'), { id: 'cancel-toast' });
                             const res = await fetch('/api/subscription/cancel', { method: 'POST' });

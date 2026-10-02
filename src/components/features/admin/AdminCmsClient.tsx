@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useLanguage } from '@/components/features/LanguageContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 export const AI_PRESETS: Record<string, { 
   name: string; 
@@ -175,6 +176,7 @@ export function AdminCmsClient({
   allOrgs?: any[];
 }) {
   const { formatNumber, formatCurrency, t } = useLanguage();
+  const { confirm } = useConfirm();
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -489,13 +491,13 @@ export function AdminCmsClient({
     toast.success('New package added to draft. Click "Save All SaaS Plans" to publish.');
   };
 
-  const handleDeletePlan = (planId: string) => {
+  const handleDeletePlan = async (planId: string) => {
     if (planId === 'free') {
       toast.error('The default Free Starter plan cannot be deleted.');
       return;
     }
     const target = plans.find(p => p.id === planId);
-    if (window.confirm(`Are you sure you want to delete "${target?.name || planId}"?`)) {
+    if (await confirm(t(`Are you sure you want to delete "${target?.name || planId}"?`, `Are you sure you want to delete "${target?.name || planId}"?`))) {
       setPlans(prev => prev.filter(p => p.id !== planId));
       toast.success('Plan removed from draft. Click "Save All SaaS Plans" to apply.');
     }
@@ -653,7 +655,7 @@ export function AdminCmsClient({
 
   // Delete Tenant
   const handleDeleteTenant = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
+    if (!await confirm(t(`Are you sure you want to delete "${name}"? This action cannot be undone.`, `Are you sure you want to delete "${name}"? This action cannot be undone.`))) return;
     try {
       const res = await fetch('/api/admin/tenants', {
         method: 'POST',

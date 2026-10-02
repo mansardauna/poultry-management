@@ -41,6 +41,7 @@ import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { WorkspaceOnboarding } from '../features/WorkspaceOnboarding';
 import { useLanguage } from '../features/LanguageContext';
 import { useWhiteLabel } from '../features/WhiteLabelContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import toast from 'react-hot-toast';
 
 /**
@@ -183,6 +184,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
 
   const { workspaces, activeWorkspace, isLoading, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
   const { texts, t } = useLanguage();
+  const { confirm } = useConfirm();
   const whiteLabel = useWhiteLabel();
 
   const isSuperAdmin = 
@@ -282,7 +284,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   };
 
   const handleDelete = async (ws: Workspace) => {
-    if (!confirm(`Are you sure you want to delete "${ws.name}"? All its data will remain but this branch will be removed.`)) return;
+    if (!await confirm(t(`Are you sure you want to delete "${ws.name}"? All its data will remain but this branch will be removed.`, `Are you sure you want to delete "${ws.name}"? All its data will remain but this branch will be removed.`))) return;
     setDeletingId(ws.id);
     try {
       await deleteWorkspace(ws.id);

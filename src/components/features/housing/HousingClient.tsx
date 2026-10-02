@@ -11,6 +11,7 @@ import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useLanguage } from '../LanguageContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -23,6 +24,7 @@ import {
  */
 export function HousingClient({ role }: { role: string }) {
   const { texts, t, formatNumber } = useLanguage();
+  const { confirm } = useConfirm();
   const [pens, setPens] = useState<FarmPen[]>([]);
   const [batches, setBatches] = useState<ChickenBatch[]>([]);
   const [open, setOpen] = useState(false);
@@ -58,7 +60,7 @@ export function HousingClient({ role }: { role: string }) {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('Delete this pen?'))) return;
+    if (!await confirm(t('Delete this pen?'))) return;
     try {
       const res = await fetch(`/api/housing?id=${id}`, { method: 'DELETE' });
       if (res.ok) { 

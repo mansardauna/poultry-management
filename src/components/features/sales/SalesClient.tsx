@@ -37,6 +37,7 @@ import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useWorkspace } from '@/components/features/WorkspaceContext';
 import { useWhiteLabel } from '@/components/features/WhiteLabelContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 interface SalesClientProps {
   initialSales: Sale[];
@@ -47,6 +48,7 @@ interface SalesClientProps {
 
 export function SalesClient({ initialSales, initialInvoices, batches, role = 'Staff' }: SalesClientProps) {
   const { texts, t, formatNumber } = useLanguage();
+  const { confirm } = useConfirm();
   const { activeWorkspace } = useWorkspace();
   const whiteLabel = useWhiteLabel();
   const farmName = activeWorkspace?.name || whiteLabel?.coopName || 'Poultry Farm Enterprise';
@@ -182,7 +184,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   };
 
   const handleDeleteSale = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this sale transaction?')) return;
+    if (!await confirm(t('Are you sure you want to delete this sale transaction?', 'Are you sure you want to delete this sale transaction?'))) return;
     try {
       const res = await fetch(`/api/sales?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -194,7 +196,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   };
 
   const handleDeleteInvoice = async (id: string) => {
-    if (!confirm('Delete this customer invoice?')) return;
+    if (!await confirm(t('Delete this customer invoice?', 'Delete this customer invoice?'))) return;
     try {
       const res = await fetch(`/api/sales?id=${id}&type=invoice`, { method: 'DELETE' });
       if (res.ok) {

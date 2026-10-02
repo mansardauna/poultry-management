@@ -35,6 +35,7 @@ import { TimeFilterProvider } from "@/components/features/TimeFilterContext";
 import { WhiteLabelProvider } from "@/components/features/WhiteLabelContext";
 import { Preloader } from "@/components/features/Preloader";
 import { InstallPrompt } from "@/components/features/InstallPrompt";
+import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 
 export default function RootLayout({
   children,
@@ -49,15 +50,17 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} h-full bg-slate-50 text-slate-900 font-sans`}>
         <LanguageProvider>
-          <TimeFilterProvider>
-            <Preloader />
-            <WhiteLabelProvider>
-              <WorkspaceProvider>
-                {children}
-                <InstallPrompt />
-              </WorkspaceProvider>
-            </WhiteLabelProvider>
-          </TimeFilterProvider>
+          <ConfirmDialogProvider>
+            <TimeFilterProvider>
+              <Preloader />
+              <WhiteLabelProvider>
+                <WorkspaceProvider>
+                  {children}
+                  <InstallPrompt />
+                </WorkspaceProvider>
+              </WhiteLabelProvider>
+            </TimeFilterProvider>
+          </ConfirmDialogProvider>
         </LanguageProvider>
       </body>
     </html>

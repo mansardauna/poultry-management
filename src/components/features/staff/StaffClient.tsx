@@ -27,8 +27,8 @@ import {
   Box
 } from '@mui/material';
 import { useWorkspace } from '../WorkspaceContext';
-
 import { useRouter } from 'next/navigation';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 /**
  * Props for the StaffClient component.
@@ -47,6 +47,7 @@ interface StaffClientProps {
  */
 export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier = 'free' }: StaffClientProps) {
   const { texts, t, formatNumber } = useLanguage();
+  const { confirm } = useConfirm();
   const router = useRouter();
   const canEdit = role === 'Admin';
   const [staff, setStaff] = useState<Staff[]>(initialStaff);
@@ -308,7 +309,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
   };
 
   const handleDeleteStaff = async (id: string) => {
-    if (!confirm('Remove this staff member?')) return;
+    if (!await confirm(t('Remove this staff member?', 'Remove this staff member?'))) return;
     setStaff((prev) => prev.filter((s) => s.id !== id));
     try {
       const res = await fetch(`/api/staff?id=${id}`, { method: 'DELETE' });
@@ -325,7 +326,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
   };
 
   const handleDeleteTask = async (id: string) => {
-    if (!confirm('Delete this task?')) return;
+    if (!await confirm(t('Delete this task?', 'Delete this task?'))) return;
     setTasks((prev) => prev.filter((t) => t.id !== id));
     try {
       const res = await fetch(`/api/staff?id=${id}&type=task`, { method: 'DELETE' });
@@ -342,7 +343,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
   };
 
   const handleDeletePayrollLog = async (id: string) => {
-    if (!confirm('Delete this payroll log?')) return;
+    if (!await confirm(t('Delete this payroll log?', 'Delete this payroll log?'))) return;
     setPayrollLogs((prev) => prev.filter((p) => p.id !== id));
     try {
       const res = await fetch(`/api/staff?id=${id}&type=payroll`, { method: 'DELETE' });

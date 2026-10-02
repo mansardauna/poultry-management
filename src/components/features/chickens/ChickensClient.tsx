@@ -13,6 +13,7 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
   Dialog, 
   DialogTitle, 
@@ -42,6 +43,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
   const [batches, setBatches] = useState<ChickenBatch[]>(initialData);
   const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
+  const { confirm } = useConfirm();
   
   const batchesLogic = useTableLogic({
     data: filterByTimeRange(batches),
@@ -83,7 +85,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
   const [targetSection, setTargetSection] = useState('Section B');
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this batch?')) return;
+    if (!await confirm(t('Are you sure you want to delete this batch?', 'Are you sure you want to delete this batch?'))) return;
     try {
       const res = await fetch(`/api/batches?id=${id}`, { method: 'DELETE' });
       if (res.ok) {

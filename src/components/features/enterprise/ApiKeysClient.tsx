@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 interface ApiKeysClientProps {
   tier: string;
@@ -28,6 +29,7 @@ interface ApiKeysClientProps {
 
 export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysClientProps) {
   const router = useRouter();
+  const { confirm } = useConfirm();
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
@@ -71,7 +73,7 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
   };
 
   const handleRevokeKey = async (id: string) => {
-    if (!confirm('Revoke this Enterprise API Key?')) return;
+    if (!await confirm('Revoke this Enterprise API Key?')) return;
     try {
       const res = await fetch('/api/enterprise', {
         method: 'POST',

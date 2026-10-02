@@ -17,6 +17,7 @@ import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { Modal } from '@/components/ui/Modal';
 import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 /**
  * Props for the FeedClient component.
@@ -37,6 +38,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   const [feeds, setFeeds] = useState<FeedInventory[]>(initialFeeds);
   const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange, timeRange } = useTimeFilter();
+  const { confirm } = useConfirm();
   const canEdit = role === 'Admin' || role === 'Manager';
   const [logs, setLogs] = useState<DailyFeedLog[]>(initialLogs);
   const [procurePipeline, setProcurePipeline] = useState<ProcurePipeline[]>(initialProcurePipeline);
@@ -300,7 +302,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   };
 
   const handleDeleteLog = async (id: string) => {
-    if (!window.confirm("Delete this feed log?")) return;
+    if (!await confirm(t("Delete this feed log?", "Delete this feed log?"))) return;
     try {
       const res = await fetch('/api/feeds', {
         method: 'DELETE',
@@ -363,7 +365,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   };
 
   const handleDeletePipeline = async (id: string) => {
-    if (!window.confirm("Delete this pipeline record?")) return;
+    if (!await confirm(t("Delete this pipeline record?", "Delete this pipeline record?"))) return;
     try {
       const res = await fetch('/api/feeds', {
         method: 'DELETE',

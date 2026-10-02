@@ -11,6 +11,7 @@ import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useLanguage } from '../LanguageContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -23,6 +24,7 @@ import {
  */
 export function ContactsClient({ role }: { role: string }) {
   const { texts, t, formatNumber } = useLanguage();
+  const { confirm } = useConfirm();
   const [contacts, setContacts] = useState<ContactRecord[]>([]);
   const contactsLogic = useTableLogic({
     data: contacts,
@@ -55,7 +57,7 @@ export function ContactsClient({ role }: { role: string }) {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this contact?')) return;
+    if (!await confirm(t('Delete this contact?', 'Delete this contact?'))) return;
     try {
       const res = await fetch(`/api/contacts?id=${id}`, { method: 'DELETE' });
       if (res.ok) { 

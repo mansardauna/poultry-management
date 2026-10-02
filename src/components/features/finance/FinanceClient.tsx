@@ -12,6 +12,7 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { 
@@ -45,6 +46,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
   const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
+  const { confirm } = useConfirm();
   const [open, setOpen] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -113,7 +115,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   };
 
   const handleDeleteExpense = async (id: string) => {
-    if (!confirm('Delete this expense record?')) return;
+    if (!await confirm(t('Delete this expense record?', 'Delete this expense record?'))) return;
     try {
       const res = await fetch(`/api/finance?id=${id}`, { method: 'DELETE' });
       if (res.ok) { refreshData(); toast.success('Expense deleted.'); }
@@ -143,8 +145,13 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   };
 
   const handleProcessPayroll = async () => {
-    const confirm = window.confirm("Process payroll for all active staff? This will compute salaries and add them as expenses.");
-    if (!confirm) return;
+    const isConfirmed = await confirm({
+      title: t('Process Payroll', 'Process Payroll'),
+      message: t("Process payroll for all active staff? This will compute salaries and add them as expenses.", "Process payroll for all active staff? This will compute salaries and add them as expenses."),
+      confirmText: t('Process Payroll', 'Process Payroll'),
+      variant: 'info'
+    });
+    if (!isConfirmed) return;
 
     try {
       const res = await fetch('/api/finance', {

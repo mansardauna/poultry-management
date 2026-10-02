@@ -11,6 +11,7 @@ import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useLanguage } from '../LanguageContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
   Dialog, 
   DialogTitle, 
@@ -31,6 +32,7 @@ import {
  */
 export function HealthClient({ role }: { role: string }) {
   const { texts, t, formatNumber } = useLanguage();
+  const { confirm } = useConfirm();
   const [templates, setTemplates] = useState<MedicationTemplate[]>([]);
   const [schedules, setSchedules] = useState<MedicationSchedule[]>([]);
   const [batches, setBatches] = useState<ChickenBatch[]>([]);
@@ -146,7 +148,7 @@ export function HealthClient({ role }: { role: string }) {
   };
 
   const handleDeleteSchedule = async (id: string) => {
-    if (!confirm('Delete this schedule entry?')) return;
+    if (!await confirm(t('Delete this schedule entry?', 'Delete this schedule entry?'))) return;
     try {
       const res = await fetch(`/api/health?id=${id}&type=schedule`, { method: 'DELETE' });
       if (res.ok) { 
@@ -159,7 +161,7 @@ export function HealthClient({ role }: { role: string }) {
   };
 
   const handleDeleteTemplate = async (id: string) => {
-    if (!confirm('Delete this template? All linked schedules will remain.')) return;
+    if (!await confirm(t('Delete this template? All linked schedules will remain.', 'Delete this template? All linked schedules will remain.'))) return;
     try {
       const res = await fetch(`/api/health?id=${id}&type=template`, { method: 'DELETE' });
       if (res.ok) { 

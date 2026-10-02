@@ -11,6 +11,7 @@ import { Plus, Wrench, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { EquipmentInventory } from "@/data/types";
 import { useLanguage } from '../LanguageContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -23,6 +24,7 @@ import {
  */
 export function InventoryClient({ role }: { role: string }) {
   const { texts, t, formatNumber } = useLanguage();
+  const { confirm } = useConfirm();
   const [equipment, setEquipment] = useState<EquipmentInventory[]>([]);
   const [open, setOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentInventory | null>(null);
@@ -56,7 +58,7 @@ export function InventoryClient({ role }: { role: string }) {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this equipment?')) return;
+    if (!await confirm(t('Delete this equipment?', 'Delete this equipment?'))) return;
     try {
       const res = await fetch(`/api/inventory?id=${id}`, { method: 'DELETE' });
       if (res.ok) { 

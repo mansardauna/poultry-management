@@ -51,11 +51,9 @@ export async function POST(request: Request) {
       const isAdmin = cleanEmail === 'owner@poultry.com' || cleanEmail === 'owner' || cleanEmail === 'superadmin@pfms.com';
 
       if (!user && !isAdmin) {
-        // Return friendly message without exposing whether user exists
         return NextResponse.json({
-          success: true,
-          message: 'If an account matches this email, a 6-digit verification code has been dispatched.',
-        });
+          error: 'No account registered with this email address. Please check your email or create an account.',
+        }, { status: 400 });
       }
 
       const { emailSent, error: sendError } = await createResetToken(cleanEmail);

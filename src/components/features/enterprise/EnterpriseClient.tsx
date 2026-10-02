@@ -27,6 +27,7 @@ import {
 import toast from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useWorkspace } from '../WorkspaceContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 interface EnterpriseClientProps {
   tier: string;
@@ -54,6 +55,7 @@ export function EnterpriseClient({
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
+  const { confirm } = useConfirm();
   const { setActiveWorkspace, activeWorkspace } = useWorkspace();
 
   // Active Sub-Tab State
@@ -169,7 +171,7 @@ export function EnterpriseClient({
 
   // Handler: Revoke API Key
   const handleRevokeKey = async (id: string) => {
-    if (!confirm('Revoke this Enterprise API Key?')) return;
+    if (!await confirm('Revoke this Enterprise API Key?')) return;
     try {
       const res = await fetch('/api/enterprise', {
         method: 'POST',
