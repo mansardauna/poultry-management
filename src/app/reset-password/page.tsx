@@ -267,19 +267,19 @@ function ResetPasswordForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. owner@poultry.com"
-                className={`w-full border-2 rounded-xl p-3.5 pl-10 text-sm focus:outline-none transition-colors font-medium ${
+                className={`w-full border-2 rounded-xl p-3.5 pl-10 text-sm sm:text-base font-medium transition-all focus:outline-none ${
                   showEmailError
-                    ? 'border-red-400 focus:border-red-500 bg-red-50/20'
-                    : 'border-slate-200 focus:border-indigo-600 bg-slate-50'
+                    ? 'border-red-500 ring-2 ring-red-500/50 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400 focus:bg-amber-50/20'
+                    : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/30'
                 }`}
                 required
               />
-              <Mail size={18} className="absolute left-3.5 top-4 text-slate-400" />
+              <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
             {showEmailError && (
-              <p className="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                <AlertCircle size={13} />
-                {t("Please enter a valid email address", "Please enter a valid email address")}
+              <p className="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1.5">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{t("Please enter a valid email address", "Please enter a valid email address")}</span>
               </p>
             )}
           </div>
@@ -287,7 +287,7 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isSubmitting || !email.trim() || !isEmailValid}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 disabled:cursor-not-allowed mt-2 cursor-pointer"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-2 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
           >
             {isSubmitting ? t('Sending verification code…', 'Sending verification code…') : t('Send Verification Code', 'Send Verification Code')}
           </button>
@@ -313,7 +313,7 @@ function ResetPasswordForm() {
               onChange={(e) => setToken(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
               placeholder="123456"
               maxLength={6}
-              className="w-full border-2 border-slate-200 rounded-xl p-3.5 text-center text-2xl font-mono font-bold tracking-widest focus:outline-none focus:border-indigo-600 bg-white"
+              className="w-full border-2 border-slate-200 rounded-xl p-3.5 text-center text-3xl font-mono font-bold tracking-widest focus:outline-none transition-all bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/30"
               required
               autoFocus
             />
@@ -322,7 +322,7 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isSubmitting || token.length < 6}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
           >
             {isSubmitting ? t('Verifying code…', 'Verifying code…') : t('Verify Code & Proceed', 'Verify Code & Proceed')}
           </button>
@@ -357,25 +357,25 @@ function ResetPasswordForm() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder={t("Minimum 6 characters", "Minimum 6 characters")}
-                className={`w-full border-2 rounded-xl p-3 pr-12 text-sm focus:outline-none transition-colors font-medium ${
+                className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-all focus:outline-none ${
                   newPassword.length > 0 && newPassword.length < 6
-                    ? 'border-amber-300 focus:border-amber-500 bg-amber-50/20'
-                    : 'border-slate-200 focus:border-indigo-600 bg-slate-50'
+                    ? 'border-red-500 ring-2 ring-red-500/50 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400 focus:bg-amber-50/20'
+                    : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/30'
                 }`}
                 required
               />
               <button 
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[34px] -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer flex items-center justify-center"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
             {newPassword.length > 0 && newPassword.length < 6 && (
-              <p className="text-xs text-amber-600 font-medium mt-1.5 flex items-center gap-1">
-                <AlertCircle size={13} />
-                {t("Password must be at least 6 characters", "Password must be at least 6 characters")}
+              <p className="text-xs text-amber-600 font-medium mt-1.5 flex items-center gap-1.5">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{t("Password must be at least 6 characters", "Password must be at least 6 characters")}</span>
               </p>
             )}
           </div>
@@ -388,34 +388,34 @@ function ResetPasswordForm() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder={t("Re-enter new password", "Re-enter new password")}
-                className={`w-full border-2 rounded-xl p-3 pr-12 text-sm focus:outline-none transition-colors font-medium ${
+                className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-all focus:outline-none ${
                   showPasswordMismatch
-                    ? 'border-red-400 focus:border-red-500 bg-red-50/20'
+                    ? 'border-red-500 ring-2 ring-red-500/50 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400 focus:bg-amber-50/20'
                     : showPasswordMatchSuccess
-                    ? 'border-emerald-400 focus:border-emerald-500 bg-emerald-50/20'
-                    : 'border-slate-200 focus:border-indigo-600 bg-slate-50'
+                    ? 'border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-50/20 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/40 focus:bg-white'
+                    : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/30'
                 }`}
                 required
               />
               <button 
                 type="button" 
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-[34px] -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer flex items-center justify-center"
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
             {/* Real-time comparison feedback below input */}
             {showPasswordMismatch && (
-              <p className="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
-                <AlertCircle size={13} />
-                {t("Passwords do not match", "Passwords do not match")}
+              <p className="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1.5">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{t("Passwords do not match", "Passwords do not match")}</span>
               </p>
             )}
             {showPasswordMatchSuccess && (
-              <p className="text-xs text-emerald-600 font-medium mt-1.5 flex items-center gap-1">
-                <CheckCircle2 size={13} />
-                {t("Passwords match", "Passwords match")}
+              <p className="text-xs text-emerald-600 font-medium mt-1.5 flex items-center gap-1.5">
+                <CheckCircle2 size={14} className="shrink-0" />
+                <span>{t("Passwords match", "Passwords match")}</span>
               </p>
             )}
           </div>
@@ -423,7 +423,7 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isSubmitting || !isPasswordLengthValid || !isPasswordMatch}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 disabled:cursor-not-allowed mt-2 cursor-pointer"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 mt-2 cursor-pointer"
           >
             {isSubmitting ? t('Updating password…', 'Updating password…') : t('Update password', 'Update password')}
           </button>

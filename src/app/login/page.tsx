@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, ArrowLeft, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -111,6 +111,8 @@ export default function LoginPage() {
     }
   };
 
+  const hasLoginError = Boolean(error);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900/5 p-4 sm:p-6 lg:p-10 font-sans">
       <div className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1400px] flex bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 min-h-[600px] md:min-h-[680px] lg:min-h-[740px]">
@@ -174,8 +176,9 @@ export default function LoginPage() {
             
             <form onSubmit={handleLogin} className="space-y-5">
               {error && (
-                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm text-center border border-red-200 font-semibold shadow-sm">
-                  {error}
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm text-center border border-red-200 font-semibold shadow-sm flex items-center justify-center gap-2">
+                  <AlertCircle size={18} className="shrink-0" />
+                  <span>{error}</span>
                 </div>
               )}
 
@@ -197,10 +200,17 @@ export default function LoginPage() {
                     <input 
                       type="text"
                       value={twoFactorCode}
-                      onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                      onChange={(e) => {
+                        setTwoFactorCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6));
+                        if (error) setError('');
+                      }}
                       placeholder="000000"
                       maxLength={6}
-                      className="w-full border-2 border-slate-200 rounded-xl p-4 text-center text-3xl font-mono font-bold tracking-widest focus:outline-none focus:border-indigo-600 bg-white"
+                      className={`w-full border-2 rounded-xl p-3.5 text-center text-3xl font-mono font-bold tracking-widest focus:outline-none transition-all ${
+                        hasLoginError
+                          ? 'border-red-500 ring-2 ring-red-500/40 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/50 focus:bg-amber-50/20'
+                          : 'border-slate-200 bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/30'
+                      }`}
                       required
                       autoFocus
                     />
@@ -237,29 +247,45 @@ export default function LoginPage() {
                       <input 
                         type="text" 
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3.5 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (error) setError('');
+                        }}
+                        className={`w-full border-2 rounded-xl p-3.5 text-sm sm:text-base font-medium transition-all focus:outline-none ${
+                          hasLoginError
+                            ? 'border-red-500 ring-2 ring-red-500/40 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/50 focus:bg-amber-50/20'
+                            : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/30'
+                        }`}
                         placeholder="e.g. owner@poultry.com or username"
                         required
                       />
                     </div>
                     <div className="relative">
                       <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Password")}</label>
-                      <input 
-                        type={showPassword ? "text" : "password"} 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3.5 pr-14 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
-                        placeholder={t("Enter your password")}
-                        required
-                      />
-                      <button 
-                        type="button" 
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-[40px] text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
-                      >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
+                      <div className="relative">
+                        <input 
+                          type={showPassword ? "text" : "password"} 
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (error) setError('');
+                          }}
+                          className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-all focus:outline-none ${
+                            hasLoginError
+                              ? 'border-red-500 ring-2 ring-red-500/40 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/50 focus:bg-amber-50/20'
+                              : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/30'
+                          }`}
+                          placeholder={t("Enter your password")}
+                          required
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer flex items-center justify-center"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Remember Me Checkbox & Forgot Password Link */}
@@ -285,7 +311,7 @@ export default function LoginPage() {
                   <button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-2 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
                   >
                     {isSubmitting ? t('Authenticating…') : t('Sign in')}
                   </button>
