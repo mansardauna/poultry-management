@@ -3,7 +3,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { KeyRound, Eye, EyeOff, CheckCircle2, ArrowLeft, Mail, ShieldCheck, RefreshCw } from 'lucide-react';
+import { KeyRound, Eye, EyeOff, CheckCircle2, AlertCircle, ArrowLeft, Mail, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -22,18 +22,29 @@ function ResetPasswordForm() {
 
   const [email, setEmail] = useState(emailParam);
   const [token, setToken] = useState('');
-  const [devTokenNotice, setDevTokenNotice] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = emailRegex.test(email.trim());
+  const showEmailError = email.trim().length > 0 && !isEmailValid;
+
+  // Password comparison & strength validation
+  const isPasswordLengthValid = newPassword.length >= 6;
+  const isPasswordMatch = newPassword === confirmPassword;
+  const showPasswordMismatch = confirmPassword.length > 0 && !isPasswordMatch;
+  const showPasswordMatchSuccess = confirmPassword.length > 0 && isPasswordMatch && isPasswordLengthValid;
 
   // Step 1: Request Token
   const handleRequestToken = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) {
-      toast.error(t('Email address is required'));
+    if (!email.trim() || !isEmailValid) {
+      toast.error(t('Please enter a valid email address', 'Please enter a valid email address'));
       return;
     }
 
@@ -52,9 +63,6 @@ function ResetPasswordForm() {
 
       if (res.ok) {
         toast.success(data.message || t('Verification code sent!', 'Verification code sent!'));
-        if (data.devToken) {
-          setDevTokenNotice(data.devToken);
-        }
         setStep(2);
       } else {
         toast.error(data.error || t('Failed to send verification code', 'Failed to send verification code'));
@@ -120,9 +128,6 @@ function ResetPasswordForm() {
 
       if (res.ok) {
         toast.success(t('A new code has been sent!', 'A new code has been sent!'));
-        if (data.devToken) {
-          setDevTokenNotice(data.devToken);
-        }
       } else {
         toast.error(data.error || t('Failed to resend code', 'Failed to resend code'));
       }
@@ -205,7 +210,7 @@ function ResetPasswordForm() {
         <p className="text-xs sm:text-sm text-slate-500 font-medium">
           {step === 1 && t("Enter your account email to receive a recovery code.", "Enter your account email to receive a recovery code.")}
           {step === 2 && t("Enter the 6-digit verification code sent to your email.", "Enter the 6-digit verification code sent to your email.")}
-          {step === 3 && t("Specify your new account password below.", "Specify your new account password below.")}
+          {step === 3 && t("Specify and confirm your new account password below.", "Specify and confirm your new account password below.")}
         </p>
       </div>
 
@@ -232,23 +237,6 @@ function ResetPasswordForm() {
             </span>
             <span>{t("New Password", "New Password")}</span>
           </div>
-        </div>
-      )}
-
-      {/* Dev Token Notification Banner (if email provider offline or in dev mode) */}
-      {devTokenNotice && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-center justify-between">
-          <div>
-            <strong className="font-bold">{t("Verification Code:", "Verification Code:")}</strong>{' '}
-            <span className="font-mono font-extrabold tracking-widest text-indigo-700 bg-white px-2 py-0.5 rounded border border-amber-200">{devTokenNotice}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setToken(devTokenNotice)}
-            className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline ml-2 cursor-pointer"
-          >
-            {t("Auto-Fill", "Auto-Fill")}
-          </button>
         </div>
       )}
 
@@ -279,17 +267,27 @@ function ResetPasswordForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. owner@poultry.com"
-                className="w-full border-2 border-slate-200 rounded-xl p-3.5 pl-10 text-sm focus:outline-none focus:border-indigo-600 bg-slate-50 font-medium"
+                className={`w-full border-2 rounded-xl p-3.5 pl-10 text-sm focus:outline-none transition-colors font-medium ${
+                  showEmailError
+                    ? 'border-red-400 focus:border-red-500 bg-red-50/20'
+                    : 'border-slate-200 focus:border-indigo-600 bg-slate-50'
+                }`}
                 required
               />
               <Mail size={18} className="absolute left-3.5 top-4 text-slate-400" />
             </div>
+            {showEmailError && (
+              <p className="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                <AlertCircle size={13} />
+                {t("Please enter a valid email address", "Please enter a valid email address")}
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 mt-2 cursor-pointer"
+            disabled={isSubmitting || !email.trim() || !isEmailValid}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 disabled:cursor-not-allowed mt-2 cursor-pointer"
           >
             {isSubmitting ? t('Sending verification code…', 'Sending verification code…') : t('Send Verification Code', 'Send Verification Code')}
           </button>
@@ -324,7 +322,7 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isSubmitting || token.length < 6}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 cursor-pointer"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 disabled:cursor-not-allowed cursor-pointer"
           >
             {isSubmitting ? t('Verifying code…', 'Verifying code…') : t('Verify Code & Proceed', 'Verify Code & Proceed')}
           </button>
@@ -342,50 +340,90 @@ function ResetPasswordForm() {
               type="button"
               onClick={handleResendToken}
               disabled={isSubmitting}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer disabled:text-slate-400"
             >
               <RefreshCw size={14} /> {t("Resend Code", "Resend Code")}
             </button>
           </div>
         </form>
       ) : (
-        /* STEP 3: SET NEW PASSWORD */
+        /* STEP 3: SET & CONFIRM NEW PASSWORD */
         <form onSubmit={handleConfirmReset} className="space-y-4">
-          <div className="relative">
+          <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("New password *", "New password *")}</label>
-            <input 
-              type={showPassword ? "text" : "password"}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder={t("Minimum 6 characters", "Minimum 6 characters")}
-              className="w-full border-2 border-slate-200 rounded-xl p-3 pr-12 text-sm focus:outline-none focus:border-indigo-600 bg-slate-50 font-medium"
-              required
-            />
-            <button 
-              type="button" 
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[34px] text-slate-400 hover:text-indigo-600 transition-colors p-1"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={t("Minimum 6 characters", "Minimum 6 characters")}
+                className={`w-full border-2 rounded-xl p-3 pr-12 text-sm focus:outline-none transition-colors font-medium ${
+                  newPassword.length > 0 && newPassword.length < 6
+                    ? 'border-amber-300 focus:border-amber-500 bg-amber-50/20'
+                    : 'border-slate-200 focus:border-indigo-600 bg-slate-50'
+                }`}
+                required
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-[34px] -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {newPassword.length > 0 && newPassword.length < 6 && (
+              <p className="text-xs text-amber-600 font-medium mt-1.5 flex items-center gap-1">
+                <AlertCircle size={13} />
+                {t("Password must be at least 6 characters", "Password must be at least 6 characters")}
+              </p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Confirm new password *", "Confirm new password *")}</label>
-            <input 
-              type={showPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder={t("Re-enter new password", "Re-enter new password")}
-              className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 bg-slate-50 font-medium"
-              required
-            />
+            <div className="relative">
+              <input 
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder={t("Re-enter new password", "Re-enter new password")}
+                className={`w-full border-2 rounded-xl p-3 pr-12 text-sm focus:outline-none transition-colors font-medium ${
+                  showPasswordMismatch
+                    ? 'border-red-400 focus:border-red-500 bg-red-50/20'
+                    : showPasswordMatchSuccess
+                    ? 'border-emerald-400 focus:border-emerald-500 bg-emerald-50/20'
+                    : 'border-slate-200 focus:border-indigo-600 bg-slate-50'
+                }`}
+                required
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-[34px] -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {/* Real-time comparison feedback below input */}
+            {showPasswordMismatch && (
+              <p className="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                <AlertCircle size={13} />
+                {t("Passwords do not match", "Passwords do not match")}
+              </p>
+            )}
+            {showPasswordMatchSuccess && (
+              <p className="text-xs text-emerald-600 font-medium mt-1.5 flex items-center gap-1">
+                <CheckCircle2 size={13} />
+                {t("Passwords match", "Passwords match")}
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 mt-2 cursor-pointer"
+            disabled={isSubmitting || !isPasswordLengthValid || !isPasswordMatch}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 disabled:cursor-not-allowed mt-2 cursor-pointer"
           >
             {isSubmitting ? t('Updating password…', 'Updating password…') : t('Update password', 'Update password')}
           </button>

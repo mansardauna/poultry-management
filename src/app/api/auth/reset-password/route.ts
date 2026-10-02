@@ -58,14 +58,17 @@ export async function POST(request: Request) {
         });
       }
 
-      const { token: genToken, emailSent } = await createResetToken(cleanEmail);
+      const { emailSent, error: sendError } = await createResetToken(cleanEmail);
+
+      if (!emailSent) {
+        return NextResponse.json({
+          error: sendError || 'Failed to dispatch verification email. Please verify that the email provider is configured.',
+        }, { status: 400 });
+      }
 
       return NextResponse.json({
         success: true,
-        message: emailSent 
-          ? 'A 6-digit verification code has been dispatched to your email address.'
-          : 'Verification code generated. Please check your inbox or use the verification code below.',
-        devToken: genToken, // Provided so dev/local testing without SMTP credentials is fully functional
+        message: 'A 6-digit verification code has been dispatched to your email address.',
       });
     }
 

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -15,13 +15,26 @@ function SignupForm() {
   const whiteLabel = useWhiteLabel();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const plan = searchParams.get('plan');
+
+  // Real-time Email Format Validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = emailRegex.test(email.trim());
+  const showEmailError = email.trim().length > 0 && !isEmailValid;
+
+  // Real-time Password Strength & Match Validation
+  const isPasswordLengthValid = password.length >= 6;
+  const isPasswordMatch = password === confirmPassword;
+  const showPasswordMismatch = confirmPassword.length > 0 && !isPasswordMatch;
+  const showPasswordMatchSuccess = confirmPassword.length > 0 && isPasswordMatch && isPasswordLengthValid;
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -38,6 +51,21 @@ function SignupForm() {
     e.preventDefault();
     setError('');
 
+    if (!isEmailValid) {
+      setError(t("Please enter a valid email address", "Please enter a valid email address"));
+      return;
+    }
+
+    if (!isPasswordLengthValid) {
+      setError(t("Password must be at least 6 characters", "Password must be at least 6 characters"));
+      return;
+    }
+
+    if (!isPasswordMatch) {
+      setError(t("Passwords do not match", "Passwords do not match"));
+      return;
+    }
+
     if (!agreeTerms) {
       setError(t("You must agree to the Terms of Service and Privacy Policy to continue.", "You must agree to the Terms of Service and Privacy Policy to continue."));
       return;
@@ -49,7 +77,7 @@ function SignupForm() {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
       setIsSubmitting(false);
@@ -77,6 +105,13 @@ function SignupForm() {
       setError(err?.message || 'Network error while attempting to reach server.');
     }
   };
+
+  const isFormValid =
+    isEmailValid &&
+    isPasswordLengthValid &&
+    isPasswordMatch &&
+    confirmPassword.length > 0 &&
+    agreeTerms;
 
   return (
     <>
@@ -107,42 +142,108 @@ function SignupForm() {
         <p className="text-xs sm:text-sm font-medium text-indigo-600">{t("Join Poultry Farm Management")}</p>
       </div>
       
-      <form onSubmit={handleSignup} className="space-y-5">
+      <form onSubmit={handleSignup} className="space-y-4">
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm text-center border border-red-200 font-medium">
             {error}
           </div>
         )}
             
-        <div className="space-y-4">
+        <div className="space-y-3.5">
+          {/* Email Input Field */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Email address")}</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("Email address")}</label>
             <input 
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white font-medium"
+              className={`w-full border-2 rounded-lg p-3 text-sm focus:outline-none transition-colors font-medium ${
+                showEmailError 
+                  ? 'border-red-400 focus:border-red-500 bg-red-50/20' 
+                  : 'border-slate-200 focus:border-indigo-500 bg-slate-50 focus:bg-white'
+              }`}
               placeholder={t("Enter your email address")}
               required
             />
+            {showEmailError && (
+              <p className="text-xs text-red-600 font-medium mt-1 flex items-center gap-1">
+                <AlertCircle size={13} />
+                {t("Please enter a valid email address", "Please enter a valid email address")}
+              </p>
+            )}
           </div>
-          <div className="relative">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Password")}</label>
-            <input 
-              type={showPassword ? "text" : "password"} 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-2 border-slate-200 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white font-medium"
-              placeholder={t("Choose a secure password", "Choose a secure password")}
-              required
-            />
-            <button 
-              type="button" 
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[34px] text-slate-400 hover:text-indigo-600 transition-colors p-1"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+
+          {/* Password Input Field */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("Password")}</label>
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full border-2 rounded-lg p-3 pr-12 text-sm focus:outline-none transition-colors font-medium ${
+                  password.length > 0 && password.length < 6
+                    ? 'border-amber-300 focus:border-amber-500 bg-amber-50/20'
+                    : 'border-slate-200 focus:border-indigo-500 bg-slate-50 focus:bg-white'
+                }`}
+                placeholder={t("Choose a secure password", "Choose a secure password")}
+                required
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {password.length > 0 && password.length < 6 && (
+              <p className="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
+                <AlertCircle size={13} />
+                {t("Password must be at least 6 characters", "Password must be at least 6 characters")}
+              </p>
+            )}
+          </div>
+
+          {/* Confirm Password Input Field */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("Confirm Password", "Confirm Password")}</label>
+            <div className="relative">
+              <input 
+                type={showConfirmPassword ? "text" : "password"} 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`w-full border-2 rounded-lg p-3 pr-12 text-sm focus:outline-none transition-colors font-medium ${
+                  showPasswordMismatch
+                    ? 'border-red-400 focus:border-red-500 bg-red-50/20'
+                    : showPasswordMatchSuccess
+                    ? 'border-emerald-400 focus:border-emerald-500 bg-emerald-50/20'
+                    : 'border-slate-200 focus:border-indigo-500 bg-slate-50 focus:bg-white'
+                }`}
+                placeholder={t("Re-enter your password", "Re-enter your password")}
+                required
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {/* Real-time Comparison Feedback */}
+            {showPasswordMismatch && (
+              <p className="text-xs text-red-600 font-medium mt-1 flex items-center gap-1">
+                <AlertCircle size={13} />
+                {t("Passwords do not match", "Passwords do not match")}
+              </p>
+            )}
+            {showPasswordMatchSuccess && (
+              <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                <CheckCircle2 size={13} />
+                {t("Passwords match", "Passwords match")}
+              </p>
+            )}
           </div>
 
           {/* Terms & Privacy Agreement Checkbox */}
@@ -170,13 +271,13 @@ function SignupForm() {
 
         <button 
           type="submit" 
-          disabled={isSubmitting || !agreeTerms}
+          disabled={isSubmitting || !isFormValid}
           className="w-full bg-indigo-600 text-white font-semibold text-sm py-3.5 mt-2 rounded-lg hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-indigo-400 shadow-md shadow-indigo-200 cursor-pointer"
         >
           {isSubmitting ? t('Creating account…', 'Creating account…') : t('Sign Up')}
         </button>
         
-        <div className="text-center mt-4">
+        <div className="text-center mt-3">
           <Link href="/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
             {t("Already have an account? Log in here →")}
           </Link>
@@ -192,7 +293,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900/5 p-4 sm:p-6 lg:p-10 font-sans">
       <div className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1400px] flex bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 min-h-[600px] md:min-h-[680px] lg:min-h-[740px]">
-        {/* Left Side: Illustration */}
+        {/* Left Side: Rich Hero Illustration */}
         <div className="hidden md:flex md:w-1/2 lg:w-[55%] relative bg-slate-950 border-r border-slate-100 items-center justify-center overflow-hidden">
           <Image 
             src="/login_illustration.png" 
@@ -204,7 +305,7 @@ export default function SignupPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
           
           <div className="absolute bottom-10 left-10 right-10 text-white z-10 space-y-2 backdrop-blur-md bg-slate-950/40 p-6 rounded-2xl border border-white/10">
-            <span className="text-[11px] font-extrabold tracking-widest text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-500/30">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-500/30">
               {t("Commercial Farm Operations")}
             </span>
             <h2 className="text-2xl lg:text-3xl font-extrabold tracking-wide text-white">
@@ -216,13 +317,15 @@ export default function SignupPage() {
           </div>
         </div>
         
-        {/* Right Side: Signup Form */}
+        {/* Right Side: Wider Signup Form */}
         <div className="w-full md:w-1/2 lg:w-[45%] p-6 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
-          <Suspense fallback={<div className="text-center p-8 text-slate-500 font-medium">{t("Loading...")}</div>}>
-            <SignupForm />
-          </Suspense>
-          
-          <div className="pt-8 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 mt-6">
+          <div>
+            <Suspense fallback={<div className="text-center text-slate-500 py-10">Loading signup form...</div>}>
+              <SignupForm />
+            </Suspense>
+          </div>
+
+          <div className="pt-6 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 mt-6">
             <p>&copy; 2026 Poultry Farm Management System. All rights reserved.</p>
           </div>
         </div>

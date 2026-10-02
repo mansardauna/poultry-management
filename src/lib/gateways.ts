@@ -24,6 +24,8 @@ export async function getGatewaysConfig(): Promise<GatewaysConfig> {
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     paystackPublicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
     paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    fromEmail: process.env.RESEND_FROM_EMAIL || process.env.FROM_EMAIL || 'support@pfms-poultry.com',
     currencySymbol: '₦',
     platformName: 'PFMS',
     aiApiKey: process.env.GEMINI_API_KEY || '',
@@ -48,6 +50,8 @@ export async function getGatewaysConfig(): Promise<GatewaysConfig> {
   if (!config.stripeSecretKey) config.stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
   if (!config.stripePublicKey) config.stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
   if (!config.stripeWebhookSecret) config.stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+  if (!config.resendApiKey) config.resendApiKey = process.env.RESEND_API_KEY || '';
+  if (!config.fromEmail) config.fromEmail = process.env.RESEND_FROM_EMAIL || process.env.FROM_EMAIL || 'support@pfms-poultry.com';
 
   return config;
 }
