@@ -1,11 +1,11 @@
-'use strict';
 'use client';
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Wheat, Sparkles, Building2 } from 'lucide-react';
+import { Wheat, Sparkles, Building2, Palette, ArrowRightLeft, Award } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 interface FeedPoolClientProps {
   tier: string;
@@ -14,6 +14,7 @@ interface FeedPoolClientProps {
 
 export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: FeedPoolClientProps) {
   const router = useRouter();
+  const { t, formatCurrency, formatNumber } = useLanguage();
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
@@ -37,10 +38,10 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
       const data = await res.json();
       if (res.ok && data.order) {
         setBulkOrders(prev => [data.order, ...prev]);
-        toast.success(`Wholesale Feed Procurement Order created for ${bags} bags!`);
+        toast.success(`${t('Wholesale Feed & Procurement Pool')} - ${bags} ${t('Quantity (Bags)')}`);
       }
     } catch (_e) {
-      toast.error('Failed to submit bulk order');
+      toast.error(t('Failed to submit bulk order'));
     }
   };
 
@@ -50,11 +51,11 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
             <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
-              ENTERPRISE TIER REQUIRED
+              {t("ENTERPRISE TIER REQUIRED")}
             </span>
-            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Wholesale Feed & Procurement Pool</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">{t("Wholesale Feed & Procurement Pool")}</h2>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Pooling feed orders (Maize, Soybean, Layer Mash) with cooperative partner farms to unlock 15% bulk discounts is exclusively available on Enterprise Plus.
+              {t("Pooling feed orders (Maize, Soybean, Layer Mash) with cooperative partner farms to unlock 15% bulk discounts is exclusively available on Enterprise Plus.")}
             </p>
           </div>
 
@@ -63,7 +64,7 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
-              Upgrade to Enterprise & Cooperative (₦45,000/mo)
+              {t("Upgrade to Enterprise & Cooperative (₦45,000/mo)")}
             </button>
           </div>
         </div>
@@ -79,35 +80,35 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Building2 size={16} /> Branch Matrix
+          <Building2 size={16} /> {t("Branch Matrix")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/whitelabel')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> White-Label & Themes
+          <Palette size={16} /> {t("White-Label & Themes")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/api')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> API Keys & Webhooks
+          <ArrowRightLeft size={16} /> {t("API Keys & Webhooks")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/vet')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> 24/7 Vet Hotline
+          <Award size={16} /> {t("24/7 Vet Hotline")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/feed-pool')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap bg-amber-600 text-white shadow-md"
         >
-          <Wheat size={16} /> Wholesale Feed Pool ({bulkOrders.length})
+          <Wheat size={16} /> {t("Wholesale Feed Pool")} ({bulkOrders.length})
         </button>
       </div>
 
@@ -116,10 +117,10 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Wheat size={24} className="text-amber-600 shrink-0" />
-            Wholesale Feed Purchasing Pool
+            {t("Wholesale Feed Purchasing Pool")}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Pool feed orders with regional cooperative member farms to unlock 15% wholesale volume discounts.
+            {t("Pool feed orders with regional cooperative member farms to unlock 15% wholesale volume discounts.")}
           </p>
         </div>
       </div>
@@ -127,7 +128,7 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
       <Card className="rounded-2xl border border-slate-200 shadow-sm">
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Wheat size={20} className="text-amber-600" /> Cooperative Bulk Feed & Wholesale Purchasing Pool
+            <Wheat size={20} className="text-amber-600" /> {t("Cooperative Bulk Feed & Wholesale Purchasing Pool")}
           </CardTitle>
         </CardHeader>
 
@@ -138,15 +139,15 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
               onChange={(e) => setBulkFeedType(e.target.value)}
               className="p-3 border border-amber-200 rounded-xl font-semibold bg-white outline-none"
             >
-              <option>Layer Mash (Bulk 50kg)</option>
-              <option>Broiler Finisher (Bulk 50kg)</option>
-              <option>Yellow Maize (Ton Bags)</option>
-              <option>Soybean Meal (Ton Bags)</option>
+              <option value="Layer Mash (Bulk 50kg)">{t("Layer Mash (Bulk 50kg)")}</option>
+              <option value="Broiler Finisher (Bulk 50kg)">{t("Broiler Finisher (Bulk 50kg)")}</option>
+              <option value="Yellow Maize (Ton Bags)">{t("Yellow Maize (Ton Bags)")}</option>
+              <option value="Soybean Meal (Ton Bags)">{t("Soybean Meal (Ton Bags)")}</option>
             </select>
 
             <input 
               type="number"
-              placeholder="Quantity (Bags)"
+              placeholder={t("Quantity (Bags)")}
               value={bulkBags}
               onChange={(e) => setBulkBags(e.target.value)}
               className="p-3 border border-amber-200 rounded-xl font-semibold bg-white outline-none"
@@ -156,25 +157,25 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
               onClick={handleCreateBulkOrder}
               className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-3 rounded-xl shadow cursor-pointer transition-colors flex items-center justify-center gap-1.5"
             >
-              <Wheat size={16} /> Join Wholesale Feed Pool
+              <Wheat size={16} /> {t("Join Wholesale Feed Pool")}
             </button>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-700 tracking-wider">Active Bulk Orders ({bulkOrders.length})</h4>
+            <h4 className="text-xs font-extrabold text-slate-700 tracking-wider">{t("Active Bulk Orders")} ({bulkOrders.length})</h4>
             {bulkOrders.length === 0 ? (
               <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
-                No active wholesale feed pool orders. Pool orders to unlock 15% discount on maize and feeds.
+                {t("No active wholesale feed pool orders. Pool orders to unlock 15% discount on maize and feeds.")}
               </div>
             ) : (
               bulkOrders.map((o) => (
                 <div key={o.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-bold text-slate-900">{o.feedType} ({o.quantityBags} Bags)</span>
-                    <p className="text-[10px] text-emerald-600 font-bold mt-0.5">Wholesale Discount: 15% Off (₦{(o.discountPrice || 12500).toLocaleString()}/bag)</p>
+                    <span className="font-bold text-slate-900">{t(o.feedType) || o.feedType} ({formatNumber(o.quantityBags)} {t("Quantity (Bags)")})</span>
+                    <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{t("Wholesale Discount: 15% Off")} ({formatCurrency(o.discountPrice || 12500)}/bag)</p>
                   </div>
                   <span className="bg-amber-100 text-amber-800 text-[9px] font-extrabold px-2.5 py-1 rounded uppercase font-mono">
-                    {o.status || 'Processing Pool'}
+                    {t(o.status || 'Processing Pool')}
                   </span>
                 </div>
               ))

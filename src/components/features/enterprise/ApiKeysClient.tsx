@@ -21,6 +21,7 @@ import {
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 interface ApiKeysClientProps {
   tier: string;
@@ -30,6 +31,7 @@ interface ApiKeysClientProps {
 export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysClientProps) {
   const router = useRouter();
   const { confirm } = useConfirm();
+  const { t } = useLanguage();
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
@@ -44,7 +46,7 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
 
   const handleCreateApiKey = async () => {
     if (!newKeyName.trim()) {
-      toast.error('Please enter a key description');
+      toast.error(t('Please enter a key description'));
       return;
     }
     try {
@@ -63,17 +65,17 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
         setApiKeys(prev => [data.apiKey, ...prev]);
         setNewKeyName('');
         setNewKeyWebhook('');
-        toast.success(`Generated Enterprise API Key: ${data.apiKey.name}`);
+        toast.success(t('API Key Created Successfully!'));
       } else {
-        toast.error(data.error || 'Failed to create API key');
+        toast.error(data.error || t('Failed to generate API Key'));
       }
     } catch (_e) {
-      toast.error('Error creating API key');
+      toast.error(t('Failed to generate API Key'));
     }
   };
 
   const handleRevokeKey = async (id: string) => {
-    if (!await confirm('Revoke this Enterprise API Key?')) return;
+    if (!await confirm(t('Are you sure you want to revoke and delete API key') + '?')) return;
     try {
       const res = await fetch('/api/enterprise', {
         method: 'POST',
@@ -82,16 +84,16 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
       });
       if (res.ok) {
         setApiKeys(prev => prev.filter(k => k.id !== id));
-        toast.success('API Key revoked');
+        toast.success(t('API Key Deleted'));
       }
     } catch (_e) {
-      toast.error('Failed to revoke API key');
+      toast.error(t('Failed to generate API Key'));
     }
   };
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(`${label} copied to clipboard!`);
+    toast.success(`${label} ${t('Copied to clipboard')}!`);
     setCopiedEndpoint(label);
     setTimeout(() => setCopiedEndpoint(null), 2000);
   };
@@ -102,11 +104,11 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
             <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
-              ENTERPRISE TIER REQUIRED
+              {t("ENTERPRISE TIER REQUIRED")}
             </span>
-            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Enterprise REST API & AI Developer Suite</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">{t("Enterprise Developer API & Webhooks")}</h2>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Production REST API Keys, OAuth scopes, AI machine-to-machine endpoints, and automated ERP webhook triggers (QuickBooks, SAP, Sage) are exclusively available on Enterprise Plus.
+              {t("Securely connect your ERP, IoT farm sensors, accounting tools, or custom client apps with PFMS Enterprise REST API.")}
             </p>
           </div>
 
@@ -115,7 +117,7 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
-              Upgrade to Enterprise & Cooperative
+              {t("Upgrade to Enterprise & Cooperative (₦45,000/mo)")}
             </button>
           </div>
         </div>
@@ -165,35 +167,35 @@ console.log(data);`;
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Building2 size={16} /> Branch Matrix
+          <Building2 size={16} /> {t("Branch Matrix")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/whitelabel')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> White-Label & Themes
+          <Sparkles size={16} /> {t("White-Label & Themes")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/api')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap bg-indigo-600 text-white shadow-md"
         >
-          <Key size={16} /> API Keys & AI Endpoints ({apiKeys.length})
+          <Key size={16} /> {t("API Keys & Webhooks")} ({apiKeys.length})
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/vet')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> 24/7 Vet Hotline
+          <Sparkles size={16} /> {t("24/7 Vet Hotline")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/feed-pool')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> Wholesale Feed Pool
+          <Sparkles size={16} /> {t("Wholesale Feed Pool")}
         </button>
       </div>
 
@@ -202,10 +204,10 @@ console.log(data);`;
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Key size={24} className="text-indigo-600 shrink-0" />
-            Developer Hub & API Gateway
+            {t("Enterprise Developer API & Webhooks")}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage production secret keys, automate data pipelines with webhooks, and integrate machine-to-machine AI poultry endpoints.
+            {t("Securely connect your ERP, IoT farm sensors, accounting tools, or custom client apps with PFMS Enterprise REST API.")}
           </p>
         </div>
       </div>
@@ -214,14 +216,14 @@ console.log(data);`;
       <Card className="rounded-2xl border border-slate-200 shadow-sm">
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Key size={18} className="text-indigo-600" /> Production REST API Keys
+            <Key size={18} className="text-indigo-600" /> {t("Active API Keys")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input 
               type="text"
-              placeholder="Key Description (e.g. QuickBooks Sync, Farm IoT)"
+              placeholder={t("Key Name") + " (e.g. QuickBooks Sync, Farm IoT)"}
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
               className="p-3 border border-slate-200 rounded-xl text-xs font-semibold bg-white outline-none focus:border-indigo-500"
@@ -229,7 +231,7 @@ console.log(data);`;
 
             <input 
               type="text"
-              placeholder="Webhook Endpoint URL (Optional)"
+              placeholder={t("Webhooks URL (Optional)")}
               value={newKeyWebhook}
               onChange={(e) => setNewKeyWebhook(e.target.value)}
               className="p-3 border border-slate-200 rounded-xl text-xs font-semibold bg-white outline-none focus:border-indigo-500"
@@ -239,15 +241,15 @@ console.log(data);`;
               onClick={handleCreateApiKey}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-3 rounded-xl shadow cursor-pointer transition-colors flex items-center justify-center gap-1.5 active:scale-95"
             >
-              <Plus size={16} /> Generate Production API Key
+              <Plus size={16} /> {t("Generate API Key")}
             </button>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-700 tracking-wider">Active API Keys ({apiKeys.length})</h4>
+            <h4 className="text-xs font-extrabold text-slate-700 tracking-wider">{t("Active API Keys")} ({apiKeys.length})</h4>
             {apiKeys.length === 0 ? (
               <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
-                No active Enterprise API Keys. Create a new key above to integrate ERP, accounting software, or AI workers.
+                {t("No active Enterprise API Keys. Create a new key above to integrate ERP, accounting software, or AI workers.")}
               </div>
             ) : (
               apiKeys.map((k) => (
@@ -256,7 +258,7 @@ console.log(data);`;
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900 text-xs">{k.name}</span>
                       <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase font-mono">
-                        {k.status || 'Active'}
+                        {k.status ? t(k.status) : t('Active')}
                       </span>
                     </div>
                     <p className="font-mono text-xs text-indigo-600 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200 max-w-md truncate">
@@ -269,16 +271,16 @@ console.log(data);`;
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => copyToClipboard(k.secretKey, 'API Secret Key')}
+                      onClick={() => copyToClipboard(k.secretKey, t('Key Secret'))}
                       className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
                     >
-                      <Copy size={14} /> Copy
+                      <Copy size={14} /> {t("Copy API Key")}
                     </button>
 
                     <button
                       onClick={() => handleRevokeKey(k.id)}
                       className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                      title="Revoke Key"
+                      title={t("Delete Key")}
                     >
                       <Trash2 size={14} />
                     </button>

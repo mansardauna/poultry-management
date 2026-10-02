@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '../WorkspaceContext';
 import { WorkspaceOnboarding } from '../WorkspaceOnboarding';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 interface BranchMatrixClientProps {
   tier: string;
@@ -29,6 +30,7 @@ interface BranchMatrixClientProps {
 
 export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branchMetrics = {} }: BranchMatrixClientProps) {
   const router = useRouter();
+  const { t, formatCurrency, formatNumber } = useLanguage();
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
@@ -52,12 +54,12 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
   // Handler: Execute Stock Transfer
   const handleExecuteTransfer = async () => {
     if (fromBranchId === toBranchId) {
-      toast.error('Source and Destination branch must be different!');
+      toast.error(t('Source and Destination branch must be different!'));
       return;
     }
     const qty = Number(transferQuantity);
     if (!qty || qty <= 0) {
-      toast.error('Please enter a valid transfer quantity');
+      toast.error(t('Please enter a valid transfer quantity'));
       return;
     }
 
@@ -76,15 +78,15 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
         })
       });
       if (res.ok) {
-        toast.success(`Successfully transferred ${qty} ${transferItemType} to destination branch!`);
+        toast.success(t(`Successfully transferred ${qty} ${transferItemType} to destination branch!`));
         setOpenTransferModal(false);
         setTransferNotes('');
         router.refresh();
       } else {
-        toast.error('Failed to execute stock transfer');
+        toast.error(t('Failed to execute stock transfer'));
       }
     } catch (_e) {
-      toast.error('Error during stock transfer');
+      toast.error(t('Error during stock transfer'));
     } finally {
       setIsTransferring(false);
     }
@@ -94,7 +96,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
   const handleConfirmDeleteBranch = async () => {
     if (!deletingBranch) return;
     if (deletingBranch.id === 'main') {
-      toast.error('Cannot delete the primary main farm branch');
+      toast.error(t('Cannot delete the primary main farm branch'));
       return;
     }
 
@@ -114,14 +116,14 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
 
       if (res.ok) {
         setWorkspaces(prev => prev.filter(w => w.id !== deletingBranch.id));
-        toast.success(`Branch "${deletingBranch.name}" permanently deleted!`);
+        toast.success(`${t('Branch')} "${deletingBranch.name}" ${t('permanently deleted!')}`);
         setDeletingBranch(null);
         router.refresh();
       } else {
-        toast.error('Failed to delete branch');
+        toast.error(t('Failed to delete branch'));
       }
     } catch (_e) {
-      toast.error('Error deleting branch');
+      toast.error(t('Error deleting branch'));
     } finally {
       setIsDeleting(false);
     }
@@ -133,11 +135,11 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
             <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
-              ENTERPRISE TIER REQUIRED
+              {t("ENTERPRISE TIER REQUIRED")}
             </span>
-            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Multi-Farm Matrix & Stock Transfers</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">{t("Multi-Farm Matrix & Stock Transfers")}</h2>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Multi-farm matrix management, inter-branch stock transfers, and branch performance leaderboards are exclusively available on Enterprise Plus.
+              {t("Multi-farm matrix management, inter-branch stock transfers, and branch performance leaderboards are exclusively available on Enterprise Plus.")}
             </p>
           </div>
 
@@ -146,7 +148,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
-              Upgrade to Enterprise & Cooperative (₦45,000/mo)
+              {t("Upgrade to Enterprise & Cooperative (₦45,000/mo)")}
             </button>
           </div>
         </div>
@@ -166,35 +168,35 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap bg-indigo-600 text-white shadow-md"
         >
-          <Building2 size={16} /> Branch Matrix ({workspaces.length})
+          <Building2 size={16} /> {t("Branch Matrix")} ({workspaces.length})
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/whitelabel')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> White-Label & Themes
+          <Sparkles size={16} /> {t("White-Label & Themes")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/api')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <ArrowRightLeft size={16} /> API Keys & Webhooks
+          <ArrowRightLeft size={16} /> {t("API Keys & Webhooks")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/vet')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Award size={16} /> 24/7 Vet Hotline
+          <Award size={16} /> {t("24/7 Vet Hotline")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/feed-pool')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Layers size={16} /> Wholesale Feed Pool
+          <Layers size={16} /> {t("Wholesale Feed Pool")}
         </button>
       </div>
 
@@ -203,10 +205,10 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Building2 size={24} className="text-indigo-600 shrink-0" />
-            Multi-Farm Branch Matrix
+            {t("Multi-Farm Branch Matrix")}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real live aggregated metrics per branch, cross-branch stock transfers, and permanent branch management.
+            {t("Real live aggregated metrics per branch, cross-branch stock transfers, and permanent branch management.")}
           </p>
         </div>
 
@@ -215,13 +217,13 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
             onClick={() => setOpenTransferModal(true)}
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
-            <ArrowRightLeft size={15} /> Transfer Stock
+            <ArrowRightLeft size={15} /> {t("Transfer Stock")}
           </button>
           <button 
             onClick={() => setShowAddModal(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
-            <Plus size={15} /> Add Farm Branch
+            <Plus size={15} /> {t("Add Farm Branch")}
           </button>
         </div>
       </div>
@@ -231,9 +233,9 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
         <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Building2 size={18} className="text-indigo-600 shrink-0" /> Active Farm Locations ({workspaces.length})
+              <Building2 size={18} className="text-indigo-600 shrink-0" /> {t("Farm Branch Matrix & Operations")} ({workspaces.length})
             </CardTitle>
-            <p className="text-xs text-slate-500 mt-0.5">Real live telemetry aggregated from database records across all farm branches</p>
+            <p className="text-xs text-slate-500 mt-0.5">{t("Across all branch farms")}</p>
           </div>
         </CardHeader>
 
@@ -258,13 +260,13 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                     <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded ${
                       isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
                     }`}>
-                      {isActive ? 'Active Workspace' : `Location #${i + 1}`}
+                      {isActive ? t('Active') : `${t('Location / Region')} #${i + 1}`}
                     </span>
 
                     <button
                       onClick={() => setDeletingBranch(ws)}
                       className="text-slate-400 hover:text-red-600 p-1 transition-colors cursor-pointer"
-                      title="Permanently Delete Branch"
+                      title={t("Delete Farm Branch")}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -272,26 +274,26 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
 
                   <div>
                     <h4 className="font-extrabold text-slate-900 text-base">{ws.name}</h4>
-                    <p className="text-xs text-slate-500 font-medium">{ws.type || 'Commercial Farm Branch'}</p>
+                    <p className="text-xs text-slate-500 font-medium">{ws.type || t('Main Farm (Primary)')}</p>
                   </div>
 
                   {/* Real Database Telemetry Stats */}
                   <div className="pt-3 border-t border-slate-200/60 grid grid-cols-2 gap-3 text-xs font-semibold text-slate-700 font-mono">
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Flock Size</span>
-                      <span className="text-sm font-bold text-slate-900">{bm.totalBirds.toLocaleString()} Birds</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">{t("Flock Headcount")}</span>
+                      <span className="text-sm font-bold text-slate-900">{formatNumber(bm.totalBirds)}</span>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Egg Production</span>
-                      <span className="text-sm font-bold text-emerald-600">{Math.floor(bm.totalEggs / 30).toLocaleString()} Crates</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">{t("Egg Output")}</span>
+                      <span className="text-sm font-bold text-emerald-600">{formatNumber(Math.floor(bm.totalEggs / 30))} {t("Egg Crates")}</span>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Feed Stock</span>
-                      <span className="text-sm font-bold text-indigo-600">{bm.feedStockKg.toLocaleString()} Kg</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">{t("Feed Stock")}</span>
+                      <span className="text-sm font-bold text-indigo-600">{formatNumber(bm.feedStockKg)} Kg</span>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-[9px] text-slate-400 font-bold block font-sans">Revenue</span>
-                      <span className="text-sm font-bold text-amber-600">₦{bm.revenue.toLocaleString()}</span>
+                      <span className="text-[9px] text-slate-400 font-bold block font-sans">{t("Revenue")}</span>
+                      <span className="text-sm font-bold text-amber-600">{formatCurrency(bm.revenue)}</span>
                     </div>
                   </div>
 
@@ -299,13 +301,13 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                     <button
                       onClick={() => {
                         setActiveWorkspace(ws);
-                        toast.success(`Switched active workspace to "${ws.name}"`);
+                        toast.success(`${t('Switch to Branch')}: "${ws.name}"`);
                       }}
                       className={`flex-1 text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer ${
                         isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
                       }`}
                     >
-                      {isActive ? 'Currently Active' : 'Switch Workspace'}
+                      {isActive ? t('Active') : t('Switch to Branch')}
                     </button>
                   </div>
                 </div>
@@ -322,14 +324,14 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ArrowRightLeft size={18} className="text-indigo-600 shrink-0" />
-                <h3 className="font-bold text-slate-900 text-sm">Cross-Branch Stock Transfer</h3>
+                <h3 className="font-bold text-slate-900 text-sm">{t("Transfer Stock Between Branches")}</h3>
               </div>
               <button onClick={() => setOpenTransferModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
             </div>
 
             <div className="p-5 space-y-4 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Source Branch (From) *</label>
+                <label className="font-bold text-slate-700 block mb-1">{t("Source Farm Branch")} *</label>
                 <select
                   value={fromBranchId}
                   onChange={(e) => setFromBranchId(e.target.value)}
@@ -340,7 +342,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Destination Branch (To) *</label>
+                <label className="font-bold text-slate-700 block mb-1">{t("Destination Farm Branch")} *</label>
                 <select
                   value={toBranchId}
                   onChange={(e) => setToBranchId(e.target.value)}
@@ -351,20 +353,21 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Transfer Item Type *</label>
+                <label className="font-bold text-slate-700 block mb-1">{t("Item Category / Type")} *</label>
                 <select
                   value={transferItemType}
                   onChange={(e) => setTransferItemType(e.target.value)}
                   className="w-full p-3 border border-slate-200 rounded-xl font-semibold outline-none bg-slate-50"
                 >
-                  <option>Egg Crates</option>
-                  <option>Feed Bags (50kg)</option>
-                  <option>Bird Batches (Layers/Broilers)</option>
+                  <option value="Egg Crates">{t("Egg Crates")}</option>
+                  <option value="Feed Bags (50kg)">{t("Feed Bags (50kg)")}</option>
+                  <option value="Live Birds">{t("Live Birds")}</option>
+                  <option value="Vaccines & Meds">{t("Vaccines & Meds")}</option>
                 </select>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Quantity to Transfer *</label>
+                <label className="font-bold text-slate-700 block mb-1">{t("Quantity to Transfer")} *</label>
                 <input
                   type="number"
                   value={transferQuantity}
@@ -375,13 +378,13 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Transfer Notes / Reason</label>
+                <label className="font-bold text-slate-700 block mb-1">{t("Transfer Memo / Notes (Optional)")}</label>
                 <input
                   type="text"
                   value={transferNotes}
                   onChange={(e) => setTransferNotes(e.target.value)}
                   className="w-full p-3 border border-slate-200 rounded-xl font-semibold outline-none"
-                  placeholder="e.g. Stock balancing for Maitama Branch"
+                  placeholder={t("Transfer Memo / Notes (Optional)")}
                 />
               </div>
 
@@ -390,7 +393,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                 disabled={isTransferring}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow cursor-pointer transition-colors"
               >
-                {isTransferring ? 'Executing Stock Transfer...' : 'Execute Stock Transfer'}
+                {isTransferring ? t('Transferring...') : t('Confirm Transfer')}
               </button>
             </div>
           </div>
@@ -404,18 +407,18 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle size={18} className="text-red-600 shrink-0" />
-                <h3 className="font-bold text-slate-900 text-sm">Permanently Delete Branch</h3>
+                <h3 className="font-bold text-slate-900 text-sm">{t("Delete Farm Branch")}</h3>
               </div>
               <button onClick={() => setDeletingBranch(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
             </div>
 
             <div className="p-5 space-y-4 text-xs">
               <p className="text-slate-700 leading-relaxed font-semibold">
-                Are you sure you want to permanently delete farm branch <strong className="text-slate-950">"{deletingBranch.name}"</strong>?
+                {t("Are you sure you want to permanently delete")} <strong className="text-slate-950">"{deletingBranch.name}"</strong>?
               </p>
               <div className="text-red-700 bg-red-50 p-3 rounded-xl border border-red-200 flex items-start gap-2">
                 <AlertTriangle size={16} className="text-red-600 shrink-0 mt-0.5" />
-                <span>Warning: This action will permanently remove this branch location from your database.</span>
+                <span>{t("This will remove the workspace and disassociate its records.")}</span>
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
@@ -423,7 +426,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                   onClick={() => setDeletingBranch(null)}
                   className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl"
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
 
                 <button
@@ -431,7 +434,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                   disabled={isDeleting}
                   className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow"
                 >
-                  {isDeleting ? 'Deleting...' : 'Permanently Delete'}
+                  {isDeleting ? t('Deleting...') : t('Yes, Delete Branch')}
                 </button>
               </div>
             </div>

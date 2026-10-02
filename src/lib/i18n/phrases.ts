@@ -6,6 +6,7 @@ import { frPhrases } from './locales/phrases_fr';
 import { yoPhrases } from './locales/phrases_yo';
 import { igPhrases } from './locales/phrases_ig';
 import { haPhrases } from './locales/phrases_ha';
+import { ENTERPRISE_CCTV_PHRASES } from './locales/enterprise_cctv';
 
 export const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
   en: {
@@ -5552,4 +5553,12 @@ export const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
   ig: igPhrases,
   ha: haPhrases,
 };
+
+// Merge enterprise & CCTV translations across all languages
+(Object.keys(ENTERPRISE_CCTV_PHRASES) as Language[]).forEach((lang) => {
+  if (GLOBAL_PHRASES[lang]) {
+    Object.assign(GLOBAL_PHRASES[lang], ENTERPRISE_CCTV_PHRASES[lang]);
+  }
+});
+
 

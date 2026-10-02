@@ -3,10 +3,11 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Palette, Sparkles, Building2, CheckCircle2, Globe, FileText, Upload } from 'lucide-react';
+import { Palette, Sparkles, Building2, CheckCircle2, Globe, FileText, Upload, ArrowRightLeft, Award, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useWhiteLabel } from '../WhiteLabelContext';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 interface WhiteLabelClientProps {
   tier: string;
@@ -16,6 +17,7 @@ interface WhiteLabelClientProps {
 export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
   const router = useRouter();
   const whiteLabel = useWhiteLabel();
+  const { t } = useLanguage();
 
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
@@ -45,10 +47,10 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
         customReportHeader,
         customInvoiceFooter
       });
-      toast.success('White-Label Branding & Theme Saved Globally!');
+      toast.success(t('White-Label Branding & Theme Saved Globally!'));
       router.refresh();
     } catch (_e) {
-      toast.error('Failed to save white-label branding');
+      toast.error(t('Failed to save white-label branding'));
     } finally {
       setIsSaving(false);
     }
@@ -60,11 +62,11 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
         <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-5 shadow-sm">
           <div className="space-y-2 max-w-lg mx-auto">
             <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
-              ENTERPRISE TIER REQUIRED
+              {t("ENTERPRISE TIER REQUIRED")}
             </span>
-            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">White-Label Portal & Custom Branding</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">{t("White-Label Portal & Custom Branding")}</h2>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Custom logo URLs, custom subdomains, branded PDF report headers, custom invoice footers, and app theme customization are exclusively available on Enterprise Plus.
+              {t("Custom logo URLs, custom subdomains, branded PDF report headers, custom invoice footers, and app theme customization are exclusively available on Enterprise Plus.")}
             </p>
           </div>
 
@@ -73,7 +75,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
-              Upgrade to Enterprise & Cooperative (₦45,000/mo)
+              {t("Upgrade to Enterprise & Cooperative (₦45,000/mo)")}
             </button>
           </div>
         </div>
@@ -89,35 +91,35 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
           onClick={() => router.push('/dashboard/enterprise/branches')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Building2 size={16} /> Branch Matrix
+          <Building2 size={16} /> {t("Branch Matrix")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/whitelabel')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap bg-purple-600 text-white shadow-md"
         >
-          <Palette size={16} /> White-Label & Themes
+          <Palette size={16} /> {t("White-Label & Themes")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/api')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> API Keys & Webhooks
+          <ArrowRightLeft size={16} /> {t("API Keys & Webhooks")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/vet')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> 24/7 Vet Hotline
+          <Award size={16} /> {t("24/7 Vet Hotline")}
         </button>
 
         <button
           onClick={() => router.push('/dashboard/enterprise/feed-pool')}
           className="px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap text-slate-600 hover:bg-slate-100"
         >
-          <Sparkles size={16} /> Wholesale Feed Pool
+          <Layers size={16} /> {t("Wholesale Feed Pool")}
         </button>
       </div>
 
@@ -126,10 +128,10 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Palette size={24} className="text-purple-600 shrink-0" />
-            White-Label Portal & Branding
+            {t("White-Label Portal & Custom Branding")}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Customize your farm title, custom subdomain, brand logo, report headers, and invoice footer notes across the whole app.
+            {t("Configure your farm cooperative's custom brand identity, branded subdomains, PDF reports, and invoice footers.")}
           </p>
         </div>
 
@@ -138,14 +140,14 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
           disabled={isSaving}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2"
         >
-          <Sparkles size={15} /> {isSaving ? 'Saving...' : 'Save Branding'}
+          <Sparkles size={15} /> {isSaving ? t('Saving...') : t('Save Brand Settings')}
         </button>
       </div>
 
       <Card className="rounded-2xl border border-slate-200 shadow-sm">
         <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Palette size={20} className="text-purple-600" /> Cooperative White-Label Portal & Custom Branding
+            <Palette size={20} className="text-purple-600" /> {t("Brand Identity & Themes")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
@@ -153,7 +155,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
             {/* Form Controls */}
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Cooperative / Enterprise Name *</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{t("Cooperative / Enterprise Brand Name")} *</label>
                 <input 
                   type="text" 
                   value={coopName} 
@@ -163,7 +165,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Custom Portal Sub-Domain *</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{t("Dedicated Farm Subdomain")} *</label>
                 <div className="flex items-center">
                   <input 
                     type="text" 
@@ -178,7 +180,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Brand Logo Image URL</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{t("Brand Logo URL")}</label>
                 <input 
                   type="text" 
                   placeholder="https://example.com/logo.png"
@@ -189,13 +191,14 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Brand Theme Accent Color</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{t("Primary Accent Color Theme")}</label>
                 <div className="flex items-center gap-3">
                   {(['indigo', 'emerald', 'purple', 'amber', 'slate'] as const).map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => setBrandColor(c)}
+                      title={c === 'indigo' ? t('Indigo Classic') : c === 'emerald' ? t('Emerald Forest') : c === 'purple' ? t('Purple Imperial') : c === 'amber' ? t('Amber Harvest') : t('Slate Charcoal')}
                       className={`w-8 h-8 rounded-full border-2 transition-transform cursor-pointer ${
                         c === 'indigo' ? 'bg-indigo-600' :
                         c === 'emerald' ? 'bg-emerald-600' :
@@ -208,7 +211,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Custom Report Header Title</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{t("Branded PDF Report Header Title")}</label>
                 <input 
                   type="text" 
                   value={customReportHeader} 
@@ -218,7 +221,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Custom Invoice Footer Note</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{t("Custom Invoice Footer Note")}</label>
                 <input 
                   type="text" 
                   value={customInvoiceFooter} 
@@ -232,7 +235,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
             <div className="bg-slate-950 text-white p-6 rounded-2xl flex flex-col justify-between space-y-4 border border-slate-800 relative shadow-xl">
               <div>
                 <span className="text-[10px] text-purple-400 font-extrabold block mb-2 font-mono">
-                  LIVE PORTAL PREVIEW
+                  {t("LIVE PORTAL PREVIEW")}
                 </span>
 
                 <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
@@ -251,7 +254,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
                       </div>
                     </div>
                     <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded font-mono">
-                      WHITE-LABEL ACTIVE
+                      {t("WHITE-LABEL ACTIVE")}
                     </span>
                   </div>
 
@@ -263,9 +266,9 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               </div>
 
               <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
-                <span className="text-slate-400">Branded Invoices & PDF Reports:</span>
+                <span className="text-slate-400">{t("Branded Invoices & PDF Reports:")}</span>
                 <span className="bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-[10px] tracking-wider">
-                  Enabled
+                  {t("Active")}
                 </span>
               </div>
             </div>
@@ -277,7 +280,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
               disabled={isSaving}
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow transition-all cursor-pointer flex items-center gap-2"
             >
-              <Sparkles size={16} /> {isSaving ? 'Saving Settings...' : 'Save White-Label & Theme Settings'}
+              <Sparkles size={16} /> {isSaving ? t('Saving...') : t('Save Brand Settings')}
             </button>
           </div>
         </CardContent>

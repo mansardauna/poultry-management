@@ -1580,14 +1580,24 @@ export function AdminCmsClient({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Brand / Platform Name")}</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700">{t("Brand / Platform Name")}</label>
+                  <span className={`text-[10px] font-mono ${platformName.length >= 25 ? 'text-amber-600 font-bold' : 'text-slate-400'}`}>
+                    {platformName.length}/30
+                  </span>
+                </div>
                 <input
                   type="text"
+                  maxLength={30}
                   value={platformName}
-                  onChange={(e) => setPlatformName(e.target.value)}
+                  onChange={(e) => setPlatformName(e.target.value.slice(0, 30))}
                   placeholder="e.g. PFMS, PoultryOS"
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-indigo-700 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                  title={platformName}
                 />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  {t("Max 30 characters. Long names will truncate with '...' and show full name on hover.")}
+                </p>
               </div>
 
               <div>
@@ -2233,9 +2243,9 @@ export function AdminCmsClient({
                       if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
                     }}
                   />
-                  <div>
+                  <div className="min-w-0">
                     <h4 className="font-bold text-xs text-slate-900">{t("Platform Brand Identity")}</h4>
-                    <p className="text-sm font-extrabold text-indigo-700">{platformName}</p>
+                    <p className="text-sm font-extrabold text-indigo-700 truncate max-w-[200px]" title={platformName}>{platformName}</p>
                   </div>
                 </div>
                 <p className="text-[11px] text-slate-500">{brandTagline}</p>

@@ -329,7 +329,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                   }}
                 />
                 <div className="flex flex-col truncate">
-                  <span className="font-bold text-white text-sm truncate">{whiteLabel.brandName || 'Super Admin'}</span>
+                  <span className="font-bold text-white text-sm truncate" title={whiteLabel.brandName || 'Super Admin'}>{whiteLabel.brandName || 'Super Admin'}</span>
                   <div className="flex items-center gap-1.5 text-xs text-purple-300 font-medium">
                     <ShieldCheck size={12} className="text-purple-400 shrink-0" />
                     <span className="truncate">Super Admin Console</span>
@@ -342,6 +342,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                 src={whiteLabel.logoUrl || '/icon.png'} 
                 alt={whiteLabel.brandName || "Logo"} 
                 className="w-8 h-8 rounded-lg object-contain mx-auto shadow-sm bg-white/10 p-0.5" 
+                title={whiteLabel.brandName || 'Super Admin'}
                 onError={(e) => {
                   const target = e.currentTarget as HTMLImageElement;
                   if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
@@ -358,14 +359,15 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                       src={whiteLabel.logoUrl || '/icon.png'} 
                       alt={whiteLabel.brandName || "Logo"} 
                       className="w-7 h-7 rounded-lg object-contain flex-shrink-0 shadow-sm bg-white/10 p-0.5" 
+                      title={whiteLabel.brandName || 'PFMS'}
                       onError={(e) => {
                         const target = e.currentTarget as HTMLImageElement;
                         if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
                       }}
                     />
                     <div className="flex flex-col truncate">
-                      <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Assigned Branch'}</span>
-                      <span className="text-xs text-indigo-400">{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
+                      <span className="font-semibold text-white text-sm truncate" title={activeWorkspace?.name || 'Assigned Branch'}>{activeWorkspace?.name || 'Assigned Branch'}</span>
+                      <span className="text-xs text-indigo-400 truncate" title={whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}>{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
                     </div>
                   </div>
                 </div>
@@ -381,14 +383,15 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                         src={whiteLabel.logoUrl || '/icon.png'} 
                         alt={whiteLabel.brandName || "Logo"} 
                         className="w-7 h-7 rounded-lg object-contain flex-shrink-0 shadow-sm bg-white/10 p-0.5" 
+                        title={whiteLabel.brandName || 'PFMS'}
                         onError={(e) => {
                           const target = e.currentTarget as HTMLImageElement;
                           if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
                         }}
                       />
                       <div className="flex flex-col truncate">
-                        <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Main'}</span>
-                        <span className="text-xs text-indigo-400">{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
+                        <span className="font-semibold text-white text-sm truncate" title={activeWorkspace?.name || 'Main'}>{activeWorkspace?.name || 'Main'}</span>
+                        <span className="text-xs text-indigo-400 truncate" title={whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}>{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
                       </div>
                     </div>
                     <ChevronDown size={16} className={clsx("text-indigo-400 transition-transform", isDropdownOpen && "rotate-180")} />

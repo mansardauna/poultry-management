@@ -28,6 +28,7 @@ import toast from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useWorkspace } from '../WorkspaceContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 interface EnterpriseClientProps {
   tier: string;
@@ -51,6 +52,7 @@ export function EnterpriseClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTabParam = searchParams.get('tab') || 'matrix';
+  const { t, formatCurrency, formatNumber } = useLanguage();
 
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
@@ -243,11 +245,11 @@ export function EnterpriseClient({
           <Building2 size={36} className="text-indigo-600 mx-auto" />
           <div className="space-y-2 max-w-lg mx-auto">
             <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
-              ENTERPRISE TIER REQUIRED
+              {t("ENTERPRISE TIER REQUIRED")}
             </span>
-            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Enterprise Suite & White-Label Portal</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">{t("Enterprise Hub")}</h2>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Multi-farm matrix telemetry, white-label cooperative custom branding, 24/7 priority veterinarian hotline, custom REST API keys, and wholesale bulk feed pools are exclusively available on Enterprise Plus.
+              {t("Multi-farm matrix management, inter-branch stock transfers, and branch performance leaderboards are exclusively available on Enterprise Plus.")}
             </p>
           </div>
 
@@ -256,22 +258,22 @@ export function EnterpriseClient({
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
-              Upgrade to Enterprise & Cooperative (₦45,000/mo)
+              {t("Upgrade to Enterprise & Cooperative (₦45,000/mo)")}
             </button>
           </div>
 
           <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left border-t border-slate-100 text-xs text-slate-600">
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-              <span>Multi-Farm Central Matrix</span>
+              <span>{t("Multi-Farm Branch Matrix")}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} className="text-purple-600 flex-shrink-0" />
-              <span>White-Label Custom Portal</span>
+              <span>{t("White-Label & Themes")}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
-              <span>24/7 Priority Vet Hotline</span>
+              <span>{t("24/7 Vet Hotline")}</span>
             </div>
           </div>
         </div>
@@ -291,26 +293,26 @@ export function EnterpriseClient({
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Building2 size={24} className="text-indigo-600 shrink-0" />
-            {coopName || 'Enterprise Management Portal'}
+            {coopName || t('Enterprise Hub')}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Multi-farm matrix management, white-label custom themes, 24/7 veterinarian tickets, and API logistics.
+            {t("Real live aggregated metrics per branch, cross-branch stock transfers, and permanent branch management.")}
           </p>
         </div>
 
         {/* Aggregated Real Matrix Stat Chips */}
         <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono">
           <div className="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-sm text-center">
-            <span className="text-[10px] text-slate-400 block font-sans font-medium">Total birds</span>
-            <span className="text-sm font-bold text-slate-900">{totalBirdsAll.toLocaleString()}</span>
+            <span className="text-[10px] text-slate-400 block font-sans font-medium">{t("Total Aggregated Birds")}</span>
+            <span className="text-sm font-bold text-slate-900">{formatNumber(totalBirdsAll)}</span>
           </div>
           <div className="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-sm text-center">
-            <span className="text-[10px] text-slate-400 block font-sans font-medium">Total eggs</span>
-            <span className="text-sm font-bold text-indigo-600">{totalEggsAll.toLocaleString()}</span>
+            <span className="text-[10px] text-slate-400 block font-sans font-medium">{t("Total Aggregated Eggs")}</span>
+            <span className="text-sm font-bold text-indigo-600">{formatNumber(totalEggsAll)}</span>
           </div>
           <div className="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-sm text-center">
-            <span className="text-[10px] text-slate-400 block font-sans font-medium">Net revenue</span>
-            <span className="text-sm font-bold text-emerald-600">₦{totalRevenueAll.toLocaleString()}</span>
+            <span className="text-[10px] text-slate-400 block font-sans font-medium">{t("Total Branch Revenue")}</span>
+            <span className="text-sm font-bold text-emerald-600">{formatCurrency(totalRevenueAll)}</span>
           </div>
         </div>
       </div>
@@ -323,43 +325,43 @@ export function EnterpriseClient({
             activeTab === 'matrix' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Building2 size={16} /> Branch matrix ({workspaces.length})
+          <Building2 size={16} /> {t("Branch Matrix")} ({workspaces.length})
         </button>
 
         <button
           onClick={() => setActiveTab('whitelabel')}
           className={`px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'whitelabel' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'whitelabel' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Palette size={16} /> White-label & themes
+          <Palette size={16} /> {t("White-Label & Themes")}
         </button>
 
         <button
           onClick={() => setActiveTab('apikeys')}
           className={`px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'apikeys' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'apikeys' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Key size={16} /> API Keys & Webhooks ({apiKeys.length})
+          <Key size={16} /> {t("API Keys & Webhooks")} ({apiKeys.length})
         </button>
 
         <button
           onClick={() => setActiveTab('vet')}
           className={`px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'vet' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'vet' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <PhoneCall size={16} /> 24/7 Vet Hotline ({consultants.length})
+          <PhoneCall size={16} /> {t("24/7 Vet Hotline")} ({consultants.length})
         </button>
 
         <button
           onClick={() => setActiveTab('bulk')}
           className={`px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'bulk' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'bulk' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Wheat size={16} /> Wholesale Bulk Pool ({bulkOrders.length})
+          <Wheat size={16} /> {t("Wholesale Feed Pool")} ({bulkOrders.length})
         </button>
       </div>
 
