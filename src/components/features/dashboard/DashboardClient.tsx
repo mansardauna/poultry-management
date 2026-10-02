@@ -144,17 +144,17 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         })
       });
       if (res.ok) {
-        toast.success('Egg collection logged successfully!');
+        toast.success(t('Egg collection logged successfully!'));
         setShowQuickEggModal(false);
         setQuickGoodEggs('');
         setQuickBrokenEggs('0');
         setQuickSpoiltEggs('0');
         refreshData();
       } else {
-        toast.error('Failed to log egg collection');
+        toast.error(t('Failed to log egg collection'));
       }
     } catch {
-      toast.error('Error logging egg collection');
+      toast.error(t('Error logging egg collection'));
     } finally {
       setIsSubmittingEgg(false);
     }
@@ -945,13 +945,13 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       <Modal
         isOpen={showQuickEggModal}
         onClose={() => setShowQuickEggModal(false)}
-        title="Log Egg Collection"
-        subtitle="Quickly record daily collection counts into the database."
+        title={t("Log Egg Collection")}
+        subtitle={t("Quickly record daily collection counts into the database.")}
         size="md"
       >
         <form onSubmit={handleQuickLogEgg} className="space-y-4">
           <Select
-            label="Chicken Batch"
+            label={t("Chicken Batch")}
             value={quickEggBatchId || (normalizedBatches[0]?.id || '')}
             onChange={(e) => setQuickEggBatchId(e.target.value)}
           >
@@ -967,7 +967,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </Select>
 
           <Input
-            label="Collection Date"
+            label={t("Collection Date")}
             type="date"
             value={quickEggDate}
             onChange={(e) => setQuickEggDate(e.target.value)}
@@ -975,10 +975,10 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           />
 
           <Input
-            label="Good Eggs Collected (Pieces)"
+            label={t("Good Eggs Collected (Pieces)")}
             type="number"
             min="0"
-            placeholder="e.g. 450"
+            placeholder={t("e.g. 450")}
             value={quickGoodEggs}
             onChange={(e) => setQuickGoodEggs(e.target.value)}
             required
@@ -987,14 +987,14 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
 
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Broken / Cracked"
+              label={t("Broken / Cracked")}
               type="number"
               min="0"
               value={quickBrokenEggs}
               onChange={(e) => setQuickBrokenEggs(e.target.value)}
             />
             <Input
-              label="Spoilt / Rejects"
+              label={t("Spoilt / Rejects")}
               type="number"
               min="0"
               value={quickSpoiltEggs}
@@ -1007,7 +1007,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               variant="secondary"
               onClick={() => setShowQuickEggModal(false)}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               type="submit"
@@ -1015,7 +1015,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               isLoading={isSubmittingEgg}
               leftIcon={<Egg size={15} />}
             >
-              Save Egg Collection
+              {t("Save Egg Collection")}
             </Button>
           </div>
         </form>

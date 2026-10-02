@@ -443,33 +443,33 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             <CardTitle>{texts.staff?.staffRoster || t("Staff Roster")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <TableControls searchTerm={staffTable.searchTerm} setSearchTerm={staffTable.setSearchTerm} placeholder="Search staff..." />
+            <TableControls searchTerm={staffTable.searchTerm} setSearchTerm={staffTable.setSearchTerm} placeholder={t("Search staff...")} />
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <TableSortHeader label="Name" sortKey="name" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
-                    <TableSortHeader label="Role" sortKey="role" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
-                    <TableSortHeader label="Branches" sortKey="assignedBranches" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
-                    <TableSortHeader label="Contact" sortKey="contact" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
-                    <TableSortHeader label="Attendance" sortKey="attendanceDays" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
-                    <TableSortHeader label="Monthly Salary" sortKey="salary" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
-                    <th className="px-4 py-3 text-right">Attendance Action</th>
-                    {canEdit && <th className="px-4 py-3 text-right">Actions</th>}
+                    <TableSortHeader label={t("Name")} sortKey="name" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label={t("Role")} sortKey="role" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label={t("Branches")} sortKey="assignedBranches" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label={t("Contact")} sortKey="contact" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label={t("Attendance")} sortKey="attendanceDays" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <TableSortHeader label={t("Monthly Salary")} sortKey="salary" currentSort={staffTable.sortConfig} onSort={staffTable.handleSort} />
+                    <th className="px-4 py-3 text-right">{t("Attendance Action")}</th>
+                    {canEdit && <th className="px-4 py-3 text-right">{t("Actions")}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
                   {staffTable.data.map((employee) => (
                     <tr key={employee.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-semibold text-slate-900">{employee.name}</td>
-                      <td className="px-4 py-3 text-slate-600">{employee.role}</td>
+                      <td className="px-4 py-3 text-slate-600">{t(employee.role)}</td>
                       <td className="px-4 py-3 text-slate-500">
                         {(employee.assignedBranches as string[] | undefined)?.length 
                           ? (employee.assignedBranches as string[]).map(id => workspaces.find(w => w.id === id)?.name || id).join(', ')
-                          : 'All'}
+                          : t('All')}
                       </td>
                       <td className="px-4 py-3 text-slate-500">{employee.contact}</td>
-                      <td className="px-4 py-3 text-center font-semibold text-indigo-650">{employee.attendanceDays} days</td>
+                      <td className="px-4 py-3 text-center font-semibold text-indigo-650">{employee.attendanceDays} {t("days")}</td>
                       <td className="px-4 py-3 font-semibold">₦{employee.salary.toLocaleString()}</td>
                       <td className="px-4 py-3 text-right">
                           <button 
@@ -481,7 +481,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                       </td>
                       {canEdit && (
                         <td className="px-4 py-3 text-right">
-                          <button onClick={() => handleDeleteStaff(employee.id)} className="p-1 hover:bg-red-100 rounded transition-colors" title="Remove">
+                          <button onClick={() => handleDeleteStaff(employee.id)} className="p-1 hover:bg-red-100 rounded transition-colors" title={t("Remove")}>
                             <Trash2 size={14} className="text-red-500" />
                           </button>
                         </td>
@@ -560,24 +560,24 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <TableControls searchTerm={payrollTable.searchTerm} setSearchTerm={payrollTable.setSearchTerm} placeholder="Search payroll logs..." />
+          <TableControls searchTerm={payrollTable.searchTerm} setSearchTerm={payrollTable.setSearchTerm} placeholder={t("Search payroll logs...")} />
           <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <TableSortHeader label="Log ID" sortKey="id" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
-                  <TableSortHeader label="Date" sortKey="date" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
-                  <TableSortHeader label="Staff Member" sortKey="staffId" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
-                  <TableSortHeader label="Period" sortKey="period" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
-                  <TableSortHeader label="Amount Paid" sortKey="amount" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
-                  {canEdit && <th className="px-4 py-3 text-slate-500 text-right">Del</th>}
+                  <TableSortHeader label={t("Log ID")} sortKey="id" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label={t("Date")} sortKey="date" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label={t("Staff Member")} sortKey="staffId" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label={t("Period")} sortKey="period" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  <TableSortHeader label={t("Amount Paid")} sortKey="amount" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
+                  {canEdit && <th className="px-4 py-3 text-slate-500 text-right">{t("Del")}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
                 {payrollTable.data.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-4 text-slate-400 font-sans italic">
-                      No payroll disbursements recorded yet. Use the Finance module to process payroll.
+                      {t("No payroll disbursements recorded yet. Use the Finance module to process payroll.")}
                     </td>
                   </tr>
                 ) : (

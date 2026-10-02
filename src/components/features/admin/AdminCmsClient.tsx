@@ -718,8 +718,8 @@ export function AdminCmsClient({
           <div className="flex items-center gap-2.5 min-w-0">
             <RefreshCw className={`text-amber-600 shrink-0 ${isUpgrading ? 'animate-spin' : ''}`} size={16} />
             <div className="min-w-0 truncate">
-              <span className="font-bold text-amber-950">Upgrade Available: </span>
-              <span className="text-amber-900 font-medium">v{versionInfo.installedVersion} → v{versionInfo.currentVersion} (DB migrations ready).</span>
+              <span className="font-bold text-amber-950">{t("Upgrade Available:")} </span>
+              <span className="text-amber-900 font-medium">v{versionInfo.installedVersion} → v{versionInfo.currentVersion} {t("(DB migrations ready).")}</span>
             </div>
           </div>
           <button
@@ -728,7 +728,7 @@ export function AdminCmsClient({
             className="text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 text-white px-3 py-1 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap flex items-center gap-1.5 transition-all"
           >
             <RefreshCw size={12} className={isUpgrading ? 'animate-spin' : ''} />
-            <span>{isUpgrading ? 'Upgrading…' : 'Run Upgrade'}</span>
+            <span>{isUpgrading ? t('Upgrading…') : t('Run Upgrade')}</span>
           </button>
         </div>
       )}
@@ -740,7 +740,7 @@ export function AdminCmsClient({
             <Card className="border border-purple-200 bg-purple-50/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-purple-900 flex items-center justify-between">
-                  <span>Monthly Recurring Revenue</span>
+                  <span>{t("Monthly Recurring Revenue")}</span>
                   <DollarSign size={18} className="text-purple-600" />
                 </CardTitle>
               </CardHeader>
@@ -748,21 +748,21 @@ export function AdminCmsClient({
                 <div className="text-2xl font-extrabold text-purple-950">
                   {formatCurrency(totalRevenue, currencySymbol)}
                 </div>
-                <p className="text-xs text-purple-700 font-medium mt-1">Aggregated merchant subscriptions</p>
+                <p className="text-xs text-purple-700 font-medium mt-1">{t("Aggregated merchant subscriptions")}</p>
               </CardContent>
             </Card>
 
             <Card className="border border-indigo-200 bg-indigo-50/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-indigo-900 flex items-center justify-between">
-                  <span>Farm Workspaces</span>
+                  <span>{t("Farm Workspaces")}</span>
                   <Building2 size={18} className="text-indigo-600" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-extrabold text-indigo-950">{formatNumber(allOrgs.length)}</div>
                 <p className="text-xs text-indigo-700 font-medium mt-1">
-                  Pro: {formatNumber(activeProCount)} | Enterprise: {formatNumber(activeEnterpriseCount)}
+                  {t("Pro:")} {formatNumber(activeProCount)} | {t("Enterprise:")} {formatNumber(activeEnterpriseCount)}
                 </p>
               </CardContent>
             </Card>
@@ -770,7 +770,7 @@ export function AdminCmsClient({
             <Card className="border border-emerald-200 bg-emerald-50/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-emerald-900 flex items-center justify-between">
-                  <span>Active Subscriptions</span>
+                  <span>{t("Active Subscriptions")}</span>
                   <CheckCircle2 size={18} className="text-emerald-600" />
                 </CardTitle>
               </CardHeader>
@@ -778,43 +778,43 @@ export function AdminCmsClient({
                 <div className="text-2xl font-extrabold text-emerald-950">
                   {formatNumber(activePaidSubsCount)}
                 </div>
-                <p className="text-xs text-emerald-700 font-medium mt-1">Paid accounts on live billing</p>
+                <p className="text-xs text-emerald-700 font-medium mt-1">{t("Paid accounts on live billing")}</p>
               </CardContent>
             </Card>
 
             <Card className="border border-amber-200 bg-amber-50/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-amber-900 flex items-center justify-between">
-                  <span>Platform Brand Title</span>
+                  <span>{t("Platform Brand Title")}</span>
                   <ShieldCheck size={18} className="text-amber-600" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-extrabold text-amber-950 truncate">{platformName}</div>
-                <p className="text-xs text-amber-700 font-medium mt-1">Currency: {currencySymbol}</p>
+                <p className="text-xs text-amber-700 font-medium mt-1">{t("Currency:")} {currencySymbol}</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Quick Summary of Recent Activity */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-slate-900">Farm Workspaces Directory</h3>
+            <h3 className="text-sm font-bold text-slate-900">{t("Farm Workspaces Directory")}</h3>
             <p className="text-xs text-slate-500">
-              Manage your tenants, inspect real-time billing history, and configure SaaS subscription tiers from the sidebar menu.
+              {t("Manage your tenants, inspect real-time billing history, and configure SaaS subscription tiers from the sidebar menu.")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
               <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Workspaces</span>
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t("Total Workspaces")}</span>
                 <span className="text-xl font-bold text-slate-900 mt-1 block">{formatNumber(allOrgs.length)}</span>
               </div>
               <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">SaaS Packages Active</span>
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t("SaaS Packages Active")}</span>
                 <span className="text-xl font-bold text-slate-900 mt-1 block">{formatNumber(plans.length)}</span>
               </div>
               <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">System Status</span>
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t("System Status")}</span>
                 <span className="text-xl font-bold text-emerald-600 mt-1 block flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Operational
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> {t("Operational")}
                 </span>
               </div>
             </div>
@@ -825,15 +825,15 @@ export function AdminCmsClient({
             <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                  <Building2 size={18} className="text-purple-600" /> Recent Farm Workspaces
+                  <Building2 size={18} className="text-purple-600" /> {t("Recent Farm Workspaces")}
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">Quick oversight of latest customer farm deployments and tenants</p>
+                <p className="text-xs text-slate-500 mt-0.5">{t("Quick oversight of latest customer farm deployments and tenants")}</p>
               </div>
               <button
                 onClick={() => handleTabChange('orgs')}
                 className="text-xs font-bold text-purple-700 hover:text-purple-900 flex items-center gap-1 cursor-pointer"
               >
-                <span>View All ({allOrgs.length})</span>
+                <span>{t("View All")} ({allOrgs.length})</span>
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -841,18 +841,18 @@ export function AdminCmsClient({
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
                   <tr>
-                    <th className="p-4">Farm Workspace</th>
-                    <th className="p-4">Owner / Admin</th>
-                    <th className="p-4">Plan Tier</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Quick Action</th>
+                    <th className="p-4">{t("Farm Workspace")}</th>
+                    <th className="p-4">{t("Owner / Admin")}</th>
+                    <th className="p-4">{t("Plan Tier")}</th>
+                    <th className="p-4">{t("Status")}</th>
+                    <th className="p-4 text-right">{t("Quick Action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
                   {orgsList.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="p-6 text-center text-slate-400">
-                        No farm workspaces registered yet.
+                        {t("No farm workspaces registered yet.")}
                       </td>
                     </tr>
                   ) : (
@@ -870,7 +870,7 @@ export function AdminCmsClient({
                           </div>
                         </td>
                         <td className="p-4">
-                          <div className="text-slate-800">{org.ownerUsername || 'System Admin'}</div>
+                          <div className="text-slate-800">{org.ownerUsername || t('System Admin')}</div>
                           <div className="text-[11px] text-slate-500 font-mono">{org.ownerEmail || 'admin@farm.local'}</div>
                         </td>
                         <td className="p-4">
@@ -898,7 +898,7 @@ export function AdminCmsClient({
                             onClick={() => handleImpersonateTenant(org.id, org.name)}
                             className="text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1"
                           >
-                            <LogIn size={13} /> Login as Tenant
+                            <LogIn size={13} /> {t("Login as Tenant")}
                           </button>
                         </td>
                       </tr>
@@ -917,10 +917,10 @@ export function AdminCmsClient({
           <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Settings size={20} className="text-purple-600" /> Payment & API Gateways
+                <Settings size={20} className="text-purple-600" /> {t("Payment & API Gateways")}
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Configure merchant keys, billing webhooks, email delivery, and platform currency. Database parameters are locked to ensure security.
+                {t("Configure merchant keys, billing webhooks, email delivery, and platform currency. Database parameters are locked to ensure security.")}
               </p>
             </div>
 
@@ -930,19 +930,19 @@ export function AdminCmsClient({
               className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
-              <span>Save Gateway Settings</span>
+              <span>{t("Save Gateway Settings")}</span>
             </button>
           </div>
 
           {/* Master Super Admin Credentials */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm w-full">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-              <Lock size={16} className="text-indigo-600" /> Master Super Admin Credentials
+              <Lock size={16} className="text-indigo-600" /> {t("Master Super Admin Credentials")}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Super Admin Email</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">{t("Super Admin Email")}</label>
                 <input
                   type="email"
                   value={superAdminEmailState}
@@ -953,14 +953,14 @@ export function AdminCmsClient({
 
               <div className="relative">
                 <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                  Update Password (Optional)
+                  {t("Update Password (Optional)")}
                 </label>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={superAdminPassword}
                   onChange={(e) => setSuperAdminPassword(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 pr-10 text-xs font-mono text-slate-800 bg-slate-50 focus:bg-white"
-                  placeholder="Leave blank to keep current"
+                  placeholder={t("Leave blank to keep current")}
                 />
                 <button
                   type="button"
@@ -979,7 +979,7 @@ export function AdminCmsClient({
             <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                  <CreditCard size={16} className="text-emerald-600" /> Paystack Merchant Keys (NGN)
+                  <CreditCard size={16} className="text-emerald-600" /> {t("Paystack Merchant Keys (NGN)")}
                 </h3>
                 <button
                   type="button"
@@ -987,12 +987,12 @@ export function AdminCmsClient({
                   className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   {showPaystackSecret ? <EyeOff size={14} /> : <Eye size={14} />}
-                  <span>{showPaystackSecret ? 'Hide Secret' : 'Show Secret'}</span>
+                  <span>{showPaystackSecret ? t('Hide Secret') : t('Show Secret')}</span>
                 </button>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack Public Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Paystack Public Key")}</label>
                 <input
                   type="text"
                   value={paystackPublicKey}
@@ -1003,7 +1003,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Paystack Secret Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Paystack Secret Key")}</label>
                 <input
                   type={showPaystackSecret ? 'text' : 'password'}
                   value={paystackSecretKey}
@@ -1018,7 +1018,7 @@ export function AdminCmsClient({
             <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                  <CreditCard size={16} className="text-indigo-600" /> Stripe Merchant Keys (USD / Global)
+                  <CreditCard size={16} className="text-indigo-600" /> {t("Stripe Merchant Keys (USD / Global)")}
                 </h3>
                 <button
                   type="button"
@@ -1026,12 +1026,12 @@ export function AdminCmsClient({
                   className="text-xs font-bold text-indigo-700 hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   {showStripeSecret ? <EyeOff size={14} /> : <Eye size={14} />}
-                  <span>{showStripeSecret ? 'Hide Secrets' : 'Show Secrets'}</span>
+                  <span>{showStripeSecret ? t('Hide Secrets') : t('Show Secrets')}</span>
                 </button>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe Publishable Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Stripe Publishable Key")}</label>
                 <input
                   type="text"
                   value={stripePublicKey}
@@ -1042,7 +1042,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe Secret Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Stripe Secret Key")}</label>
                 <input
                   type={showStripeSecret ? 'text' : 'password'}
                   value={stripeSecretKey}
@@ -1053,7 +1053,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Stripe Webhook Signing Secret</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Stripe Webhook Signing Secret")}</label>
                 <input
                   type={showStripeSecret ? 'text' : 'password'}
                   value={stripeWebhookSecret}
@@ -1069,7 +1069,7 @@ export function AdminCmsClient({
           <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <Mail size={16} className="text-purple-600" /> Transactional Email Gateway (Resend)
+                <Mail size={16} className="text-purple-600" /> {t("Transactional Email Gateway (Resend)")}
               </h3>
               <button
                 type="button"
@@ -1077,13 +1077,13 @@ export function AdminCmsClient({
                 className="text-xs font-bold text-purple-700 hover:underline flex items-center gap-1 cursor-pointer"
               >
                 {showResendKey ? <EyeOff size={14} /> : <Eye size={14} />}
-                <span>{showResendKey ? 'Hide Key' : 'Show Key'}</span>
+                <span>{showResendKey ? t('Hide Key') : t('Show Key')}</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Resend API Key</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Resend API Key")}</label>
                 <input
                   type={showResendKey ? 'text' : 'password'}
                   value={resendApiKey}
@@ -1093,7 +1093,7 @@ export function AdminCmsClient({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">From Sender Email</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("From Sender Email")}</label>
                 <input
                   type="email"
                   value={fromEmail}
@@ -1109,16 +1109,16 @@ export function AdminCmsClient({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                  <Bot size={18} className="text-indigo-600" /> Artificial Intelligence (AI) Gateway
+                  <Bot size={18} className="text-indigo-600" /> {t("Artificial Intelligence (AI) Gateway")}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Select your preferred LLM provider and enter your API key to power the Voice & Quick Text Auto-Logger.
+                  {t("Select your preferred LLM provider and enter your API key to power the Voice & Quick Text Auto-Logger.")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1.5 whitespace-nowrap">
                   <Cpu size={12} />
-                  Active: {AI_PRESETS[aiProvider]?.name || 'Google Gemini'} {AI_PRESETS[aiProvider]?.badge && `(${AI_PRESETS[aiProvider].badge})`}
+                  {t("Active:")} {AI_PRESETS[aiProvider]?.name || 'Google Gemini'} {AI_PRESETS[aiProvider]?.badge && `(${AI_PRESETS[aiProvider].badge})`}
                 </span>
                 <button
                   type="button"
@@ -1126,7 +1126,7 @@ export function AdminCmsClient({
                   className="text-xs font-bold text-indigo-700 hover:underline flex items-center gap-1 cursor-pointer whitespace-nowrap"
                 >
                   {showAiSecret ? <EyeOff size={14} /> : <Eye size={14} />}
-                  <span>{showAiSecret ? 'Hide Key' : 'Show Key'}</span>
+                  <span>{showAiSecret ? t('Hide Key') : t('Show Key')}</span>
                 </button>
               </div>
             </div>
@@ -1134,7 +1134,7 @@ export function AdminCmsClient({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  AI Provider
+                  {t("AI Provider")}
                 </label>
                 <select
                   value={aiProvider}
@@ -1166,8 +1166,8 @@ export function AdminCmsClient({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-                  <span>Model ID</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Preset or custom</span>
+                  <span>{t("Model ID")}</span>
+                  <span className="text-[10px] text-slate-400 font-normal">{t("Preset or custom")}</span>
                 </label>
                 <div className="relative">
                   <input
@@ -1188,7 +1188,7 @@ export function AdminCmsClient({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-                  <span>API Key</span>
+                  <span>{t("API Key")}</span>
                   {AI_PRESETS[aiProvider]?.consoleUrl && (
                     <a
                       href={AI_PRESETS[aiProvider].consoleUrl}
@@ -1196,7 +1196,7 @@ export function AdminCmsClient({
                       rel="noreferrer"
                       className="text-[10px] text-indigo-600 hover:underline flex items-center gap-0.5"
                     >
-                      <span>Get API Key</span>
+                      <span>{t("Get API Key")}</span>
                       <ExternalLink size={10} />
                     </a>
                   )}
@@ -1206,7 +1206,7 @@ export function AdminCmsClient({
                   value={aiApiKey}
                   onChange={(e) => setAiApiKey(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-purple-900 bg-slate-50 focus:bg-white"
-                  placeholder={AI_PRESETS[aiProvider]?.keyPlaceholder || 'Enter API Key...'}
+                  placeholder={AI_PRESETS[aiProvider]?.keyPlaceholder || t('Enter API Key...')}
                 />
               </div>
             </div>
@@ -1215,7 +1215,7 @@ export function AdminCmsClient({
             {aiProvider === 'ollama' && (
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                 <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-                  <span>Local / Self-Hosted Server Endpoint</span>
+                  <span>{t("Local / Self-Hosted Server Endpoint")}</span>
                   <span className="text-[10px] text-slate-400">Default: http://localhost:11434</span>
                 </label>
                 <input
@@ -1226,7 +1226,7 @@ export function AdminCmsClient({
                   className="w-full border border-slate-300 rounded-lg p-2 text-xs font-mono text-slate-800 bg-white outline-none"
                 />
                 <p className="text-[10px] text-slate-500 mt-1">
-                  Connects to your local Ollama daemon or vLLM / LiteLLM server over LAN or localhost.
+                  {t("Connects to your local Ollama daemon or vLLM / LiteLLM server over LAN or localhost.")}
                 </p>
               </div>
             )}
@@ -1234,8 +1234,8 @@ export function AdminCmsClient({
             <div className="p-3 bg-gradient-to-r from-purple-50/70 via-indigo-50/50 to-blue-50/70 border border-purple-100 rounded-xl flex items-start gap-2.5 text-[11px] text-slate-600">
               <Sparkles size={16} className="text-purple-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-800 font-bold">Zero-Downtime Smart Fallback: </strong>
-                If the selected provider is unreachable, out of credits, or no API key is specified, the system automatically falls back to the built-in offline smart poultry rule parser with 100% continuous uptime.
+                <strong className="text-slate-800 font-bold">{t("Zero-Downtime Smart Fallback:")} </strong>
+                {t("If the selected provider is unreachable, out of credits, or no API key is specified, the system automatically falls back to the built-in offline smart poultry rule parser with 100% continuous uptime.")}
               </div>
             </div>
           </div>
@@ -1247,7 +1247,7 @@ export function AdminCmsClient({
               className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
-              <span>Save & Apply Gateway Configuration</span>
+              <span>{t("Save & Apply Gateway Configuration")}</span>
             </button>
           </div>
         </div>
@@ -1259,10 +1259,10 @@ export function AdminCmsClient({
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Layers size={20} className="text-purple-600" /> SaaS Plans
+                <Layers size={20} className="text-purple-600" /> {t("SaaS Plans")}
               </h2>
               <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                Create, rename, configure, and delete subscription tiers. Link Stripe Plan IDs & Paystack Plan Codes for automated recurring merchant billing.
+                {t("Create, rename, configure, and delete subscription tiers. Link Stripe Plan IDs & Paystack Plan Codes for automated recurring merchant billing.")}
               </p>
             </div>
 
@@ -1273,7 +1273,7 @@ export function AdminCmsClient({
                 className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <Plus size={16} />
-                <span>Add New Package</span>
+                <span>{t("Add New Package")}</span>
               </button>
 
               <button
@@ -1283,7 +1283,7 @@ export function AdminCmsClient({
                 className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
               >
                 {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
-                <span>Save All SaaS Plans</span>
+                <span>{t("Save All SaaS Plans")}</span>
               </button>
             </div>
           </div>
@@ -1301,7 +1301,7 @@ export function AdminCmsClient({
                         type="button"
                         onClick={() => handleDeletePlan(plan.id)}
                         className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors cursor-pointer"
-                        title="Delete Plan"
+                        title={t("Delete Plan")}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -1310,7 +1310,7 @@ export function AdminCmsClient({
 
                   <div className="mt-2">
                     <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                      Package Name
+                      {t("Package Name")}
                     </label>
                     <input
                       type="text"
@@ -1323,7 +1323,7 @@ export function AdminCmsClient({
 
                   <div className="mt-2">
                     <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                      Description
+                      {t("Description")}
                     </label>
                     <textarea
                       rows={2}
@@ -1338,7 +1338,7 @@ export function AdminCmsClient({
                   {/* Pricing Inputs */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Monthly ({currencySymbol})</label>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">{t("Monthly")} ({currencySymbol})</label>
                       <input
                         type="number"
                         value={plan.priceMonthly}
@@ -1347,7 +1347,7 @@ export function AdminCmsClient({
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Annual ({currencySymbol})</label>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">{t("Annual")} ({currencySymbol})</label>
                       <input
                         type="number"
                         value={plan.priceAnnual}
@@ -1360,21 +1360,21 @@ export function AdminCmsClient({
                   {/* Stripe Plan / Price IDs */}
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
                     <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <CreditCard size={13} className="text-indigo-600" /> Stripe Plan Price IDs
+                      <CreditCard size={13} className="text-indigo-600" /> {t("Stripe Plan Price IDs")}
                     </span>
                     <div className="space-y-1.5">
                       <input
                         type="text"
                         value={plan.stripeMonthlyPlanId || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'stripeMonthlyPlanId', e.target.value)}
-                        placeholder="Monthly Price ID (price_1N...)"
+                        placeholder={t("Monthly Price ID (price_1N...)")}
                         className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
                       />
                       <input
                         type="text"
                         value={plan.stripeAnnualPlanId || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'stripeAnnualPlanId', e.target.value)}
-                        placeholder="Annual Price ID (price_1N...)"
+                        placeholder={t("Annual Price ID (price_1N...)")}
                         className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
                       />
                     </div>
@@ -1383,21 +1383,21 @@ export function AdminCmsClient({
                   {/* Paystack Plan Codes */}
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
                     <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <CreditCard size={13} className="text-emerald-600" /> Paystack Plan Codes
+                      <CreditCard size={13} className="text-emerald-600" /> {t("Paystack Plan Codes")}
                     </span>
                     <div className="space-y-1.5">
                       <input
                         type="text"
                         value={plan.paystackMonthlyPlanCode || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'paystackMonthlyPlanCode', e.target.value)}
-                        placeholder="Monthly Plan Code (PLN_...)"
+                        placeholder={t("Monthly Plan Code (PLN_...)")}
                         className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
                       />
                       <input
                         type="text"
                         value={plan.paystackAnnualPlanCode || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'paystackAnnualPlanCode', e.target.value)}
-                        placeholder="Annual Plan Code (PLN_...)"
+                        placeholder={t("Annual Plan Code (PLN_...)")}
                         className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
                       />
                     </div>
@@ -1406,7 +1406,7 @@ export function AdminCmsClient({
                   {/* Entitlements & Feature Toggles */}
                   <div className="space-y-2 border-t border-slate-100 pt-3">
                     <div className="flex items-center justify-between pb-1">
-                      <label className="text-xs font-bold text-slate-700">Max Branches Allowed</label>
+                      <label className="text-xs font-bold text-slate-700">{t("Max Branches Allowed")}</label>
                       <input
                         type="number"
                         value={plan.maxBranches}
@@ -1423,7 +1423,7 @@ export function AdminCmsClient({
                           onChange={(e) => handleFieldChange(plan.id, 'cctvEnabled', e.target.checked)}
                           className="rounded text-purple-600 w-4 h-4"
                         />
-                        <span>CCTV Live Surveillance</span>
+                        <span>{t("CCTV Live Surveillance")}</span>
                       </label>
 
                       <label className="flex items-center gap-2 cursor-pointer">
@@ -1433,7 +1433,7 @@ export function AdminCmsClient({
                           onChange={(e) => handleFieldChange(plan.id, 'aiLoggerEnabled', e.target.checked)}
                           className="rounded text-purple-600 w-4 h-4"
                         />
-                        <span>AI Voice Auto-Logger</span>
+                        <span>{t("AI Voice Auto-Logger")}</span>
                       </label>
 
                       <label className="flex items-center gap-2 cursor-pointer">
@@ -1443,7 +1443,7 @@ export function AdminCmsClient({
                           onChange={(e) => handleFieldChange(plan.id, 'exportReportsEnabled', e.target.checked)}
                           className="rounded text-purple-600 w-4 h-4"
                         />
-                        <span>PDF & Excel Report Exports</span>
+                        <span>{t("PDF & Excel Report Exports")}</span>
                       </label>
 
                       <label className="flex items-center gap-2 cursor-pointer">
@@ -1453,7 +1453,7 @@ export function AdminCmsClient({
                           onChange={(e) => handleFieldChange(plan.id, 'enterpriseHubEnabled', e.target.checked)}
                           className="rounded text-purple-600 w-4 h-4"
                         />
-                        <span>Multi-Branch Enterprise Hub</span>
+                        <span>{t("Multi-Branch Enterprise Hub")}</span>
                       </label>
                     </div>
                   </div>
@@ -1462,7 +1462,7 @@ export function AdminCmsClient({
                   <div className="border-t border-slate-100 pt-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        Feature Bullet Points
+                        {t("Feature Bullet Points")}
                       </label>
                       <button
                         type="button"
@@ -1470,7 +1470,7 @@ export function AdminCmsClient({
                         className="text-[11px] font-bold text-indigo-600 hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <Plus size={12} />
-                        <span>Add Bullet</span>
+                        <span>{t("Add Bullet")}</span>
                       </button>
                     </div>
 
@@ -1487,7 +1487,7 @@ export function AdminCmsClient({
                             type="button"
                             onClick={() => handleRemoveFeature(plan.id, idx)}
                             className="text-slate-400 hover:text-red-600 p-1 cursor-pointer shrink-0"
-                            title="Remove bullet"
+                            title={t("Remove bullet")}
                           >
                             <Trash2 size={13} />
                           </button>
@@ -1508,10 +1508,10 @@ export function AdminCmsClient({
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Sparkles size={20} className="text-purple-600" /> Public Landing Page Content Editor
+                <Sparkles size={20} className="text-purple-600" /> {t("Public Landing Page Content Editor")}
               </h2>
               <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                Edit public hero headlines, announcement banners, and support contact details live on your homepage.
+                {t("Edit public hero headlines, announcement banners, and support contact details live on your homepage.")}
               </p>
             </div>
 
@@ -1521,7 +1521,7 @@ export function AdminCmsClient({
               className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
-              <span>Publish Landing CMS & Brand</span>
+              <span>{t("Publish Landing CMS & Brand")}</span>
             </button>
           </div>
 
@@ -1529,16 +1529,16 @@ export function AdminCmsClient({
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles size={16} className="text-indigo-600" /> Platform Brand Identity & White-Label
+                <Sparkles size={16} className="text-indigo-600" /> {t("Platform Brand Identity & White-Label")}
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Customize the platform brand name, monogram badge, currency, and footer across all public and farm pages.
+                {t("Customize the platform brand name, monogram badge, currency, and footer across all public and farm pages.")}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Brand / Platform Name</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Brand / Platform Name")}</label>
                 <input
                   type="text"
                   value={platformName}
@@ -1549,7 +1549,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Brand Logo Badge (1-3 Letters)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Brand Logo Badge (1-3 Letters)")}</label>
                 <input
                   type="text"
                   maxLength={4}
@@ -1561,7 +1561,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Platform Currency</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Platform Currency")}</label>
                 <select
                   value={currencySymbol}
                   onChange={(e) => setCurrencySymbol(e.target.value)}
@@ -1582,7 +1582,7 @@ export function AdminCmsClient({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Brand Tagline / Slogan</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Brand Tagline / Slogan")}</label>
                 <input
                   type="text"
                   value={brandTagline}
@@ -1593,7 +1593,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Footer Copyright Line</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Footer Copyright Line")}</label>
                 <input
                   type="text"
                   value={footerText}
@@ -1609,7 +1609,7 @@ export function AdminCmsClient({
               {/* Brand Logo Upload */}
               <div className="space-y-2">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Brand Logo Image (PNG, JPG, SVG, WebP)
+                  {t("Brand Logo Image (PNG, JPG, SVG, WebP)")}
                 </label>
                 
                 {logoUrl ? (
@@ -1619,10 +1619,10 @@ export function AdminCmsClient({
                       <img src={logoUrl} alt="Brand Logo Preview" className="max-h-full max-w-full object-contain" />
                     </div>
                     <div className="space-y-1.5 flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-900 truncate">Custom Logo Uploaded</p>
+                      <p className="text-xs font-bold text-slate-900 truncate">{t("Custom Logo Uploaded")}</p>
                       <div className="flex items-center gap-2">
                         <label className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors">
-                          Change Logo
+                          {t("Change Logo")}
                           <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                         </label>
                         <button
@@ -1630,7 +1630,7 @@ export function AdminCmsClient({
                           onClick={() => { setLogoUrl(''); toast.success('Logo removed, falling back to logo badge'); }}
                           className="text-red-500 hover:text-red-700 text-[11px] font-bold cursor-pointer"
                         >
-                          Remove
+                          {t("Remove")}
                         </button>
                       </div>
                     </div>
@@ -1638,8 +1638,8 @@ export function AdminCmsClient({
                 ) : (
                   <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/30 rounded-2xl cursor-pointer transition-colors">
                     <Upload size={20} className="text-indigo-600 mb-1" />
-                    <span className="text-xs font-bold text-slate-800">Upload Brand Logo</span>
-                    <span className="text-[10px] text-slate-400 mt-0.5">PNG, JPG, SVG up to 2MB</span>
+                    <span className="text-xs font-bold text-slate-800">{t("Upload Brand Logo")}</span>
+                    <span className="text-[10px] text-slate-400 mt-0.5">{t("PNG, JPG, SVG up to 2MB")}</span>
                     <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                   </label>
                 )}
@@ -1648,13 +1648,13 @@ export function AdminCmsClient({
               {/* Brand Colors Config */}
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Brand Colors (Primary & Accent)
+                  {t("Brand Colors (Primary & Accent)")}
                 </label>
                 
                 <div className="grid grid-cols-2 gap-3">
                   {/* Primary Color */}
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-600">Primary Color</span>
+                    <span className="text-[11px] font-bold text-slate-600">{t("Primary Color")}</span>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
@@ -1673,7 +1673,7 @@ export function AdminCmsClient({
 
                   {/* Accent Color */}
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-600">Accent Color</span>
+                    <span className="text-[11px] font-bold text-slate-600">{t("Accent Color")}</span>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
@@ -1693,7 +1693,7 @@ export function AdminCmsClient({
 
                 {/* Quick Presets */}
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[10px] text-slate-400 font-semibold">Presets:</span>
+                  <span className="text-[10px] text-slate-400 font-semibold">{t("Presets:")}</span>
                   {[
                     { name: 'Indigo', prim: '#4f46e5', acc: '#7c3aed' },
                     { name: 'Emerald', prim: '#059669', acc: '#10b981' },
@@ -1718,7 +1718,7 @@ export function AdminCmsClient({
 
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero Headline</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">{t("Hero Headline")}</label>
               <input
                 type="text"
                 value={heroHeading}
@@ -1728,7 +1728,7 @@ export function AdminCmsClient({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Hero Subtitle</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">{t("Hero Subtitle")}</label>
               <textarea
                 rows={3}
                 value={heroSubtitle}
@@ -1738,7 +1738,7 @@ export function AdminCmsClient({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">Top Announcement Banner</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">{t("Top Announcement Banner")}</label>
               <input
                 type="text"
                 value={announcementBanner}
@@ -1749,7 +1749,7 @@ export function AdminCmsClient({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Support Phone</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">{t("Support Phone")}</label>
                 <input
                   type="text"
                   value={supportPhone}
@@ -1759,7 +1759,7 @@ export function AdminCmsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Support Email</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">{t("Support Email")}</label>
                 <input
                   type="email"
                   value={supportEmail}
@@ -1778,10 +1778,10 @@ export function AdminCmsClient({
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Building2 size={20} className="text-purple-600" /> Registered Farm Tenant Accounts ({formatNumber(orgsList.length)})
+                <Building2 size={20} className="text-purple-600" /> {t("Registered Farm Tenant Accounts")} ({formatNumber(orgsList.length)})
               </h2>
               <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                Directory of all customer and internal farm organizations. Manage subscriptions, view deep telemetry, or log in to manage/subscribe on their behalf.
+                {t("Directory of all customer and internal farm organizations. Manage subscriptions, view deep telemetry, or log in to manage/subscribe on their behalf.")}
               </p>
             </div>
 
@@ -1790,7 +1790,7 @@ export function AdminCmsClient({
               className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
             >
               <UserPlus size={16} />
-              <span>Create Farm Account</span>
+              <span>{t("Create Farm Account")}</span>
             </button>
           </div>
 
@@ -1799,18 +1799,18 @@ export function AdminCmsClient({
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
                   <tr>
-                    <th className="p-4">Farm Organization</th>
-                    <th className="p-4">Owner / Admin</th>
-                    <th className="p-4">Subscription Plan</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                    <th className="p-4">{t("Farm Organization")}</th>
+                    <th className="p-4">{t("Owner / Admin")}</th>
+                    <th className="p-4">{t("Subscription Plan")}</th>
+                    <th className="p-4">{t("Status")}</th>
+                    <th className="p-4 text-right">{t("Actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
                   {orgsList.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-slate-400">
-                        No organization workspaces registered yet. Click &quot;Create Farm Account&quot; to provision a farm.
+                        {t('No organization workspaces registered yet. Click "Create Farm Account" to provision a farm.')}
                       </td>
                     </tr>
                   ) : (
@@ -1835,7 +1835,7 @@ export function AdminCmsClient({
                         </td>
                         <td className="p-4">
                           <span className="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded capitalize">
-                            {org.subscriptionTier || 'Free Starter'}
+                            {org.subscriptionTier || t('Free Starter')}
                           </span>
                         </td>
                         <td className="p-4">
@@ -1846,7 +1846,7 @@ export function AdminCmsClient({
                               ? 'bg-amber-100 text-amber-800'
                               : 'bg-slate-100 text-slate-700'
                           }`}>
-                            {org.subscriptionStatus || 'Active'}
+                            {org.subscriptionStatus || t('Active')}
                           </span>
                         </td>
                         <td className="p-4 text-right">
@@ -1856,25 +1856,25 @@ export function AdminCmsClient({
                               className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
                             >
                               <Activity size={13} className="text-indigo-600" />
-                              <span>Manage</span>
+                              <span>{t("Manage")}</span>
                             </button>
 
                             <button
                               onClick={() => handleImpersonateTenant(org.id, org.name)}
                               className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-sm"
-                              title="Login into customer farm account"
+                              title={t("Login into customer farm account")}
                             >
                               <LogIn size={13} />
-                              <span>Login as Farm</span>
+                              <span>{t("Login as Farm")}</span>
                             </button>
 
                             <button
                               onClick={() => handleDeleteTenant(org.id, org.name)}
                               className="bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 border border-red-200"
-                              title="Delete customer farm account"
+                              title={t("Delete customer farm account")}
                             >
                               <Trash2 size={13} />
-                              <span>Delete</span>
+                              <span>{t("Delete")}</span>
                             </button>
                           </div>
                         </td>
@@ -1896,8 +1896,8 @@ export function AdminCmsClient({
                       <UserPlus size={18} />
                     </div>
                     <div>
-                      <h3 className="font-extrabold text-sm text-slate-900">Provision New Farm Tenant Account</h3>
-                      <p className="text-xs text-slate-500">Create a farm account for yourself or a customer.</p>
+                      <h3 className="font-extrabold text-sm text-slate-900">{t("Provision New Farm Tenant Account")}</h3>
+                      <p className="text-xs text-slate-500">{t("Create a farm account for yourself or a customer.")}</p>
                     </div>
                   </div>
                   <button 
@@ -1910,7 +1910,7 @@ export function AdminCmsClient({
 
                 <form onSubmit={handleCreateTenant} className="p-6 space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Farm Organization Name *</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Farm Organization Name *")}</label>
                     <input
                       type="text"
                       required
@@ -1923,7 +1923,7 @@ export function AdminCmsClient({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Full Name</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Admin Full Name")}</label>
                       <input
                         type="text"
                         placeholder="e.g. Alex Green"
@@ -1934,7 +1934,7 @@ export function AdminCmsClient({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Email Address *</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Admin Email Address *")}</label>
                       <input
                         type="email"
                         required
@@ -1948,7 +1948,7 @@ export function AdminCmsClient({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Initial Password</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Initial Password")}</label>
                       <input
                         type="text"
                         placeholder="FarmAdmin123!"
@@ -1959,7 +1959,7 @@ export function AdminCmsClient({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Initial Branch Name</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Initial Branch Name")}</label>
                       <input
                         type="text"
                         placeholder="Main Branch"
@@ -1971,7 +1971,7 @@ export function AdminCmsClient({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Assign SaaS Package Tier</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Assign SaaS Package Tier")}</label>
                     <select
                       value={newTenantForm.packageId}
                       onChange={(e) => setNewTenantForm({ ...newTenantForm, packageId: e.target.value })}
@@ -1979,12 +1979,12 @@ export function AdminCmsClient({
                     >
                       {plans.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name} — {p.priceMonthly === 0 ? 'Free' : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`}
+                          {p.name} — {p.priceMonthly === 0 ? t('Free') : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`}
                         </option>
                       ))}
                     </select>
                     <p className="text-[10px] text-slate-400 mt-1">
-                      Includes all custom private packages configured in the SaaS plans catalog.
+                      {t("Includes all custom private packages configured in the SaaS plans catalog.")}
                     </p>
                   </div>
 
@@ -1994,7 +1994,7 @@ export function AdminCmsClient({
                       onClick={() => setShowCreateModal(false)}
                       className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                     >
-                      Cancel
+                      {t("Cancel")}
                     </button>
                     <button
                       type="submit"
@@ -2002,7 +2002,7 @@ export function AdminCmsClient({
                       className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5"
                     >
                       {isCreatingTenant ? <RefreshCw size={14} className="animate-spin" /> : <UserPlus size={14} />}
-                      <span>Provision Farm Account</span>
+                      <span>{t("Provision Farm Account")}</span>
                     </button>
                   </div>
                 </form>
@@ -2021,7 +2021,7 @@ export function AdminCmsClient({
                     </div>
                     <div>
                       <h3 className="font-extrabold text-base text-slate-900">{selectedTenant.name}</h3>
-                      <p className="text-[11px] text-slate-400 font-mono">Org ID: {selectedTenant.id}</p>
+                      <p className="text-[11px] text-slate-400 font-mono">{t("Org ID:")} {selectedTenant.id}</p>
                     </div>
                   </div>
                   <button 
@@ -2036,28 +2036,28 @@ export function AdminCmsClient({
                   {/* Telemetry Strip */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-center">
-                      <p className="text-[10px] text-purple-600 font-bold uppercase">Branches</p>
+                      <p className="text-[10px] text-purple-600 font-bold uppercase">{t("Branches")}</p>
                       <p className="text-xl font-extrabold text-purple-900 mt-0.5">
                         {isLoadingTenant ? '...' : (tenantDetail?.workspaces?.length || 1)}
                       </p>
                     </div>
 
                     <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-center">
-                      <p className="text-[10px] text-indigo-600 font-bold uppercase">Staff</p>
+                      <p className="text-[10px] text-indigo-600 font-bold uppercase">{t("Staff")}</p>
                       <p className="text-xl font-extrabold text-indigo-900 mt-0.5">
                         {isLoadingTenant ? '...' : (tenantDetail?.telemetry?.staffCount || 0)}
                       </p>
                     </div>
 
                     <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-center">
-                      <p className="text-[10px] text-amber-600 font-bold uppercase">Flocks</p>
+                      <p className="text-[10px] text-amber-600 font-bold uppercase">{t("Flocks")}</p>
                       <p className="text-xl font-extrabold text-amber-900 mt-0.5">
                         {isLoadingTenant ? '...' : (tenantDetail?.telemetry?.batchesCount || 0)}
                       </p>
                     </div>
 
                     <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-center">
-                      <p className="text-[10px] text-emerald-600 font-bold uppercase">Good Eggs</p>
+                      <p className="text-[10px] text-emerald-600 font-bold uppercase">{t("Good Eggs")}</p>
                       <p className="text-xl font-extrabold text-emerald-900 mt-0.5">
                         {isLoadingTenant ? '...' : formatNumber(tenantDetail?.telemetry?.eggsCount || 0)}
                       </p>
@@ -2066,10 +2066,10 @@ export function AdminCmsClient({
 
                   {/* Editable Configuration */}
                   <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Farm Workspace Configuration</h4>
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t("Farm Workspace Configuration")}</h4>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Organization Name</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Organization Name")}</label>
                       <input
                         type="text"
                         value={selectedTenant.name}
@@ -2080,7 +2080,7 @@ export function AdminCmsClient({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Package Tier</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Assigned Package Tier")}</label>
                         <select
                           value={selectedTenant.subscriptionTier || 'free'}
                           onChange={(e) => setSelectedTenant({ ...selectedTenant, subscriptionTier: e.target.value })}
@@ -2088,22 +2088,22 @@ export function AdminCmsClient({
                         >
                           {plans.map((p) => (
                             <option key={p.id} value={p.id}>
-                              {p.name} ({p.priceMonthly === 0 ? 'Free' : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`})
+                              {p.name} ({p.priceMonthly === 0 ? t('Free') : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`})
                             </option>
                           ))}
                         </select>
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">Subscription Status</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Subscription Status")}</label>
                         <select
                           value={selectedTenant.subscriptionStatus || 'active'}
                           onChange={(e) => setSelectedTenant({ ...selectedTenant, subscriptionStatus: e.target.value })}
                           className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-emerald-900 bg-white cursor-pointer capitalize"
                         >
-                          <option value="active">Active</option>
-                          <option value="suspended">Suspended</option>
-                          <option value="canceled">Canceled</option>
+                          <option value="active">{t("Active")}</option>
+                          <option value="suspended">{t("Suspended")}</option>
+                          <option value="canceled">{t("Canceled")}</option>
                         </select>
                       </div>
                     </div>
@@ -2111,7 +2111,7 @@ export function AdminCmsClient({
 
                   {/* Branches Matrix */}
                   <div className="space-y-2">
-                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Associated Farm Workspaces</h4>
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">{t("Associated Farm Workspaces")}</h4>
                     <div className="space-y-1.5">
                       {tenantDetail?.workspaces?.length > 0 ? (
                         tenantDetail.workspaces.map((ws: any) => (
@@ -2121,7 +2121,7 @@ export function AdminCmsClient({
                           </div>
                         ))
                       ) : (
-                        <p className="text-xs text-slate-400 italic">Main Branch Workspace</p>
+                        <p className="text-xs text-slate-400 italic">{t("Main Branch Workspace")}</p>
                       )}
                     </div>
                   </div>
@@ -2133,7 +2133,7 @@ export function AdminCmsClient({
                       className="text-red-600 hover:text-red-700 text-xs font-bold flex items-center gap-1 cursor-pointer self-start sm:self-auto"
                     >
                       <Trash2 size={14} />
-                      <span>Delete Farm Organization</span>
+                      <span>{t("Delete Farm Organization")}</span>
                     </button>
 
                     <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -2142,7 +2142,7 @@ export function AdminCmsClient({
                         className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
                       >
                         <LogIn size={14} />
-                        <span>Login as Tenant</span>
+                        <span>{t("Login as Tenant")}</span>
                       </button>
 
                       <button
@@ -2151,7 +2151,7 @@ export function AdminCmsClient({
                         className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
                       >
                         {isSavingTenant ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                        <span>Save Changes</span>
+                        <span>{t("Save Changes")}</span>
                       </button>
                     </div>
                   </div>
@@ -2167,37 +2167,37 @@ export function AdminCmsClient({
         <div className="space-y-6 animate-in fade-in duration-300">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
             <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <Server size={20} className="text-purple-600" /> Platform Maintenance & System Governance
+              <Server size={20} className="text-purple-600" /> {t("Platform Maintenance & System Governance")}
             </h2>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Global system diagnostics, database schema integrity, brand identity overview, and maintenance shortcuts.
+              {t("Global system diagnostics, database schema integrity, brand identity overview, and maintenance shortcuts.")}
             </p>
 
             <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                <h4 className="font-bold text-xs text-slate-900">Platform Brand Identity</h4>
+                <h4 className="font-bold text-xs text-slate-900">{t("Platform Brand Identity")}</h4>
                 <p className="text-sm font-extrabold text-indigo-700">{platformName}</p>
                 <p className="text-[11px] text-slate-500">{brandTagline}</p>
                 <button
                   onClick={() => setActiveTab('cms')}
                   className="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 pt-1 cursor-pointer"
                 >
-                  Edit Brand in CMS →
+                  {t("Edit Brand in CMS →")}
                 </button>
               </div>
 
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                <h4 className="font-bold text-xs text-slate-900">Database Driver Engine</h4>
+                <h4 className="font-bold text-xs text-slate-900">{t("Database Driver Engine")}</h4>
                 <p className="text-xs text-slate-600 font-mono">
-                  Engine: Managed Database Service
+                  {t("Engine: Managed Database Service")}
                 </p>
-                <p className="text-xs text-emerald-700 font-bold">Status: Healthy & Active</p>
+                <p className="text-xs text-emerald-700 font-bold">{t("Status: Healthy & Active")}</p>
               </div>
 
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                <h4 className="font-bold text-xs text-slate-900">Deployment Environment</h4>
+                <h4 className="font-bold text-xs text-slate-900">{t("Deployment Environment")}</h4>
                 <p className="text-xs text-slate-600 font-mono">Node.js Next.js 16 (Production)</p>
-                <p className="text-xs text-indigo-700 font-bold">Mode: Production Self-Hosted</p>
+                <p className="text-xs text-indigo-700 font-bold">{t("Mode: Production Self-Hosted")}</p>
               </div>
             </div>
           </div>

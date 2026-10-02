@@ -103,7 +103,7 @@ export default function DocumentationPage() {
         <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-800 text-white p-8 sm:p-12 rounded-3xl shadow-xl space-y-4 relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-white/5 transform skew-x-12 pointer-events-none" />
           
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-indigo-200 text-xs font-bold uppercase tracking-widest">
               <BookOpen size={16} />
               <span>{t("Documentation Portal")}</span>

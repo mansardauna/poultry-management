@@ -438,19 +438,19 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             <span className="text-xs text-slate-500 font-medium">{t("Click any row to view full invoice & share payment links")}</span>
           </CardHeader>
           <CardContent className="p-6">
-            <TableControls searchTerm={invoicesTable.searchTerm} setSearchTerm={invoicesTable.setSearchTerm} placeholder="Search by customer name, invoice ID..." />
+            <TableControls searchTerm={invoicesTable.searchTerm} setSearchTerm={invoicesTable.setSearchTerm} placeholder={t("Search by customer name, invoice ID...")} />
             <div className="overflow-x-auto mt-4">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200 font-semibold tracking-wider">
                   <tr>
-                    <TableSortHeader label="Invoice ID" sortKey="id" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
-                    <TableSortHeader label="Date" sortKey="date" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
-                    <TableSortHeader label="Customer" sortKey="customerName" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
-                    <TableSortHeader label="Description / Items" sortKey="items" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
-                    <TableSortHeader label="Qty" sortKey="quantity" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
-                    <TableSortHeader label="Total Amount" sortKey="totalAmount" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
-                    <TableSortHeader label="Status" sortKey="status" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
-                    <th className="px-4 py-3 text-right">Actions / Payment Link</th>
+                    <TableSortHeader label={t("Invoice ID")} sortKey="id" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label={t("Date")} sortKey="date" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label={t("Customer")} sortKey="customerName" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label={t("Description / Items")} sortKey="items" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label={t("Qty")} sortKey="quantity" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label={t("Total Amount")} sortKey="totalAmount" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <TableSortHeader label={t("Status")} sortKey="status" currentSort={invoicesTable.sortConfig} onSort={invoicesTable.handleSort} />
+                    <th className="px-4 py-3 text-right">{t("Actions / Payment Link")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
@@ -546,19 +546,19 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             <CardTitle>{texts.sales?.salesHistory || t("Sales History")}</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <TableControls searchTerm={salesTable.searchTerm} setSearchTerm={salesTable.setSearchTerm} placeholder="Search sales..." />
+            <TableControls searchTerm={salesTable.searchTerm} setSearchTerm={salesTable.setSearchTerm} placeholder={t("Search sales...")} />
             <div className="overflow-x-auto mt-4">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200 font-semibold tracking-wider">
                   <tr>
-                    <TableSortHeader label="Sale ID" sortKey="id" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
-                    <TableSortHeader label="Date" sortKey="date" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
-                    <TableSortHeader label="Customer" sortKey="customerName" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
-                    <TableSortHeader label="Product Type" sortKey="type" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
-                    <TableSortHeader label="Amount" sortKey="totalAmount" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
-                    <TableSortHeader label="Payment Method" sortKey="paymentMethod" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
-                    <TableSortHeader label="Status" sortKey="status" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
-                    {canEdit && <th className="px-4 py-3 text-right">Delete</th>}
+                    <TableSortHeader label={t("Sale ID")} sortKey="id" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                    <TableSortHeader label={t("Date")} sortKey="date" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                    <TableSortHeader label={t("Customer")} sortKey="customerName" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                    <TableSortHeader label={t("Product Type")} sortKey="type" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                    <TableSortHeader label={t("Amount")} sortKey="totalAmount" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                    <TableSortHeader label={t("Payment Method")} sortKey="paymentMethod" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                    <TableSortHeader label={t("Status")} sortKey="status" currentSort={salesTable.sortConfig} onSort={salesTable.handleSort} />
+                    {canEdit && <th className="px-4 py-3 text-right">{t("Delete")}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">

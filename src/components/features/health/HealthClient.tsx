@@ -210,7 +210,7 @@ export function HealthClient({ role }: { role: string }) {
           </CardHeader>
           <CardContent className="p-0">
             <div className="p-4 border-b border-slate-100">
-              <TableControls searchTerm={schedulesLogic.searchTerm} setSearchTerm={schedulesLogic.setSearchTerm} placeholder="Search schedules..." />
+              <TableControls searchTerm={schedulesLogic.searchTerm} setSearchTerm={schedulesLogic.setSearchTerm} placeholder={t("Search schedules...")} />
             </div>
             <div className="max-h-[400px] overflow-x-auto overflow-y-auto">
               <table className="w-full text-xs text-left">

@@ -67,8 +67,8 @@ function ResetPasswordForm() {
   };
 
   return (
-    <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 p-8 sm:p-12 lg:p-14 space-y-8 relative">
-      <div className="absolute top-6 right-6">
+    <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 p-6 sm:p-12 lg:p-14 space-y-8 relative">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
         <LanguageSelector variant="light" />
       </div>
 

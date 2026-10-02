@@ -570,17 +570,17 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           </CardHeader>
           <CardContent className="p-6">
             <div className="mb-4">
-              <TableControls searchTerm={inventoryLogic.searchTerm} setSearchTerm={inventoryLogic.setSearchTerm} placeholder="Search inventory..." />
+              <TableControls searchTerm={inventoryLogic.searchTerm} setSearchTerm={inventoryLogic.setSearchTerm} placeholder={t("Search inventory...")} />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <TableSortHeader label="Type" sortKey="type" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
-                    <TableSortHeader label="Quantity (kg)" sortKey="quantityKg" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
-                    <TableSortHeader label="Supplier" sortKey="supplier" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
-                    <TableSortHeader label="Last Restock" sortKey="lastRestock" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
-                    <th className="px-4 py-3">Status</th>
+                    <TableSortHeader label={t("Type")} sortKey="type" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
+                    <TableSortHeader label={t("Quantity (kg)")} sortKey="quantityKg" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
+                    <TableSortHeader label={t("Supplier")} sortKey="supplier" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
+                    <TableSortHeader label={t("Last Restock")} sortKey="lastRestock" currentSort={inventoryLogic.sortConfig} onSort={inventoryLogic.handleSort} />
+                    <th className="px-4 py-3">{t("Status")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -598,7 +598,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                           <span className={`px-2.5 py-0.5 text-[9px] font-semibold ${
                             isCritical ? 'bg-red-100 text-red-800 animate-pulse' : 'bg-indigo-105 text-indigo-800'
                           }`}>
-                            {isCritical ? 'Critical Stock' : 'Safe stock'}
+                            {isCritical ? t('Critical Stock') : t('Safe stock')}
                           </span>
                         </td>
                       </tr>
@@ -624,25 +624,25 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider flex items-center gap-2">
-              <Truck size="18" className="text-indigo-655" /> Restructured Logistics Procurement Pipeline (DB Roster)
+              <Truck size="18" className="text-indigo-655" /> {t("Restructured Logistics Procurement Pipeline (DB Roster)")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <p className="text-[11px] text-slate-500 mb-4">
-              Restructured supply chains to securely lock down layer bird feed logistics and prevent future stock depletion.
+              {t("Restructured supply chains to securely lock down layer bird feed logistics and prevent future stock depletion.")}
             </p>
             <div className="mb-4">
-              <TableControls searchTerm={pipelineLogic.searchTerm} setSearchTerm={pipelineLogic.setSearchTerm} placeholder="Search pipeline..." />
+              <TableControls searchTerm={pipelineLogic.searchTerm} setSearchTerm={pipelineLogic.setSearchTerm} placeholder={t("Search pipeline...")} />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                   <tr>
                     <TableSortHeader label={texts.common.date} sortKey="date" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
-                    <TableSortHeader label="Milestone Action" sortKey="milestone" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
-                    <TableSortHeader label="New Supplier" sortKey="supplier" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
-                    <TableSortHeader label="Status" sortKey="status" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
-                    <TableSortHeader label="ETA" sortKey="eta" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label={t("Milestone Action")} sortKey="milestone" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label={t("New Supplier")} sortKey="supplier" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label={t("Status")} sortKey="status" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
+                    <TableSortHeader label={t("ETA")} sortKey="eta" currentSort={pipelineLogic.sortConfig} onSort={pipelineLogic.handleSort} />
                     {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
@@ -704,16 +704,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         </CardHeader>
         <CardContent className="p-6">
           <div className="mb-4">
-            <TableControls searchTerm={logsLogic.searchTerm} setSearchTerm={logsLogic.setSearchTerm} placeholder="Search logs..." />
+            <TableControls searchTerm={logsLogic.searchTerm} setSearchTerm={logsLogic.setSearchTerm} placeholder={t("Search logs...")} />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="text-[10px] text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <TableSortHeader label={texts.common.date} sortKey="date" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
-                  <th className="px-4 py-3">Feed Type</th>
-                  <TableSortHeader label="Batch ID" sortKey="batchId" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
-                  <TableSortHeader label="Amount (kg)" sortKey="quantityConsumedKg" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
+                  <th className="px-4 py-3">{t("Feed Type")}</th>
+                  <TableSortHeader label={t("Batch ID")} sortKey="batchId" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
+                  <TableSortHeader label={t("Amount (kg)")} sortKey="quantityConsumedKg" currentSort={logsLogic.sortConfig} onSort={logsLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                 </tr>
               </thead>
@@ -723,7 +723,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                   return (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-semibold text-slate-950">{log.date}</td>
-                      <td className="px-4 py-3 font-medium text-slate-650">{feed?.type || 'Unknown'}</td>
+                      <td className="px-4 py-3 font-medium text-slate-650">{feed?.type ? t(feed.type) : t('Unknown')}</td>
                       <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{log.batchId}</td>
                       <td className="px-4 py-3 font-semibold text-amber-600">{log.quantityConsumedKg} kg</td>
                       {canEdit && (
@@ -731,14 +731,14 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                           <button
                             onClick={() => handleOpenEditLog(log)}
                             className="p-1 hover:bg-blue-100 rounded transition-colors"
-                            title="Edit"
+                            title={t("Edit")}
                           >
                             <Edit2 size={16} className="text-blue-600" />
                           </button>
                           <button
                             onClick={() => handleDeleteLog(log.id)}
                             className="p-1 hover:bg-red-100 rounded transition-colors"
-                            title="Delete"
+                            title={t("Delete")}
                           >
                             <Trash2 size={16} className="text-red-600" />
                           </button>

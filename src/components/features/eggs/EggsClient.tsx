@@ -620,15 +620,15 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <p className="text-[11px] text-slate-500 mb-4">
               Regular checks of nesting box padding and straw status to aggressively decrease cracked shell incidences:
             </p>
-            <TableControls searchTerm={cushionAuditsLogic.searchTerm} setSearchTerm={cushionAuditsLogic.setSearchTerm} placeholder="Search audits..." />
+            <TableControls searchTerm={cushionAuditsLogic.searchTerm} setSearchTerm={cushionAuditsLogic.setSearchTerm} placeholder={t("Search audits...")} />
             <div className="overflow-x-auto overflow-y-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
                     <TableSortHeader label={texts.common.date} sortKey="date" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
-                    <TableSortHeader label="Nesting Box" sortKey="boxName" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
+                    <TableSortHeader label={t("Nesting Box")} sortKey="boxName" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
                     <TableSortHeader label={texts.common.status} sortKey="status" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
-                    <TableSortHeader label="Action Completed" sortKey="actionTaken" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
+                    <TableSortHeader label={t("Action Completed")} sortKey="actionTaken" currentSort={cushionAuditsLogic.sortConfig} onSort={cushionAuditsLogic.handleSort} />
                     {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
                 </thead>
@@ -688,15 +688,15 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             <p className="text-[11px] text-slate-500 mb-4">
               Maturation metrics for the 3 newly laying birds to track structural weight bounds and size progressions:
             </p>
-            <TableControls searchTerm={maturationLogsLogic.searchTerm} setSearchTerm={maturationLogsLogic.setSearchTerm} placeholder="Search metrics..." />
+            <TableControls searchTerm={maturationLogsLogic.searchTerm} setSearchTerm={maturationLogsLogic.setSearchTerm} placeholder={t("Search metrics...")} />
             <div className="overflow-x-auto overflow-y-auto">
               <table className="w-full text-xs text-left">
                 <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
                     <TableSortHeader label={texts.common.date} sortKey="date" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
-                    <TableSortHeader label="Bird ID" sortKey="birdId" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
-                    <TableSortHeader label="Eggs Count" sortKey="eggsCount" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
-                    <TableSortHeader label="Avg Egg Weight (g)" sortKey="avgWeightGrams" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
+                    <TableSortHeader label={t("Bird ID")} sortKey="birdId" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
+                    <TableSortHeader label={t("Eggs Count")} sortKey="eggsCount" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
+                    <TableSortHeader label={t("Avg Egg Weight (g)")} sortKey="avgWeightGrams" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
                     <TableSortHeader label={texts.common.notes} sortKey="notes" currentSort={maturationLogsLogic.sortConfig} onSort={maturationLogsLogic.handleSort} />
                     {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                   </tr>
@@ -752,16 +752,16 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <TableControls searchTerm={eggsLogic.searchTerm} setSearchTerm={eggsLogic.setSearchTerm} placeholder="Search collections..." />
+          <TableControls searchTerm={eggsLogic.searchTerm} setSearchTerm={eggsLogic.setSearchTerm} placeholder={t("Search collections...")} />
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
                   <TableSortHeader label={texts.common.date} sortKey="date" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
-                  <TableSortHeader label="Batch ID" sortKey="batchId" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
-                  <TableSortHeader label="Good Eggs" sortKey="goodEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
-                  <TableSortHeader label="Broken / Cracked" sortKey="brokenEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
-                  <TableSortHeader label="Spoilt" sortKey="spoiltEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label={t("Batch ID")} sortKey="batchId" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label={t("Good Eggs")} sortKey="goodEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label={t("Broken / Cracked")} sortKey="brokenEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <TableSortHeader label={t("Spoilt")} sortKey="spoiltEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
                   {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                 </tr>
               </thead>
@@ -778,14 +778,14 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                         <button
                           onClick={() => handleOpenEditCollection(egg)}
                           className="p-1 hover:bg-blue-100 rounded transition-colors"
-                          title="Edit"
+                          title={t("Edit")}
                         >
                           <Edit2 size={16} className="text-blue-600" />
                         </button>
                         <button
                           onClick={() => handleDeleteCollection(egg.id)}
                           className="p-1 hover:bg-red-100 rounded transition-colors"
-                          title="Delete"
+                          title={t("Delete")}
                         >
                           <Trash2 size={16} className="text-red-600" />
                         </button>

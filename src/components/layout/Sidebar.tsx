@@ -92,20 +92,21 @@ interface EditModalProps {
  * @param {EditModalProps} props
  */
 function EditBranchModal({ workspace, onClose, onSave }: EditModalProps) {
+  const { t } = useLanguage();
   const [name, setName] = useState(workspace.name);
   const [type, setType] = useState(workspace.type);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { toast.error('Branch name is required'); return; }
+    if (!name.trim()) { toast.error(t('Branch name is required')); return; }
     setIsSaving(true);
     try {
       await onSave(name.trim(), type);
-      toast.success('Branch updated successfully');
+      toast.success(t('Branch updated successfully'));
       onClose();
     } catch (err: unknown) {
-      toast.error((err as Error)?.message || 'Failed to update branch');
+      toast.error((err as Error)?.message || t('Failed to update branch'));
     } finally {
       setIsSaving(false);
     }
@@ -117,30 +118,30 @@ function EditBranchModal({ workspace, onClose, onSave }: EditModalProps) {
         <div className="flex justify-between items-center p-5 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Pencil className="text-indigo-600" size={20} />
-            <h2 className="text-lg font-semibold text-slate-800">Edit Branch</h2>
+            <h2 className="text-lg font-semibold text-slate-800">{t("Edit Branch")}</h2>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Branch Name</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("Branch Name")}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              placeholder="e.g. North Side Broilers"
+              placeholder={t("e.g. North Side Broilers")}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Farm Type</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t("Farm Type")}</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             >
-              {FARM_TYPES.map((t) => <option key={t}>{t}</option>)}
+              {FARM_TYPES.map((tType) => <option key={tType}>{tType}</option>)}
             </select>
           </div>
           <div className="pt-2 flex justify-end gap-3">
@@ -149,14 +150,14 @@ function EditBranchModal({ workspace, onClose, onSave }: EditModalProps) {
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors"
             >
-              Cancel
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               disabled={isSaving}
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors disabled:opacity-60"
             >
-              {isSaving ? 'Saving…' : 'Save Changes'}
+              {isSaving ? t('Saving…') : t('Save Changes')}
             </button>
           </div>
         </form>
@@ -181,7 +182,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { workspaces, activeWorkspace, isLoading, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
-  const { texts } = useLanguage();
+  const { texts, t } = useLanguage();
   const whiteLabel = useWhiteLabel();
 
   const isSuperAdmin = 
@@ -436,7 +437,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                         onClick={() => {
                           setIsDropdownOpen(false);
                           if (tier === 'free' && workspaces.length >= 1) {
-                             toast.error('Free tier is limited to 1 branch. Upgrade to Pro for unlimited branches!');
+                             toast.error(t('Free tier is limited to 1 branch. Upgrade to Pro for unlimited branches!'));
                              router.push('/dashboard/settings?tab=subscription');
                              return;
                           }
@@ -444,7 +445,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-2 font-medium"
                       >
-                        <Plus size={16} /> Add new branch
+                        <Plus size={16} /> {t("Add new branch")}
                       </button>
                     </div>
                   )}
@@ -628,21 +629,21 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                           onClick={() => setIsMobileOpen(false)}
                           className={`block py-1 hover:underline transition-colors ${pathname.includes('/api') ? 'text-white font-bold' : 'text-indigo-300 hover:text-white'}`}
                         >
-                          • API Keys & Webhooks
+                          • {t("API Keys & Webhooks")}
                         </Link>
                         <Link 
                           href="/dashboard/enterprise/vet" 
                           onClick={() => setIsMobileOpen(false)}
                           className={`block py-1 hover:underline transition-colors ${pathname.includes('/vet') ? 'text-white font-bold' : 'text-emerald-300 hover:text-white'}`}
                         >
-                          • 24/7 Vet Hotline
+                          • {t("24/7 Vet Hotline")}
                         </Link>
                         <Link 
                           href="/dashboard/enterprise/feed-pool" 
                           onClick={() => setIsMobileOpen(false)}
                           className={`block py-1 hover:underline transition-colors ${pathname.includes('/feed-pool') ? 'text-white font-bold' : 'text-amber-300 hover:text-white'}`}
                         >
-                          • Wholesale Feed Pool
+                          • {t("Wholesale Feed Pool")}
                         </Link>
                       </div>
                     )}
@@ -656,10 +657,10 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         {!isCollapsed && !isSuperAdmin && role === 'Admin' && currentTier === 'free' && (
           <div className="mx-3 mb-2 p-3 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/30 rounded-xl text-center">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-semibold text-amber-300">Free Starter</span>
-              <span className="text-[10px] bg-amber-500 text-slate-950 font-semibold px-1.5 py-0.2 rounded">1 Branch Limit</span>
+              <span className="text-[10px] font-semibold text-amber-300">{t("Free Starter")}</span>
+              <span className="text-[10px] bg-amber-500 text-slate-950 font-semibold px-1.5 py-0.2 rounded">{t("1 Branch Limit")}</span>
             </div>
-            <p className="text-[11px] text-indigo-200 mb-2 leading-tight">Unlock CCTV, voice logging and unlimited branches</p>
+            <p className="text-[11px] text-indigo-200 mb-2 leading-tight">{t("Unlock CCTV, voice logging and unlimited branches")}</p>
             <button
               onClick={() => {
                 setIsMobileOpen(false);
@@ -667,7 +668,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               }}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 rounded-md transition-colors shadow-sm cursor-pointer"
             >
-              Upgrade to Pro (₦{proPrice.toLocaleString()}/mo)
+              {t("Upgrade to Pro")} (₦{proPrice.toLocaleString()}/{t("mo")})
             </button>
           </div>
         )}

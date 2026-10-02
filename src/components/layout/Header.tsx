@@ -97,7 +97,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   }, [isUpgraded, searchParams, router]);
 
   const { setIsMobileOpen } = useSidebar();
-  const { language, setLanguage, texts } = useLanguage();
+  const { language, setLanguage, texts, t } = useLanguage();
   const { timeRange, setTimeRange } = useTimeFilter();
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -604,8 +604,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         <button
           onClick={() => setIsRightDrawerOpen(true)}
           className="md:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer relative"
-          aria-label="Open preferences and filters"
-          title="Filters & Preferences"
+          aria-label={t("Open preferences and filters")}
+          title={t("Filters & Preferences")}
         >
           <SlidersHorizontal size={20} />
           {timeRange !== 'all' && (
@@ -617,19 +617,19 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         {isSuperAdmin ? (
           <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
             <span className="bg-indigo-600 text-white text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg whitespace-nowrap">
-              Super Admin
+              {t("Super Admin")}
             </span>
           </div>
         ) : role === 'Staff' ? (
           <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
             <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg whitespace-nowrap">
-              Staff Portal
+              {t("Staff Portal")}
             </span>
           </div>
         ) : role === 'Manager' ? (
           <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
             <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg whitespace-nowrap">
-              Farm Manager
+              {t("Farm Manager")}
             </span>
           </div>
         ) : (
@@ -639,7 +639,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 onClick={() => router.push('/dashboard/settings?tab=subscription')}
                 className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
               >
-                <span>Upgrade</span>
+                <span>{t("Upgrade")}</span>
               </button>
             </div>
           )
@@ -666,14 +666,14 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                     <SlidersHorizontal size={18} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">Filters & Controls</h3>
-                    <p className="text-[11px] text-slate-500 font-medium">Quick configuration drawer</p>
+                    <h3 className="text-sm font-bold text-slate-900">{t("Filters & Controls")}</h3>
+                    <p className="text-[11px] text-slate-500 font-medium">{t("Quick configuration drawer")}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsRightDrawerOpen(false)}
                   className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 rounded-lg transition-colors cursor-pointer"
-                  aria-label="Close drawer"
+                  aria-label={t("Close drawer")}
                 >
                   <X size={18} />
                 </button>
@@ -686,28 +686,28 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                   <div>
                     <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
                       <Calendar size={14} className="text-indigo-600" />
-                      Time Filter
+                      {t("Time Filter")}
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        { id: 'all', label: texts.common.allTime || 'All Time' },
-                        { id: 'weekly', label: texts.common.weekly || 'Weekly' },
-                        { id: 'monthly', label: texts.common.monthly || 'Monthly' },
-                        { id: 'yearly', label: texts.common.yearly || 'Yearly' },
-                      ].map((t) => (
+                        { id: 'all', label: texts.common.allTime || t('All Time') },
+                        { id: 'weekly', label: texts.common.weekly || t('Weekly') },
+                        { id: 'monthly', label: texts.common.monthly || t('Monthly') },
+                        { id: 'yearly', label: texts.common.yearly || t('Yearly') },
+                      ].map((tRange) => (
                         <button
-                          key={t.id}
+                          key={tRange.id}
                           type="button"
                           onClick={() => {
-                            setTimeRange(t.id as TimeRange);
+                            setTimeRange(tRange.id as TimeRange);
                           }}
                           className={`px-3 py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                            timeRange === t.id
+                            timeRange === tRange.id
                               ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
                               : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                           }`}
                         >
-                          {t.label}
+                          {tRange.label}
                         </button>
                       ))}
                     </div>
@@ -718,7 +718,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 <div>
                   <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
                     <Globe size={14} className="text-indigo-600" />
-                    Language
+                    {t("Language")}
                   </label>
                   <div className="grid grid-cols-1 gap-1.5">
                     {[
@@ -756,10 +756,10 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100/60 border border-indigo-200 space-y-3">
                     <div className="flex items-center gap-2 text-indigo-700 font-bold text-xs uppercase tracking-wider">
                       <Sparkles size={14} className="text-indigo-600" />
-                      Upgrade to Commercial Pro
+                      {t("Upgrade to Commercial Pro")}
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Get unlimited branches, exportable custom PDF reports, CCTV phone scanning, and multi-staff rosters.
+                      {t("Get unlimited branches, exportable custom PDF reports, CCTV phone scanning, and multi-staff rosters.")}
                     </p>
                     <button
                       onClick={() => {
@@ -769,7 +769,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Sparkles size={14} />
-                      <span>Upgrade Plan</span>
+                      <span>{t("Upgrade Plan")}</span>
                     </button>
                   </div>
                 )}
@@ -777,8 +777,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
 
               {/* Drawer Footer */}
               <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-[11px] text-slate-500">
-                <span>PoultryPro v2.1.0</span>
-                <span className="font-semibold text-indigo-600">Enterprise Edition</span>
+                <span>PFMS</span>
+                <span className="font-semibold text-indigo-600">{t("Enterprise Edition")}</span>
               </div>
             </div>
           </div>

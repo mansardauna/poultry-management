@@ -71,16 +71,16 @@ function SignupForm() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
-            {t("Create account")}
-          </h1>
-          <p className="text-sm font-medium text-indigo-600">{t("Join Poultry Farm Management")}</p>
-        </div>
-        <div className="shrink-0 self-start">
-          <LanguageSelector variant="light" />
-        </div>
+      {/* Top-Right Language Switcher */}
+      <div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-10">
+        <LanguageSelector variant="light" />
+      </div>
+
+      <div className="mb-6 sm:mb-8 pr-16 sm:pr-0">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
+          {t("Create account")}
+        </h1>
+        <p className="text-xs sm:text-sm font-medium text-indigo-600">{t("Join Poultry Farm Management")}</p>
       </div>
       
       <form onSubmit={handleSignup} className="space-y-5">
@@ -171,7 +171,7 @@ export default function SignupPage() {
         </div>
         
         {/* Right Side: Signup Form */}
-        <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
+        <div className="w-full md:w-1/2 lg:w-[45%] p-6 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
           <Suspense fallback={<div className="text-center p-8 text-slate-500 font-medium">{t("Loading...")}</div>}>
             <SignupForm />
           </Suspense>

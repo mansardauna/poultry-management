@@ -485,28 +485,28 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold text-slate-900">{farmName || activeWorkspace?.name || 'My Poultry Farm'}</h2>
+                    <h2 className="text-xl font-bold text-slate-900">{farmName || activeWorkspace?.name || t('My Poultry Farm')}</h2>
                     <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
-                      Billed Monthly
+                      {t("Billed Monthly")}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Farm ID: {computedFarmId} | Account Admin: {adminName || 'Farm Owner'}</p>
+                  <p className="text-xs text-slate-500 mt-1">{t("Farm ID:")} {computedFarmId} | {t("Account Admin:")} {adminName || t('Farm Owner')}</p>
                 </div>
               </div>
 
               <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-4 rounded-xl text-xs">
                 <div>
-                  <p className="text-slate-400 font-bold">Account Admin</p>
-                  <p className="font-semibold text-slate-800 mt-0.5">{adminName || 'Farm Owner'}</p>
-                  <p className="text-slate-500">{adminEmail || 'Not Configured'}</p>
+                  <p className="text-slate-400 font-bold">{t("Account Admin")}</p>
+                  <p className="font-semibold text-slate-800 mt-0.5">{adminName || t('Farm Owner')}</p>
+                  <p className="text-slate-500">{adminEmail || t('Not Configured')}</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 font-bold">Phone Number</p>
-                  <p className="font-semibold text-slate-800 mt-0.5">{adminPhone || 'Not Configured'}</p>
+                  <p className="text-slate-400 font-bold">{t("Phone Number")}</p>
+                  <p className="font-semibold text-slate-800 mt-0.5">{adminPhone || t('Not Configured')}</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 font-bold">Billing Region</p>
-                  <p className="font-semibold text-slate-800 mt-0.5">{billingRegion || 'Nigeria & West Africa (NGN)'}</p>
+                  <p className="text-slate-400 font-bold">{t("Billing Region")}</p>
+                  <p className="font-semibold text-slate-800 mt-0.5">{billingRegion || t('Nigeria & West Africa (NGN)')}</p>
                 </div>
               </div>
             </CardContent>
@@ -516,12 +516,12 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           <Card className="border-2 border-indigo-200 shadow-sm">
             <CardHeader className="border-b border-slate-100 bg-indigo-50/30">
               <CardTitle className="text-sm font-bold text-slate-800 flex items-center justify-between">
-                <span>Current Active Subscription</span>
+                <span>{t("Current Active Subscription")}</span>
                 <span className={`text-xs px-3.5 py-1 rounded-full font-extrabold ${
                   currentTier === 'enterprise' ? 'bg-purple-600 text-white shadow-sm' :
                   currentTier === 'pro' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-200 text-slate-800'
                 }`}>
-                  {currentTier === 'enterprise' ? 'Enterprise Plus' : currentTier === 'pro' ? 'Commercial Pro' : 'Free Starter'}
+                  {currentTier === 'enterprise' ? t('Enterprise Plus') : currentTier === 'pro' ? t('Commercial Pro') : t('Free Starter')}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -532,14 +532,14 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                     <span className="text-3xl font-extrabold text-slate-900">
                       ₦{((activePlan ? (isAnnual ? Math.round(activePlan.priceAnnual / 12) : activePlan.priceMonthly) : (currentTier === 'enterprise' ? 45000 : currentTier === 'pro' ? 15000 : 0))).toLocaleString()}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">/ month</span>
+                    <span className="text-xs text-slate-500 font-medium">{t("/ month")}</span>
                   </div>
                   <p className="text-xs text-slate-600 mt-2 max-w-lg leading-relaxed">
                     {currentTier === 'enterprise' 
-                      ? 'Enterprise Plus includes Multi-Farm Enterprise Hub, White-Label Cooperative Portal, 24/7 Consultant Support, Custom API & Logistics.'
+                      ? t('Enterprise Plus includes Multi-Farm Enterprise Hub, White-Label Cooperative Portal, 24/7 Consultant Support, Custom API & Logistics.')
                       : currentTier === 'pro'
-                      ? 'Commercial Pro includes AI Voice Auto-Logger, CCTV Live Surveillance, PDF/Excel Exports, and Unlimited Branches & Staff.'
-                      : 'Free Starter Plan includes up to 1 branch, 2 staff members, and basic flock logs.'}
+                      ? t('Commercial Pro includes AI Voice Auto-Logger, CCTV Live Surveillance, PDF/Excel Exports, and Unlimited Branches & Staff.')
+                      : t('Free Starter Plan includes up to 1 branch, 2 staff members, and basic flock logs.')}
                   </p>
                 </div>
 
@@ -548,32 +548,32 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                     onClick={() => setShowUpgradeModal(true)}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-3 rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
                   >
-                    {currentTier === 'free' ? 'Upgrade Plan' : 'Manage / Change Tier'}
+                    {currentTier === 'free' ? t('Upgrade Plan') : t('Manage / Change Tier')}
                   </button>
                   {currentTier !== 'free' && (
                     <button
                       onClick={async () => {
-                        if (confirm('Cancel your active subscription? Your account will downgrade to Free Starter.')) {
+                        if (confirm(t('Cancel your active subscription? Your account will downgrade to Free Starter.'))) {
                           try {
-                            toast.loading('Cancelling subscription...', { id: 'cancel-toast' });
+                            toast.loading(t('Cancelling subscription...'), { id: 'cancel-toast' });
                             const res = await fetch('/api/subscription/cancel', { method: 'POST' });
                             toast.dismiss('cancel-toast');
                             if (res.ok) {
                               document.cookie = "pfms_tier=free; path=/; max-age=86400";
                               setCurrentTier('free');
-                              toast.success('Subscription cancelled successfully. Account downgraded to Free Starter.');
+                              toast.success(t('Subscription cancelled successfully. Account downgraded to Free Starter.'));
                             } else {
-                              toast.error('Failed to cancel subscription');
+                              toast.error(t('Failed to cancel subscription'));
                             }
                           } catch (_e) {
                             toast.dismiss('cancel-toast');
-                            toast.error('Error cancelling subscription');
+                            toast.error(t('Error cancelling subscription'));
                           }
                         }
                       }}
                       className="bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs uppercase px-4 py-3 rounded-xl transition-colors cursor-pointer border border-red-200 whitespace-nowrap"
                     >
-                      Cancel Plan
+                      {t("Cancel Plan")}
                     </button>
                   )}
                 </div>
@@ -591,35 +591,35 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
               <CardHeader className="border-b border-slate-100">
                 <CardTitle className="text-sm font-semibold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <User size={18} className="text-emerald-500" /> Staff Member Profile
+                    <User size={18} className="text-emerald-500" /> {t("Staff Member Profile")}
                   </span>
                   <span className="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
-                    Farm Attendant (Staff)
+                    {t("Farm Attendant (Staff)")}
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Staff Full Name</span>
-                    <p className="text-sm font-bold text-slate-900">{currentUser?.name || 'Farm Attendant'}</p>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t("Staff Full Name")}</span>
+                    <p className="text-sm font-bold text-slate-900">{currentUser?.name || t('Farm Attendant')}</p>
                   </div>
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Login Username</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t("Login Username")}</span>
                     <p className="text-sm font-mono font-bold text-slate-900">{currentUser?.username || 'staff'}</p>
                   </div>
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Assigned Branch</span>
-                    <p className="text-sm font-bold text-indigo-600">{activeWorkspace?.name || 'Main Location'}</p>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t("Assigned Branch")}</span>
+                    <p className="text-sm font-bold text-indigo-600">{activeWorkspace?.name || t('Main Location')}</p>
                   </div>
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Farm Organization ID</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t("Farm Organization ID")}</span>
                     <p className="text-sm font-mono font-medium text-slate-600">{computedFarmId}</p>
                   </div>
                 </div>
 
                 <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900 leading-relaxed">
-                  <strong>Role Permissions Notice:</strong> Farm organization details, egg pricing, payment gateways, and subscription billing are managed exclusively by the farm Administrator. As a staff attendant, you can update your login password below.
+                  <strong>{t("Role Permissions Notice:")}</strong> {t("Farm organization details, egg pricing, payment gateways, and subscription billing are managed exclusively by the farm Administrator. As a staff attendant, you can update your login password below.")}
                 </div>
               </CardContent>
             </Card>
@@ -627,24 +627,24 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
             <Card>
               <CardHeader className="border-b border-slate-100">
                 <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <User size={18} className="text-green-500" /> Farm Profile & Pricing
+                  <User size={18} className="text-green-500" /> {t("Farm Profile & Pricing")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <TextField label="Farm / Organization Name" fullWidth variant="outlined" value={farmName} onChange={(e) => setFarmName(e.target.value)} helperText="Official farm name displayed on billing cards and invoices." />
-                  <TextField label="Admin Full Name" fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
-                  <TextField label="Admin Email Address" type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
-                  <TextField label="Admin Contact Phone" fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
-                  <TextField label="Billing Region / Currency" fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText="e.g. Nigeria & West Africa (NGN)" />
+                  <TextField label={t("Farm / Organization Name")} fullWidth variant="outlined" value={farmName} onChange={(e) => setFarmName(e.target.value)} helperText={t("Official farm name displayed on billing cards and invoices.")} />
+                  <TextField label={t("Admin Full Name")} fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
+                  <TextField label={t("Admin Email Address")} type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+                  <TextField label={t("Admin Contact Phone")} fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
+                  <TextField label={t("Billing Region / Currency")} fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText={t("e.g. Nigeria & West Africa (NGN)")} />
                   
                   <div className="md:col-span-2 pt-4 border-t border-slate-100">
                     <p className="text-xs font-semibold text-slate-500 mb-3 flex items-center gap-1">
-                      <DollarSign size={14} /> Egg Pricing Configuration
+                      <DollarSign size={14} /> {t("Egg Pricing Configuration")}
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <TextField label="Egg Price Per Crate (Small) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
-                      <TextField label="Egg Price Per Crate (Large) - ₦" type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
+                      <TextField label={t("Egg Price Per Crate (Small) - ₦")} type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
+                      <TextField label={t("Egg Price Per Crate (Large) - ₦")} type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
                     </div>
                   </div>
                 </div>
@@ -750,23 +750,23 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           <CardContent className="p-6 space-y-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">Nigeria & Africa</span>
-                <h4 className="text-sm font-semibold text-slate-800">Paystack Integration</h4>
+                <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">{t("Nigeria & Africa")}</span>
+                <h4 className="text-sm font-semibold text-slate-800">{t("Paystack Integration")}</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TextField label="Paystack Public Key" fullWidth variant="outlined" value={paystackPublicKey} onChange={(e) => setPaystackPublicKey(e.target.value)} />
-                <TextField label="Paystack Secret Key" type="password" fullWidth variant="outlined" value={paystackSecretKey} onChange={(e) => setPaystackSecretKey(e.target.value)} />
+                <TextField label={t("Paystack Public Key")} fullWidth variant="outlined" value={paystackPublicKey} onChange={(e) => setPaystackPublicKey(e.target.value)} />
+                <TextField label={t("Paystack Secret Key")} type="password" fullWidth variant="outlined" value={paystackSecretKey} onChange={(e) => setPaystackSecretKey(e.target.value)} />
               </div>
             </div>
 
             <div className="pt-6 border-t border-slate-100">
               <div className="flex items-center gap-2 mb-3">
-                <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-0.5 rounded">Global SaaS</span>
-                <h4 className="text-sm font-semibold text-slate-800">Stripe Integration</h4>
+                <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-0.5 rounded">{t("Global SaaS")}</span>
+                <h4 className="text-sm font-semibold text-slate-800">{t("Stripe Integration")}</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TextField label="Stripe Publishable Key" fullWidth variant="outlined" value={stripePublicKey} onChange={(e) => setStripePublicKey(e.target.value)} />
-                <TextField label="Stripe Secret Key" type="password" fullWidth variant="outlined" value={stripeSecretKey} onChange={(e) => setStripeSecretKey(e.target.value)} />
+                <TextField label={t("Stripe Publishable Key")} fullWidth variant="outlined" value={stripePublicKey} onChange={(e) => setStripePublicKey(e.target.value)} />
+                <TextField label={t("Stripe Secret Key")} type="password" fullWidth variant="outlined" value={stripeSecretKey} onChange={(e) => setStripeSecretKey(e.target.value)} />
               </div>
             </div>
 
@@ -818,9 +818,9 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         <div className="bg-slate-900 text-white p-6 flex items-center justify-between border-b border-slate-800">
           <div>
             <h2 className="text-xl font-bold tracking-wider flex items-center gap-2">
-              <Crown className="text-amber-400" size={20} /> Upgrade Your Subscription Plan
+              <Crown className="text-amber-400" size={20} /> {t("Upgrade Your Subscription Plan")}
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5 font-medium">Scale your poultry farm operations with voice logging, CCTV, and enterprise hub tools.</p>
+            <p className="text-xs text-slate-400 mt-0.5 font-medium">{t("Scale your poultry farm operations with voice logging, CCTV, and enterprise hub tools.")}</p>
           </div>
           <button 
             onClick={() => setShowUpgradeModal(false)}
@@ -840,7 +840,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   !isAnnual ? 'bg-slate-900 text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Billed Monthly
+                {t("Billed Monthly")}
               </button>
               <button
                 onClick={() => setIsAnnual(true)}
@@ -848,9 +848,9 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   isAnnual ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Billed Annually
+                {t("Billed Annually")}
                 <span className="bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.2 rounded">
-                  Save 20%
+                  {t("Save 20%")}
                 </span>
               </button>
             </div>
@@ -862,38 +862,38 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
             {/* 1. Starter Plan (Free) */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between shadow-sm relative">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">Starter Plan</h3>
-                <p className="text-xs text-slate-500 mb-4 h-10">Manage single farm branch and basic flock logs for small setups.</p>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">{t("Starter Plan")}</h3>
+                <p className="text-xs text-slate-500 mb-4 h-10">{t("Manage single farm branch and basic flock logs for small setups.")}</p>
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
                   <div className="text-3xl font-extrabold text-slate-900">₦0</div>
-                  <div className="text-[10px] text-slate-400 font-bold mt-0.5">Free Forever</div>
+                  <div className="text-[10px] text-slate-400 font-bold mt-0.5">{t("Free Forever")}</div>
                 </div>
 
                 <ul className="space-y-3 text-xs text-slate-700 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
-                    <span>1 Farm Branch limit</span>
+                    <span>{t("1 Farm Branch limit")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
-                    <span>2 Staff members max</span>
+                    <span>{t("2 Staff members max")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
-                    <span>Manual Egg & Feed logging</span>
+                    <span>{t("Manual Egg & Feed logging")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
-                    <span>Basic Flock health records</span>
+                    <span>{t("Basic Flock health records")}</span>
                   </li>
                   <li className="flex items-center gap-2 text-slate-400 line-through">
                     <X size={16} className="text-slate-300 flex-shrink-0" />
-                    <span>AI Voice Auto-Logger</span>
+                    <span>{t("AI Voice Auto-Logger")}</span>
                   </li>
                   <li className="flex items-center gap-2 text-slate-400 line-through">
                     <X size={16} className="text-slate-300 flex-shrink-0" />
-                    <span>CCTV Live Surveillance</span>
+                    <span>{t("CCTV Live Surveillance")}</span>
                   </li>
                 </ul>
               </div>
@@ -902,53 +902,53 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 disabled={currentTier === 'free'}
                 className="w-full bg-slate-100 text-slate-600 font-bold text-xs py-3 rounded-xl border border-slate-200 disabled:opacity-75"
               >
-                {currentTier === 'free' ? 'Current Plan' : 'Free Starter'}
+                {currentTier === 'free' ? t('Current Plan') : t('Free Starter')}
               </button>
             </div>
 
             {/* 2. Commercial Pro Plan (POPULAR BADGE - Screenshot 1 Style) */}
             <div className="bg-slate-900 text-white border-2 border-indigo-500 rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full shadow">
-                MOST POPULAR
+                {t("MOST POPULAR")}
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-white mb-1">Commercial Pro</h3>
-                <p className="text-xs text-indigo-200 mb-4 h-10">AI voice auto-logger, live CCTV predator alerts, and unlimited scale.</p>
+                <h3 className="text-lg font-bold text-white mb-1">{t("Commercial Pro")}</h3>
+                <p className="text-xs text-indigo-200 mb-4 h-10">{t("AI voice auto-logger, live CCTV predator alerts, and unlimited scale.")}</p>
 
                 <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 mb-6">
                   <div className="text-3xl font-extrabold text-white">
                     ₦{((isAnnual ? (proPlan?.priceAnnual || 144000) : (proPlan?.priceMonthly || 15000))).toLocaleString()}
                   </div>
                   <div className="text-[10px] text-indigo-300 font-bold mt-0.5">
-                    {isAnnual ? 'Billed Annually' : 'Billed Monthly'}
+                    {isAnnual ? t('Billed Annually') : t('Billed Monthly')}
                   </div>
                 </div>
 
                 <ul className="space-y-3 text-xs text-slate-200 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">Up to 5 Regional Farm Branches</span>
+                    <span className="font-bold">{t("Up to 5 Regional Farm Branches")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">Production Analytics Bar & Line Charts</span>
+                    <span className="font-bold">{t("Production Analytics Bar & Line Charts")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">Voice & Text AI Auto-Logger Widget</span>
+                    <span className="font-bold">{t("Voice & Text AI Auto-Logger Widget")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">CCTV Live Surveillance Gateway</span>
+                    <span className="font-bold">{t("CCTV Live Surveillance Gateway")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span className="font-bold">PDF & Excel Export Financial Reports</span>
+                    <span className="font-bold">{t("PDF & Excel Export Financial Reports")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
-                    <span>Shift Checklist & Payroll Indicators</span>
+                    <span>{t("Shift Checklist & Payroll Indicators")}</span>
                   </li>
                 </ul>
               </div>
@@ -957,53 +957,53 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 onClick={() => handleInitiateCheckout('pro', isAnnual)}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow-xl transition-all cursor-pointer"
               >
-                {currentTier === 'pro' ? 'Current Plan (Renew)' : 'Upgrade to Commercial Pro'}
+                {currentTier === 'pro' ? t('Current Plan (Renew)') : t('Upgrade to Commercial Pro')}
               </button>
             </div>
 
             {/* 3. Enterprise Plus Plan */}
             <div className="bg-white border-2 border-purple-500/40 rounded-2xl p-6 flex flex-col justify-between shadow-md relative">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black px-3.5 py-1 rounded-full shadow-lg tracking-widest">
-                PLUS
+                {t("PLUS")}
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">Enterprise Plus</h3>
-                <p className="text-xs text-slate-500 mb-4 h-10">Multi-farm enterprise hub & white-label cooperative management.</p>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">{t("Enterprise Plus")}</h3>
+                <p className="text-xs text-slate-500 mb-4 h-10">{t("Multi-farm enterprise hub & white-label cooperative management.")}</p>
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
                   <div className="text-3xl font-extrabold text-slate-900">
                     ₦{((isAnnual ? (enterprisePlan?.priceAnnual || 432000) : (enterprisePlan?.priceMonthly || 45000))).toLocaleString()}
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold mt-0.5">
-                    {isAnnual ? 'Billed Annually' : 'Billed Monthly'}
+                    {isAnnual ? t('Billed Annually') : t('Billed Monthly')}
                   </div>
                 </div>
 
                 <ul className="space-y-3 text-xs text-slate-700 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span className="font-bold">Multi-Farm Branch Matrix & Telemetry</span>
+                    <span className="font-bold">{t("Multi-Farm Branch Matrix & Telemetry")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span className="font-bold">Cross-Branch Stock Transfers & Deletion</span>
+                    <span className="font-bold">{t("Cross-Branch Stock Transfers & Deletion")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span className="font-bold">Global White-Labeling & Themes (Logo & PDF)</span>
+                    <span className="font-bold">{t("Global White-Labeling & Themes (Logo & PDF)")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span className="font-bold">Production REST API Keys & Webhooks</span>
+                    <span className="font-bold">{t("Production REST API Keys & Webhooks")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span className="font-bold">24/7 Priority Veterinarian Hotline</span>
+                    <span className="font-bold">{t("24/7 Priority Veterinarian Hotline")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
-                    <span className="font-bold">Wholesale Feed Pool (15% Bulk Discount)</span>
+                    <span className="font-bold">{t("Wholesale Feed Pool (15% Bulk Discount)")}</span>
                   </li>
                 </ul>
               </div>
@@ -1012,7 +1012,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 onClick={() => handleInitiateCheckout('enterprise', isAnnual)}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
               >
-                {currentTier === 'enterprise' ? 'Current Plan (Renew)' : 'Get Enterprise Plus'}
+                {currentTier === 'enterprise' ? t('Current Plan (Renew)') : t('Get Enterprise Plus')}
               </button>
             </div>
 

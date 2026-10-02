@@ -58,15 +58,15 @@ export function HousingClient({ role }: { role: string }) {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this pen?')) return;
+    if (!confirm(t('Delete this pen?'))) return;
     try {
       const res = await fetch(`/api/housing?id=${id}`, { method: 'DELETE' });
       if (res.ok) { 
         setPens(prev => prev.filter(p => p.id !== id));
         refreshData(); 
-        toast.success('Pen deleted.'); 
+        toast.success(t('Pen deleted.')); 
       }
-      else toast.error('Failed to delete pen');
+      else toast.error(t('Failed to delete pen'));
     } catch {}
   };
 
@@ -94,9 +94,9 @@ export function HousingClient({ role }: { role: string }) {
         setOpen(false);
         setEditingPen(null);
         setFormData({ name: '', capacity: 1000, status: 'Active', currentBatchId: '' });
-        toast.success(editingPen ? 'Pen updated!' : 'Pen added!');
+        toast.success(editingPen ? t('Pen updated!') : t('Pen added!'));
       } else {
-        toast.error('Failed to save pen');
+        toast.error(t('Failed to save pen'));
       }
     } catch {}
   };
@@ -126,7 +126,7 @@ export function HousingClient({ role }: { role: string }) {
         </CardHeader>
         <CardContent className="p-0">
           <div className="p-4 border-b border-slate-100">
-            <TableControls searchTerm={pensLogic.searchTerm} setSearchTerm={pensLogic.setSearchTerm} placeholder="Search pens..." />
+            <TableControls searchTerm={pensLogic.searchTerm} setSearchTerm={pensLogic.setSearchTerm} placeholder={t("Search pens...")} />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">

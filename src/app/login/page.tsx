@@ -121,18 +121,18 @@ export default function LoginPage() {
         </div>
         
         {/* Right Side: Wider Login Form */}
-        <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
+        <div className="w-full md:w-1/2 lg:w-[45%] p-6 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
+          {/* Top-Right Language Switcher */}
+          <div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-10">
+            <LanguageSelector variant="light" />
+          </div>
+
           <div>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
-                  {t("Welcome back")}
-                </h1>
-                <p className="text-sm font-medium text-slate-500">{t("Sign in to manage your farm branches and operations.")}</p>
-              </div>
-              <div className="shrink-0 self-start">
-                <LanguageSelector variant="light" />
-              </div>
+            <div className="mb-6 sm:mb-8 pr-16 sm:pr-0">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
+                {t("Welcome back")}
+              </h1>
+              <p className="text-xs sm:text-sm font-medium text-slate-500">{t("Sign in to manage your farm branches and operations.")}</p>
             </div>
             
             <form onSubmit={handleLogin} className="space-y-6">
