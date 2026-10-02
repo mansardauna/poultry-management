@@ -324,8 +324,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
             }`}
             placeholder={
               isSuperAdmin
-                ? 'Search tenants, gateways, database, SaaS plans, CMS...'
-                : `${texts.common.search || 'Search'} farm records, staff, batches, invoices...`
+                ? t('Search tenants, gateways, database, SaaS plans, CMS...', 'Search tenants, gateways, database, SaaS plans, CMS...')
+                : t('Search farm records, staff, batches, invoices...', 'Search farm records, staff, batches, invoices...')
             }
             type="search"
             value={searchQuery}
@@ -358,7 +358,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         {isSearchFocused && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 max-h-[80vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-600">
-              <span>{searchQuery ? `Search results (${filteredSearchResults.length})` : 'Quick jump shortcuts'}</span>
+              <span>{searchQuery ? `${t("Search results", "Search results")} (${filteredSearchResults.length})` : t("Quick jump shortcuts", "Quick jump shortcuts")}</span>
               <button 
                 onClick={() => setIsSearchFocused(false)} 
                 className="text-slate-400 hover:text-slate-600 p-1"
@@ -372,8 +372,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 <div className="py-8 text-center text-slate-400 text-xs">
                   <Search size={28} className="mx-auto mb-2 opacity-30 text-indigo-600" />
                   {role === 'SuperAdmin'
-                    ? <>No matching configuration, gateway, or tenant records found for &quot;<strong>{searchQuery}</strong>&quot;.</>
-                    : <>No matching farm modules or records found for &quot;<strong>{searchQuery}</strong>&quot;.</>
+                    ? <>{t("No matching configuration, gateway, or tenant records found for", "No matching configuration, gateway, or tenant records found for")} &quot;<strong>{searchQuery}</strong>&quot;.</>
+                    : <>{t("No matching farm modules or records found for", "No matching farm modules or records found for")} &quot;<strong>{searchQuery}</strong>&quot;.</>
                   }
                 </div>
               ) : (
@@ -396,17 +396,17 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       <div className="truncate">
                         <div className="flex items-center gap-2">
                           <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
-                            {item.name}
+                            {t(item.name, item.name)}
                           </h4>
                           <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full shrink-0">
-                            {item.category}
+                            {t(item.category, item.category)}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-500 truncate mt-0.5">{item.desc}</p>
+                        <p className="text-[11px] text-slate-500 truncate mt-0.5">{t(item.desc, item.desc)}</p>
                       </div>
                     </div>
                     <span className="text-xs text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
-                      Jump →
+                      {t("Jump →", "Jump →")}
                     </span>
                   </button>
                 );
@@ -420,7 +420,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                 onClick={handleSearch}
                 className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
               >
-                Press Enter to perform global query &quot;{searchQuery}&quot;
+                {t("Press Enter to perform global query", "Press Enter to perform global query")} &quot;{searchQuery}&quot;
               </button>
             </div>
           )}
@@ -434,8 +434,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           <button
             onClick={() => setIsSearchFocused(true)}
             className="sm:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-            aria-label="Search"
-            title="Search"
+            aria-label={t("Search", "Search")}
+            title={t("Search", "Search")}
           >
             <Search size={20} />
           </button>

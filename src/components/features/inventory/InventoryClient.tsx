@@ -121,7 +121,7 @@ export function InventoryClient({ role }: { role: string }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <TableControls searchTerm={tableLogic.searchTerm} setSearchTerm={tableLogic.setSearchTerm} placeholder="Search equipment..." />
+          <TableControls searchTerm={tableLogic.searchTerm} setSearchTerm={tableLogic.setSearchTerm} placeholder={t("Search equipment...")} />
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">

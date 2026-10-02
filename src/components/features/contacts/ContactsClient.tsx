@@ -120,7 +120,7 @@ export function ContactsClient({ role }: { role: string }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <TableControls searchTerm={contactsLogic.searchTerm} setSearchTerm={contactsLogic.setSearchTerm} placeholder="Search contacts..." />
+          <TableControls searchTerm={contactsLogic.searchTerm} setSearchTerm={contactsLogic.setSearchTerm} placeholder={t("Search contacts...")} />
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">

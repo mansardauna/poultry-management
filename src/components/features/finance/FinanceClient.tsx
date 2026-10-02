@@ -366,7 +366,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <TableControls searchTerm={expensesLogic.searchTerm} setSearchTerm={expensesLogic.setSearchTerm} placeholder="Search expenses..." />
+            <TableControls searchTerm={expensesLogic.searchTerm} setSearchTerm={expensesLogic.setSearchTerm} placeholder={t("Search expenses...")} />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
