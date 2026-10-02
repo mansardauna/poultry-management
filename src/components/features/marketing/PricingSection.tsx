@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Zap, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '../LanguageContext';
 
 export interface SaasPlan {
   id: string;
@@ -87,6 +88,7 @@ const DEFAULT_PLANS: SaasPlan[] = [
 export function PricingSection() {
   const router = useRouter();
   const [plans, setPlans] = useState<SaasPlan[]>(DEFAULT_PLANS);
+  const { t, formatCurrency } = useLanguage();
 
   useEffect(() => {
     fetch('/api/admin/plans', { cache: 'no-store' })
@@ -107,10 +109,10 @@ export function PricingSection() {
     <section id="pricing" className="py-24 bg-white border-t border-slate-100 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">
-          Simple, transparent pricing
+          {t("Simple, transparent pricing", "Simple, transparent pricing")}
         </h2>
         <p className="text-lg text-slate-500 mb-16 max-w-2xl mx-auto font-normal">
-          Choose the plan that fits your farm's size and needs. Upgrade anytime as your flock grows.
+          {t("Choose the plan that fits your farm's size and needs. Upgrade anytime as your flock grows.")}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
@@ -129,22 +131,22 @@ export function PricingSection() {
                 <div>
                   {isFeatured && (
                     <div className="absolute top-0 right-8 transform -translate-y-1/2 bg-indigo-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                      <CheckCircle2 size={14} /> Most Popular
+                      <CheckCircle2 size={14} /> {t("Most Popular", "Most Popular")}
                     </div>
                   )}
 
                   <h3 className={`text-xl font-bold mb-2 ${isFeatured ? 'text-white' : 'text-slate-800'}`}>
-                    {plan.name}
+                    {t(plan.name, plan.name)}
                   </h3>
                   <p className={`text-sm mb-6 min-h-[40px] ${isFeatured ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {plan.description}
+                    {t(plan.description, plan.description)}
                   </p>
 
                   <div className="mb-6">
                     <span className={`text-4xl md:text-5xl font-extrabold ${isFeatured ? 'text-white' : 'text-slate-900'}`}>
-                      ₦{plan.priceMonthly.toLocaleString()}
+                      {formatCurrency(plan.priceMonthly)}
                     </span>
-                    <span className={isFeatured ? 'text-slate-400 text-sm' : 'text-slate-500 text-sm'}>/mo</span>
+                    <span className={isFeatured ? 'text-slate-400 text-sm' : 'text-slate-500 text-sm'}>/{t("mo", "mo")}</span>
                   </div>
 
                   <button 
@@ -157,7 +159,7 @@ export function PricingSection() {
                         : 'bg-slate-900 text-white hover:bg-slate-800'
                     }`}
                   >
-                    {plan.id === 'free' ? 'Get Started' : plan.id === 'pro' ? 'Start Pro Trial' : 'Get Enterprise'}
+                    {plan.id === 'free' ? t('Get Started Free', 'Get Started') : plan.id === 'pro' ? t('Start Pro Trial', 'Start Pro Trial') : t('Get Enterprise', 'Get Enterprise')}
                   </button>
 
                   <ul className="space-y-4 text-sm mb-6">
@@ -165,14 +167,14 @@ export function PricingSection() {
                       plan.features.map((feature, i) => (
                         <li key={i} className={`flex items-start gap-3 ${isFeatured ? 'text-slate-300' : 'text-slate-700 font-medium'}`}>
                           <CheckCircle2 className={isFeatured ? "text-emerald-400 flex-shrink-0" : "text-indigo-600 flex-shrink-0"} size={20} />
-                          <span>{feature}</span>
+                          <span>{t(feature, feature)}</span>
                         </li>
                       ))
                     ) : (
                       <>
                         <li className={`flex items-start gap-3 ${isFeatured ? 'text-slate-300' : 'text-slate-700'}`}>
                           <CheckCircle2 className={isFeatured ? "text-emerald-400 flex-shrink-0" : "text-indigo-600 flex-shrink-0"} size={20} />
-                          <span>{plan.maxBranches >= 999 ? 'Unlimited Farm Branches' : `${plan.maxBranches} Farm Branch`}</span>
+                          <span>{plan.maxBranches >= 999 ? t('Unlimited Farm Branches', 'Unlimited Farm Branches') : `${plan.maxBranches} ${t('Farm Branch', 'Farm Branch')}`}</span>
                         </li>
                         <li className={`flex items-start gap-3 ${isFeatured ? 'text-slate-300' : 'text-slate-700'}`}>
                           {plan.cctvEnabled ? (
@@ -180,7 +182,7 @@ export function PricingSection() {
                           ) : (
                             <X className="text-slate-400 flex-shrink-0" size={20} />
                           )}
-                          <span className={!plan.cctvEnabled ? 'line-through text-slate-400' : ''}>CCTV Live Surveillance</span>
+                          <span className={!plan.cctvEnabled ? 'line-through text-slate-400' : ''}>{t('CCTV Live Surveillance', 'CCTV Live Surveillance')}</span>
                         </li>
                         <li className={`flex items-start gap-3 ${isFeatured ? 'text-slate-300' : 'text-slate-700'}`}>
                           {plan.aiLoggerEnabled ? (
@@ -188,7 +190,7 @@ export function PricingSection() {
                           ) : (
                             <X className="text-slate-400 flex-shrink-0" size={20} />
                           )}
-                          <span className={!plan.aiLoggerEnabled ? 'line-through text-slate-400' : ''}>Voice AI Auto-Logger</span>
+                          <span className={!plan.aiLoggerEnabled ? 'line-through text-slate-400' : ''}>{t('Voice AI Auto-Logger', 'Voice AI Auto-Logger')}</span>
                         </li>
                       </>
                     )}

@@ -6,8 +6,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLanguage } from '@/components/features/LanguageContext';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 function SignupForm() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -68,11 +71,16 @@ function SignupForm() {
 
   return (
     <>
-      <div className="mb-8 text-center md:text-left">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
-          Create account
-        </h1>
-        <p className="text-sm font-medium text-indigo-600">Join Poultry Farm Management</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
+            {t("Create account")}
+          </h1>
+          <p className="text-sm font-medium text-indigo-600">{t("Join Poultry Farm Management")}</p>
+        </div>
+        <div className="shrink-0 self-start">
+          <LanguageSelector variant="light" />
+        </div>
       </div>
       
       <form onSubmit={handleSignup} className="space-y-5">
@@ -84,24 +92,24 @@ function SignupForm() {
             
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Email address")}</label>
             <input 
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border-2 border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white font-medium"
-              placeholder="Enter your email address"
+              placeholder={t("Enter your email address")}
               required
             />
           </div>
           <div className="relative">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Password")}</label>
             <input 
               type={showPassword ? "text" : "password"} 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border-2 border-slate-200 rounded-lg p-3 pr-12 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors bg-slate-50 focus:bg-white font-medium"
-              placeholder="Choose a secure password"
+              placeholder={t("Choose a secure password", "Choose a secure password")}
               required
             />
             <button 
@@ -119,12 +127,12 @@ function SignupForm() {
           disabled={isSubmitting}
           className="w-full bg-indigo-600 text-white font-semibold text-sm py-3.5 mt-2 rounded-lg hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-indigo-400 shadow-md shadow-indigo-200 cursor-pointer"
         >
-          {isSubmitting ? 'Creating account…' : 'Sign up'}
+          {isSubmitting ? t('Creating account…', 'Creating account…') : t('Sign Up')}
         </button>
         
         <div className="text-center mt-4">
           <Link href="/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
-            Already have an account? Login here
+            {t("Already have an account? Log in here →")}
           </Link>
         </div>
       </form>
@@ -133,6 +141,8 @@ function SignupForm() {
 }
 
 export default function SignupPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900/5 p-4 sm:p-6 lg:p-10 font-sans">
       <div className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1400px] flex bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 min-h-[600px] md:min-h-[680px] lg:min-h-[740px]">
@@ -149,20 +159,20 @@ export default function SignupPage() {
           
           <div className="absolute bottom-10 left-10 right-10 text-white z-10 space-y-2 backdrop-blur-md bg-slate-950/40 p-6 rounded-2xl border border-white/10">
             <span className="text-[11px] font-extrabold tracking-widest text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-500/30">
-              Start Commercial Management
+              {t("Commercial Farm Operations")}
             </span>
             <h2 className="text-2xl lg:text-3xl font-extrabold tracking-wide text-white">
-              Initialize Your Poultry Farm
+              {t("Poultry Farm Management")}
             </h2>
             <p className="text-xs lg:text-sm text-slate-300 font-medium">
-              Join thousands of commercial farm owners managing multi-section flocks, egg production, and financial accounting.
+              {t("Multi-branch analytics, flock tracking, egg production logs, and automated feed threshold alerts.")}
             </p>
           </div>
         </div>
         
         {/* Right Side: Signup Form */}
         <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
-          <Suspense fallback={<div className="text-center p-8 text-slate-500 font-medium">Loading signup...</div>}>
+          <Suspense fallback={<div className="text-center p-8 text-slate-500 font-medium">{t("Loading...")}</div>}>
             <SignupForm />
           </Suspense>
           

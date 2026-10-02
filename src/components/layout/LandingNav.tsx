@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+import { useLanguage } from '../features/LanguageContext';
+import { LanguageSelector } from '../ui/LanguageSelector';
+
 export function LandingNav({ 
   activePath, 
   brandName: propBrandName,
@@ -21,6 +24,7 @@ export function LandingNav({
   const [brandLogoText, setBrandLogoText] = useState(propBrandLogoText || 'P');
   const [logoUrl, setLogoUrl] = useState(propLogoUrl || '');
   const [primaryColor, setPrimaryColor] = useState(propPrimaryColor || '#4f46e5');
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -68,24 +72,26 @@ export function LandingNav({
           </Link>
           
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-            <Link href="/about" className={`hover:text-indigo-600 transition-colors ${activePath === '/about' ? 'text-indigo-600 font-semibold' : ''}`}>About</Link>
-            <Link href="/pricing" className={`hover:text-indigo-600 transition-colors ${activePath === '/pricing' ? 'text-indigo-600 font-semibold' : ''}`}>Pricing</Link>
-            <a href="/documentation/index.html" className={`hover:text-indigo-600 transition-colors ${activePath === '/documentation' || activePath === '/documentation/index.html' ? 'text-indigo-600 font-semibold' : ''}`}>Documentation</a>
-            <Link href="/contact" className={`hover:text-indigo-600 transition-colors ${activePath === '/contact' ? 'text-indigo-600 font-semibold' : ''}`}>Contact</Link>
+            <Link href="/about" className={`hover:text-indigo-600 transition-colors ${activePath === '/about' ? 'text-indigo-600 font-semibold' : ''}`}>{t("About")}</Link>
+            <Link href="/pricing" className={`hover:text-indigo-600 transition-colors ${activePath === '/pricing' ? 'text-indigo-600 font-semibold' : ''}`}>{t("Pricing")}</Link>
+            <Link href="/documentation" className={`hover:text-indigo-600 transition-colors ${activePath === '/documentation' || activePath === '/documentation/index.html' ? 'text-indigo-600 font-semibold' : ''}`}>{t("Documentation")}</Link>
+            <Link href="/contact" className={`hover:text-indigo-600 transition-colors ${activePath === '/contact' ? 'text-indigo-600 font-semibold' : ''}`}>{t("Contact")}</Link>
           </div>
           
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <LanguageSelector variant="light" />
+
             {isLoggedIn ? (
               <Link href="/dashboard" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md shadow-indigo-600/20 active:scale-95">
-                Dashboard
+                {t("Dashboard")}
               </Link>
             ) : (
               <>
                 <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-indigo-600 transition-colors hidden sm:block">
-                  Log In
+                  {t("Log In")}
                 </Link>
-                <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md shadow-indigo-600/20 active:scale-95">
-                  Sign Up Free
+                <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-md shadow-indigo-600/20 active:scale-95 whitespace-nowrap">
+                  {t("Sign Up Free")}
                 </Link>
               </>
             )}

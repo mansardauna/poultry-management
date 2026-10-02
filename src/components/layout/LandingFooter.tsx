@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+import { useLanguage } from '../features/LanguageContext';
+
 export function LandingFooter({
   brandName: propBrandName,
   brandLogoText: propBrandLogoText,
@@ -21,6 +23,7 @@ export function LandingFooter({
   const [logoUrl, setLogoUrl] = useState(propLogoUrl || '');
   const [primaryColor, setPrimaryColor] = useState(propPrimaryColor || '#4f46e5');
   const [footerText, setFooterText] = useState(propFooterText || 'PFMS Inc. All rights reserved.');
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!propBrandName) {
@@ -57,10 +60,10 @@ export function LandingFooter({
           <span className="font-bold text-slate-800">{brandName}</span>
         </Link>
         <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 font-medium">
-          <Link href="/privacy" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
-          <Link href="/about" className="hover:text-indigo-600 transition-colors">About Us</Link>
-          <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact Support</Link>
+          <Link href="/privacy" className="hover:text-indigo-600 transition-colors">{t("Privacy Policy")}</Link>
+          <Link href="/terms" className="hover:text-indigo-600 transition-colors">{t("Terms of Service")}</Link>
+          <Link href="/documentation" className="hover:text-indigo-600 transition-colors">{t("Documentation")}</Link>
+          <Link href="/contact" className="hover:text-indigo-600 transition-colors">{t("Contact")}</Link>
         </div>
         <div className="text-sm text-slate-400 font-normal">
           © {new Date().getFullYear()} {footerText}

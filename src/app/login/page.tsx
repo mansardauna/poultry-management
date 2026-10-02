@@ -7,8 +7,11 @@ import { Eye, EyeOff, KeyRound, X, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Dialog, DialogContent } from '@mui/material';
+import { useLanguage } from '@/components/features/LanguageContext';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -106,13 +109,13 @@ export default function LoginPage() {
           
           <div className="absolute bottom-10 left-10 right-10 text-white z-10 space-y-2 backdrop-blur-md bg-slate-950/40 p-6 rounded-2xl border border-white/10">
             <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-500/30">
-              Commercial Farm Operations
+              {t("Commercial Farm Operations")}
             </span>
             <h2 className="text-2xl lg:text-3xl font-extrabold tracking-wide text-white">
-              Poultry Farm Management
+              {t("Poultry Farm Management")}
             </h2>
             <p className="text-xs lg:text-sm text-slate-300 font-medium">
-              Multi-branch analytics, flock tracking, egg production logs, and automated feed threshold alerts.
+              {t("Multi-branch analytics, flock tracking, egg production logs, and automated feed threshold alerts.")}
             </p>
           </div>
         </div>
@@ -120,11 +123,16 @@ export default function LoginPage() {
         {/* Right Side: Wider Login Form */}
         <div className="w-full md:w-1/2 lg:w-[45%] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
           <div>
-            <div className="mb-10 text-center md:text-left">
-              <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
-                Welcome back
-              </h1>
-              <p className="text-sm font-medium text-slate-500">Sign in to manage your farm branches and operations.</p>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
+                  {t("Welcome back")}
+                </h1>
+                <p className="text-sm font-medium text-slate-500">{t("Sign in to manage your farm branches and operations.")}</p>
+              </div>
+              <div className="shrink-0 self-start">
+                <LanguageSelector variant="light" />
+              </div>
             </div>
             
             <form onSubmit={handleLogin} className="space-y-6">
@@ -136,7 +144,7 @@ export default function LoginPage() {
               
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Email address")}</label>
                   <input 
                     type="text" 
                     value={email}
@@ -148,20 +156,21 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-sm font-medium text-slate-700">Password</label>
-                    <Link
-                      href={email ? `/reset-password?email=${encodeURIComponent(email)}` : '/reset-password'}
+                    <label className="block text-sm font-medium text-slate-700">{t("Password")}</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowResetModal(true)}
                       className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                     >
-                      Forgot password?
-                    </Link>
+                      {t("Forgot password?")}
+                    </button>
                   </div>
                   <input 
                     type={showPassword ? "text" : "password"} 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full border-2 border-slate-200 rounded-xl p-4 pr-14 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
-                    placeholder="Enter your password"
+                    placeholder={t("Enter your password")}
                     required
                   />
                   <button 
@@ -179,13 +188,13 @@ export default function LoginPage() {
                 disabled={isSubmitting}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
               >
-                {isSubmitting ? 'Authenticating…' : 'Sign in'}
+                {isSubmitting ? t('Authenticating…') : t('Sign in')}
               </button>
             </form>
             
             <div className="text-center mt-8">
               <Link href="/signup" className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer inline-block p-2">
-                Don't have an account? Sign up here &rarr;
+                {t("Don't have an account? Sign up here →")}
               </Link>
             </div>
           </div>
@@ -204,7 +213,7 @@ export default function LoginPage() {
               <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                 <KeyRound size={20} />
               </div>
-              <h3 className="font-bold text-slate-900 text-base">Reset Your Password</h3>
+              <h3 className="font-bold text-slate-900 text-base">{t("Reset Your Password")}</h3>
             </div>
             <button onClick={() => setShowResetModal(false)} className="text-slate-400 hover:text-slate-600">
               <X size={18} />
@@ -214,23 +223,23 @@ export default function LoginPage() {
           {resetStatus === 'success' ? (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-5 rounded-2xl text-center space-y-2">
               <CheckCircle2 size={36} className="mx-auto text-emerald-600" />
-              <h4 className="font-bold text-sm">Reset Link Dispatched!</h4>
+              <h4 className="font-bold text-sm">{t("Reset Link Dispatched!")}</h4>
               <p className="text-xs text-emerald-700 leading-relaxed">{resetMsg}</p>
               <button
                 onClick={() => setShowResetModal(false)}
                 className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors w-full"
               >
-                Back to Login
+                {t("Back to Login")}
               </button>
             </div>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4 pt-1">
               <p className="text-xs text-slate-500 leading-relaxed">
-                Enter your account email below. We'll send instructions and let you specify a new password.
+                {t("Enter your account email below. We'll send instructions and let you specify a new password.")}
               </p>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Account email *</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Account email *")}</label>
                 <input 
                   type="email"
                   value={resetEmail}
@@ -242,7 +251,7 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">New password (optional)</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">{t("New password (optional)")}</label>
                 <input 
                   type="password"
                   value={newPassword}
@@ -258,14 +267,14 @@ export default function LoginPage() {
                   onClick={() => setShowResetModal(false)}
                   className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700"
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={resetStatus === 'submitting'}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm disabled:bg-indigo-300"
                 >
-                  {resetStatus === 'submitting' ? 'Processing…' : 'Send Reset Link'}
+                  {resetStatus === 'submitting' ? t('Processing…', 'Processing…') : t('Send Reset Link')}
                 </button>
               </div>
             </form>

@@ -1,12 +1,16 @@
 'use strict';
+'use client';
 
 import Link from 'next/link';
 import { ArrowLeft, Shield, Cpu, Users, Building2, CheckCircle2, Award } from 'lucide-react';
 
 import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 export default function AboutPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pt-20">
       {/* Top Navbar */}
@@ -16,13 +20,13 @@ export default function AboutPage() {
       <section className="py-20 bg-gradient-to-b from-white to-slate-50 border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold px-3 py-1 rounded-full tracking-wider">
-            About Our Platform
+            {t("About Our Platform", "About Our Platform")}
           </span>
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mt-4 tracking-tight leading-tight">
-            Empowering poultry farmers with modern AI telemetry and cooperative intelligence
+            {t("Empowering poultry farmers with modern AI telemetry and cooperative intelligence", "Empowering poultry farmers with modern AI telemetry and cooperative intelligence")}
           </h1>
           <p className="text-lg text-slate-600 mt-6 max-w-3xl mx-auto leading-relaxed font-normal">
-            Poultry Management System (PFMS) is a next-generation SaaS enterprise platform designed to streamline multi-farm management, automate daily egg collection logs, monitor CCTV feeds, and digitize cooperative supply chains.
+            {t("Poultry Management System (PFMS) is a next-generation SaaS enterprise platform designed to streamline multi-farm management, automate daily egg collection logs, monitor CCTV feeds, and digitize cooperative supply chains.")}
           </p>
         </div>
       </section>

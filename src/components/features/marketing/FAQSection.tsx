@@ -4,6 +4,8 @@
 import { useState } from 'react';
 import { Plus, Minus, HelpCircle } from 'lucide-react';
 
+import { useLanguage } from '../LanguageContext';
+
 interface FAQItem {
   question: string;
   answer: string;
@@ -34,6 +36,7 @@ const FAQS: FAQItem[] = [
 
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0); // First item open by default
+  const { t } = useLanguage();
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -47,10 +50,10 @@ export function FAQSection() {
             <HelpCircle size={24} />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            Frequently Asked Questions
+            {t("Frequently Asked Questions")}
           </h2>
           <p className="text-slate-600 text-sm mt-3">
-            Everything you need to know about managing your poultry farm with PFMS AI.
+            {t("Everything you need to know about managing your poultry farm with PFMS AI.")}
           </p>
         </div>
         
@@ -69,7 +72,7 @@ export function FAQSection() {
                   onClick={() => toggle(i)}
                   className="w-full p-6 text-left flex justify-between items-center gap-4 focus:outline-none"
                 >
-                  <span className="font-bold text-slate-800 text-base sm:text-lg">{faq.question}</span>
+                  <span className="font-bold text-slate-800 text-base sm:text-lg">{t(faq.question, faq.question)}</span>
                   <div className={`p-1.5 rounded-full transition-colors flex-shrink-0 ${
                     isOpen ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
                   }`}>
@@ -79,7 +82,7 @@ export function FAQSection() {
 
                 {isOpen && (
                   <div className="px-6 pb-6 text-slate-600 text-sm sm:text-base leading-relaxed border-t border-slate-100 pt-4 bg-slate-50/50">
-                    {faq.answer}
+                    {t(faq.answer, faq.answer)}
                   </div>
                 )}
               </div>

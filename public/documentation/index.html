@@ -69,6 +69,23 @@
         <!-- Main Content Area -->
         <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-8">
             
+            <!-- Top Utility Bar -->
+            <div class="flex items-center justify-between pb-2">
+                <a href="/documentation" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition-colors">
+                    ← Back to Documentation Portal
+                </a>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-slate-500">Language:</span>
+                    <select onchange="document.cookie='pfms_lang='+this.value+';path=/;max-age=31536000'; window.location.href='/documentation';" class="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="en">English (EN)</option>
+                        <option value="zh">中文 (ZH)</option>
+                        <option value="id">Indonesia (ID)</option>
+                        <option value="hi">हिन्दी (HI)</option>
+                        <option value="sw">Kiswahili (SW)</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- Hero Banner Box -->
             <div class="bg-gradient-to-r from-indigo-600 via-indigo-600 to-indigo-500 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
                 <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
