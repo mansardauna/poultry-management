@@ -10,6 +10,7 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
+import { useLanguage } from '../LanguageContext';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -21,6 +22,7 @@ import {
  * @param props.role The user role.
  */
 export function HousingClient({ role }: { role: string }) {
+  const { texts, t, formatNumber } = useLanguage();
   const [pens, setPens] = useState<FarmPen[]>([]);
   const [batches, setBatches] = useState<ChickenBatch[]>([]);
   const [open, setOpen] = useState(false);
@@ -103,15 +105,15 @@ export function HousingClient({ role }: { role: string }) {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Housing & Pens</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage farm housing, capacities, and batch assignments.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{t("Housing & Pens")}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t("Manage farm housing, capacities, and batch assignments.")}</p>
         </div>
         {role !== 'Staff' && (
           <button 
             onClick={() => setOpen(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={18} /> Add Pen
+            <Plus size={18} /> {t("Add Pen")}
           </button>
         )}
       </div>
@@ -119,7 +121,7 @@ export function HousingClient({ role }: { role: string }) {
       <Card>
         <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">
           <CardTitle className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-            <Home size={18} className="text-indigo-600" /> Farm pens
+            <Home size={18} className="text-indigo-600" /> {t("Farm pens")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -130,22 +132,22 @@ export function HousingClient({ role }: { role: string }) {
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <TableSortHeader label="Pen Name" sortKey="name" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
-                  <TableSortHeader label="Capacity" sortKey="capacity" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
-                  <TableSortHeader label="Current Batch" sortKey="currentBatchId" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
-                  <TableSortHeader label="Status" sortKey="status" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
-                  {canEdit && <th className="px-4 py-3 text-slate-500 font-semibold">Actions</th>}
+                  <TableSortHeader label={t("Pen Name")} sortKey="name" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
+                  <TableSortHeader label={t("Capacity")} sortKey="capacity" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
+                  <TableSortHeader label={t("Current Batch")} sortKey="currentBatchId" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
+                  <TableSortHeader label={t("Status")} sortKey="status" currentSort={pensLogic.sortConfig} onSort={pensLogic.handleSort} />
+                  {canEdit && <th className="px-4 py-3 text-slate-500 font-semibold">{t("Actions")}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
                 {pensLogic.data.map(p => (
                   <tr key={p.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-800">{p.name}</td>
-                    <td className="px-4 py-3 text-slate-600">{p.capacity.toLocaleString()} birds</td>
-                    <td className="px-4 py-3 text-slate-600">{p.currentBatchId || 'Empty'}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatNumber(p.capacity)} {t("birds")}</td>
+                    <td className="px-4 py-3 text-slate-600">{p.currentBatchId || t('Empty')}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${p.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : p.status === 'Cleaning' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800'}`}>
-                        {p.status}
+                        {t(p.status)}
                       </span>
                     </td>
                     {canEdit && (
@@ -158,7 +160,7 @@ export function HousingClient({ role }: { role: string }) {
                 ))}
                 {pens.length === 0 && (
                   <tr>
-                    <td colSpan={canEdit ? 5 : 4} className="text-center py-4 text-slate-500 font-sans">No farm pens recorded.</td>
+                    <td colSpan={canEdit ? 5 : 4} className="text-center py-4 text-slate-500 font-sans">{t("No farm pens recorded.")}</td>
                   </tr>
                 )}
               </tbody>
@@ -178,19 +180,19 @@ export function HousingClient({ role }: { role: string }) {
       </Card>
 
       <Dialog open={open} onClose={() => { setOpen(false); setEditingPen(null); setFormData({ name: '', capacity: 1000, status: 'Active', currentBatchId: '' }); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>{editingPen ? 'Edit farm pen' : 'Add farm pen'}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>{editingPen ? t('Edit farm pen') : t('Add farm pen')}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField
-            label="Pen Name"
+            label={t("Pen Name")}
             fullWidth
             variant="outlined"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
-            placeholder="e.g. Broiler Pen A"
+            placeholder={t("e.g. Broiler Pen A")}
           />
           <TextField
-            label="Capacity (Birds)"
+            label={t("Capacity (Birds)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -198,27 +200,27 @@ export function HousingClient({ role }: { role: string }) {
             onChange={e => setFormData({ ...formData, capacity: Number(e.target.value) })}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t("Status")}</InputLabel>
             <Select
               value={formData.status}
-              label="Status"
+              label={t("Status")}
               onChange={e => setFormData({ ...formData, status: e.target.value })}
               className="rounded-sm"
             >
-              <MenuItem value="Active">Active</MenuItem>
-              <MenuItem value="Cleaning">Cleaning</MenuItem>
-              <MenuItem value="Empty">Empty</MenuItem>
+              <MenuItem value="Active">{t("Active")}</MenuItem>
+              <MenuItem value="Cleaning">{t("Cleaning")}</MenuItem>
+              <MenuItem value="Empty">{t("Empty")}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Assign Batch (Optional)</InputLabel>
+            <InputLabel>{t("Assign Batch (Optional)")}</InputLabel>
             <Select
               value={formData.currentBatchId}
-              label="Assign Batch (Optional)"
+              label={t("Assign Batch (Optional)")}
               onChange={e => setFormData({ ...formData, currentBatchId: e.target.value })}
               className="rounded-sm"
             >
-              <MenuItem value=""><em>None</em></MenuItem>
+              <MenuItem value=""><em>{t("None")}</em></MenuItem>
               {batches.map(b => (
                 <MenuItem key={b.id} value={b.id}>{b.breed} ({b.id}) - {b.quantity} birds</MenuItem>
               ))}
@@ -226,8 +228,8 @@ export function HousingClient({ role }: { role: string }) {
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={() => { setOpen(false); setEditingPen(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingPen ? 'Save Changes' : 'Add Pen'}</MuiButton>
+          <MuiButton onClick={() => { setOpen(false); setEditingPen(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
+          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingPen ? t('Save Changes') : t('Add Pen')}</MuiButton>
         </DialogActions>
       </Dialog>
     </div>

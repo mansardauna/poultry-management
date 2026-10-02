@@ -239,6 +239,15 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   let currentYield = 0;
   let previousYield = 0;
 
+  const localeMap: Record<string, string> = {
+    en: 'en-US',
+    zh: 'zh-CN',
+    id: 'id-ID',
+    hi: 'hi-IN',
+    sw: 'sw-TZ'
+  };
+  const currentLocale = localeMap[language] || 'en-US';
+
   if (timeRange === 'weekly' || timeRange === 'all') {
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
@@ -248,7 +257,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
       const revenueThatDay = normalizedSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
-        name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { weekday: 'short' }),
+        name: d.toLocaleDateString(currentLocale, { weekday: 'short' }),
         Eggs: eggsThatDay,
         CrackedSpoilt: badEggsThatDay,
         Revenue: revenueThatDay,
@@ -272,7 +281,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
       const revenueThatDay = normalizedSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
-        name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { day: 'numeric', month: 'short' }),
+        name: d.toLocaleDateString(currentLocale, { day: 'numeric', month: 'short' }),
         Eggs: eggsThatDay,
         CrackedSpoilt: badEggsThatDay,
         Revenue: revenueThatDay,
@@ -309,7 +318,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       }).reduce((sum, s) => sum + s.totalAmount, 0);
 
       chartData.push({
-        name: d.toLocaleDateString(language === 'ar' ? 'ar-EG' : undefined, { month: 'short' }),
+        name: d.toLocaleDateString(currentLocale, { month: 'short' }),
         Eggs: eggsInMonth,
         CrackedSpoilt: badEggsInMonth,
         Revenue: revenueInMonth,
@@ -451,11 +460,11 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               setShowQuickEggModal(true);
             }}
             className="bg-amber-600 hover:bg-amber-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md shadow-amber-600/20 flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap active:scale-95"
-            title="Log Egg Collection"
+            title={t("Log Egg Collection")}
           >
             <Plus size={15} className="shrink-0" />
             <Egg size={15} className="shrink-0" />
-            <span>Log Eggs</span>
+            <span>{t("Log Eggs")}</span>
           </button>
           <button 
             data-tour="print-report-btn"
@@ -464,7 +473,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           >
             <Printer size={15} className="shrink-0" />
             <span className="hidden sm:inline">{texts.common.printReport}</span>
-            <span className="sm:hidden">Print</span>
+            <span className="sm:hidden">{t("Print")}</span>
           </button>
         </div>
       </div>
@@ -947,7 +956,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
             onChange={(e) => setQuickEggBatchId(e.target.value)}
           >
             {normalizedBatches.length === 0 ? (
-              <option value="">No batches available</option>
+              <option value="">{t("No batches available")}</option>
             ) : (
               normalizedBatches.map((b) => (
                 <option key={b.id} value={b.id}>

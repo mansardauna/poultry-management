@@ -1,5 +1,8 @@
 'use strict';
+'use client';
+
 import React, { forwardRef, InputHTMLAttributes, ReactNode } from 'react';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -13,6 +16,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 /**
  * Standard Unified Input Component for PFMS.
  * Enforces uniform radius (rounded-xl), sizing, label typography, and focus ring across all pages.
+ * Automatically translates label and placeholder strings.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   {
@@ -25,20 +29,26 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     containerClassName = '',
     id,
     disabled,
+    placeholder,
     ...props
   },
   ref
 ) {
+  const { t } = useLanguage();
   const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
+  const displayLabel = label ? t(label) : undefined;
+  const displayPlaceholder = placeholder ? t(placeholder) : undefined;
+  const displayError = error ? t(error) : undefined;
+  const displayHelper = helperText ? t(helperText) : undefined;
 
   return (
     <div className={`w-full ${containerClassName}`}>
-      {label && (
+      {displayLabel && (
         <label 
           htmlFor={inputId} 
           className="block text-xs font-semibold text-slate-700 mb-1.5"
         >
-          {label}
+          {displayLabel}
         </label>
       )}
       <div className="relative flex items-center">
@@ -51,6 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           ref={ref}
           id={inputId}
           disabled={disabled}
+          placeholder={displayPlaceholder}
           className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none transition-all shadow-sm ${
             leftIcon ? 'pl-10' : ''
           } ${rightIcon ? 'pr-10' : ''} ${
@@ -61,13 +72,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           {...props}
         />
         {rightIcon && (
-          <div className="absolute right-3.5 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute right-3.5 flex items-center text-slate-400">
             {rightIcon}
           </div>
         )}
       </div>
-      {error && <p className="text-[11px] text-red-600 font-medium mt-1">{error}</p>}
-      {!error && helperText && <p className="text-[11px] text-slate-500 mt-1">{helperText}</p>}
+      {displayError && <p className="text-[11px] text-red-600 font-medium mt-1">{displayError}</p>}
+      {!displayError && displayHelper && <p className="text-[11px] text-slate-500 mt-1">{displayHelper}</p>}
     </div>
   );
 });
@@ -82,6 +93,7 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 
 /**
  * Standard Unified Select Component for PFMS.
+ * Automatically translates label and helper text.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
   {
@@ -97,16 +109,20 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   },
   ref
 ) {
+  const { t } = useLanguage();
   const selectId = id || (label ? `select-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
+  const displayLabel = label ? t(label) : undefined;
+  const displayError = error ? t(error) : undefined;
+  const displayHelper = helperText ? t(helperText) : undefined;
 
   return (
     <div className={`w-full ${containerClassName}`}>
-      {label && (
+      {displayLabel && (
         <label 
           htmlFor={selectId} 
           className="block text-xs font-semibold text-slate-700 mb-1.5"
         >
-          {label}
+          {displayLabel}
         </label>
       )}
       <div className="relative">
@@ -129,8 +145,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           </svg>
         </div>
       </div>
-      {error && <p className="text-[11px] text-red-600 font-medium mt-1">{error}</p>}
-      {!error && helperText && <p className="text-[11px] text-slate-500 mt-1">{helperText}</p>}
+      {displayError && <p className="text-[11px] text-red-600 font-medium mt-1">{displayError}</p>}
+      {!displayError && displayHelper && <p className="text-[11px] text-slate-500 mt-1">{displayHelper}</p>}
     </div>
   );
 });

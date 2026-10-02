@@ -10,6 +10,7 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
+import { useLanguage } from '../LanguageContext';
 import { 
   Dialog, 
   DialogTitle, 
@@ -29,6 +30,7 @@ import {
  * @param props.role The user role.
  */
 export function HealthClient({ role }: { role: string }) {
+  const { texts, t, formatNumber } = useLanguage();
   const [templates, setTemplates] = useState<MedicationTemplate[]>([]);
   const [schedules, setSchedules] = useState<MedicationSchedule[]>([]);
   const [batches, setBatches] = useState<ChickenBatch[]>([]);
@@ -177,8 +179,8 @@ export function HealthClient({ role }: { role: string }) {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Health & Vaccinations</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage flock medication routines and vaccination schedules.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{texts.health?.title || t("Health & Medication")}</h1>
+          <p className="text-sm text-slate-500 mt-1">{texts.health?.subtitle || t("Vaccination schedules, medication logs, and flock wellness.")}</p>
         </div>
         {role !== 'Staff' && (
           <div className="flex flex-wrap gap-2">
@@ -186,13 +188,13 @@ export function HealthClient({ role }: { role: string }) {
               onClick={() => setOpenApply(true)}
               className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
             >
-              <Calendar size={17} /> Apply Template
+              <Calendar size={17} /> {t("Apply Template")}
             </button>
             <button 
               onClick={() => setOpenTemplate(true)}
               className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
             >
-              <Plus size={18} /> Define New Template
+              <Plus size={18} /> {t("Define New Template")}
             </button>
           </div>
         )}
@@ -203,7 +205,7 @@ export function HealthClient({ role }: { role: string }) {
         <Card>
           <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">
             <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <Calendar size={18} className="text-indigo-600" /> Active Roster Calendar
+              <Calendar size={18} className="text-indigo-600" /> {t("Active Roster Calendar")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -214,11 +216,11 @@ export function HealthClient({ role }: { role: string }) {
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <TableSortHeader label="Date" sortKey="scheduledDate" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
-                    <TableSortHeader label="Batch" sortKey="batchId" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
-                    <TableSortHeader label="Medication" sortKey="medicationName" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
-                    <TableSortHeader label="Status" sortKey="status" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
-                    {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Del</th>}
+                    <TableSortHeader label={t("Date")} sortKey="scheduledDate" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
+                    <TableSortHeader label={t("Batch")} sortKey="batchId" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
+                    <TableSortHeader label={t("Medication")} sortKey="medicationName" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
+                    <TableSortHeader label={t("Status")} sortKey="status" currentSort={schedulesLogic.sortConfig} onSort={schedulesLogic.handleSort} />
+                    {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">{t("Del")}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono">
@@ -230,19 +232,19 @@ export function HealthClient({ role }: { role: string }) {
                         <td className="px-4 py-3 text-slate-600">{batch?.breed} ({s.batchId})</td>
                         <td className="px-4 py-3">
                           <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-semibold ${s.type === 'Vaccine' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}`}>
-                            {s.type}
+                            {t(s.type)}
                           </span>
                           <span className="ml-2 font-sans font-semibold text-slate-700">{s.medicationName}</span>
                         </td>
                         <td className="px-4 py-3">
                           {s.status === 'Completed' ? (
-                            <span className="text-emerald-600 flex items-center gap-1 font-sans font-semibold"><CheckCircle size={14}/> Done</span>
+                            <span className="text-emerald-600 flex items-center gap-1 font-sans font-semibold"><CheckCircle size={14}/> {t("Done")}</span>
                           ) : (
                             <button
                               onClick={() => handleCompleteSchedule(s.id)}
                               className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md text-xs hover:bg-indigo-100 font-sans font-semibold flex items-center gap-1"
                             >
-                              <Clock size={14}/> Mark Done
+                              <Clock size={14}/> {t("Mark Done")}
                             </button>
                           )}
                         </td>
@@ -256,7 +258,7 @@ export function HealthClient({ role }: { role: string }) {
                   })}
                   {schedules.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="text-center py-4 text-slate-500 font-sans">No active schedules.</td>
+                      <td colSpan={4} className="text-center py-4 text-slate-500 font-sans">{t("No active schedules.")}</td>
                     </tr>
                   )}
                 </tbody>
@@ -279,7 +281,7 @@ export function HealthClient({ role }: { role: string }) {
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <Settings size={18} className="text-indigo-600" /> Presets & Templates
+              <Settings size={18} className="text-indigo-600" /> {t("Presets & Templates")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -317,15 +319,15 @@ export function HealthClient({ role }: { role: string }) {
 
       {/* Apply Template Modal */}
       <Dialog open={openApply} onClose={() => setOpenApply(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-poppins)', fontWeight: 600 }}>Apply Medication Template</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-poppins)', fontWeight: 600 }}>{t("Apply Medication Template")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Select Batch</InputLabel>
+            <InputLabel>{t("Select Batch")}</InputLabel>
             <Select
               value={selectedBatchId}
               onChange={(e) => setSelectedBatchId(e.target.value)}
-              label="Select Batch"
+              label={t("Select Batch")}
               className="rounded-lg"
             >
               {batches.map(b => (
@@ -334,20 +336,20 @@ export function HealthClient({ role }: { role: string }) {
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Select Template</InputLabel>
+            <InputLabel>{t("Select Template")}</InputLabel>
             <Select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              label="Select Template"
+              label={t("Select Template")}
               className="rounded-lg"
             >
-              {templates.map(t => (
-                <MenuItem key={t.id} value={t.id}>{t.name} ({t.targetType})</MenuItem>
+              {templates.map(t_item => (
+                <MenuItem key={t_item.id} value={t_item.id}>{t_item.name} ({t(t_item.targetType)})</MenuItem>
               ))}
             </Select>
           </FormControl>
           <TextField
-            label="Start Date (Day 0)"
+            label={t("Start Date (Day 0)")}
             type="date"
             fullWidth
             variant="outlined"
@@ -357,14 +359,14 @@ export function HealthClient({ role }: { role: string }) {
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={() => setOpenApply(false)} sx={{ color: '#64748b' }}>Cancel</MuiButton>
+          <MuiButton onClick={() => setOpenApply(false)} sx={{ color: '#64748b' }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleApplyTemplate} 
             variant="contained" 
             disabled={!selectedTemplateId || !selectedBatchId}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Apply Template
+            {t("Apply Template")}
           </MuiButton>
         </DialogActions>
       </Dialog>
@@ -373,8 +375,8 @@ export function HealthClient({ role }: { role: string }) {
       <Dialog open={openTemplate} onClose={() => setOpenTemplate(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}>
         <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
           <div>
-            <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">Define Medication Template</h3>
-            <p className="text-xs text-indigo-200 mt-0.5">Create reusable vaccination & medication schedules for flock breeds</p>
+            <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">{t("Define Medication Template")}</h3>
+            <p className="text-xs text-indigo-200 mt-0.5">{t("Create reusable vaccination & medication schedules for flock breeds")}</p>
           </div>
           <button onClick={() => setOpenTemplate(false)} className="text-slate-400 hover:text-white cursor-pointer">
             <X size={20} />
@@ -383,32 +385,32 @@ export function HealthClient({ role }: { role: string }) {
 
         <DialogContent className="flex flex-col gap-4 p-5 sm:p-6 bg-slate-50">
           <TextField
-            label="Template Name *"
+            label={t("Template Name *")}
             fullWidth
             variant="outlined"
             size="small"
             value={templateName}
             onChange={(e) => setTemplateName(e.target.value)}
-            placeholder="e.g. Standard Broiler 8-Week Program"
+            placeholder={t("e.g. Standard Broiler 8-Week Program")}
           />
           <FormControl fullWidth variant="outlined" size="small">
-            <InputLabel>Target Flock Type</InputLabel>
+            <InputLabel>{t("Target Flock Type")}</InputLabel>
             <Select
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
-              label="Target Flock Type"
+              label={t("Target Flock Type")}
               className="rounded-lg"
             >
-              <MenuItem value="Broilers">Broilers</MenuItem>
-              <MenuItem value="Layers">Layers</MenuItem>
-              <MenuItem value="Chicks">Chicks</MenuItem>
+              <MenuItem value="Broilers">{t("Broilers")}</MenuItem>
+              <MenuItem value="Layers">{t("Layers")}</MenuItem>
+              <MenuItem value="Chicks">{t("Chicks")}</MenuItem>
             </Select>
           </FormControl>
           
           <div className="mt-2 border-t border-slate-200 pt-4 space-y-3">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Schedule Stages</h4>
-              <span className="text-[11px] text-slate-400">Define day offset & medication name</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("Schedule Stages")}</h4>
+              <span className="text-[11px] text-slate-400">{t("Define day offset & medication name")}</span>
             </div>
 
             {stages.map((st, i) => (
@@ -416,7 +418,7 @@ export function HealthClient({ role }: { role: string }) {
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 w-full items-center">
                   <div className="sm:col-span-3">
                     <TextField
-                      label="Day Offset *"
+                      label={t("Day Offset *")}
                       type="number"
                       variant="outlined"
                       size="small"
@@ -433,7 +435,7 @@ export function HealthClient({ role }: { role: string }) {
 
                   <div className="sm:col-span-5">
                     <TextField
-                      label="Medication / Vaccine *"
+                      label={t("Medication / Vaccine *")}
                       variant="outlined"
                       size="small"
                       fullWidth
@@ -443,25 +445,25 @@ export function HealthClient({ role }: { role: string }) {
                         newStages[i].medicationName = e.target.value;
                         setStages(newStages);
                       }}
-                      placeholder="e.g. Newcastle / Gumboro"
+                      placeholder={t("e.g. Newcastle / Gumboro")}
                     />
                   </div>
 
                   <div className="sm:col-span-4">
                     <FormControl variant="outlined" size="small" fullWidth>
-                      <InputLabel>Type</InputLabel>
+                      <InputLabel>{t("Type")}</InputLabel>
                       <Select
                         value={st.type}
-                        label="Type"
+                        label={t("Type")}
                         onChange={(e) => {
                           const newStages = [...stages];
                           newStages[i].type = e.target.value as any;
                           setStages(newStages);
                         }}
                       >
-                        <MenuItem value="Vaccine">Vaccine</MenuItem>
-                        <MenuItem value="Medication">Medication</MenuItem>
-                        <MenuItem value="Supplement">Supplement</MenuItem>
+                        <MenuItem value="Vaccine">{t("Vaccine")}</MenuItem>
+                        <MenuItem value="Medication">{t("Medication")}</MenuItem>
+                        <MenuItem value="Supplement">{t("Supplement")}</MenuItem>
                       </Select>
                     </FormControl>
                   </div>
@@ -473,14 +475,14 @@ export function HealthClient({ role }: { role: string }) {
               onClick={addStageRow}
               className="mt-2 text-indigo-600 text-xs font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
-              + Add Another Schedule Stage
+              + {t("Add Another Schedule Stage")}
             </button>
           </div>
         </DialogContent>
 
         <DialogActions sx={{ p: 2.5, bgcolor: 'white', borderTop: '1px solid #e2e8f0', justifyContent: 'space-between' }}>
           <MuiButton onClick={() => setOpenTemplate(false)} variant="outlined" sx={{ textTransform: 'none', color: '#64748b', borderColor: '#cbd5e1', fontWeight: 600 }}>
-            Cancel
+            {t("Cancel")}
           </MuiButton>
           <MuiButton 
             onClick={() => {
@@ -497,7 +499,7 @@ export function HealthClient({ role }: { role: string }) {
             variant="contained" 
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, textTransform: 'none', fontWeight: 700, px: 3, borderRadius: 2 }}
           >
-            Save Template
+            {t("Save Template")}
           </MuiButton>
         </DialogActions>
       </Dialog>

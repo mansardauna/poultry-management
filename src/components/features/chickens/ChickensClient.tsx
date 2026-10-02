@@ -425,18 +425,18 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
 
       {/* Add Batch Modal */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Add Chicken Batch</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Add Chicken Batch")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
-            label="Breed (e.g. Isa Brown)"
+            label={t("Breed (e.g. Isa Brown)")}
             fullWidth
             variant="outlined"
             value={breed}
             onChange={(e) => setBreed(e.target.value)}
           />
           <TextField
-            label="Quantity"
+            label={t("Quantity")}
             type="number"
             fullWidth
             variant="outlined"
@@ -444,7 +444,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setQuantity(e.target.value)}
           />
           <TextField
-            label="Age (in weeks)"
+            label={t("Age (in weeks)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -452,71 +452,71 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setAgeInWeeks(e.target.value)}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Type</InputLabel>
+            <InputLabel shrink>{t("Type")}</InputLabel>
             <Select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              label="Type"
+              label={t("Type")}
               className="rounded-sm"
             >
-              <MenuItem value="Layers">Layers</MenuItem>
-              <MenuItem value="Broilers">Broilers</MenuItem>
-              <MenuItem value="Chicks">Chicks</MenuItem>
+              <MenuItem value="Layers">{t("Layers")}</MenuItem>
+              <MenuItem value="Broilers">{t("Broilers")}</MenuItem>
+              <MenuItem value="Chicks">{t("Chicks")}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Farm Section</InputLabel>
+            <InputLabel shrink>{t("Farm Section")}</InputLabel>
             <Select
               value={farmSection}
               onChange={(e) => setFarmSection(e.target.value)}
-              label="Farm Section"
+              label={t("Farm Section")}
               className="rounded-sm"
             >
-              <MenuItem value="Section A">Section A</MenuItem>
-              <MenuItem value="Section B">Section B</MenuItem>
-              <MenuItem value="Section C">Section C</MenuItem>
+              <MenuItem value="Section A">{t("Section A")}</MenuItem>
+              <MenuItem value="Section B">{t("Section B")}</MenuItem>
+              <MenuItem value="Section C">{t("Section C")}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Vaccination Status</InputLabel>
+            <InputLabel shrink>{t("Vaccination Status")}</InputLabel>
             <Select
               value={vaccinationStatus}
               onChange={(e) => setVaccinationStatus(e.target.value)}
-              label="Vaccination Status"
+              label={t("Vaccination Status")}
               className="rounded-sm"
             >
-              <MenuItem value="Up to Date">Up to Date</MenuItem>
-              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="Up to Date">{t("Up to Date")}</MenuItem>
+              <MenuItem value="Pending">{t("Pending")}</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleClose} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleClose} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleAddBatch} 
             variant="contained" 
             disabled={!breed || !quantity}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Add Batch
+            {t("Add Batch")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Log Mortality Modal */}
       <Dialog open={openMortality} onClose={handleCloseMortality} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Record Flock Mortality</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Record Flock Mortality")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <SelectWithAdd
-            label="Select Batch"
+            label={t("Select Batch")}
             value={mortalityBatchId}
             onChange={setMortalityBatchId}
             items={batches.map(b => ({ id: b.id, label: `${b.id} (${b.breed} - ${b.quantity} birds)` }))}
             addPath="/chickens"
           />
           <TextField
-            label="Mortality Date"
+            label={t("Mortality Date")}
             type="date"
             fullWidth
             variant="outlined"
@@ -525,7 +525,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } }, inputLabel: { shrink: true } }}
           />
           <TextField
-            label="Mortality count"
+            label={t("Mortality count")}
             type="number"
             fullWidth
             variant="outlined"
@@ -534,83 +534,84 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setMortalityCount(e.target.value)}
           />
           <TextField
-            label="Reason / Diagnosis details"
+            label={t("Reason / Diagnosis details")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Heat stress or physical injury"
+            placeholder={t("Reason / Diagnosis details")}
             value={mortalityReason}
             onChange={(e) => setMortalityReason(e.target.value)}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseMortality} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseMortality} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleLogMortality} 
             variant="contained" 
             disabled={!mortalityBatchId || !mortalityCount}
             sx={{ bgcolor: '#dc2626', '&:hover': { bgcolor: '#b91c1c' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Log Mortality
+            {t("Log Mortality")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Log Vaccination Modal */}
       <Dialog open={openVaccine} onClose={handleCloseVaccine} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Log Vaccination Event</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Log Vaccination Event")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <SelectWithAdd
-            label="Select Batch"
+            label={t("Select Batch")}
             value={vaccineBatchId}
             onChange={setVaccineBatchId}
             items={batches.map(b => ({ id: b.id, label: `${b.id} (${b.breed})` }))}
             addPath="/chickens"
           />
           <TextField
-            label="Vaccine / Drug administered"
+            label={t("Vaccine / Drug administered")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Newcastle Lasota or Gumboro"
+            placeholder={t("Vaccine / Drug administered")}
             value={vaccineName}
             onChange={(e) => setVaccineName(e.target.value)}
           />
           <TextField
-            label="Next Booster Schedule Date"
+            label={t("Next Booster Schedule Date")}
             type="date"
             fullWidth
             variant="outlined"
             value={nextBoosterDate}
             onChange={(e) => setNextBoosterDate(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseVaccine} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseVaccine} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleLogVaccine} 
             variant="contained" 
             disabled={!vaccineBatchId || !vaccineName}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Log Vaccination
+            {t("Log Vaccination")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Transfer Birds Modal */}
       <Dialog open={openTransfer} onClose={handleCloseTransfer} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Log Bird Transfer</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Log Bird Transfer")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <SelectWithAdd
-            label="Select Batch"
+            label={t("Select Batch")}
             value={transferBatchId}
             onChange={setTransferBatchId}
             items={batches.map(b => ({ id: b.id, label: `${b.id} (${b.breed} - ${b.quantity} birds in ${b.farmSection})` }))}
             addPath="/chickens"
           />
           <TextField
-            label="Transfer Count (leave empty for entire batch)"
+            label={t("Transfer Count (leave empty for entire batch)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -619,46 +620,46 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setTransferCount(e.target.value)}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Target Section</InputLabel>
+            <InputLabel shrink>{t("Target Section")}</InputLabel>
             <Select
               value={targetSection}
               onChange={(e) => setTargetSection(e.target.value)}
-              label="Target Section"
+              label={t("Target Section")}
               className="rounded-sm"
             >
-              <MenuItem value="Section A">Section A</MenuItem>
-              <MenuItem value="Section B">Section B</MenuItem>
-              <MenuItem value="Section C">Section C</MenuItem>
+              <MenuItem value="Section A">{t("Section A")}</MenuItem>
+              <MenuItem value="Section B">{t("Section B")}</MenuItem>
+              <MenuItem value="Section C">{t("Section C")}</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseTransfer} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseTransfer} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleTransfer} 
             variant="contained" 
             disabled={!transferBatchId || !targetSection}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Transfer Birds
+            {t("Transfer Birds")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Edit Batch Modal */}
       <Dialog open={openEdit} onClose={handleCloseEdit} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Edit Chicken Batch</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Edit Chicken Batch")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
-            label="Breed (e.g. Isa Brown)"
+            label={t("Breed (e.g. Isa Brown)")}
             fullWidth
             variant="outlined"
             value={breed}
             onChange={(e) => setBreed(e.target.value)}
           />
           <TextField
-            label="Quantity"
+            label={t("Quantity")}
             type="number"
             fullWidth
             variant="outlined"
@@ -666,7 +667,7 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setQuantity(e.target.value)}
           />
           <TextField
-            label="Age (in weeks)"
+            label={t("Age (in weeks)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -674,53 +675,53 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
             onChange={(e) => setAgeInWeeks(e.target.value)}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Type</InputLabel>
+            <InputLabel shrink>{t("Type")}</InputLabel>
             <Select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              label="Type"
+              label={t("Type")}
               className="rounded-sm"
             >
-              <MenuItem value="Layers">Layers</MenuItem>
-              <MenuItem value="Broilers">Broilers</MenuItem>
-              <MenuItem value="Chicks">Chicks</MenuItem>
+              <MenuItem value="Layers">{t("Layers")}</MenuItem>
+              <MenuItem value="Broilers">{t("Broilers")}</MenuItem>
+              <MenuItem value="Chicks">{t("Chicks")}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Farm Section</InputLabel>
+            <InputLabel shrink>{t("Farm Section")}</InputLabel>
             <Select
               value={farmSection}
               onChange={(e) => setFarmSection(e.target.value)}
-              label="Farm Section"
+              label={t("Farm Section")}
               className="rounded-sm"
             >
-              <MenuItem value="Section A">Section A</MenuItem>
-              <MenuItem value="Section B">Section B</MenuItem>
-              <MenuItem value="Section C">Section C</MenuItem>
+              <MenuItem value="Section A">{t("Section A")}</MenuItem>
+              <MenuItem value="Section B">{t("Section B")}</MenuItem>
+              <MenuItem value="Section C">{t("Section C")}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Vaccination Status</InputLabel>
+            <InputLabel shrink>{t("Vaccination Status")}</InputLabel>
             <Select
               value={vaccinationStatus}
               onChange={(e) => setVaccinationStatus(e.target.value)}
-              label="Vaccination Status"
+              label={t("Vaccination Status")}
               className="rounded-sm"
             >
-              <MenuItem value="Up to Date">Up to Date</MenuItem>
-              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="Up to Date">{t("Up to Date")}</MenuItem>
+              <MenuItem value="Pending">{t("Pending")}</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseEdit} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseEdit} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleEditBatch} 
             variant="contained" 
             disabled={!breed || !quantity}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Save Changes
+            {t("Save Changes")}
           </MuiButton>
         </DialogActions>
       </Dialog>

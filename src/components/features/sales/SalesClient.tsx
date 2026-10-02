@@ -29,7 +29,7 @@ import {
   Mail,
   Receipt
 } from 'lucide-react';
-import { TEXTS } from "@/lib/constants/texts";
+import { useLanguage } from '@/components/features/LanguageContext';
 import { Sale, Invoice, ChickenBatch } from "@/data/types";
 import { downloadCSV, printBrandedReport, printInvoiceReceipt } from '@/lib/exportReports';
 import { Modal } from '@/components/ui/Modal';
@@ -46,6 +46,7 @@ interface SalesClientProps {
 }
 
 export function SalesClient({ initialSales, initialInvoices, batches, role = 'Staff' }: SalesClientProps) {
+  const { texts, t, formatNumber } = useLanguage();
   const { activeWorkspace } = useWorkspace();
   const whiteLabel = useWhiteLabel();
   const farmName = activeWorkspace?.name || whiteLabel?.coopName || 'Poultry Farm Enterprise';
@@ -346,8 +347,8 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       {/* Header & Main Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">{TEXTS.sales.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{TEXTS.sales.subtitle}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">{texts.sales?.title || t("Sales & Invoices")}</h1>
+          <p className="text-sm text-slate-500 mt-1">{texts.sales?.subtitle || t("Track all farm sales and generate invoices.")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button 
@@ -365,19 +366,19 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             }}
             className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
           >
-            <Printer size={16} /> Print Audit Report
+            <Printer size={16} /> {t("Print Audit Report")}
           </button>
           <button 
             onClick={() => setOpenInvoiceModal(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95"
           >
-            <FileText size={16} /> + Generate New Invoice
+            <FileText size={16} /> + {t("Generate New Invoice")}
           </button>
           <button 
             onClick={handleOpen}
             className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
           >
-            <Plus size={18} /> {TEXTS.sales.newSale}
+            <Plus size={18} /> {texts.sales?.newSale || t("New Sale")}
           </button>
         </div>
       </div>
@@ -392,7 +393,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
-          <FileText size={16} /> All Invoices ({invoices.length})
+          <FileText size={16} /> {t("All Invoices")} ({invoices.length})
         </button>
         <button
           onClick={() => setActiveTab('unpaid-invoices')}
@@ -402,7 +403,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
-          <Coins size={16} className="text-amber-500" /> Unpaid & Due ({unpaidCount})
+          <Coins size={16} className="text-amber-500" /> {t("Unpaid & Due")} ({unpaidCount})
         </button>
         <button
           onClick={() => setActiveTab('paid-invoices')}
@@ -412,7 +413,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
-          <CheckCircle2 size={16} className="text-emerald-500" /> Paid Invoices ({paidCount})
+          <CheckCircle2 size={16} className="text-emerald-500" /> {t("Paid Invoices")} ({paidCount})
         </button>
         <button
           onClick={() => setActiveTab('sales')}
@@ -422,7 +423,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
-          Sales History ({sales.length})
+          {texts.sales?.salesHistory || t("Sales History")} ({sales.length})
         </button>
       </div>
 
@@ -432,9 +433,9 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
               <FileText size={18} className="text-indigo-600" />
-              {activeTab === 'unpaid-invoices' ? 'Awaiting Payment Invoices' : activeTab === 'paid-invoices' ? 'Settled & Paid Invoices' : 'All Merchant Invoices'}
+              {activeTab === 'unpaid-invoices' ? t('Awaiting Payment Invoices') : activeTab === 'paid-invoices' ? t('Settled & Paid Invoices') : t('All Merchant Invoices')}
             </CardTitle>
-            <span className="text-xs text-slate-500 font-medium">Click any row to view full invoice & share payment links</span>
+            <span className="text-xs text-slate-500 font-medium">{t("Click any row to view full invoice & share payment links")}</span>
           </CardHeader>
           <CardContent className="p-6">
             <TableControls searchTerm={invoicesTable.searchTerm} setSearchTerm={invoicesTable.setSearchTerm} placeholder="Search by customer name, invoice ID..." />
@@ -542,7 +543,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       {activeTab === 'sales' && (
         <Card className="border border-slate-200 shadow-sm">
           <CardHeader className="border-b border-slate-100">
-            <CardTitle>{TEXTS.sales.salesHistory}</CardTitle>
+            <CardTitle>{texts.sales?.salesHistory || t("Sales History")}</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <TableControls searchTerm={salesTable.searchTerm} setSearchTerm={salesTable.setSearchTerm} placeholder="Search sales..." />

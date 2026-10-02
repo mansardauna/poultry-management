@@ -3,6 +3,7 @@
 
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 export interface ModalProps {
   /** Controls modal visibility */
@@ -39,6 +40,8 @@ export function Modal({
   size = 'lg',
   children,
 }: ModalProps) {
+  const { t } = useLanguage();
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -58,6 +61,8 @@ export function Modal({
   if (!isOpen) return null;
 
   const maxWidthClass = SIZE_MAPS[size] || SIZE_MAPS.lg;
+  const displayTitle = title ? t(title) : '';
+  const displaySubtitle = subtitle ? t(subtitle) : '';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
@@ -66,16 +71,17 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        {title && (
+        {displayTitle && (
           <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
             <div>
-              <h3 className="text-lg font-extrabold text-slate-900 leading-tight">{title}</h3>
-              {subtitle && <p className="text-xs text-slate-500 font-medium mt-0.5">{subtitle}</p>}
+              <h3 className="text-lg font-extrabold text-slate-900 leading-tight">{displayTitle}</h3>
+              {displaySubtitle && <p className="text-xs text-slate-500 font-medium mt-0.5">{displaySubtitle}</p>}
             </div>
             <button
               onClick={onClose}
               className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
-              title="Close Dialog"
+              title={t("Close")}
+              aria-label={t("Close")}
             >
               <X size={20} />
             </button>

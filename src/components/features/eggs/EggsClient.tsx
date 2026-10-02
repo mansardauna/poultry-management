@@ -500,7 +500,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             onClick={() => handleExportReports('csv')}
             className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <Download size={15} /> Export CSV
+            <Download size={15} /> {t("Export CSV")}
           </button>
           <button 
             onClick={() => handleExportReports('pdf')}
@@ -535,15 +535,15 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           <div className="flex items-center gap-2.5 min-w-0">
             <AlertTriangle size={18} className="text-amber-600 shrink-0 animate-pulse" />
             <div className="min-w-0 truncate">
-              <span className="font-bold text-amber-950">Egg Breakage Alert: </span>
-              <span className="text-amber-800 font-medium">{totalBrokenEggs} cracked/broken eggs detected. Cushioning check suggested.</span>
+              <span className="font-bold text-amber-950">{t("Egg Breakage Alert")}: </span>
+              <span className="text-amber-800 font-medium">{formatNumber(totalBrokenEggs)} {t("cracked/broken eggs detected. Cushioning check suggested.")}</span>
             </div>
           </div>
           <button 
             onClick={handleOpenAudit}
             className="text-[11px] font-bold bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
           >
-            Audit Padding
+            {t("Audit Padding")}
           </button>
         </div>
       )}
@@ -809,11 +809,11 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
 
       {/* Log Collection Modal */}
       <Dialog open={openCollect} onClose={handleCloseCollect} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Log Egg Collection</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Log Egg Collection")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
-            label="Collection Date"
+            label={t("Collection Date")}
             type="date"
             fullWidth
             variant="outlined"
@@ -822,14 +822,14 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } }, inputLabel: { shrink: true } }}
           />
           <SelectWithAdd
-            label="Chicken Batch"
+            label={t("Chicken Batch")}
             value={collectBatchId}
             onChange={setCollectBatchId}
             items={batches.map(b => ({ id: b.id, label: `${b.id} (${b.breed} - ${b.type})` }))}
             addPath="/chickens"
           />
           <TextField
-            label="Good Eggs Count"
+            label={t("Good Eggs Count")}
             type="number"
             fullWidth
             variant="outlined"
@@ -838,7 +838,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Cracked / Broken Eggs"
+            label={t("Cracked / Broken Eggs")}
             type="number"
             fullWidth
             variant="outlined"
@@ -847,7 +847,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Spoilt Eggs Count"
+            label={t("Spoilt Eggs Count")}
             type="number"
             fullWidth
             variant="outlined"
@@ -857,92 +857,92 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseCollect} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseCollect} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleCollect} 
             variant="contained" 
             disabled={!goodEggs}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Log Collection
+            {t("Log Collection")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Cushioning Audit Modal */}
       <Dialog open={openAudit} onClose={handleCloseAudit} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Record Nesting Box Cushion Audit</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Record Nesting Box Cushion Audit")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Nesting Box</InputLabel>
+            <InputLabel shrink>{t("Nesting Box")}</InputLabel>
             <Select
               value={auditBox}
               onChange={(e) => setAuditBox(e.target.value)}
-              label="Nesting Box"
+              label={t("Nesting Box")}
               className="rounded-sm"
             >
-              <MenuItem value="Box #1">Box #1</MenuItem>
-              <MenuItem value="Box #2">Box #2</MenuItem>
-              <MenuItem value="Box #3">Box #3</MenuItem>
-              <MenuItem value="Box #4">Box #4</MenuItem>
+              <MenuItem value="Box #1">{t("Box #1")}</MenuItem>
+              <MenuItem value="Box #2">{t("Box #2")}</MenuItem>
+              <MenuItem value="Box #3">{t("Box #3")}</MenuItem>
+              <MenuItem value="Box #4">{t("Box #4")}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Cushion Condition</InputLabel>
+            <InputLabel shrink>{t("Cushion Condition")}</InputLabel>
             <Select
               value={auditCondition}
               onChange={(e) => setAuditCondition(e.target.value)}
-              label="Cushion Condition"
+              label={t("Cushion Condition")}
               className="rounded-sm"
             >
-              <MenuItem value="Optimal Cushioning">Optimal Cushioning</MenuItem>
-              <MenuItem value="Compressed - Low Straw">Compressed - Low Straw (Requires Replenishing)</MenuItem>
-              <MenuItem value="Missing Padding">Missing Padding (Critical Quality Threat)</MenuItem>
+              <MenuItem value="Optimal Cushioning">{t("Optimal Cushioning")}</MenuItem>
+              <MenuItem value="Compressed - Low Straw">{t("Compressed - Low Straw (Requires Replenishing)")}</MenuItem>
+              <MenuItem value="Missing Padding">{t("Missing Padding (Critical Quality Threat)")}</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Specific Action Taken / Notes"
+            label={t("Specific Action Taken / Notes")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Refilled straw cushioning & realigned nest box padding"
+            placeholder={t("e.g. Refilled straw cushioning & realigned nest box padding")}
             value={auditActionTaken}
             onChange={(e) => setAuditActionTaken(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseAudit} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseAudit} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleLogAudit} 
             variant="contained" 
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Register Audit
+            {t("Register Audit")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Maturation Log Modal */}
       <Dialog open={openMaturation} onClose={handleCloseMaturation} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Log Newly Laying Maturation Metric</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Log Newly Laying Maturation Metric")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Newly Laying Bird ID</InputLabel>
+            <InputLabel shrink>{t("Newly Laying Bird ID")}</InputLabel>
             <Select
               value={maturationBirdId}
               onChange={(e) => setMaturationBirdId(e.target.value)}
-              label="Newly Laying Bird ID"
+              label={t("Newly Laying Bird ID")}
               className="rounded-sm"
             >
-              <MenuItem value="Bird-NL01">Bird-NL01 (Isa Brown newly laying)</MenuItem>
-              <MenuItem value="Bird-NL02">Bird-NL02 (Isa Brown newly laying)</MenuItem>
-              <MenuItem value="Bird-NL03">Bird-NL03 (Isa Brown newly laying)</MenuItem>
+              <MenuItem value="Bird-NL01">Bird-NL01 ({t("Isa Brown newly laying")})</MenuItem>
+              <MenuItem value="Bird-NL02">Bird-NL02 ({t("Isa Brown newly laying")})</MenuItem>
+              <MenuItem value="Bird-NL03">Bird-NL03 ({t("Isa Brown newly laying")})</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Eggs Count (Yield)"
+            label={t("Eggs Count (Yield)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -952,7 +952,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Avg Egg Weight (in grams)"
+            label={t("Avg Egg Weight (in grams)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -962,35 +962,35 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Laying Shell / Shape Notes"
+            label={t("Laying Shell / Shape Notes")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Shell thickness thin but improving"
+            placeholder={t("e.g. Shell thickness thin but improving")}
             value={maturationNotes}
             onChange={(e) => setMaturationNotes(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseMaturation} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseMaturation} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleLogMaturation} 
             variant="contained" 
             disabled={!maturationEggsCount || !maturationWeight}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Log Metric
+            {t("Log Metric")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Edit Collection Modal */}
       <Dialog open={openEditCollection} onClose={handleCloseEditCollection} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Edit Egg Collection</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Edit Egg Collection")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
-            label="Good Eggs Count"
+            label={t("Good Eggs Count")}
             type="number"
             fullWidth
             variant="outlined"
@@ -999,7 +999,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Broken / Cracked Eggs Count"
+            label={t("Broken / Cracked Eggs Count")}
             type="number"
             fullWidth
             variant="outlined"
@@ -1008,7 +1008,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Spoilt Eggs Count"
+            label={t("Spoilt Eggs Count")}
             type="number"
             fullWidth
             variant="outlined"
@@ -1018,92 +1018,92 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseEditCollection} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseEditCollection} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleUpdateCollection} 
             variant="contained" 
             disabled={!editGoodEggs}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Update Collection
+            {t("Update Collection")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Edit Audit Modal */}
       <Dialog open={openEditAudit} onClose={handleCloseEditAudit} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Edit Cushioning Audit</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Edit Cushioning Audit")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Nesting Box</InputLabel>
+            <InputLabel shrink>{t("Nesting Box")}</InputLabel>
             <Select
               value={editAuditBox}
               onChange={(e) => setEditAuditBox(e.target.value)}
-              label="Nesting Box"
+              label={t("Nesting Box")}
               className="rounded-sm"
             >
-              <MenuItem value="Box #1">Box #1</MenuItem>
-              <MenuItem value="Box #2">Box #2</MenuItem>
-              <MenuItem value="Box #3">Box #3</MenuItem>
-              <MenuItem value="Box #4">Box #4</MenuItem>
+              <MenuItem value="Box #1">{t("Box #1")}</MenuItem>
+              <MenuItem value="Box #2">{t("Box #2")}</MenuItem>
+              <MenuItem value="Box #3">{t("Box #3")}</MenuItem>
+              <MenuItem value="Box #4">{t("Box #4")}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Cushion Condition</InputLabel>
+            <InputLabel shrink>{t("Cushion Condition")}</InputLabel>
             <Select
               value={editAuditCondition}
               onChange={(e) => setEditAuditCondition(e.target.value)}
-              label="Cushion Condition"
+              label={t("Cushion Condition")}
               className="rounded-sm"
             >
-              <MenuItem value="Optimal Cushioning">Optimal Cushioning</MenuItem>
-              <MenuItem value="Compressed - Low Straw">Compressed - Low Straw (Requires Replenishing)</MenuItem>
-              <MenuItem value="Missing Padding">Missing Padding (Critical Quality Threat)</MenuItem>
+              <MenuItem value="Optimal Cushioning">{t("Optimal Cushioning")}</MenuItem>
+              <MenuItem value="Compressed - Low Straw">{t("Compressed - Low Straw (Requires Replenishing)")}</MenuItem>
+              <MenuItem value="Missing Padding">{t("Missing Padding (Critical Quality Threat)")}</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Specific Action Taken / Notes"
+            label={t("Specific Action Taken / Notes")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Refilled straw cushioning & realigned nest box padding"
+            placeholder={t("e.g. Refilled straw cushioning & realigned nest box padding")}
             value={editAuditActionTaken}
             onChange={(e) => setEditAuditActionTaken(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseEditAudit} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseEditAudit} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleUpdateAudit} 
             variant="contained" 
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Update Audit
+            {t("Update Audit")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Edit Maturation Modal */}
       <Dialog open={openEditMaturation} onClose={handleCloseEditMaturation} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>Edit Maturation Record</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{t("Edit Maturation Record")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Newly Laying Bird ID</InputLabel>
+            <InputLabel shrink>{t("Newly Laying Bird ID")}</InputLabel>
             <Select
               value={editMaturationBirdId}
               onChange={(e) => setEditMaturationBirdId(e.target.value)}
-              label="Newly Laying Bird ID"
+              label={t("Newly Laying Bird ID")}
               className="rounded-sm"
             >
-              <MenuItem value="Bird-NL01">Bird-NL01 (Isa Brown newly laying)</MenuItem>
-              <MenuItem value="Bird-NL02">Bird-NL02 (Isa Brown newly laying)</MenuItem>
-              <MenuItem value="Bird-NL03">Bird-NL03 (Isa Brown newly laying)</MenuItem>
+              <MenuItem value="Bird-NL01">Bird-NL01 ({t("Isa Brown newly laying")})</MenuItem>
+              <MenuItem value="Bird-NL02">Bird-NL02 ({t("Isa Brown newly laying")})</MenuItem>
+              <MenuItem value="Bird-NL03">Bird-NL03 ({t("Isa Brown newly laying")})</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Eggs Count (Yield)"
+            label={t("Eggs Count (Yield)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -1112,7 +1112,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Avg Egg Weight (grams)"
+            label={t("Avg Egg Weight (grams)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -1121,24 +1121,24 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Maturation Notes"
+            label={t("Maturation Notes")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Shell thickness thin but improving"
+            placeholder={t("e.g. Shell thickness thin but improving")}
             value={editMaturationNotes}
             onChange={(e) => setEditMaturationNotes(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseEditMaturation} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseEditMaturation} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleUpdateMaturation} 
             variant="contained" 
             disabled={!editMaturationEggsCount || !editMaturationWeight}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Update Record
+            {t("Update Record")}
           </MuiButton>
         </DialogActions>
       </Dialog>

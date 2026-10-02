@@ -4,6 +4,7 @@
 import React from 'react';
 import { Card, CardContent } from './Card';
 import { LucideIcon } from 'lucide-react';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 export interface StatCardProps {
   /** Title label for the KPI card (e.g. "Active Flock", "Egg Yield") */
@@ -76,7 +77,7 @@ const COLOR_MAPS = {
   slate: {
     bg: 'bg-slate-50',
     border: 'border-slate-200',
-    iconBg: 'bg-slate-700',
+    iconBg: 'bg-slate-600',
     iconText: 'text-white',
     valueText: 'text-slate-900',
     subtext: 'text-slate-500',
@@ -85,6 +86,7 @@ const COLOR_MAPS = {
 
 /**
  * Reusable Telemetry KPI StatCard component for displaying farm analytics and operational metrics.
+ * Automatically translates card titles and subtexts.
  */
 export function StatCard({
   title,
@@ -96,6 +98,7 @@ export function StatCard({
   onClick,
   className = '',
 }: StatCardProps) {
+  const { t } = useLanguage();
   const styles = COLOR_MAPS[color] || COLOR_MAPS.indigo;
 
   return (
@@ -116,7 +119,7 @@ export function StatCard({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
-                <p className="text-xs font-semibold text-slate-500 group-hover:text-indigo-600 transition-colors">{title}</p>
+                <p className="text-xs font-semibold text-slate-500 group-hover:text-indigo-600 transition-colors">{t(title)}</p>
                 {onClick && (
                   <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                 )}
@@ -124,7 +127,7 @@ export function StatCard({
               <p className={`text-2xl sm:text-3xl font-extrabold ${styles.valueText}`}>{value}</p>
               {subtext && (
                 <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1`}>
-                  {subtext}
+                  {t(subtext)}
                 </p>
               )}
             </div>

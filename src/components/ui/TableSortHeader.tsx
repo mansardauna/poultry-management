@@ -1,5 +1,9 @@
+'use strict';
+'use client';
+
 import React from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 interface TableSortHeaderProps {
   label: React.ReactNode;
@@ -11,8 +15,11 @@ interface TableSortHeaderProps {
 }
 
 export function TableSortHeader({ label, sortKey, currentSort, onSort, className = "", align = 'left' }: TableSortHeaderProps) {
+  const { t } = useLanguage();
   const isSorted = currentSort?.key === sortKey;
   const direction = currentSort?.direction;
+
+  const displayLabel = typeof label === 'string' ? t(label) : label;
 
   return (
     <th 
@@ -20,7 +27,7 @@ export function TableSortHeader({ label, sortKey, currentSort, onSort, className
       onClick={() => onSort(sortKey)}
     >
       <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start'}`}>
-        <span>{label}</span>
+        <span>{displayLabel}</span>
         <div className="flex flex-col text-slate-400">
           {!isSorted || direction === null ? (
             <ArrowUpDown size={12} className="opacity-50" />

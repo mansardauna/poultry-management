@@ -9,7 +9,7 @@ import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, User, CheckSquare, Fingerprint, CheckCircle, Trash2 } from 'lucide-react';
-import { TEXTS } from "@/lib/constants/texts";
+import { useLanguage } from '@/components/features/LanguageContext';
 import { Staff, StaffTask, PayrollLog } from "@/data/types";
 import { 
   Dialog, 
@@ -46,6 +46,7 @@ interface StaffClientProps {
  * @param props - Component properties.
  */
 export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier = 'free' }: StaffClientProps) {
+  const { texts, t, formatNumber } = useLanguage();
   const router = useRouter();
   const canEdit = role === 'Admin';
   const [staff, setStaff] = useState<Staff[]>(initialStaff);
@@ -365,21 +366,21 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       {/* Header section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{TEXTS.staff.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{TEXTS.staff.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{texts.staff?.title || t("Staff Management")}</h1>
+          <p className="text-sm text-slate-500 mt-1">{texts.staff?.subtitle || t("Manage farm personnel, attendance, and roles.")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button 
             onClick={handleOpenTaskModal}
             className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <CheckSquare size={17} /> Assign Task
+            <CheckSquare size={17} /> {t("Assign Task")}
           </button>
           <button 
             onClick={handleOpen}
             className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={18} /> {TEXTS.staff.addStaff}
+            <Plus size={18} /> {texts.staff?.addStaff || t("Add Staff")}
           </button>
         </div>
       </div>
@@ -398,7 +399,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             onClick={() => router.push('/dashboard/settings')}
             className="text-[11px] font-bold bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
           >
-            Upgrade Plan
+            {t("Upgrade Plan")}
           </button>
         </div>
       )}
@@ -409,8 +410,8 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 tracking-wider">{TEXTS.staff.totalStaff}</p>
-                <p className="text-3xl font-semibold text-slate-900 mt-2">{totalStaff}</p>
+                <p className="text-xs font-semibold text-slate-500 tracking-wider">{texts.staff?.totalStaff || t("Total Staff")}</p>
+                <p className="text-3xl font-semibold text-slate-900 mt-2">{formatNumber(totalStaff)}</p>
               </div>
               <div className="text-blue-500">
                 <User size={32} />
@@ -423,8 +424,8 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 tracking-wider">Active Staff Tasks</p>
-                <p className="text-3xl font-semibold text-indigo-600 mt-2">{pendingTasksCount}</p>
+                <p className="text-xs font-semibold text-slate-500 tracking-wider">{t("Active Staff Tasks")}</p>
+                <p className="text-3xl font-semibold text-indigo-600 mt-2">{formatNumber(pendingTasksCount)}</p>
               </div>
               <div className="text-indigo-650">
                 <CheckSquare size={32} />
@@ -439,7 +440,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
         {/* Roster Sheet */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>{TEXTS.staff.staffRoster}</CardTitle>
+            <CardTitle>{texts.staff?.staffRoster || t("Staff Roster")}</CardTitle>
           </CardHeader>
           <CardContent>
             <TableControls searchTerm={staffTable.searchTerm} setSearchTerm={staffTable.setSearchTerm} placeholder="Search staff..." />
@@ -475,7 +476,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                           onClick={() => handleMarkAttendance(employee.id)}
                           className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[10px] font-semibold px-3 py-1.5 inline-flex items-center gap-1"
                         >
-                          <Fingerprint size={12} /> Check-in Today
+                          <Fingerprint size={12} /> {t("Check-in Today")}
                         </button>
                       </td>
                       {canEdit && (
@@ -505,13 +506,13 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
         <Card className="lg:col-span-1">
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider">
-              Shift Task List (Active Assignments)
+              {t("Shift Task List (Active Assignments)")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4 max-h-[350px] overflow-y-auto font-mono text-xs">
               {tasks.length === 0 ? (
-                <p className="text-slate-400 italic">No tasks assigned yet.</p>
+                <p className="text-slate-400 italic">{t("No tasks assigned yet.")}</p>
               ) : (
                 tasks.map((task) => (
                   <div key={task.id} className={`p-3 border ${task.status === 'Completed' ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'} space-y-2`}>
@@ -520,11 +521,11 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                       <span className={`text-[9px] font-semibold px-1.5 py-0.5 ${
                         task.status === 'Completed' ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-100 text-amber-800 animate-pulse'
                       }`}>
-                        {task.status}
+                        {t(task.status)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] text-slate-500">
-                      <span>Assigned: {task.assignedTo}</span>
+                      <span>{t("Assigned")}: {task.assignedTo}</span>
                       <span>{task.date}</span>
                     </div>
                     {task.status === 'Pending' && (
@@ -532,7 +533,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                         onClick={() => handleCompleteTask(task.id)}
                         className="w-full bg-indigo-650 hover:bg-indigo-700 text-white text-[10px] font-semibold py-1 mt-1 text-center flex items-center justify-center gap-1"
                       >
-                        <CheckCircle size={12} /> Mark Completed
+                        <CheckCircle size={12} /> {t("Mark Completed")}
                       </button>
                     )}
                     {canEdit && (
@@ -540,7 +541,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                         onClick={() => handleDeleteTask(task.id)}
                         className="w-full bg-red-50 hover:bg-red-100 text-red-600 text-[10px] font-semibold uppercase py-1 mt-1 text-center flex items-center justify-center gap-1"
                       >
-                        <Trash2 size={12} /> Delete Task
+                        <Trash2 size={12} /> {t("Delete Task")}
                       </button>
                     )}
                   </div>
@@ -555,7 +556,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       <Card>
         <CardHeader className="border-b border-slate-100 flex flex-row justify-between items-center">
           <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider">
-            Payroll & Disbursement History
+            {t("Payroll & Disbursement History")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -616,11 +617,11 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
 
       {/* Add Staff Modal */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)' }}>Add Staff Member</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)' }}>{t("Add Staff Member")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <TextField
-            label="Full Name"
+            label={t("Full Name")}
             fullWidth
             variant="outlined"
             value={name}
@@ -628,20 +629,20 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel id="staff-role-select-label">Access Role</InputLabel>
+            <InputLabel id="staff-role-select-label">{t("Access Role")}</InputLabel>
             <Select
               labelId="staff-role-select-label"
-              label="Access Role"
+              label={t("Access Role")}
               value={staffRole || 'Staff'}
               onChange={(e) => setStaffRole(e.target.value)}
               sx={{ borderRadius: 2 }}
             >
-              <MenuItem value="Staff">Staff (Farm Attendant)</MenuItem>
-              <MenuItem value="Manager">Manager (Farm Operations)</MenuItem>
+              <MenuItem value="Staff">{t("Staff (Farm Attendant)")}</MenuItem>
+              <MenuItem value="Manager">{t("Manager (Farm Operations)")}</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Monthly Salary (₦)"
+            label={t("Monthly Salary (₦)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -650,7 +651,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Contact Number"
+            label={t("Contact Number")}
             fullWidth
             variant="outlined"
             value={contact}
@@ -658,7 +659,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Staff Login Username"
+            label={t("Staff Login Username")}
             fullWidth
             variant="outlined"
             value={username}
@@ -667,31 +668,31 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             error={Boolean(usernameError)}
             helperText={
               usernameChecking
-                ? "Checking global platform availability..."
+                ? t("Checking global platform availability...")
                 : usernameError
                 ? `⚠️ ${usernameError}`
                 : usernameAvailable
-                ? "✓ Username is available across all platform farms"
-                : "Staff member will log in with this username"
+                ? t("✓ Username is available across all platform farms")
+                : t("Staff member will log in with this username")
             }
           />
           <TextField
-            label="Staff Login Password"
+            label={t("Staff Login Password")}
             type="password"
             fullWidth
             variant="outlined"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
-            helperText="Set a password for their login"
+            helperText={t("Set a password for their login")}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Assigned Branches</InputLabel>
+            <InputLabel>{t("Assigned Branches")}</InputLabel>
             <Select
               multiple
               value={assignedBranches}
               onChange={(e) => setAssignedBranches(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
-              input={<OutlinedInput label="Assigned Branches" sx={{ borderRadius: 2 }} />}
+              input={<OutlinedInput label={t("Assigned Branches")} sx={{ borderRadius: 2 }} />}
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value) => {
@@ -710,38 +711,38 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleClose} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleClose} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleAddStaff} 
             variant="contained" 
             disabled={!name || !staffRole || !salary || !username || !password || Boolean(usernameError) || usernameChecking}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Add Staff
+            {t("Add Staff")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Assign Task Modal */}
       <Dialog open={openTaskModal} onClose={handleCloseTaskModal} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 600 }}>Assign Shift Task</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 600 }}>{t("Assign Shift Task")}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField
-            label="Task Name / Instructions"
+            label={t("Task Name / Instructions")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Inspect feed lines or replenish Nest Box 4 Cushioning"
+            placeholder={t("e.g. Inspect feed lines or replenish Nest Box 4 Cushioning")}
             value={taskName}
             onChange={(e) => setTaskName(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Assign To</InputLabel>
+            <InputLabel>{t("Assign To")}</InputLabel>
             <Select
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
-              label="Assign To"
+              label={t("Assign To")}
               className="rounded-sm"
             >
               {staff.map(s => (
@@ -751,14 +752,14 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleCloseTaskModal} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleCloseTaskModal} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleAssignTask} 
             variant="contained" 
             disabled={!taskName || !assignedTo}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Assign Task
+            {t("Assign Task")}
           </MuiButton>
         </DialogActions>
       </Dialog>

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Plus, Wrench, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { EquipmentInventory } from "@/data/types";
+import { useLanguage } from '../LanguageContext';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -21,6 +22,7 @@ import {
  * @param props.role The user role.
  */
 export function InventoryClient({ role }: { role: string }) {
+  const { texts, t, formatNumber } = useLanguage();
   const [equipment, setEquipment] = useState<EquipmentInventory[]>([]);
   const [open, setOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentInventory | null>(null);
@@ -99,15 +101,15 @@ export function InventoryClient({ role }: { role: string }) {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Equipment Inventory</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage farm equipment, feeders, drinkers, and maintenance logs.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{t("Equipment Inventory")}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t("Manage farm equipment, feeders, drinkers, and maintenance logs.")}</p>
         </div>
         {role !== 'Staff' && (
           <button 
             onClick={() => setOpen(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={18} /> Add Equipment
+            <Plus size={18} /> {t("Add Equipment")}
           </button>
         )}
       </div>
@@ -115,7 +117,7 @@ export function InventoryClient({ role }: { role: string }) {
       <Card>
         <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">
           <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-            <Wrench size={18} className="text-indigo-600" /> Active Inventory
+            <Wrench size={18} className="text-indigo-600" /> {t("Active Inventory")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -124,23 +126,23 @@ export function InventoryClient({ role }: { role: string }) {
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <TableSortHeader label="Item Name" sortKey="name" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
-                  <TableSortHeader label="Type" sortKey="type" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
-                  <TableSortHeader label="Quantity" sortKey="quantity" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
-                  <TableSortHeader label="Status" sortKey="status" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
-                  <TableSortHeader label="Last Maintenance" sortKey="lastMaintenance" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
-                  {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Actions</th>}
+                  <TableSortHeader label={t("Item Name")} sortKey="name" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label={t("Type")} sortKey="type" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label={t("Quantity")} sortKey="quantity" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label={t("Status")} sortKey="status" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  <TableSortHeader label={t("Last Maintenance")} sortKey="lastMaintenance" currentSort={tableLogic.sortConfig} onSort={tableLogic.handleSort} />
+                  {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">{t("Actions")}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
                 {tableLogic.data.map(eq => (
                   <tr key={eq.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-semibold text-slate-800">{eq.name}</td>
-                    <td className="px-4 py-3 text-slate-600">{eq.type}</td>
-                    <td className="px-4 py-3 text-slate-600">{eq.quantity}</td>
+                    <td className="px-4 py-3 text-slate-600">{t(eq.type)}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatNumber(eq.quantity)}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-semibold ${eq.status === 'Good' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
-                        {eq.status}
+                        {t(eq.status)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-600">{eq.lastMaintenance}</td>
@@ -154,7 +156,7 @@ export function InventoryClient({ role }: { role: string }) {
                 ))}
                 {equipment.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-4 text-slate-500 font-sans">No equipment recorded.</td>
+                    <td colSpan={5} className="text-center py-4 text-slate-500 font-sans">{t("No equipment recorded.")}</td>
                   </tr>
                 )}
               </tbody>
@@ -172,11 +174,11 @@ export function InventoryClient({ role }: { role: string }) {
       </Card>
 
       <Dialog open={open} onClose={() => { setOpen(false); setEditingItem(null); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{editingItem ? 'Edit Equipment' : 'Add Equipment'}</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{editingItem ? t('Edit Equipment') : t('Add Equipment')}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField
-            label="Equipment Name"
+            label={t("Equipment Name")}
             fullWidth
             variant="outlined"
             value={formData.name}
@@ -184,23 +186,23 @@ export function InventoryClient({ role }: { role: string }) {
           />
           <div className="flex gap-4">
             <FormControl fullWidth variant="outlined">
-              <InputLabel>Type</InputLabel>
+              <InputLabel>{t("Type")}</InputLabel>
               <Select
                 value={formData.type}
-                label="Type"
+                label={t("Type")}
                 onChange={e => setFormData({ ...formData, type: e.target.value })}
                 className="rounded-sm"
               >
-                <MenuItem value="Feeder">Feeder</MenuItem>
-                <MenuItem value="Drinker">Drinker</MenuItem>
-                <MenuItem value="Heater">Heater</MenuItem>
-                <MenuItem value="Cage">Cage</MenuItem>
-                <MenuItem value="Generator">Generator</MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
+                <MenuItem value="Feeder">{t("Feeder")}</MenuItem>
+                <MenuItem value="Drinker">{t("Drinker")}</MenuItem>
+                <MenuItem value="Heater">{t("Heater")}</MenuItem>
+                <MenuItem value="Cage">{t("Cage")}</MenuItem>
+                <MenuItem value="Generator">{t("Generator")}</MenuItem>
+                <MenuItem value="Other">{t("Other")}</MenuItem>
               </Select>
             </FormControl>
             <TextField
-              label="Quantity"
+              label={t("Quantity")}
               type="number"
               fullWidth
               variant="outlined"
@@ -210,20 +212,20 @@ export function InventoryClient({ role }: { role: string }) {
           </div>
           <div className="flex gap-4">
             <FormControl fullWidth variant="outlined">
-              <InputLabel>Status</InputLabel>
+              <InputLabel>{t("Status")}</InputLabel>
               <Select
                 value={formData.status}
-                label="Status"
+                label={t("Status")}
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
                 className="rounded-sm"
               >
-                <MenuItem value="Good">Good</MenuItem>
-                <MenuItem value="Needs Repair">Needs Repair</MenuItem>
-                <MenuItem value="Broken">Broken</MenuItem>
+                <MenuItem value="Good">{t("Good")}</MenuItem>
+                <MenuItem value="Needs Repair">{t("Needs Repair")}</MenuItem>
+                <MenuItem value="Broken">{t("Broken")}</MenuItem>
               </Select>
             </FormControl>
             <TextField
-              label="Last Maintenance"
+              label={t("Last Maintenance")}
               type="date"
               fullWidth
               variant="outlined"
@@ -233,8 +235,8 @@ export function InventoryClient({ role }: { role: string }) {
           </div>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={() => { setOpen(false); setEditingItem(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingItem ? 'Save Changes' : 'Add Item'}</MuiButton>
+          <MuiButton onClick={() => { setOpen(false); setEditingItem(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
+          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingItem ? t('Save Changes') : t('Add Item')}</MuiButton>
         </DialogActions>
       </Dialog>
     </div>

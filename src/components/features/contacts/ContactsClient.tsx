@@ -10,6 +10,7 @@ import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
+import { useLanguage } from '../LanguageContext';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -21,6 +22,7 @@ import {
  * @param props - Component properties containing user role.
  */
 export function ContactsClient({ role }: { role: string }) {
+  const { texts, t, formatNumber } = useLanguage();
   const [contacts, setContacts] = useState<ContactRecord[]>([]);
   const contactsLogic = useTableLogic({
     data: contacts,
@@ -98,15 +100,15 @@ export function ContactsClient({ role }: { role: string }) {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">CRM & Contacts</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage regular customers and suppliers.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{t("CRM & Contacts")}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t("Manage regular customers and suppliers.")}</p>
         </div>
         {role !== 'Staff' && (
           <button 
             onClick={() => setOpen(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={18} /> Add Contact
+            <Plus size={18} /> {t("Add Contact")}
           </button>
         )}
       </div>
@@ -114,7 +116,7 @@ export function ContactsClient({ role }: { role: string }) {
       <Card>
         <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">
           <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-            <Users size={18} className="text-indigo-600" /> Active Contacts
+            <Users size={18} className="text-indigo-600" /> {t("Active Contacts")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -123,11 +125,11 @@ export function ContactsClient({ role }: { role: string }) {
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <TableSortHeader label="Name" sortKey="name" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
-                  <TableSortHeader label="Type" sortKey="type" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
-                  <TableSortHeader label="Contact Details" sortKey="contactDetails" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
-                  <TableSortHeader label="Notes" sortKey="notes" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
-                  {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">Actions</th>}
+                  <TableSortHeader label={t("Name")} sortKey="name" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
+                  <TableSortHeader label={t("Type")} sortKey="type" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
+                  <TableSortHeader label={t("Contact Details")} sortKey="contactDetails" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
+                  <TableSortHeader label={t("Notes")} sortKey="notes" currentSort={contactsLogic.sortConfig} onSort={contactsLogic.handleSort} />
+                  {canEdit && <th className="px-4 py-3 text-slate-500 uppercase">{t("Actions")}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
@@ -136,7 +138,7 @@ export function ContactsClient({ role }: { role: string }) {
                     <td className="px-4 py-3 font-semibold text-slate-800">{c.name}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-semibold ${c.type === 'Customer' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                        {c.type}
+                        {t(c.type)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-600">{c.contactDetails}</td>
@@ -151,7 +153,7 @@ export function ContactsClient({ role }: { role: string }) {
                 ))}
                 {contactsLogic.data.length === 0 && (
                   <tr>
-                    <td colSpan={canEdit ? 5 : 4} className="text-center py-4 text-slate-500 font-sans">No contacts recorded.</td>
+                    <td colSpan={canEdit ? 5 : 4} className="text-center py-4 text-slate-500 font-sans">{t("No contacts recorded.")}</td>
                   </tr>
                 )}
               </tbody>
@@ -169,37 +171,37 @@ export function ContactsClient({ role }: { role: string }) {
       </Card>
 
       <Dialog open={open} onClose={() => { setOpen(false); setEditingContact(null); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{editingContact ? 'Edit Contact' : 'Add Contact'}</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605 }}>{editingContact ? t('Edit Contact') : t('Add Contact')}</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-4">
           <div className="h-2" />
           <TextField
-            label="Name"
+            label={t("Name")}
             fullWidth
             variant="outlined"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
           />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>Type</InputLabel>
+            <InputLabel>{t("Type")}</InputLabel>
             <Select
               value={formData.type}
-              label="Type"
+              label={t("Type")}
               onChange={e => setFormData({ ...formData, type: e.target.value })}
               className="rounded-sm"
             >
-              <MenuItem value="Customer">Customer</MenuItem>
-              <MenuItem value="Supplier">Supplier</MenuItem>
+              <MenuItem value="Customer">{t("Customer")}</MenuItem>
+              <MenuItem value="Supplier">{t("Supplier")}</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Contact Details (Phone/Email)"
+            label={t("Contact Details (Phone/Email)")}
             fullWidth
             variant="outlined"
             value={formData.contactDetails}
             onChange={e => setFormData({ ...formData, contactDetails: e.target.value })}
           />
           <TextField
-            label="Notes"
+            label={t("Notes")}
             fullWidth
             variant="outlined"
             multiline
@@ -209,8 +211,8 @@ export function ContactsClient({ role }: { role: string }) {
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={() => { setOpen(false); setEditingContact(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingContact ? 'Save Changes' : 'Save Contact'}</MuiButton>
+          <MuiButton onClick={() => { setOpen(false); setEditingContact(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
+          <MuiButton onClick={handleSave} variant="contained" disabled={!formData.name} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{editingContact ? t('Save Changes') : t('Save Contact')}</MuiButton>
         </DialogActions>
       </Dialog>
     </div>

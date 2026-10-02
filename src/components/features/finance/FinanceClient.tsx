@@ -43,7 +43,7 @@ interface FinanceClientProps {
 export function FinanceClient({ initialSales, initialExpenses, role }: FinanceClientProps) {
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
-  const { texts } = useLanguage();
+  const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
   const [open, setOpen] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -208,19 +208,19 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
             onClick={handleExportPDF}
             className="bg-white border border-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            Export PDF
+            {t("Export PDF")}
           </button>
           <button 
             onClick={handleProcessPayroll}
             className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <User size={17} /> Process Payroll
+            <User size={17} /> {t("Process Payroll")}
           </button>
           <button 
             onClick={handleOpen}
             className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
           >
-            <Plus size={18} /> {texts.finance.logExpense}
+            <Plus size={18} /> {texts.finance?.logExpense || t("Log Expense")}
           </button>
         </div>
       </div>
@@ -231,14 +231,14 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance.totalRevenue}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance?.totalRevenue || t("Total Revenue")}</p>
                 <p className="text-2xl font-semibold text-slate-900 mt-2">₦{totalRevenue.toLocaleString()}</p>
               </div>
               <div className="text-indigo-600">
                 <ArrowUp size={32} />
               </div>
             </div>
-            <div className="text-[10px] text-slate-400 mt-3">From Wednesday wholesale sales</div>
+            <div className="text-[10px] text-slate-400 mt-3">{t("From Wednesday wholesale sales")}</div>
           </CardContent>
         </Card>
 
@@ -246,14 +246,14 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance.totalExpenses}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance?.totalExpenses || t("Total Expenses")}</p>
                 <p className="text-2xl font-semibold text-red-650 mt-2">₦{totalExpenses.toLocaleString()}</p>
               </div>
               <div className="text-red-500">
                 <ArrowDown size={32} />
               </div>
             </div>
-            <div className="text-[10px] text-slate-400 mt-3">Feed, fuel and sanitation tools</div>
+            <div className="text-[10px] text-slate-400 mt-3">{t("Feed, fuel and sanitation tools")}</div>
           </CardContent>
         </Card>
 
@@ -261,14 +261,14 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Remaining Asset Balance</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t("Remaining Asset Balance")}</p>
                 <p className="text-2xl font-semibold text-indigo-600 mt-2">₦{netBalance.toLocaleString()}</p>
               </div>
               <div className="text-blue-500">
                 <Wallet size={32} />
               </div>
             </div>
-            <div className="text-[10px] text-emerald-600 font-semibold mt-3">Reconciled & Audited</div>
+            <div className="text-[10px] text-emerald-600 font-semibold mt-3">{t("Reconciled & Audited")}</div>
           </CardContent>
         </Card>
 
@@ -276,14 +276,14 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-indigo-200 uppercase tracking-wider">Return Efficiency Rate</p>
+                <p className="text-xs font-semibold text-indigo-200 uppercase tracking-wider">{t("Return Efficiency Rate")}</p>
                 <p className="text-2xl font-semibold text-white mt-2">{returnEfficiency}%</p>
               </div>
               <div className="text-blue-400">
                 <Percent size={32} />
               </div>
             </div>
-            <div className="text-[10px] text-indigo-300 mt-3 font-semibold">Net Profit: ₦{netProfit.toLocaleString()}</div>
+            <div className="text-[10px] text-indigo-300 mt-3 font-semibold">{t("Net Profit")}: ₦{netProfit.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
@@ -426,26 +426,26 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
 
       {/* Log Expense Modal */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 600 }}>Log New Expense</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 600 }}>{t("Log New Expense")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Expense Category</InputLabel>
+            <InputLabel shrink>{t("Expense Category")}</InputLabel>
             <Select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              label="Expense Category"
+              label={t("Expense Category")}
               className="rounded-sm"
             >
-              <MenuItem value="Feed">Feed</MenuItem>
-              <MenuItem value="Drugs">Drugs & Vaccines</MenuItem>
-              <MenuItem value="Salaries">Staff Salaries</MenuItem>
-              <MenuItem value="Maintenance">Maintenance & Repairs</MenuItem>
-              <MenuItem value="Utilities">Utilities & Fuel</MenuItem>
+              <MenuItem value="Feed">{t("Feed")}</MenuItem>
+              <MenuItem value="Drugs">{t("Drugs & Vaccines")}</MenuItem>
+              <MenuItem value="Salaries">{t("Staff Salaries")}</MenuItem>
+              <MenuItem value="Maintenance">{t("Maintenance & Repairs")}</MenuItem>
+              <MenuItem value="Utilities">{t("Utilities & Fuel")}</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Amount (₦)"
+            label={t("Amount (₦)")}
             type="number"
             fullWidth
             variant="outlined"
@@ -454,49 +454,49 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
           <TextField
-            label="Description / Purpose"
+            label={t("Description / Purpose")}
             fullWidth
             variant="outlined"
-            placeholder="e.g. Layer Bird Feed Supply"
+            placeholder={t("e.g. Layer Bird Feed Supply")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={handleClose} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
+          <MuiButton onClick={handleClose} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleAddExpense} 
             variant="contained" 
             disabled={!amount || !description}
             sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
-            Log Expense
+            {t("Log Expense")}
           </MuiButton>
         </DialogActions>
       </Dialog>
 
       {/* Edit Expense Modal */}
       <Dialog open={openEdit} onClose={() => { setOpenEdit(false); setEditingExpense(null); }} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 600 }}>Edit Expense</DialogTitle>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 600 }}>{t("Edit Expense")}</DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel shrink>Expense Category</InputLabel>
-            <Select value={category} onChange={(e) => setCategory(e.target.value)} label="Expense Category" className="rounded-sm">
-              <MenuItem value="Feed">Feed</MenuItem>
-              <MenuItem value="Drugs">Drugs &amp; Vaccines</MenuItem>
-              <MenuItem value="Salaries">Staff Salaries</MenuItem>
-              <MenuItem value="Maintenance">Maintenance &amp; Repairs</MenuItem>
-              <MenuItem value="Utilities">Utilities &amp; Fuel</MenuItem>
+            <InputLabel shrink>{t("Expense Category")}</InputLabel>
+            <Select value={category} onChange={(e) => setCategory(e.target.value)} label={t("Expense Category")} className="rounded-sm">
+              <MenuItem value="Feed">{t("Feed")}</MenuItem>
+              <MenuItem value="Drugs">{t("Drugs & Vaccines")}</MenuItem>
+              <MenuItem value="Salaries">{t("Staff Salaries")}</MenuItem>
+              <MenuItem value="Maintenance">{t("Maintenance & Repairs")}</MenuItem>
+              <MenuItem value="Utilities">{t("Utilities & Fuel")}</MenuItem>
             </Select>
           </FormControl>
-          <TextField label="Amount (₦)" type="number" fullWidth variant="outlined" value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <TextField label="Description / Purpose" fullWidth variant="outlined" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <TextField label={t("Amount (₦)")} type="number" fullWidth variant="outlined" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <TextField label={t("Description / Purpose")} fullWidth variant="outlined" value={description} onChange={(e) => setDescription(e.target.value)} />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={() => { setOpenEdit(false); setEditingExpense(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>Cancel</MuiButton>
-          <MuiButton onClick={handleUpdateExpense} variant="contained" disabled={!amount || !description} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>Save Changes</MuiButton>
+          <MuiButton onClick={() => { setOpenEdit(false); setEditingExpense(null); }} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
+          <MuiButton onClick={handleUpdateExpense} variant="contained" disabled={!amount || !description} sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}>{t("Save Changes")}</MuiButton>
         </DialogActions>
       </Dialog>
     </div>

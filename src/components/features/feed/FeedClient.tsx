@@ -35,7 +35,7 @@ interface FeedClientProps {
  */
 export function FeedClient({ initialFeeds, initialLogs, batches, initialProcurePipeline, role }: FeedClientProps) {
   const [feeds, setFeeds] = useState<FeedInventory[]>(initialFeeds);
-  const { texts } = useLanguage();
+  const { texts, t, formatNumber } = useLanguage();
   const { filterByTimeRange, timeRange } = useTimeFilter();
   const canEdit = role === 'Admin' || role === 'Manager';
   const [logs, setLogs] = useState<DailyFeedLog[]>(initialLogs);
@@ -412,31 +412,31 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             onClick={() => handleExportReports('csv')}
             className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           >
-            <Download size={15} /> Export CSV
+            <Download size={15} /> {t("Export CSV")}
           </button>
           <button 
             onClick={() => handleExportReports('pdf')}
             className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           >
-            <Printer size={15} /> Print Report
+            <Printer size={15} /> {t("Print Report")}
           </button>
           <button 
             onClick={() => setOpenLogistics(true)}
             className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
           >
-            <Truck size={15} /> Logistics Pipeline
+            <Truck size={15} /> {t("Logistics Pipeline")}
           </button>
           <button 
             onClick={handleOpenUsage}
             className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer shadow-sm active:scale-95"
           >
-            Log Usage
+            {t("Log Usage")}
           </button>
           <button 
             onClick={handleOpenRestock}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
           >
-            <Plus size={16} /> {texts.feed.receiveStock}
+            <Plus size={16} /> {texts.feed?.receiveStock || t("Receive Stock")}
           </button>
         </div>
       </div>
@@ -447,7 +447,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           <div className="flex items-center gap-2.5 min-w-0">
             <AlertTriangle size={18} className="text-red-600 shrink-0 animate-pulse" />
             <div className="min-w-0 truncate">
-              <span className="font-bold text-red-950">Low Feed Alert: </span>
+              <span className="font-bold text-red-950">{t("Low Feed Alert")}: </span>
               <span className="text-red-800 font-medium">Layer mash is at {Number(layerMash?.quantityKg || 0)}kg (below 50kg threshold).</span>
             </div>
           </div>
@@ -455,7 +455,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             onClick={handleOpenRestock}
             className="text-[11px] font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-xl shrink-0 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
           >
-            Restock
+            {t("Restock")}
           </button>
         </div>
       )}

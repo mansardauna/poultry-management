@@ -467,11 +467,10 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
             className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-4 pl-0 appearance-none text-xs"
           >
             <option value="en">English (EN)</option>
-            <option value="es">Español (ES)</option>
-            <option value="ar">العربية (AR)</option>
-            <option value="de">Deutsch (DE)</option>
-            <option value="fr">Français (FR)</option>
-            <option value="zh">中文 (ZH)</option>
+            <option value="zh">中文 (ZH) - China</option>
+            <option value="id">Bahasa Indonesia (ID) - Indonesia</option>
+            <option value="hi">हिन्दी (HI) - India</option>
+            <option value="sw">Kiswahili (SW) - Swahili</option>
           </select>
         </div>
 
@@ -723,12 +722,11 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                   </label>
                   <div className="grid grid-cols-1 gap-1.5">
                     {[
-                      { id: 'en', name: 'English', code: 'EN' },
-                      { id: 'es', name: 'Español', code: 'ES' },
-                      { id: 'ar', name: 'العربية', code: 'AR' },
-                      { id: 'de', name: 'Deutsch', code: 'DE' },
-                      { id: 'fr', name: 'Français', code: 'FR' },
-                      { id: 'zh', name: '中文', code: 'ZH' },
+                      { id: 'en', name: 'English', code: 'EN', region: 'Global' },
+                      { id: 'zh', name: '中文 (Chinese)', code: 'ZH', region: 'China' },
+                      { id: 'id', name: 'Bahasa Indonesia', code: 'ID', region: 'Indonesia' },
+                      { id: 'hi', name: 'हिन्दी (Hindi)', code: 'HI', region: 'India' },
+                      { id: 'sw', name: 'Kiswahili (Swahili)', code: 'SW', region: 'East Africa' },
                     ].map((lang) => (
                       <button
                         key={lang.id}

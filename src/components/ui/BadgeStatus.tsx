@@ -1,6 +1,8 @@
 'use strict';
+'use client';
 
 import React from 'react';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 export interface BadgeStatusProps {
   /** Status string value (e.g. "Paid", "Unpaid", "Active", "Completed", "Pending", "Offline") */
@@ -13,8 +15,10 @@ export interface BadgeStatusProps {
 
 /**
  * Standardized Status Badge component for data tables and status pills across the application.
+ * Automatically translates the displayed status name into the active language.
  */
 export function BadgeStatus({ status, size = 'sm', className = '' }: BadgeStatusProps) {
+  const { t } = useLanguage();
   const norm = (status || '').toLowerCase().trim();
 
   let colorClasses = 'bg-slate-100 text-slate-700 border-slate-200';
@@ -33,7 +37,7 @@ export function BadgeStatus({ status, size = 'sm', className = '' }: BadgeStatus
 
   return (
     <span className={`inline-flex items-center font-semibold border rounded-full ${colorClasses} ${paddingClasses} ${className}`}>
-      {status}
+      {t(status)}
     </span>
   );
 }

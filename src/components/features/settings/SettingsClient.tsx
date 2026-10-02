@@ -21,6 +21,7 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap, Crown, ShieldCheck } from 'lucide-react';
 import { useWorkspace } from '../WorkspaceContext';
+import { useLanguage } from '../LanguageContext';
 
 /**
  * Represents a workspace.
@@ -81,6 +82,7 @@ interface SettingsClientProps {
  * @param props - Component properties.
  */
 export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin', currentUser }: SettingsClientProps) {
+  const { texts, t, formatNumber } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -404,12 +406,12 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           <Settings size={32} className="text-indigo-600" />
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">
-              {role === 'Staff' ? 'Staff Account & Security' : 'Settings & Subscription'}
+              {role === 'Staff' ? t('Staff Account & Security') : t('Settings & Subscription')}
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
               {role === 'Staff' 
-                ? 'Manage your staff profile credentials and update your login password.' 
-                : 'Manage your billing plans, alert rules, and farm profile.'}
+                ? t('Manage your staff profile credentials and update your login password.') 
+                : t('Manage your billing plans, alert rules, and farm profile.')}
             </p>
           </div>
         </div>
@@ -419,7 +421,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
             onClick={() => setShowUpgradeModal(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-colors flex items-center gap-2"
           >
-            <Sparkles size={16} /> Upgrade Plan
+            <Sparkles size={16} /> {t("Upgrade Plan")}
           </button>
         )}
       </div>
@@ -435,7 +437,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            <DollarSign size={16} /> My Subscription & Billing
+            <DollarSign size={16} /> {t("My Subscription & Billing")}
           </button>
         )}
         <button
@@ -446,7 +448,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <User size={16} /> {role === 'Staff' ? 'My Profile & Security' : 'Farm Profile & Pricing'}
+          <User size={16} /> {role === 'Staff' ? t('My Profile & Security') : t('Farm Profile & Pricing')}
         </button>
         {role !== 'Staff' && (
           <>
@@ -458,7 +460,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
-              <BellRing size={16} /> Alert Rules
+              <BellRing size={16} /> {t("Alert Rules")}
             </button>
             <button
               onClick={() => setActiveTab('gateways')}
@@ -468,7 +470,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
-              <CreditCard size={16} /> Payment Gateway Keys
+              <CreditCard size={16} /> {t("Payment Gateway Keys")}
             </button>
           </>
         )}
@@ -648,7 +650,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 </div>
                 <div className="pt-6 flex justify-end">
                   <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
-                    Save Profile & Pricing
+                    {t("Save Profile & Pricing")}
                   </MuiButton>
                 </div>
               </CardContent>
@@ -659,13 +661,13 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           <Card>
             <CardHeader className="border-b border-slate-100">
               <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Shield size={18} className="text-indigo-600" /> Account Security & Change Password
+                <Shield size={18} className="text-indigo-600" /> {t("Account Security & Change Password")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <TextField 
-                  label="Current Password" 
+                  label={t("Current Password")} 
                   type="password" 
                   fullWidth 
                   variant="outlined" 
@@ -673,16 +675,16 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   onChange={(e) => setCurrentPassword(e.target.value)} 
                 />
                 <TextField 
-                  label="New Password" 
+                  label={t("New Password")} 
                   type="password" 
                   fullWidth 
                   variant="outlined" 
                   value={newPassword} 
                   onChange={(e) => setNewPassword(e.target.value)} 
-                  helperText="Minimum 6 characters"
+                  helperText={t("Minimum 6 characters")}
                 />
                 <TextField 
-                  label="Confirm New Password" 
+                  label={t("Confirm New Password")} 
                   type="password" 
                   fullWidth 
                   variant="outlined" 
@@ -697,7 +699,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   variant="contained" 
                   sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}
                 >
-                  {isUpdatingPassword ? 'Updating Password...' : 'Update Password'}
+                  {isUpdatingPassword ? t('Updating Password...') : t('Update Password')}
                 </MuiButton>
               </div>
             </CardContent>
@@ -710,27 +712,27 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <BellRing size={18} className="text-blue-500" /> Thresholds & Alerts Rules
+              <BellRing size={18} className="text-blue-500" /> {t("Thresholds & Alerts Rules")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TextField label="Feed Shortfall Critical Threshold (kg)" type="number" fullWidth variant="outlined" value={feedThresholdKg} onChange={(e) => setFeedThresholdKg(e.target.value)} helperText="Triggers critical dashboard/feed warnings when feed drops below this level." />
-              <TextField label="Egg Output Drop Percentage Warning limit (%)" type="number" fullWidth variant="outlined" value={eggDropPercentage} onChange={(e) => setEggDropPercentage(e.target.value)} helperText="Warns if egg collection dips by more than this percentage." />
+              <TextField label={t("Feed Shortfall Critical Threshold (kg)")} type="number" fullWidth variant="outlined" value={feedThresholdKg} onChange={(e) => setFeedThresholdKg(e.target.value)} helperText={t("Triggers critical dashboard/feed warnings when feed drops below this level.")} />
+              <TextField label={t("Egg Output Drop Percentage Warning limit (%)")} type="number" fullWidth variant="outlined" value={eggDropPercentage} onChange={(e) => setEggDropPercentage(e.target.value)} helperText={t("Warns if egg collection dips by more than this percentage.")} />
             </div>
 
             <div className="pt-4 border-t border-slate-100">
-              <p className="text-xs font-semibold text-slate-500 mb-3">Automated Alert Dispatch Channels</p>
+              <p className="text-xs font-semibold text-slate-500 mb-3">{t("Automated Alert Dispatch Channels")}</p>
               <div className="flex flex-col md:flex-row gap-4 md:gap-8">
-                <FormControlLabel control={<Checkbox checked={notifySms} onChange={(e) => setNotifySms(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">Instant SMS Alerts</span>} />
-                <FormControlLabel control={<Checkbox checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">Email Digest</span>} />
-                <FormControlLabel control={<Checkbox checked={notifyWhatsapp} onChange={(e) => setNotifyWhatsapp(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">WhatsApp Business Pings</span>} />
+                <FormControlLabel control={<Checkbox checked={notifySms} onChange={(e) => setNotifySms(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">{t("Instant SMS Alerts")}</span>} />
+                <FormControlLabel control={<Checkbox checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">{t("Email Digest")}</span>} />
+                <FormControlLabel control={<Checkbox checked={notifyWhatsapp} onChange={(e) => setNotifyWhatsapp(e.target.checked)} sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }} />} label={<span className="text-sm font-medium text-slate-700">{t("WhatsApp Business Pings")}</span>} />
               </div>
             </div>
 
             <div className="pt-6 flex justify-end">
               <MuiButton onClick={handleSaveAlertSettings} variant="contained" sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
-                Save Alert Configuration
+                {t("Save Alert Configuration")}
               </MuiButton>
             </div>
           </CardContent>
@@ -742,7 +744,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <DollarSign size={18} className="text-emerald-500" /> Multi-Payment Gateway & Billing Keys
+              <DollarSign size={18} className="text-emerald-500" /> {t("Multi-Payment Gateway & Billing Keys")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-8">
@@ -770,7 +772,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
             <div className="pt-6 justify-end flex">
               <MuiButton onClick={handleSaveSystemSettings} variant="contained" sx={{ bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' }, borderRadius: 2, px: 4, py: 1.5, boxShadow: 'none' }}>
-                Save Payment Gateway Keys
+                {t("Save Payment Gateway Keys")}
               </MuiButton>
             </div>
           </CardContent>
@@ -782,14 +784,14 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         <Card className="border-red-100 mt-8">
           <CardHeader className="border-b border-red-50 bg-red-50/50">
             <CardTitle className="text-sm font-semibold uppercase text-red-600 flex items-center gap-2">
-              <Trash2 size={18} /> Danger Zone
+              <Trash2 size={18} /> {t("Danger Zone")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-medium text-slate-900">Delete Current Workspace</h3>
-                <p className="text-sm text-slate-500 mt-1">Permanently remove this workspace and all its data. This action is irreversible.</p>
+                <h3 className="text-base font-medium text-slate-900">{t("Delete Current Workspace")}</h3>
+                <p className="text-sm text-slate-500 mt-1">{t("Permanently remove this workspace and all its data. This action is irreversible.")}</p>
               </div>
               <MuiButton 
                 disabled={workspaceId === 'main' || isDeleting}
@@ -798,7 +800,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 color="error"
                 sx={{ borderRadius: 2, px: 4, py: 1.5 }}
               >
-                {workspaceId === 'main' ? 'Cannot Delete Main Workspace' : isDeleting ? 'Deleting...' : 'Delete Workspace'}
+                {workspaceId === 'main' ? t('Cannot Delete Main Workspace') : isDeleting ? t('Deleting...') : t('Delete Workspace')}
               </MuiButton>
             </div>
           </CardContent>
