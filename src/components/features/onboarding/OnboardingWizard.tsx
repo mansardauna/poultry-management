@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, User, Clipboard, GraduationCap, ChevronRight, CheckCircle2, X, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspace } from '../WorkspaceContext';
+import { useLanguage } from '../LanguageContext';
 
 interface OnboardingWizardProps {
   onClose: () => void;
@@ -12,6 +13,7 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps) {
+  const { t } = useLanguage();
   const { addWorkspace, updateWorkspace, workspaces, setActiveWorkspace, activeWorkspace } = useWorkspace();
   
   // Target workspace context for draft isolation
@@ -57,7 +59,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
     }
 
     if (raw.length < 3) {
-      setUsernameError('Username must be at least 3 characters.');
+      setUsernameError(t('Username must be at least 3 characters.', 'Username must be at least 3 characters.'));
       setIsUsernameAvailable(false);
       setIsCheckingUsername(false);
       return;
@@ -73,7 +75,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
             setUsernameError('');
             setIsUsernameAvailable(true);
           } else {
-            setUsernameError(data.error || 'Username is already taken across the platform.');
+            setUsernameError(data.error ? t(data.error, data.error) : t('Username is already taken across the platform.', 'Username is already taken across the platform.'));
             setIsUsernameAvailable(false);
           }
         }
@@ -83,7 +85,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
     }, 350);
 
     return () => clearTimeout(timer);
-  }, [staffUsername]);
+  }, [staffUsername, t]);
 
   const setStep = (newStep: number) => {
     setStepState(newStep);
@@ -188,10 +190,10 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           createdAt: new Date().toISOString(),
         }, false);
       }
-      toast.success('Setup initialized. Welcome to Poultry Management System.');
+      toast.success(t('Setup initialized. Welcome to Poultry Management System.', 'Setup initialized. Welcome to Poultry Management System.'));
       handleClose();
     } catch {
-      toast.error('Initialization failed.');
+      toast.error(t('Initialization failed.', 'Initialization failed.'));
     } finally {
       setIsSaving(false);
     }
@@ -199,7 +201,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
 
   const handleNextStep1 = () => {
     if (!branchName.trim()) {
-      toast.error('Please enter a farm branch name');
+      toast.error(t('Please enter a farm branch name', 'Please enter a farm branch name'));
       return;
     }
     setStep(2);
@@ -211,7 +213,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
 
   const handleNextStep3 = () => {
     if (isCheckingUsername) {
-      toast.error('Validating username availability, please wait...');
+      toast.error(t('Validating username availability, please wait...', 'Validating username availability, please wait...'));
       return;
     }
     if (usernameError) {
@@ -223,7 +225,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
 
   const handleSubmitAll = async () => {
     if (staffUsername.trim() && (usernameError || isCheckingUsername)) {
-      toast.error(usernameError || 'Please wait for staff username validation to complete.');
+      toast.error(usernameError || t('Please wait for staff username validation to complete.', 'Please wait for staff username validation to complete.'));
       setStep(3);
       return;
     }
@@ -321,10 +323,10 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
         window.dispatchEvent(new CustomEvent('pfms_onboarding_updated'));
       }
 
-      toast.success('Farm onboarding setup submitted successfully.');
+      toast.success(t('Farm onboarding setup submitted successfully.', 'Farm onboarding setup submitted successfully.'));
       handleClose();
     } catch {
-      toast.error('Error submitting onboarding setup');
+      toast.error(t('Error submitting onboarding setup', 'Error submitting onboarding setup'));
     } finally {
       setIsSaving(false);
     }
@@ -347,7 +349,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
           <div>
             <div className="flex items-center gap-2 mb-3 md:mb-6">
               <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">P</div>
-              <span className="font-bold tracking-wider uppercase text-xs text-indigo-300">Farm Onboarding</span>
+              <span className="font-bold tracking-wider uppercase text-xs text-indigo-300">{t("Farm Onboarding", "Farm Onboarding")}</span>
             </div>
             <ul className="grid grid-cols-4 md:flex md:flex-col gap-2 md:gap-5">
               {[
@@ -364,7 +366,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                       ? 'bg-indigo-600/20 md:bg-transparent border border-indigo-500/30 md:border-none' 
                       : ''
                   }`}
-                  title={`Jump to Step ${item.s}`}
+                  title={`${t("Step", "Step")} ${item.s}`}
                 >
                   <div className={`p-2 rounded-xl transition-colors shrink-0 ${
                     step === item.s 
@@ -378,10 +380,10 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                   <div className="text-center md:text-left min-w-0">
                     <p className={`text-[10px] uppercase tracking-wider font-extrabold truncate ${
                       step === item.s ? 'text-indigo-400' : 'text-slate-400'
-                    }`}>Step {item.s}</p>
+                    }`}>{t("Step", "Step")} {item.s}</p>
                     <p className={`text-xs font-semibold hidden md:block truncate ${
                       step === item.s ? 'text-white' : 'text-slate-400'
-                    }`}>{item.label}</p>
+                    }`}>{t(item.label, item.label)}</p>
                   </div>
                 </li>
               ))}
@@ -394,7 +396,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
               disabled={isSaving}
               className="mt-3 md:mt-6 text-xs font-semibold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors text-left cursor-pointer flex items-center gap-1 shrink-0"
             >
-              Skip Setup & Start
+              {t("Skip Setup & Start", "Skip Setup & Start")}
             </button>
           )}
         </div>
@@ -407,13 +409,13 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
             <div className="flex-1 flex flex-col justify-between overflow-hidden">
               <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">Configure Farm Profile & Primary Branch</h2>
-                  <p className="text-xs text-slate-500 mt-1">Set up your farm profile, owner details, location, and operational capacity.</p>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">{t("Configure Farm Profile & Primary Branch", "Configure Farm Profile & Primary Branch")}</h2>
+                  <p className="text-xs text-slate-500 mt-1">{t("Set up your farm profile, owner details, location, and operational capacity.", "Set up your farm profile, owner details, location, and operational capacity.")}</p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Farm / Organization Name *</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Farm / Organization Name *", "Farm / Organization Name *")}</label>
                     <input 
                       type="text" 
                       value={branchName}
@@ -424,7 +426,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Owner / Manager Full Name</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Owner / Manager Full Name", "Owner / Manager Full Name")}</label>
                     <input 
                       type="text" 
                       value={ownerName}
@@ -434,7 +436,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Phone / WhatsApp Number</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Phone / WhatsApp Number", "Phone / WhatsApp Number")}</label>
                     <input 
                       type="text" 
                       value={ownerPhone}
@@ -444,7 +446,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Location Address / State</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Location Address / State", "Location Address / State")}</label>
                     <input 
                       type="text" 
                       value={farmLocation}
@@ -454,7 +456,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Est. Total Capacity (Birds)</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Est. Total Capacity (Birds)", "Est. Total Capacity (Birds)")}</label>
                     <input 
                       type="number" 
                       value={estimatedCapacity}
@@ -464,16 +466,16 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Branch Operational Type</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Branch Operational Type", "Branch Operational Type")}</label>
                     <select 
                       value={branchType}
                       onChange={(e) => setBranchType(e.target.value)}
                       className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium cursor-pointer"
                     >
-                      <option value="Layer Farm">Layer Farm (Egg Production)</option>
-                      <option value="Broiler Farm">Broiler Farm (Meat Production)</option>
-                      <option value="Hatchery">Hatchery & Breeding</option>
-                      <option value="Mixed Use">Mixed Commercial Farm</option>
+                      <option value="Layer Farm">{t("Layer Farm (Egg Production)", "Layer Farm (Egg Production)")}</option>
+                      <option value="Broiler Farm">{t("Broiler Farm (Meat Production)", "Broiler Farm (Meat Production)")}</option>
+                      <option value="Hatchery">{t("Hatchery & Breeding", "Hatchery & Breeding")}</option>
+                      <option value="Mixed Use">{t("Mixed Commercial Farm", "Mixed Commercial Farm")}</option>
                     </select>
                   </div>
                 </div>
@@ -486,7 +488,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                   disabled={!branchName.trim()}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all w-full sm:w-auto justify-center"
                 >
-                  <span>Continue to Flock Setup</span> <ChevronRight size={16} />
+                  <span>{t("Continue to Flock Setup", "Continue to Flock Setup")}</span> <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -497,13 +499,13 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
             <div className="flex-1 flex flex-col justify-between overflow-hidden">
               <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first flock batch</h2>
-                  <p className="text-xs text-slate-500 mt-1">Add initial chicken batches to monitor mortality rates, vaccination routines, and yield metrics.</p>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">{t("Register your first flock batch", "Register your first flock batch")}</h2>
+                  <p className="text-xs text-slate-500 mt-1">{t("Add initial chicken batches to monitor mortality rates, vaccination routines, and yield metrics.", "Add initial chicken batches to monitor mortality rates, vaccination routines, and yield metrics.")}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pb-2">
                   <div className="col-span-2">
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Breed / Hybrid</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Breed / Hybrid", "Breed / Hybrid")}</label>
                     <input 
                       type="text" 
                       value={breed}
@@ -513,7 +515,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Bird Count (Qty)</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Bird Count (Qty)", "Bird Count (Qty)")}</label>
                     <input 
                       type="number" 
                       value={flockQty}
@@ -523,7 +525,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Age (Weeks)</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Age (Weeks)", "Age (Weeks)")}</label>
                     <input 
                       type="number" 
                       value={flockAge}
@@ -533,15 +535,15 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Bird Category</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Bird Category", "Bird Category")}</label>
                     <select 
                       value={flockType}
                       onChange={(e) => setFlockType(e.target.value)}
                       className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium cursor-pointer"
                     >
-                      <option value="Layers">Layers (Egg Production)</option>
-                      <option value="Broilers">Broilers (Meat Production)</option>
-                      <option value="Cockerels">Cockerels</option>
+                      <option value="Layers">{t("Layers (Egg Production)", "Layers (Egg Production)")}</option>
+                      <option value="Broilers">{t("Broilers (Meat Production)", "Broilers (Meat Production)")}</option>
+                      <option value="Cockerels">{t("Cockerels", "Cockerels")}</option>
                     </select>
                   </div>
                 </div>
@@ -553,13 +555,13 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                   onClick={() => setStep(1)}
                   className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  <ArrowLeft size={14} /> Back
+                  <ArrowLeft size={14} /> {t("Back", "Back")}
                 </button>
                 <button 
                   onClick={handleNextStep2}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer transition-all"
                 >
-                  <span>Continue to Staff Setup</span> <ChevronRight size={16} />
+                  <span>{t("Continue to Staff Setup", "Continue to Staff Setup")}</span> <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -570,13 +572,13 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
             <div className="flex-1 flex flex-col justify-between overflow-hidden">
               <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">Register your first staff member</h2>
-                  <p className="text-xs text-slate-500 mt-1">Create staff login credentials to begin delegating daily tasks and logging work.</p>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide">{t("Register your first staff member", "Register your first staff member")}</h2>
+                  <p className="text-xs text-slate-500 mt-1">{t("Create staff login credentials to begin delegating daily tasks and logging work.", "Create staff login credentials to begin delegating daily tasks and logging work.")}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pb-2">
                   <div className="col-span-2">
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Full Name</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Full Name", "Full Name")}</label>
                     <input 
                       type="text" 
                       value={staffName}
@@ -586,18 +588,18 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Access Role</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Access Role", "Access Role")}</label>
                     <select 
                       value={staffRole}
                       onChange={(e) => setStaffRole(e.target.value)}
                       className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium cursor-pointer"
                     >
-                      <option value="Staff">Attendant (Staff)</option>
-                      <option value="Manager">Manager</option>
+                      <option value="Staff">{t("Attendant (Staff)", "Attendant (Staff)")}</option>
+                      <option value="Manager">{t("Manager", "Manager")}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Monthly Salary (₦)</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Monthly Salary (₦)", "Monthly Salary (₦)")}</label>
                     <input 
                       type="number" 
                       value={staffSalary}
@@ -608,7 +610,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      Staff Login Username
+                      {t("Staff Login Username", "Staff Login Username")}
                     </label>
                     <input 
                       type="text" 
@@ -625,27 +627,27 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     />
                     {isCheckingUsername && (
                       <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium animate-pulse">
-                        Checking global availability...
+                        {t("Checking global availability...", "Checking global availability...")}
                       </p>
                     )}
                     {!isCheckingUsername && usernameError && (
                       <p className="text-[11px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                        ⚠️ {usernameError}
+                        ⚠️ {t(usernameError, usernameError)}
                       </p>
                     )}
                     {!isCheckingUsername && isUsernameAvailable && (
                       <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-                        ✓ Username is available across all platform farms.
+                        ✓ {t("Username is available across all platform farms.", "Username is available across all platform farms.")}
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">Password</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Password", "Password")}</label>
                     <input 
                       type="password" 
                       value={staffPassword}
                       onChange={(e) => setStaffPassword(e.target.value)}
-                      placeholder="Set password"
+                      placeholder={t("Set password", "Set password")}
                       className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
                     />
                   </div>
@@ -658,14 +660,14 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                   onClick={() => setStep(2)}
                   className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  <ArrowLeft size={14} /> Back
+                  <ArrowLeft size={14} /> {t("Back", "Back")}
                 </button>
                 <button 
                   onClick={handleNextStep3}
                   disabled={Boolean(usernameError) || isCheckingUsername}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                 >
-                  <span>Continue to Final Review</span> <ChevronRight size={16} />
+                  <span>{t("Continue to Final Review", "Continue to Final Review")}</span> <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -677,26 +679,26 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
               <div className="space-y-4 overflow-y-auto pr-1 flex-1">
                 <div>
                   <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    <CheckCircle2 className="text-emerald-500" size={24} /> Review & Complete Setup
+                    <CheckCircle2 className="text-emerald-500" size={24} /> {t("Review & Complete Setup", "Review & Complete Setup")}
                   </h2>
-                  <p className="text-xs text-slate-500 mt-1">Operational breakdown of your poultry management workspace.</p>
+                  <p className="text-xs text-slate-500 mt-1">{t("Operational breakdown of your poultry management workspace.", "Operational breakdown of your poultry management workspace.")}</p>
                 </div>
                 
                 <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
                   <div className="space-y-1">
-                    <p className="font-bold text-slate-900">Farm Branch: <span className="text-indigo-600">{branchName || 'Main Farm'}</span> ({branchType})</p>
+                    <p className="font-bold text-slate-900">{t("Farm Branch:", "Farm Branch:")} <span className="text-indigo-600">{branchName || 'Main Farm'}</span> ({branchType})</p>
                     <p className="text-slate-600 font-medium">Owner: {ownerName || 'Not specified'} | Location: {farmLocation || 'Default'} | Capacity: {estimatedCapacity || '5000'} birds</p>
                   </div>
                   <div className="space-y-1 border-t border-slate-200 pt-3">
-                    <p className="font-bold text-slate-900">First Flock: <span className="text-indigo-600">{breed || 'Commercial Layer'}</span> ({flockQty || '500'} birds, {flockAge || '1'} weeks old)</p>
+                    <p className="font-bold text-slate-900">{t("First Flock:", "First Flock:")} <span className="text-indigo-600">{breed || 'Commercial Layer'}</span> ({flockQty || '500'} birds, {flockAge || '1'} weeks old)</p>
                   </div>
                   <div className="space-y-1 border-t border-slate-200 pt-3">
-                    <p className="font-bold text-slate-900">First Staff: <span className="text-indigo-600">{staffName || 'Farm Attendant'}</span> ({staffRole}, Username: {staffUsername || 'staff1'})</p>
+                    <p className="font-bold text-slate-900">{t("First Staff:", "First Staff:")} <span className="text-indigo-600">{staffName || 'Farm Attendant'}</span> ({staffRole}, Username: {staffUsername || 'staff1'})</p>
                   </div>
                   <div className="space-y-1 border-t border-slate-200 pt-3">
-                    <p className="font-bold text-slate-900">Daily Logs & Operational Rules</p>
+                    <p className="font-bold text-slate-900">{t("Daily Logs & Operational Rules", "Daily Logs & Operational Rules")}</p>
                     <p className="text-slate-600 leading-relaxed">
-                      Egg collections, mortality alerts, feed thresholds, and staff task rosters are ready for immediate logging.
+                      {t("Egg collections, mortality alerts, feed thresholds, and staff task rosters are ready for immediate logging.", "Egg collections, mortality alerts, feed thresholds, and staff task rosters are ready for immediate logging.")}
                     </p>
                   </div>
                 </div>
@@ -708,14 +710,14 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                   onClick={() => setStep(3)}
                   className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  <ArrowLeft size={14} /> Back
+                  <ArrowLeft size={14} /> {t("Back", "Back")}
                 </button>
                 <button 
                   onClick={handleSubmitAll}
                   disabled={isSaving}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-8 py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 disabled:opacity-50 cursor-pointer transition-all"
                 >
-                  {isSaving ? 'Submitting Setup...' : 'Submit & Complete Setup'} <ChevronRight size={18} />
+                  {isSaving ? t('Submitting Setup...', 'Submitting Setup...') : t('Submit & Complete Setup', 'Submit & Complete Setup')} <ChevronRight size={18} />
                 </button>
               </div>
             </div>

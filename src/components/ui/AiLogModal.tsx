@@ -15,6 +15,7 @@ import {
   Box
 } from '@mui/material';
 import { Sparkles } from 'lucide-react';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 /**
  * Props for the AiLogModal component.
@@ -30,6 +31,7 @@ interface AiLogModalProps {
  * sales, expenses) and writes them directly to the database.
  */
 export function AiLogModal({ onSuccess }: AiLogModalProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [reportText, setReportText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -86,11 +88,11 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
         }, 3000);
       } else {
         setIsProcessing(false);
-        toast.error('Failed to parse report. Please try again.');
+        toast.error(t('Failed to parse report. Please try again.', 'Failed to parse report. Please try again.'));
       }
     } catch {
       setIsProcessing(false);
-      toast.error('Error contacting the parser service.');
+      toast.error(t('Error contacting the parser service.', 'Error contacting the parser service.'));
     }
   };
 
@@ -100,7 +102,7 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
         onClick={handleOpen}
         className="bg-white border-2 border-indigo-600 text-indigo-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
       >
-        <Sparkles size={18} /> AI Auto-Log
+        <Sparkles size={18} /> {t('AI Auto-Log', 'AI Auto-Log')}
       </button>
 
       <Dialog
@@ -113,63 +115,63 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
         }}
       >
         <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>
-          {success ? "Report processed" : "Voice & text log parser"}
+          {success ? t("Report processed", "Report processed") : t("Voice & text log parser", "Voice & text log parser")}
         </DialogTitle>
         <DialogContent className="flex flex-col gap-4">
           {success ? (
             <Box sx={{ py: 3, textAlign: "center" }}>
               <Sparkles size={48} color="#4f46e5" className="mx-auto mb-4 block" />
               <Typography variant="h6" sx={{ fontFamily: "var(--font-cal-sans)", color: "#1e293b" }}>
-                Database Updated Successfully!
+                {t("Database Updated Successfully!", "Database Updated Successfully!")}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ fontFamily: "var(--font-dm-sans)", mt: 1 }}>
-                The AI has extracted the following metrics:
+                {t("The AI has extracted the following metrics:", "The AI has extracted the following metrics:")}
               </Typography>
               {!!extractedData && (
                 <Box sx={{ mt: 2, p: 2, bgcolor: "#f8fafc", border: "1px solid #e2e8f0", textAlign: "left", maxHeight: "300px", overflowY: "auto" }} className="font-mono text-xs text-slate-700 space-y-2">
                   {/* Staff Updates */}
-                  {(extractedData as any).staffChanges?.removeAll && <div className="text-red-600">Removed all previous staff records.</div>}
+                  {(extractedData as any).staffChanges?.removeAll && <div className="text-red-600">{t("Removed all previous staff records.", "Removed all previous staff records.")}</div>}
                   {(extractedData as any).staffChanges?.add?.map((s: any, i: number) => (
-                    <div key={'s'+i}>Added Staff: {s.name} ({s.role}) - ₦{s.salary.toLocaleString()}</div>
+                    <div key={'s'+i}>{t("Added Staff:", "Added Staff:")} {s.name} ({s.role}) - ₦{s.salary.toLocaleString()}</div>
                   ))}
                   
                   {/* Eggs */}
                   {(extractedData as any).eggs?.map((e: any, i: number) => (
-                    <div key={'e'+i}>Collected {e.goodEggs} eggs on {e.date} {e.notes ? `(${e.notes})` : ''}</div>
+                    <div key={'e'+i}>{t("Collected", "Collected")} {e.goodEggs} {t("eggs on", "eggs on")} {e.date} {e.notes ? `(${e.notes})` : ''}</div>
                   ))}
 
                   {/* Expenses */}
                   {(extractedData as any).expenses?.map((ex: any, i: number) => (
-                    <div key={'ex'+i}>Logged Expense: ₦{ex.amount.toLocaleString()} for {ex.description} ({ex.category}) on {ex.date}</div>
+                    <div key={'ex'+i}>{t("Logged Expense:", "Logged Expense:")} ₦{ex.amount.toLocaleString()} for {ex.description} ({ex.category}) on {ex.date}</div>
                   ))}
 
                   {/* Medications */}
                   {(extractedData as any).medications?.map((m: any, i: number) => (
-                    <div key={'m'+i}>Scheduled: {m.name} on {m.date}</div>
+                    <div key={'m'+i}>{t("Scheduled:", "Scheduled:")} {m.name} on {m.date}</div>
                   ))}
 
                   {/* Basic Metrics */}
-                  {(extractedData as any).feedUsedKg > 0 && <div>Feed Used: {(extractedData as any).feedUsedKg} kg</div>}
-                  {(extractedData as any).mortalityCount > 0 && <div>Mortality: {(extractedData as any).mortalityCount} birds</div>}
-                  {(extractedData as any).salesAmount > 0 && <div>Sales Recorded: ₦{(extractedData as any).salesAmount.toLocaleString()}</div>}
+                  {(extractedData as any).feedUsedKg > 0 && <div>{t("Feed Used:", "Feed Used:")} {(extractedData as any).feedUsedKg} kg</div>}
+                  {(extractedData as any).mortalityCount > 0 && <div>{t("Mortality:", "Mortality:")} {(extractedData as any).mortalityCount} birds</div>}
+                  {(extractedData as any).salesAmount > 0 && <div>{t("Sales Recorded:", "Sales Recorded:")} ₦{(extractedData as any).salesAmount.toLocaleString()}</div>}
                 </Box>
               )}
             </Box>
           ) : (
             <>
               <Typography variant="body2" color="textSecondary" sx={{ fontFamily: "var(--font-dm-sans)", mb: 3, mt: 1 }}>
-                Paste your daily report below. The AI will automatically extract egg collections, feed usage, and mortality figures to update your records.
+                {t("Paste your daily report below. The AI will automatically extract egg collections, feed usage, and mortality figures to update your records.", "Paste your daily report below. The AI will automatically extract egg collections, feed usage, and mortality figures to update your records.")}
               </Typography>
               <TextField
                 autoFocus
                 margin="dense"
                 id="report"
-                label="Daily Farm Report"
+                label={t("Daily Farm Report", "Daily Farm Report")}
                 type="text"
                 fullWidth
                 multiline
                 rows={6}
-                placeholder="Example: Today we collected 4500 good eggs, but 12 were cracked. Unfortunately, 3 birds died. We also spent 250000 on drugs and sold eggs for 600000."
+                placeholder={t("Example: Today we collected 4500 good eggs, but 12 were cracked. Unfortunately, 3 birds died. We also spent 250000 on drugs and sold eggs for 600000.", "Example: Today we collected 4500 good eggs, but 12 were cracked. Unfortunately, 3 birds died. We also spent 250000 on drugs and sold eggs for 600000.")}
                 variant="outlined"
                 value={reportText}
                 onChange={(e) => setReportText(e.target.value)}
@@ -189,7 +191,7 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
               disabled={isProcessing}
               sx={{ borderRadius: 2, fontFamily: 'var(--font-dm-sans)', color: '#64748b' }}
             >
-              Cancel
+              {t("Cancel", "Cancel")}
             </MuiButton>
             <MuiButton
               onClick={handleProcessLog}
@@ -204,7 +206,7 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
                 minWidth: '120px'
               }}
             >
-              {isProcessing ? <CircularProgress size={24} color="inherit" /> : 'Process Report'}
+              {isProcessing ? <CircularProgress size={24} color="inherit" /> : t("Process Report", "Process Report")}
             </MuiButton>
           </DialogActions>
         )}

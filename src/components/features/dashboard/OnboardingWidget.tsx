@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Box, Clipboard, User, GraduationCap, X } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
 
 interface OnboardingWidgetProps {
   workspacesCount: number;
@@ -19,6 +20,7 @@ export function OnboardingWidget({
   onOpenStep,
   userRole = 'Admin'
 }: OnboardingWidgetProps) {
+  const { t } = useLanguage();
   const [guideRead, setGuideRead] = useState(false);
   const [branchCompleted, setBranchCompleted] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -78,11 +80,11 @@ export function OnboardingWidget({
     },
     {
       id: 4,
-      title: 'Operational Starter Guide',
-      desc: 'Review egg yield tracking & feed threshold rules',
+      title: 'Poultry Operations Guide',
+      desc: 'Read comprehensive handbook on egg & feed management',
       isDone: step4Done,
       icon: GraduationCap,
-      actionText: 'View Guide'
+      actionText: 'Read Guide'
     }
   ];
 
@@ -119,15 +121,15 @@ export function OnboardingWidget({
               <Box size={20} />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-white tracking-tight">Farm Setup & Onboarding Progress</h3>
+              <h3 className="text-base font-extrabold text-white tracking-tight">{t("Farm Setup & Onboarding Progress", "Farm Setup & Onboarding Progress")}</h3>
               <p className="text-xs text-slate-400 mt-0.5 font-medium">
-                Complete initial setup steps to activate operational logs, mortality alerts, and feed thresholds.
+                {t("Complete initial setup to optimize your farm workflow", "Complete initial setup to optimize your farm workflow")}
               </p>
             </div>
           </div>
 
           <span className="self-start sm:self-auto bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider whitespace-nowrap shrink-0">
-            {completedCount} of 4 Completed ({progressPercent}%)
+            {completedCount} / 4 {t("Completed", "Completed")} ({progressPercent}%)
           </span>
         </div>
 
@@ -136,14 +138,14 @@ export function OnboardingWidget({
             onClick={() => onOpenStep(nextPendingStep.id)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-indigo-600/20 flex-1 md:flex-none justify-center"
           >
-            <span>Resume Step {nextPendingStep.id}: {nextPendingStep.actionText}</span>
+            <span>{t("Resume Step", "Resume Step")} {nextPendingStep.id}: {t(nextPendingStep.actionText, nextPendingStep.actionText)}</span>
             <ArrowRight size={15} />
           </button>
           
           <button
             onClick={handleDismiss}
             className="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
-            title="Dismiss widget"
+            title={t("Dismiss", "Dismiss")}
           >
             <X size={16} />
           </button>
@@ -153,7 +155,7 @@ export function OnboardingWidget({
       {/* Progress Bar Segment */}
       <div className="pt-4">
         <div className="flex justify-between text-[11px] font-bold text-slate-400 mb-2">
-          <span>Overall Setup Progress</span>
+          <span>{t("Overall Setup Progress", "Overall Setup Progress")}</span>
           <span className="text-indigo-400 font-mono">{progressPercent}%</span>
         </div>
         <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5 border border-slate-700">

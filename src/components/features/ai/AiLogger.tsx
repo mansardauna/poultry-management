@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import { X, Send, Loader2, CheckCircle, Mic, MicOff, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/components/features/LanguageContext';
 
 export function AiLogger({ role }: { role?: string }) {
+  const { t } = useLanguage();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
@@ -37,7 +39,7 @@ export function AiLogger({ role }: { role?: string }) {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      toast.error("Your browser doesn't support speech recognition.");
+      toast.error(t("Your browser doesn't support speech recognition.", "Your browser doesn't support speech recognition."));
       return;
     }
 
@@ -100,17 +102,17 @@ export function AiLogger({ role }: { role?: string }) {
 
       if (res.ok && data.success) {
         setResult(data.parsed);
-        toast.success('Data logged successfully');
+        toast.success(t('Data logged successfully', 'Data logged successfully'));
         setText('');
         router.refresh();
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('pfms_data_updated', { detail: data.parsed }));
         }
       } else {
-        toast.error(data.error || 'Failed to parse data');
+        toast.error(t(data.error || 'Failed to parse data', data.error || 'Failed to parse data'));
       }
     } catch (err) {
-      toast.error('An error occurred while logging record.');
+      toast.error(t('An error occurred while logging record.', 'An error occurred while logging record.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -123,7 +125,7 @@ export function AiLogger({ role }: { role?: string }) {
         data-tour="ai-logger-btn"
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-indigo-600 hover:bg-indigo-700 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-white cursor-pointer"
-        title="Voice & Text Logger"
+        title={t("Voice & Quick Text Logger", "Voice & Quick Text Logger")}
       >
         <Mic size={22} />
       </button>
@@ -137,7 +139,7 @@ export function AiLogger({ role }: { role?: string }) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2 text-indigo-600">
                 <FileText size={20} />
-                <h3 className="font-extrabold text-base text-slate-900">Voice & Quick Text Logger</h3>
+                <h3 className="font-extrabold text-base text-slate-900">{t("Voice & Quick Text Logger", "Voice & Quick Text Logger")}</h3>
               </div>
               <button 
                 onClick={() => {
@@ -158,9 +160,9 @@ export function AiLogger({ role }: { role?: string }) {
                   <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto border border-indigo-100">
                     <Mic size={28} />
                   </div>
-                  <h4 className="text-lg font-extrabold text-slate-900">Voice & Quick Text Logger</h4>
+                  <h4 className="text-lg font-extrabold text-slate-900">{t("Voice & Quick Text Logger", "Voice & Quick Text Logger")}</h4>
                   <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-                    Automatically parse voice recordings and raw notes into farm logs, sales, and feed records with Commercial Pro.
+                    {t("Automatically parse voice recordings and raw notes into farm logs, sales, and feed records with Commercial Pro.", "Automatically parse voice recordings and raw notes into farm logs, sales, and feed records with Commercial Pro.")}
                   </p>
                   <div className="pt-2">
                     <button
@@ -170,15 +172,15 @@ export function AiLogger({ role }: { role?: string }) {
                       }}
                       className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-md transition-all cursor-pointer"
                     >
-                      Upgrade to Commercial Pro (₦15,000/mo)
+                      {t("Upgrade to Commercial Pro (₦15,000/mo)", "Upgrade to Commercial Pro (₦15,000/mo)")}
                     </button>
                   </div>
                 </div>
               ) : !result ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <p className="text-xs text-slate-500 font-medium">
-                    Type or speak your daily logs. For example: <br/>
-                    <span className="italic text-slate-700 font-semibold">&quot;We sold 12 crates today for 50k, bought feed for 20k, and collected 4 crates.&quot;</span>
+                    {t("Type or speak your daily logs. For example:", "Type or speak your daily logs. For example:")} <br/>
+                    <span className="italic text-slate-700 font-semibold">&quot;{t("We sold 12 crates today for 50k, bought feed for 20k, and collected 4 crates.", "We sold 12 crates today for 50k, bought feed for 20k, and collected 4 crates.")}&quot;</span>
                   </p>
                   
                   <div className="relative">
@@ -186,7 +188,7 @@ export function AiLogger({ role }: { role?: string }) {
                       autoFocus
                       value={text}
                       onChange={(e) => setText(e.target.value)}
-                      placeholder="Enter your farm operational logs here..."
+                      placeholder={t("Enter your farm operational logs here...", "Enter your farm operational logs here...")}
                       className="w-full h-32 p-4 pb-12 text-slate-800 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all outline-none font-medium text-sm"
                       disabled={isSubmitting}
                     />
@@ -198,7 +200,7 @@ export function AiLogger({ role }: { role?: string }) {
                           ? 'bg-red-100 text-red-600 animate-pulse' 
                           : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
                       }`}
-                      title={isListening ? "Stop listening" : "Start speaking"}
+                      title={isListening ? t("Stop listening", "Stop listening") : t("Start speaking", "Start speaking")}
                     >
                       {isListening ? <MicOff size={18} /> : <Mic size={18} />}
                     </button>
@@ -213,12 +215,12 @@ export function AiLogger({ role }: { role?: string }) {
                       {isSubmitting ? (
                         <>
                           <Loader2 size={16} className="animate-spin" />
-                          Processing...
+                          {t("Processing...", "Processing...")}
                         </>
                       ) : (
                         <>
                           <Send size={16} />
-                          Log Data
+                          {t("Log Data", "Log Data")}
                         </>
                       )}
                     </button>
@@ -230,14 +232,14 @@ export function AiLogger({ role }: { role?: string }) {
                     <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-2">
                       <CheckCircle size={28} />
                     </div>
-                    <h4 className="text-base font-extrabold text-slate-900">Successfully Logged</h4>
-                    <p className="text-xs text-slate-500">System parsed and recorded your operational data.</p>
+                    <h4 className="text-base font-extrabold text-slate-900">{t("Successfully Logged", "Successfully Logged")}</h4>
+                    <p className="text-xs text-slate-500">{t("System parsed and recorded your operational data.", "System parsed and recorded your operational data.")}</p>
                   </div>
                   
                   <div className="bg-slate-50 rounded-xl p-4 space-y-3 text-xs border border-slate-200">
                     {result.sales && result.sales.length > 0 && (
                       <div>
-                        <span className="font-bold text-slate-800 block mb-1">Sales Logged:</span>
+                        <span className="font-bold text-slate-800 block mb-1">{t("Sales Logged:", "Sales Logged:")}</span>
                         <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
                           {result.sales.map((s: any, i: number) => (
                             <li key={i}>{s.quantity} {s.type} for ₦{s.totalAmount?.toLocaleString()} on {s.date}</li>
@@ -248,7 +250,7 @@ export function AiLogger({ role }: { role?: string }) {
 
                     {result.expenses && result.expenses.length > 0 && (
                       <div>
-                        <span className="font-bold text-slate-800 block mb-1">Expenses Logged:</span>
+                        <span className="font-bold text-slate-800 block mb-1">{t("Expenses Logged:", "Expenses Logged:")}</span>
                         <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
                           {result.expenses.map((e: any, i: number) => (
                             <li key={i}>{e.category}: ₦{e.amount?.toLocaleString()} on {e.date}</li>
@@ -259,10 +261,10 @@ export function AiLogger({ role }: { role?: string }) {
 
                     {result.eggs && result.eggs.length > 0 && (
                       <div>
-                        <span className="font-bold text-slate-800 block mb-1">Eggs Logged:</span>
+                        <span className="font-bold text-slate-800 block mb-1">{t("Eggs Logged:", "Eggs Logged:")}</span>
                         <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
                           {result.eggs.map((e: any, i: number) => (
-                            <li key={i}>{e.goodEggs} good, {e.crackedEggs || 0} cracked on {e.date}</li>
+                            <li key={i}>{e.goodEggs} {t("good", "good")}, {e.crackedEggs || 0} {t("cracked", "cracked")} on {e.date}</li>
                           ))}
                         </ul>
                       </div>
@@ -278,7 +280,7 @@ export function AiLogger({ role }: { role?: string }) {
                       }}
                       className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-sm"
                     >
-                      Done & View Updates
+                      {t("Done & View Updates", "Done & View Updates")}
                     </button>
                   </div>
                 </div>
