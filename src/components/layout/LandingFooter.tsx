@@ -1,15 +1,12 @@
 'use strict';
 'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
 import { useLanguage } from '../features/LanguageContext';
+import { useWhiteLabel } from '../features/WhiteLabelContext';
 
 export function LandingFooter({
   brandName: propBrandName,
-  brandLogoText: propBrandLogoText,
   logoUrl: propLogoUrl,
-  primaryColor: propPrimaryColor,
   footerText: propFooterText
 }: {
   brandName?: string;
@@ -18,45 +15,29 @@ export function LandingFooter({
   primaryColor?: string;
   footerText?: string;
 }) {
-  const [brandName, setBrandName] = useState(propBrandName || 'PFMS');
-  const [brandLogoText, setBrandLogoText] = useState(propBrandLogoText || 'P');
-  const [logoUrl, setLogoUrl] = useState(propLogoUrl || '');
-  const [primaryColor, setPrimaryColor] = useState(propPrimaryColor || '#4f46e5');
-  const [footerText, setFooterText] = useState(propFooterText || 'PFMS Inc. All rights reserved.');
+  const whiteLabel = useWhiteLabel();
   const { t } = useLanguage();
 
-  useEffect(() => {
-    if (!propBrandName) {
-      fetch('/api/admin/cms')
-        .then(res => res.json())
-        .then(data => {
-          if (data?.brandName) setBrandName(data.brandName);
-          if (data?.brandLogoText) setBrandLogoText(data.brandLogoText);
-          else if (data?.brandName) setBrandLogoText(data.brandName.charAt(0).toUpperCase());
-          if (data?.logoUrl !== undefined) setLogoUrl(data.logoUrl || '');
-          if (data?.primaryColor) setPrimaryColor(data.primaryColor);
-          if (data?.footerText) setFooterText(data.footerText);
-          else if (data?.brandName) setFooterText(`${data.brandName} Inc. All rights reserved.`);
-        })
-        .catch(() => {});
-    }
-  }, [propBrandName]);
+  const brandName = propBrandName || whiteLabel.brandName || whiteLabel.platformName || 'PFMS';
+  const logoUrl = propLogoUrl || whiteLabel.logoUrl || '/icon.png';
+  const footerText = propFooterText || `${brandName} Inc. All rights reserved.`;
 
   return (
     <footer className="bg-white border-t border-slate-200 py-12 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-        <Link href="/" className="flex items-center gap-2 cursor-pointer">
-          {logoUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={logoUrl} alt={brandName} className="h-6 max-w-[120px] object-contain" />
-          ) : (
-            <div 
-              className="w-6 h-6 rounded text-white font-bold text-xs flex items-center justify-center shadow-sm"
-              style={{ backgroundColor: primaryColor }}
-            >
-              {brandLogoText}
-            </div>
-          )}
+        <Link href="/" className="flex items-center gap-2.5 cursor-pointer group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={logoUrl || '/icon.png'} 
+            alt={brandName} 
+            className="h-6 w-auto max-w-[120px] object-contain transition-transform group-hover:scale-105" 
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              if (!target.src.endsWith('/icon.png')) {
+                target.src = '/icon.png';
+              }
+            }}
+          />
           <span className="font-bold text-slate-800">{brandName}</span>
         </Link>
         <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 font-medium">

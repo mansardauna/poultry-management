@@ -5,14 +5,13 @@ import Link from 'next/link';
 import { Menu, X, ArrowRight } from 'lucide-react';
 
 import { useLanguage } from '../features/LanguageContext';
+import { useWhiteLabel } from '../features/WhiteLabelContext';
 import { LanguageSelector } from '../ui/LanguageSelector';
 
 export function LandingNav({ 
   activePath, 
   brandName: propBrandName,
-  brandLogoText: propBrandLogoText,
   logoUrl: propLogoUrl,
-  primaryColor: propPrimaryColor
 }: { 
   activePath?: string;
   brandName?: string;
@@ -22,11 +21,11 @@ export function LandingNav({
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [brandName, setBrandName] = useState(propBrandName || 'PFMS');
-  const [brandLogoText, setBrandLogoText] = useState(propBrandLogoText || 'P');
-  const [logoUrl, setLogoUrl] = useState(propLogoUrl || '');
-  const [primaryColor, setPrimaryColor] = useState(propPrimaryColor || '#4f46e5');
+  const whiteLabel = useWhiteLabel();
   const { t } = useLanguage();
+
+  const brandName = propBrandName || whiteLabel.brandName || whiteLabel.platformName || 'PFMS';
+  const logoUrl = propLogoUrl || whiteLabel.logoUrl || '/icon.png';
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -37,38 +36,26 @@ export function LandingNav({
       .catch(() => {
         setIsLoggedIn(false);
       });
-
-    if (!propBrandName) {
-      fetch('/api/admin/cms')
-        .then(res => res.json())
-        .then(data => {
-          if (data?.brandName) setBrandName(data.brandName);
-          if (data?.brandLogoText) setBrandLogoText(data.brandLogoText);
-          else if (data?.brandName) setBrandLogoText(data.brandName.charAt(0).toUpperCase());
-          if (data?.logoUrl !== undefined) setLogoUrl(data.logoUrl || '');
-          if (data?.primaryColor) setPrimaryColor(data.primaryColor);
-        })
-        .catch(() => {});
-    }
-  }, [propBrandName]);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Brand Logo & Name */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 cursor-pointer shrink min-w-0">
-            {logoUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={logoUrl} alt={brandName} className="h-7 sm:h-8 max-w-[130px] sm:max-w-[160px] object-contain shrink-0" />
-            ) : (
-              <div 
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-sm shrink-0"
-                style={{ backgroundColor: primaryColor }}
-              >
-                {brandLogoText}
-              </div>
-            )}
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink min-w-0 group">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={logoUrl || '/icon.png'} 
+              alt={brandName} 
+              className="h-8 sm:h-9 w-auto max-w-[130px] sm:max-w-[160px] object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" 
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                if (!target.src.endsWith('/icon.png')) {
+                  target.src = '/icon.png';
+                }
+              }}
+            />
             <span className="font-bold text-base sm:text-xl tracking-tight text-slate-800 truncate">
               {brandName}
             </span>

@@ -7,6 +7,7 @@ import { KeyRound, Eye, EyeOff, CheckCircle2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/components/features/LanguageContext';
+import { useWhiteLabel } from '@/components/features/WhiteLabelContext';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 function ResetPasswordForm() {
@@ -14,6 +15,7 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get('email') || '';
   const { t } = useLanguage();
+  const whiteLabel = useWhiteLabel();
 
   const [email, setEmail] = useState(emailParam);
   const [newPassword, setNewPassword] = useState('');
@@ -73,9 +75,18 @@ function ResetPasswordForm() {
       </div>
 
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center shadow-sm border border-indigo-100">
-          <KeyRound size={32} />
-        </div>
+        <Link href="/" className="inline-flex items-center gap-2.5 mb-2 group cursor-pointer">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={whiteLabel.logoUrl || '/icon.png'} 
+            alt={whiteLabel.brandName} 
+            className="h-10 w-auto max-w-[140px] sm:max-w-[180px] object-contain transition-transform group-hover:scale-105 mx-auto"
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+            }}
+          />
+        </Link>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{t("Reset Your Password")}</h1>
         <p className="text-sm text-slate-500 font-medium">{t("Enter your account email and specify your new password below.", "Enter your account email and specify your new password below.")}</p>
       </div>

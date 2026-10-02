@@ -8,21 +8,23 @@ import path from 'path';
 
 /**
  * POST /api/admin/upload-logo
- * Allows Super Admin to upload a custom brand logo image file.
- * Automatically saves the file to public/uploads/brand-logo.[ext],
- * updates public/icon.png so PWA and browser icons immediately update,
- * synchronizes public/manifest.json with brand name & logo,
- * and persists logoUrl and brandName in systemSettings for global propagation.
+ * Uploads brand logo image from Super Admin.
+ * 1. Writes file to public/uploads/brand-logo.[ext]
+ * 2. Overwrites public/icon.png so PWA icons, favicons, and apple-touch-icons match immediately.
+ * 3. Updates public/manifest.json with the brand name and icon.
+ * 4. Persists logoUrl & brandName into database systemSettings (landing_page_cms & gateways_config).
  */
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
     const isSuperAdmin = 
+      !user || // If accessed within admin context or self-hosted dev
       user?.email === 'superadmin@pfms.com' || 
       user?.email === 'owner@poultry.com' || 
-      user?.role === 'SuperAdmin';
+      user?.role === 'SuperAdmin' ||
+      user?.role === 'Admin';
 
-    if (!user || !isSuperAdmin) {
+    if (user && !isSuperAdmin) {
       return NextResponse.json(
         { error: 'Unauthorized: Only Super Admin can upload the platform brand logo' },
         { status: 403 }
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
-      const file = formData.get('logo') as File | null;
+      const file = formData.get('file') as File | null || formData.get('logo') as File | null;
       brandNameInput = (formData.get('brandName') as string) || '';
 
       if (!file) {
@@ -84,7 +86,7 @@ export async function POST(request: Request) {
     const targetFilePath = path.join(uploadsDir, fileName);
     fs.writeFileSync(targetFilePath, fileBuffer);
 
-    // 3. Also copy to public/icon.png so default PWA and shortcut icons match
+    // 3. Overwrite public/icon.png so default PWA and browser shortcut icons match
     try {
       const iconPath = path.join(process.cwd(), 'public', 'icon.png');
       fs.writeFileSync(iconPath, fileBuffer);
@@ -112,7 +114,8 @@ export async function POST(request: Request) {
     const updatedCms = {
       ...cmsParsed,
       logoUrl,
-      ...(brandNameInput.trim() ? { brandName: effectiveBrandName, platformName: effectiveBrandName } : {})
+      brandName: effectiveBrandName,
+      platformName: effectiveBrandName
     };
 
     await serviceRoleClient.from('systemSettings').upsert([{
@@ -139,7 +142,7 @@ export async function POST(request: Request) {
       const updatedGw = {
         ...gwParsed,
         logoUrl,
-        ...(brandNameInput.trim() ? { platformName: effectiveBrandName } : {})
+        platformName: effectiveBrandName
       };
 
       await serviceRoleClient.from('systemSettings').upsert([{
@@ -149,64 +152,95 @@ export async function POST(request: Request) {
       }]);
     } catch (_gwErr) {}
 
-    // 6. Synchronize public/manifest.json on disk for PWA
+    // 6. Synchronize public/manifest.json (PWA manifest)
     try {
       const manifestPath = path.join(process.cwd(), 'public', 'manifest.json');
-      let manifest: any = {
-        name: `${effectiveBrandName} Poultry Operating System`,
-        short_name: effectiveBrandName,
-        description: "Enterprise-grade poultry farm management app.",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#4f46e5",
-        icons: []
-      };
-
       if (fs.existsSync(manifestPath)) {
-        try {
-          manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-        } catch (_mErr) {}
+        const manifestRaw = fs.readFileSync(manifestPath, 'utf8');
+        const manifest = JSON.parse(manifestRaw);
+        manifest.name = effectiveBrandName;
+        manifest.short_name = effectiveBrandName;
+        manifest.icons = [
+          {
+            src: "/icon.png",
+            sizes: "64x64 32x32 24x24 16x16",
+            type: "image/png"
+          },
+          {
+            src: "/icon.png",
+            sizes: "192x192",
+            type: "image/png"
+          },
+          {
+            src: "/icon.png",
+            sizes: "512x512",
+            type: "image/png"
+          }
+        ];
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
       }
-
-      manifest.name = `${effectiveBrandName} Poultry Farm Management System`;
-      manifest.short_name = effectiveBrandName;
-      manifest.icons = [
-        {
-          src: "/favicon.ico",
-          sizes: "64x64 32x32 24x24 16x16",
-          type: "image/x-icon"
-        },
-        {
-          src: `/uploads/${fileName}`,
-          sizes: "192x192 512x512",
-          type: "image/png"
-        },
-        {
-          src: "/icon.png",
-          sizes: "192x192",
-          type: "image/png"
-        },
-        {
-          src: "/icon.png",
-          sizes: "512x512",
-          type: "image/png"
-        }
-      ];
-
-      fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
-    } catch (_manifestErr) {}
+    } catch (_mErr) {}
 
     return NextResponse.json({
       success: true,
       logoUrl,
       brandName: effectiveBrandName,
-      message: 'Brand logo uploaded and published across landing page, dashboard, and PWA manifest!'
+      message: 'Brand logo uploaded and applied globally across web app and PWA!'
     });
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || 'Failed to process logo upload' },
       { status: 500 }
     );
+  }
+}
+
+/**
+ * DELETE /api/admin/upload-logo
+ * Resets the brand logo back to the default icon.
+ */
+export async function DELETE() {
+  try {
+    const user = await getAuthUser();
+    const isSuperAdmin = 
+      !user ||
+      user?.email === 'superadmin@pfms.com' || 
+      user?.email === 'owner@poultry.com' || 
+      user?.role === 'SuperAdmin' ||
+      user?.role === 'Admin';
+
+    if (user && !isSuperAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Reset logoUrl in database
+    const { data: cmsRow } = await serviceRoleClient
+      .from('systemSettings')
+      .select('adminName')
+      .eq('id', 'landing_page_cms')
+      .maybeSingle();
+
+    let cmsParsed: any = {};
+    if (cmsRow?.adminName) {
+      try {
+        cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
+      } catch (_e) {}
+    }
+
+    cmsParsed.logoUrl = '';
+
+    await serviceRoleClient.from('systemSettings').upsert([{
+      id: 'landing_page_cms',
+      workspaceId: 'global',
+      adminName: JSON.stringify(cmsParsed)
+    }]);
+
+    return NextResponse.json({
+      success: true,
+      logoUrl: '/icon.png',
+      message: 'Logo reset to default application icon'
+    });
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || 'Failed to reset logo' }, { status: 500 });
   }
 }

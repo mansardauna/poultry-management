@@ -8,15 +8,17 @@ import { FAQSection } from '@/components/features/marketing/FAQSection';
 import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 import { useLanguage } from '@/components/features/LanguageContext';
+import { useWhiteLabel } from '@/components/features/WhiteLabelContext';
 
 export default function LandingPage() {
   const { t } = useLanguage();
+  const whiteLabel = useWhiteLabel();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cms, setCms] = useState({
     brandName: 'PFMS',
     brandTagline: 'Smart Poultry Operating System',
     brandLogoText: 'P',
-    logoUrl: '',
+    logoUrl: '/icon.png',
     primaryColor: '#4f46e5',
     footerText: 'PFMS Inc. All rights reserved.',
     heroHeading: 'AI-Driven poultry farms with human-level precision',
@@ -48,10 +50,8 @@ export default function LandingPage() {
       
       {/* Navigation */}
       <LandingNav 
-        brandName={cms.brandName} 
-        brandLogoText={cms.brandLogoText} 
-        logoUrl={cms.logoUrl}
-        primaryColor={cms.primaryColor}
+        brandName={whiteLabel.brandName} 
+        logoUrl={whiteLabel.logoUrl}
       />
 
       {/* Hero Section */}
@@ -267,10 +267,8 @@ export default function LandingPage() {
 
       {/* Simple Footer */}
       <LandingFooter 
-        brandName={cms.brandName} 
-        brandLogoText={cms.brandLogoText} 
-        logoUrl={cms.logoUrl}
-        primaryColor={cms.primaryColor}
+        brandName={whiteLabel.brandName} 
+        logoUrl={whiteLabel.logoUrl}
         footerText={cms.footerText} 
       />
 

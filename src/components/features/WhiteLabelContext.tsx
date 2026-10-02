@@ -22,7 +22,7 @@ export interface WhiteLabelSettings {
 const DEFAULT_SETTINGS: WhiteLabelSettings = {
   coopName: '',
   subdomain: 'main',
-  logoUrl: '',
+  logoUrl: '/icon.png',
   brandColor: 'indigo',
   brandName: 'PFMS',
   platformName: 'PFMS',
@@ -38,41 +38,60 @@ const DEFAULT_SETTINGS: WhiteLabelSettings = {
 const WhiteLabelContext = createContext<WhiteLabelSettings>(DEFAULT_SETTINGS);
 
 export function WhiteLabelProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<Omit<WhiteLabelSettings, 'updateWhiteLabel'>>({
-    coopName: DEFAULT_SETTINGS.coopName,
-    subdomain: DEFAULT_SETTINGS.subdomain,
-    logoUrl: DEFAULT_SETTINGS.logoUrl,
-    brandColor: DEFAULT_SETTINGS.brandColor,
-    brandName: DEFAULT_SETTINGS.brandName,
-    platformName: DEFAULT_SETTINGS.platformName,
-    brandLogoText: DEFAULT_SETTINGS.brandLogoText,
-    primaryColor: DEFAULT_SETTINGS.primaryColor,
-    currencySymbol: DEFAULT_SETTINGS.currencySymbol,
-    customReportHeader: DEFAULT_SETTINGS.customReportHeader,
-    customInvoiceFooter: DEFAULT_SETTINGS.customInvoiceFooter,
-    themeMode: DEFAULT_SETTINGS.themeMode,
+  const [settings, setSettings] = useState<Omit<WhiteLabelSettings, 'updateWhiteLabel'>>(() => {
+    // Immediate hydration from cached brand settings to avoid flash of default name
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('pfms_cached_brand');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          return {
+            ...DEFAULT_SETTINGS,
+            brandName: parsed.brandName || DEFAULT_SETTINGS.brandName,
+            platformName: parsed.platformName || parsed.brandName || DEFAULT_SETTINGS.platformName,
+            logoUrl: parsed.logoUrl || DEFAULT_SETTINGS.logoUrl,
+            primaryColor: parsed.primaryColor || DEFAULT_SETTINGS.primaryColor,
+          };
+        }
+      } catch {}
+    }
+    return DEFAULT_SETTINGS;
   });
 
   const loadBrandAndSettings = () => {
-    // 1. Fetch Global Platform CMS / Branding / Currency (propagate to all tenants)
+    // 1. Fetch Global Platform CMS / Branding / Currency (propagate to all tenants & public visitors)
     fetch('/api/admin/cms')
       .then(res => res.ok ? res.json() : null)
       .then(cms => {
         if (cms) {
+          const effectiveLogo = cms.logoUrl && cms.logoUrl.trim() !== '' ? cms.logoUrl : '/icon.png';
+          const effectiveBrand = cms.brandName || cms.platformName || DEFAULT_SETTINGS.brandName;
+
           setSettings(prev => ({
             ...prev,
-            brandName: cms.brandName || prev.brandName,
-            platformName: cms.platformName || cms.brandName || prev.platformName,
-            brandLogoText: cms.brandLogoText || prev.brandLogoText,
-            logoUrl: cms.logoUrl !== undefined && cms.logoUrl !== '' ? cms.logoUrl : prev.logoUrl,
+            brandName: effectiveBrand,
+            platformName: effectiveBrand,
+            brandLogoText: cms.brandLogoText || effectiveBrand.charAt(0).toUpperCase() || 'P',
+            logoUrl: effectiveLogo,
             primaryColor: cms.primaryColor || prev.primaryColor,
             currencySymbol: cms.currencySymbol || prev.currencySymbol,
           }));
+
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('pfms_cached_brand', JSON.stringify({
+                brandName: effectiveBrand,
+                platformName: effectiveBrand,
+                logoUrl: effectiveLogo,
+                primaryColor: cms.primaryColor,
+              }));
+            }
+          } catch {}
         }
       })
       .catch(() => {});
 
-    // 2. Fetch authoritative database settings from /api/enterprise for the current workspace
+    // 2. Fetch cooperative/tenant specific settings if on an enterprise branch
     fetch('/api/enterprise')
       .then(res => res.ok ? res.json() : null)
       .then(data => {
@@ -82,7 +101,7 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
             ...prev,
             coopName: c.coopName || prev.coopName,
             subdomain: c.subdomain || prev.subdomain,
-            logoUrl: c.logoUrl || prev.logoUrl,
+            logoUrl: c.logoUrl || prev.logoUrl || '/icon.png',
             brandColor: (c.brandColor || prev.brandColor) as any,
             customReportHeader: c.customReportHeader || prev.customReportHeader,
             customInvoiceFooter: c.customInvoiceFooter || prev.customInvoiceFooter,
@@ -94,19 +113,26 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
   };
 
   useEffect(() => {
-    // Purge legacy un-scoped browser localStorage white-label settings to prevent cross-account leakage
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('pfms_white_label');
-      }
-    } catch (_e) {}
-
     loadBrandAndSettings();
 
     if (typeof window !== 'undefined') {
-      window.addEventListener('pfms_brand_updated', loadBrandAndSettings);
+      const handleBrandUpdate = (e: any) => {
+        if (e.detail) {
+          const detail = e.detail;
+          setSettings(prev => ({
+            ...prev,
+            brandName: detail.platformName || detail.brandName || prev.brandName,
+            platformName: detail.platformName || detail.brandName || prev.platformName,
+            logoUrl: detail.logoUrl || prev.logoUrl,
+            currencySymbol: detail.currencySymbol || prev.currencySymbol
+          }));
+        }
+        loadBrandAndSettings();
+      };
+
+      window.addEventListener('pfms_brand_updated', handleBrandUpdate);
       return () => {
-        window.removeEventListener('pfms_brand_updated', loadBrandAndSettings);
+        window.removeEventListener('pfms_brand_updated', handleBrandUpdate);
       };
     }
   }, []);

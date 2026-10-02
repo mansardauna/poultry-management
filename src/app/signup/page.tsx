@@ -7,10 +7,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/components/features/LanguageContext';
+import { useWhiteLabel } from '@/components/features/WhiteLabelContext';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 function SignupForm() {
   const { t } = useLanguage();
+  const whiteLabel = useWhiteLabel();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -77,6 +79,21 @@ function SignupForm() {
       </div>
 
       <div className="mb-6 sm:mb-8 pr-16 sm:pr-0">
+        <Link href="/" className="inline-flex items-center gap-2.5 mb-4 group cursor-pointer">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={whiteLabel.logoUrl || '/icon.png'} 
+            alt={whiteLabel.brandName} 
+            className="h-9 w-auto max-w-[140px] sm:max-w-[180px] object-contain transition-transform group-hover:scale-105"
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+            }}
+          />
+          <span className="font-extrabold text-lg sm:text-xl text-slate-800 tracking-tight">
+            {whiteLabel.brandName}
+          </span>
+        </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
           {t("Create account")}
         </h1>

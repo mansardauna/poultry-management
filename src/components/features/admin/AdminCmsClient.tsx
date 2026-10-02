@@ -215,22 +215,62 @@ export function AdminCmsClient({
   const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [fromEmail, setFromEmail] = useState('support@pfms-poultry.com');
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image size must be less than 2MB');
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t('Image size must be less than 5MB'));
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setLogoUrl(reader.result);
-        toast.success('Logo uploaded! Click "Publish Landing CMS & Brand" to apply.');
+
+    setIsUploadingLogo(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('brandName', platformName);
+
+    try {
+      const res = await fetch('/api/admin/upload-logo', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLogoUrl(data.logoUrl);
+        toast.success(t('Brand logo uploaded and applied globally!'));
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pfms_brand_updated', { 
+            detail: { logoUrl: data.logoUrl, platformName } 
+          }));
+        }
+      } else {
+        toast.error(data.error || t('Failed to upload brand logo'));
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (_err) {
+      toast.error(t('Network error while uploading brand logo'));
+    } finally {
+      setIsUploadingLogo(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleResetLogo = async () => {
+    try {
+      const res = await fetch('/api/admin/upload-logo', { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        setLogoUrl('/icon.png');
+        toast.success(t('Brand logo reset to default icon'));
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pfms_brand_updated', { 
+            detail: { logoUrl: '/icon.png', platformName } 
+          }));
+        }
+      }
+    } catch {
+      toast.error(t('Failed to reset logo'));
+    }
   };
 
   // Tenant Management & Impersonation State
@@ -540,7 +580,7 @@ export function AdminCmsClient({
       if (res.ok) {
         toast.success(data.message || 'Landing Page CMS & Brand Identity saved & published live!');
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('pfms_brand_updated', { detail: { currencySymbol, platformName } }));
+          window.dispatchEvent(new CustomEvent('pfms_brand_updated', { detail: { currencySymbol, platformName, logoUrl } }));
         }
       } else {
         toast.error(data.error || 'Failed to save CMS');
@@ -1536,7 +1576,7 @@ export function AdminCmsClient({
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Brand / Platform Name")}</label>
                 <input
@@ -1545,18 +1585,6 @@ export function AdminCmsClient({
                   onChange={(e) => setPlatformName(e.target.value)}
                   placeholder="e.g. PFMS, PoultryOS"
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-indigo-700 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Brand Logo Badge (1-3 Letters)")}</label>
-                <input
-                  type="text"
-                  maxLength={4}
-                  value={brandLogoText}
-                  onChange={(e) => setBrandLogoText(e.target.value)}
-                  placeholder="e.g. P"
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-slate-900 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none uppercase text-center"
                 />
               </div>
 
@@ -1608,41 +1636,58 @@ export function AdminCmsClient({
             <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Brand Logo Upload */}
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-700">
-                  {t("Brand Logo Image (PNG, JPG, SVG, WebP)")}
+                <label className="block text-xs font-semibold text-slate-700 flex items-center justify-between">
+                  <span>{t("Brand Logo Image (PNG, JPG, SVG, WebP)")}</span>
+                  <span className="text-[10px] text-indigo-600 font-semibold">{t("Applies everywhere & PWA")}</span>
                 </label>
                 
-                {logoUrl ? (
-                  <div className="flex items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-                    <div className="h-14 w-28 bg-white border border-slate-200 rounded-xl p-2 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={logoUrl} alt="Brand Logo Preview" className="max-h-full max-w-full object-contain" />
+                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl">
+                  <div className="h-20 w-32 bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={logoUrl || '/icon.png'} 
+                      alt="Brand Logo Preview" 
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 flex-1 min-w-0 text-center sm:text-left">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">
+                        {logoUrl && !logoUrl.includes('icon.png') ? t("Custom Brand Logo Active") : t("Default Application Logo")}
+                      </p>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5">
+                        {t("PNG, JPG, SVG, WebP up to 5MB. Automatically updates landing page, sidebars, navbar, login, invoices, and PWA icon.")}
+                      </p>
                     </div>
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-900 truncate">{t("Custom Logo Uploaded")}</p>
-                      <div className="flex items-center gap-2">
-                        <label className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors">
-                          {t("Change Logo")}
-                          <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                        </label>
+
+                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                      <label className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-sm inline-flex items-center gap-1.5 active:scale-95 disabled:opacity-50">
+                        {isUploadingLogo ? <RefreshCw size={12} className="animate-spin" /> : <Upload size={12} />}
+                        <span>{isUploadingLogo ? t("Uploading…") : t("Upload Image")}</span>
+                        <input 
+                          type="file" 
+                          accept="image/png, image/jpeg, image/jpg, image/svg+xml, image/webp" 
+                          onChange={handleLogoUpload} 
+                          disabled={isUploadingLogo}
+                          className="hidden" 
+                        />
+                      </label>
+                      {logoUrl && !logoUrl.includes('icon.png') && (
                         <button
                           type="button"
-                          onClick={() => { setLogoUrl(''); toast.success('Logo removed, falling back to logo badge'); }}
-                          className="text-red-500 hover:text-red-700 text-[11px] font-bold cursor-pointer"
+                          onClick={handleResetLogo}
+                          className="text-slate-500 hover:text-red-600 text-xs font-bold px-2 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition-colors cursor-pointer"
                         >
-                          {t("Remove")}
+                          {t("Reset to Default")}
                         </button>
-                      </div>
+                      )}
                     </div>
                   </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/30 rounded-2xl cursor-pointer transition-colors">
-                    <Upload size={20} className="text-indigo-600 mb-1" />
-                    <span className="text-xs font-bold text-slate-800">{t("Upload Brand Logo")}</span>
-                    <span className="text-[10px] text-slate-400 mt-0.5">{t("PNG, JPG, SVG up to 2MB")}</span>
-                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                  </label>
-                )}
+                </div>
               </div>
 
               {/* Brand Colors Config */}
@@ -2174,9 +2219,23 @@ export function AdminCmsClient({
             </p>
 
             <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                <h4 className="font-bold text-xs text-slate-900">{t("Platform Brand Identity")}</h4>
-                <p className="text-sm font-extrabold text-indigo-700">{platformName}</p>
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                <div className="flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={logoUrl || '/icon.png'} 
+                    alt={platformName} 
+                    className="w-10 h-10 rounded-xl object-contain bg-white border border-slate-200 p-1 shadow-sm"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+                    }}
+                  />
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900">{t("Platform Brand Identity")}</h4>
+                    <p className="text-sm font-extrabold text-indigo-700">{platformName}</p>
+                  </div>
+                </div>
                 <p className="text-[11px] text-slate-500">{brandTagline}</p>
                 <button
                   onClick={() => setActiveTab('cms')}

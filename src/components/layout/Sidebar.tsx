@@ -332,16 +332,16 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               {role === 'Staff' && workspaces.length <= 1 ? (
                 <div className="w-full flex items-center justify-between py-2 px-2 rounded-md text-left">
                   <div className="flex items-center gap-2.5 truncate">
-                    {whiteLabel.logoUrl ? (
-                      <img src={whiteLabel.logoUrl} alt="Logo" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 shadow-sm" />
-                    ) : (
-                      <div 
-                        className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs text-white shadow-sm flex-shrink-0"
-                        style={{ backgroundColor: whiteLabel.primaryColor || '#4f46e5' }}
-                      >
-                        {whiteLabel.brandLogoText || 'P'}
-                      </div>
-                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={whiteLabel.logoUrl || '/icon.png'} 
+                      alt={whiteLabel.brandName || "Logo"} 
+                      className="w-7 h-7 rounded-lg object-contain flex-shrink-0 shadow-sm bg-white/10 p-0.5" 
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+                      }}
+                    />
                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Assigned Branch'}</span>
                       <span className="text-xs text-indigo-400">{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
@@ -355,16 +355,16 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                     className="w-full flex items-center justify-between py-2 px-2 hover:bg-indigo-900 rounded-md transition-colors text-left"
                   >
                     <div className="flex items-center gap-2.5 truncate">
-                      {whiteLabel.logoUrl ? (
-                        <img src={whiteLabel.logoUrl} alt="Logo" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 shadow-sm" />
-                      ) : (
-                        <div 
-                          className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs text-white shadow-sm flex-shrink-0"
-                          style={{ backgroundColor: whiteLabel.primaryColor || '#4f46e5' }}
-                        >
-                          {whiteLabel.brandLogoText || 'P'}
-                        </div>
-                      )}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
+                        src={whiteLabel.logoUrl || '/icon.png'} 
+                        alt={whiteLabel.brandName || "Logo"} 
+                        className="w-7 h-7 rounded-lg object-contain flex-shrink-0 shadow-sm bg-white/10 p-0.5" 
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+                        }}
+                      />
                       <div className="flex flex-col truncate">
                         <span className="font-semibold text-white text-sm truncate">{activeWorkspace?.name || 'Main'}</span>
                         <span className="text-xs text-indigo-400">{whiteLabel.coopName || whiteLabel.brandName || activeWorkspace?.type || 'Farm Branch'}</span>
@@ -454,15 +454,17 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
             </>
           )}
         </div>
-          ) : whiteLabel.logoUrl ? (
-            <img src={whiteLabel.logoUrl} alt="Logo" className="w-8 h-8 rounded-lg object-cover mx-auto shadow-sm" />
           ) : (
-            <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm text-white mx-auto shadow-sm"
-              style={{ backgroundColor: whiteLabel.primaryColor || '#4f46e5' }}
-            >
-              {whiteLabel.brandLogoText || 'P'}
-            </div>
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img 
+              src={whiteLabel.logoUrl || '/icon.png'} 
+              alt={whiteLabel.brandName || "Logo"} 
+              className="w-8 h-8 rounded-lg object-contain mx-auto shadow-sm bg-white/10 p-0.5" 
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+              }}
+            />
           )}
           
           <button 
