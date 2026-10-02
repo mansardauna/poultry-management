@@ -648,14 +648,14 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                           <button
                             onClick={() => handleOpenEditAudit(log)}
                             className="p-1 hover:bg-blue-100 rounded transition-colors"
-                            title="Edit"
+                            title={t("Edit")}
                           >
                             <Edit2 size={14} className="text-blue-600" />
                           </button>
                           <button
                             onClick={() => handleDeleteAudit(log.id)}
                             className="p-1 hover:bg-red-100 rounded transition-colors"
-                            title="Delete"
+                            title={t("Delete")}
                           >
                             <Trash2 size={14} className="text-red-600" />
                           </button>
@@ -714,14 +714,14 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                           <button
                             onClick={() => handleOpenEditMaturation(log)}
                             className="p-1 hover:bg-blue-100 rounded transition-colors"
-                            title="Edit"
+                            title={t("Edit")}
                           >
                             <Edit2 size={14} className="text-blue-600" />
                           </button>
                           <button
                             onClick={() => handleDeleteMaturation(log.id)}
                             className="p-1 hover:bg-red-100 rounded transition-colors"
-                            title="Delete"
+                            title={t("Delete")}
                           >
                             <Trash2 size={14} className="text-red-600" />
                           </button>
@@ -793,6 +793,13 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                     )}
                   </tr>
                 ))}
+                {eggsLogic.data.length === 0 && (
+                  <tr>
+                    <td colSpan={canEdit ? 6 : 5} className="text-center py-4 text-slate-400 font-sans italic">
+                      {t("No egg collections recorded.")}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

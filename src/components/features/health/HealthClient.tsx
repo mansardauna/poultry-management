@@ -286,31 +286,31 @@ export function HealthClient({ role }: { role: string }) {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4 max-h-[400px] overflow-y-auto">
-              {templates.map(t => (
-                <div key={t.id} className="border border-slate-200 rounded-md p-4 bg-slate-50">
+              {templates.map(tmpl => (
+                <div key={tmpl.id} className="border border-slate-200 rounded-md p-4 bg-slate-50">
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-semibold text-slate-800 uppercase">{t.name}</h3>
+                    <h3 className="font-semibold text-slate-800 uppercase">{tmpl.name}</h3>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-semibold">{t.targetType}</span>
+                      <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-semibold">{t(tmpl.targetType)}</span>
                       {canEdit && (
-                        <button onClick={() => handleDeleteTemplate(t.id)} className="p-1 hover:bg-red-100 rounded" title="Delete Template">
+                        <button onClick={() => handleDeleteTemplate(tmpl.id)} className="p-1 hover:bg-red-100 rounded" title={t("Delete Template")}>
                           <Trash2 size={13} className="text-red-500" />
                         </button>
                       )}
                     </div>
                   </div>
                   <div className="space-y-1 mt-3">
-                    {((t.stages as any) || []).map((st: any, i: number) => (
+                    {((tmpl.stages as any) || []).map((st: any, i: number) => (
                       <div key={i} className="flex justify-between text-xs font-mono border-b border-slate-200 last:border-0 py-1">
-                        <span className="text-slate-500">Day {st.dayOffset}</span>
-                        <span className="font-semibold text-slate-700">{st.medicationName} ({st.type})</span>
+                        <span className="text-slate-500">{t("Day")} {st.dayOffset}</span>
+                        <span className="font-semibold text-slate-700">{st.medicationName} ({t(st.type)})</span>
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
               {templates.length === 0 && (
-                <p className="text-xs text-slate-500 italic text-center py-4">No templates defined yet. Create one to automatically schedule vaccines for new batches.</p>
+                <p className="text-xs text-slate-500 italic text-center py-4">{t("No templates defined yet. Create one to automatically schedule vaccines for new batches.")}</p>
               )}
             </div>
           </CardContent>

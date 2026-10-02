@@ -510,7 +510,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 transition-colors"
                     >
                       <CheckCheck size={13} />
-                      Mark all read
+                      {t("Mark all read")}
                     </button>
                   )}
                   <button
@@ -532,7 +532,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
-                  Unread ({unreadNotifications.length})
+                  {t("Unread")} ({unreadNotifications.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('read')}
@@ -542,7 +542,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
-                  Read ({readNotifications.length})
+                  {t("Read")} ({readNotifications.length})
                 </button>
               </div>
 
@@ -552,7 +552,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                   <div className="py-10 flex flex-col items-center justify-center text-center gap-2">
                     <Bell size={28} className="text-slate-200" />
                     <p className="text-xs text-slate-400 font-medium">
-                      {activeTab === 'unread' ? texts.dashboard.allCaughtUpAlerts : 'No read notifications.'}
+                      {activeTab === 'unread' ? texts.dashboard.allCaughtUpAlerts : t('No read notifications.')}
                     </p>
                   </div>
                 ) : (
@@ -578,7 +578,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                         {!n.read && (
                           <button
                             onClick={() => handleMarkRead(n.id)}
-                            title="Mark as read"
+                            title={t("Mark as read")}
                             className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-indigo-400 hover:text-indigo-600"
                           >
                             <CheckCheck size={14} />
@@ -593,7 +593,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               {/* Footer */}
               <div className="px-4 py-2 border-t border-slate-100 bg-slate-50">
                 <p className="text-[10px] text-slate-400 text-center">
-                  {notifications.length} total alerts
+                  {notifications.length} {t("total alerts")}
                 </p>
               </div>
             </div>
@@ -750,6 +750,27 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                     ))}
                   </div>
                 </div>
+
+                {/* Mobile Settings Shortcut */}
+                {!isSuperAdmin && (
+                  <div>
+                    <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
+                      <Settings size={14} className="text-indigo-600" />
+                      {t("Settings & Subscription")}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsRightDrawerOpen(false);
+                        router.push('/dashboard/settings');
+                      }}
+                      className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+                    >
+                      <span>{t("Account Settings")}</span>
+                      <span className="text-[10px] text-indigo-600 font-bold">→</span>
+                    </button>
+                  </div>
+                )}
 
                 {/* Upgrade Promo Card in Drawer for Free Tier */}
                 {!isSuperAdmin && role === 'Admin' && currentTier === 'free' && (

@@ -1,6 +1,6 @@
 {
-  "name": "Poultry Farm Management System",
-  "short_name": "PFMS",
+  "name": "PFMS pro",
+  "short_name": "PFMS pro",
   "description": "Enterprise-grade poultry farm management app.",
   "start_url": "/",
   "display": "standalone",
@@ -8,9 +8,9 @@
   "theme_color": "#4f46e5",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "/icon.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
       "src": "/icon.png",

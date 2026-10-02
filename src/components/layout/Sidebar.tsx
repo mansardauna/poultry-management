@@ -679,7 +679,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           <div className="mx-3 mb-2 px-3 py-2 bg-emerald-950/60 border border-emerald-500/30 rounded-xl flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
             <span className="text-xs font-semibold text-emerald-300 truncate">
-              {currentTier === 'entrepreneur' ? 'Entrepreneur' : currentTier === 'enterprise' ? 'Enterprise' : 'Pro'}
+              {currentTier === 'entrepreneur' ? t('Entrepreneur') : currentTier === 'enterprise' ? t('Enterprise Plus') : t('Commercial Pro')}
             </span>
           </div>
         )}

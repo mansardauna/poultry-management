@@ -467,16 +467,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500">Total stock</p>
+                <p className="text-xs font-semibold text-slate-500">{t("Total Stock")}</p>
                 <p className="text-3xl font-semibold text-slate-900 mt-1">{totalFeedKg.toLocaleString()} kg</p>
               </div>
               <div className="text-amber-500"><BarChart2 size={30} /></div>
             </div>
             <div className="mt-3 flex items-center text-xs">
               <span className={`font-semibold px-2 py-0.5 ${daysOfSupply !== null && daysOfSupply <= 7 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                {daysOfSupply !== null ? `~${daysOfSupply} days left` : 'No logs yet'}
+                {daysOfSupply !== null ? `~${daysOfSupply} ${t("days left")}` : t("No logs yet")}
               </span>
-              <span className="text-slate-400 ml-2">at current rate</span>
+              <span className="text-slate-400 ml-2">{t("at current rate")}</span>
             </div>
           </CardContent>
         </Card>
@@ -486,16 +486,16 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500">This week used</p>
+                <p className="text-xs font-semibold text-slate-500">{t("This week used")}</p>
                 <p className="text-3xl font-semibold text-indigo-600 mt-1">{weeklyKgTotal.toFixed(1)} kg</p>
               </div>
               <div className="text-indigo-500"><BarChart2 size={30} /></div>
             </div>
             <div className="mt-3 flex items-center text-xs">
               <span className="bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5">
-                {dailyAvgConsumption.toFixed(1)} kg/day
+                {dailyAvgConsumption.toFixed(1)} kg/{t("day")}
               </span>
-              <span className="text-slate-400 ml-2">daily average</span>
+              <span className="text-slate-400 ml-2">{t("daily average")}</span>
             </div>
           </CardContent>
         </Card>
@@ -509,7 +509,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500">{feed.type}</p>
+                    <p className="text-xs font-semibold text-slate-500">{t(feed.type)}</p>
                     <p className={`text-3xl font-semibold mt-1 ${isCritical ? 'text-red-600' : 'text-slate-900'}`}>
                       {feed.quantityKg.toLocaleString()} kg
                     </p>
@@ -518,9 +518,9 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                 </div>
                 <div className="mt-3 flex items-center text-xs gap-2">
                   <span className={`font-semibold px-2 py-0.5 ${isCritical ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-600'}`}>
-                    {isCritical ? 'Critical' : 'Safe'}
+                    {isCritical ? t('Critical') : t('Safe')}
                   </span>
-                  <span className="text-slate-400">{consumed.toFixed(1)} kg used this week</span>
+                  <span className="text-slate-400">{consumed.toFixed(1)} {t("kg used this week")}</span>
                 </div>
               </CardContent>
             </Card>
@@ -533,7 +533,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-800">
-              Weekly consumption by feed type
+              {t("Weekly consumption by feed type")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
@@ -544,11 +544,11 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
               return (
                 <div key={feed.id}>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="font-semibold text-slate-700">{feed.type}</span>
+                    <span className="font-semibold text-slate-700">{t(feed.type)}</span>
                     <span className="text-slate-500">
-                      <span className="text-amber-600 font-semibold">{consumed.toFixed(1)} kg used</span>
+                      <span className="text-amber-600 font-semibold">{consumed.toFixed(1)} {t("kg used")}</span>
                       {' / '}
-                      <span className="text-indigo-600 font-semibold">{feed.quantityKg.toLocaleString()} kg remaining</span>
+                      <span className="text-indigo-600 font-semibold">{feed.quantityKg.toLocaleString()} {t("kg remaining")}</span>
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-2.5">
@@ -663,14 +663,14 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                           <button
                             onClick={() => handleOpenEditPipeline(pipe)}
                             className="p-1 hover:bg-blue-100 rounded transition-colors"
-                            title="Edit"
+                            title={t("Edit")}
                           >
                             <Edit2 size={14} className="text-blue-600" />
                           </button>
                           <button
                             onClick={() => handleDeletePipeline(pipe.id)}
                             className="p-1 hover:bg-red-100 rounded transition-colors"
-                            title="Delete"
+                            title={t("Delete")}
                           >
                             <Trash2 size={14} className="text-red-600" />
                           </button>
@@ -767,23 +767,23 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       <Modal
         isOpen={openUsage}
         onClose={handleCloseUsage}
-        title="Log Feed Consumption"
-        subtitle="Record daily feed bags or kg consumed by batch"
+        title={t("Log Feed Consumption")}
+        subtitle={t("Record daily feed bags or kg consumed by batch")}
         size="md"
       >
         <div className="space-y-4">
           <Select
-            label="Feed Type"
+            label={t("Feed Type")}
             value={useFeedId}
             onChange={(e) => setUseFeedId(e.target.value)}
           >
             {feeds.map(f => (
-              <option key={f.id} value={f.id}>{f.type} ({Number(f.quantityKg || 0)}kg available)</option>
+              <option key={f.id} value={f.id}>{t(f.type)} ({Number(f.quantityKg || 0)}kg {t("available")})</option>
             ))}
           </Select>
 
           <Select
-            label="Chicken Batch"
+            label={t("Chicken Batch")}
             value={useBatchId}
             onChange={(e) => setUseBatchId(e.target.value)}
           >
@@ -793,7 +793,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           </Select>
 
           <Input
-            label="Quantity Consumed (kg)"
+            label={t("Quantity Consumed (kg)")}
             type="number"
             min="0"
             step="0.1"
@@ -803,8 +803,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="secondary" onClick={handleCloseUsage}>Cancel</Button>
-            <Button variant="primary" disabled={!useQty} onClick={handleLogUsage}>Log Usage</Button>
+            <Button variant="secondary" onClick={handleCloseUsage}>{t("Cancel")}</Button>
+            <Button variant="primary" disabled={!useQty} onClick={handleLogUsage}>{t("Log Usage")}</Button>
           </div>
         </div>
       </Modal>
@@ -813,23 +813,23 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       <Modal
         isOpen={openRestock}
         onClose={handleCloseRestock}
-        title="Receive Stock (Restock)"
-        subtitle="Add new feed bags to inventory & log expense"
+        title={t("Receive Stock (Restock)")}
+        subtitle={t("Add new feed bags to inventory & log expense")}
         size="md"
       >
         <div className="space-y-4">
           <Select
-            label="Feed Type"
+            label={t("Feed Type")}
             value={restockFeedId}
             onChange={(e) => setRestockFeedId(e.target.value)}
           >
             {feeds.map(f => (
-              <option key={f.id} value={f.id}>{f.type}</option>
+              <option key={f.id} value={f.id}>{t(f.type)}</option>
             ))}
           </Select>
 
           <Input
-            label="Restock Quantity (kg)"
+            label={t("Restock Quantity (kg)")}
             type="number"
             min="0"
             placeholder="e.g. 500"
@@ -838,7 +838,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <Input
-            label="Supplier / Feed Mill"
+            label={t("Supplier / Feed Mill")}
             type="text"
             placeholder="e.g. Supreme Feed Mills Ltd."
             value={restockSupplier}
@@ -846,7 +846,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <Input
-            label="Procurement Cost (₦) - Auto Logs Expense"
+            label={t("Procurement Cost (₦) - Auto Logs Expense")}
             type="number"
             min="0"
             placeholder="e.g. 150000"
@@ -855,8 +855,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="secondary" onClick={handleCloseRestock}>Cancel</Button>
-            <Button variant="primary" disabled={!restockQty} onClick={handleRestock}>Log Restock</Button>
+            <Button variant="secondary" onClick={handleCloseRestock}>{t("Cancel")}</Button>
+            <Button variant="primary" disabled={!restockQty} onClick={handleRestock}>{t("Log Restock")}</Button>
           </div>
         </div>
       </Modal>
@@ -865,13 +865,13 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       <Modal
         isOpen={openLogistics}
         onClose={handleCloseLogistics}
-        title="Log Logistics Procurement Step"
-        subtitle="Track partner contracts, supply routes & expected deliveries"
+        title={t("Log Logistics Procurement Step")}
+        subtitle={t("Track partner contracts, supply routes & expected deliveries")}
         size="md"
       >
         <div className="space-y-4">
           <Input
-            label="Pipeline Milestone Action"
+            label={t("Pipeline Milestone Action")}
             type="text"
             placeholder="e.g. Completed supply contract negotiations"
             value={pipelineMilestone}
@@ -879,7 +879,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <Select
-            label="Partner Supplier"
+            label={t("Partner Supplier")}
             value={pipelineSupplier}
             onChange={(e) => setPipelineSupplier(e.target.value)}
           >
@@ -889,18 +889,18 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           </Select>
 
           <Select
-            label="Restructured Status"
+            label={t("Restructured Status")}
             value={pipelineStatus}
             onChange={(e) => setPipelineStatus(e.target.value)}
           >
-            <option value="Secured (Awaiting Transit)">Secured (Contract signed & awaiting transit)</option>
-            <option value="In Transit (Shipping)">In Transit (Shipping via verified route)</option>
-            <option value="Under Contract">Under Contract / Negotiations</option>
-            <option value="Completed System Check">Completed System Check</option>
+            <option value="Secured (Awaiting Transit)">{t("Secured (Awaiting Transit)")}</option>
+            <option value="In Transit (Shipping)">{t("In Transit (Shipping)")}</option>
+            <option value="Under Contract">{t("Under Contract")}</option>
+            <option value="Completed System Check">{t("Completed System Check")}</option>
           </Select>
 
           <Input
-            label="Estimated Arrival (ETA)"
+            label={t("Estimated Arrival (ETA)")}
             type="text"
             placeholder="e.g. Immediate, or 2026-06-15"
             value={pipelineEta}
@@ -908,8 +908,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="secondary" onClick={handleCloseLogistics}>Cancel</Button>
-            <Button variant="primary" disabled={!pipelineMilestone} onClick={handleLogLogistics}>Log Logistics Step</Button>
+            <Button variant="secondary" onClick={handleCloseLogistics}>{t("Cancel")}</Button>
+            <Button variant="primary" disabled={!pipelineMilestone} onClick={handleLogLogistics}>{t("Log Logistics Step")}</Button>
           </div>
         </div>
       </Modal>
@@ -918,13 +918,13 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       <Modal
         isOpen={openEditLog}
         onClose={handleCloseEditLog}
-        title="Edit Feed Consumption"
-        subtitle="Update quantity consumed for this log entry"
+        title={t("Edit Feed Consumption")}
+        subtitle={t("Update quantity consumed for this log entry")}
         size="sm"
       >
         <div className="space-y-4">
           <Input
-            label="Quantity Consumed (kg)"
+            label={t("Quantity Consumed (kg)")}
             type="number"
             min="0"
             value={editLogQty}
@@ -932,8 +932,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="secondary" onClick={handleCloseEditLog}>Cancel</Button>
-            <Button variant="primary" disabled={!editLogQty} onClick={handleUpdateLog}>Update Log</Button>
+            <Button variant="secondary" onClick={handleCloseEditLog}>{t("Cancel")}</Button>
+            <Button variant="primary" disabled={!editLogQty} onClick={handleUpdateLog}>{t("Update Log")}</Button>
           </div>
         </div>
       </Modal>
@@ -942,38 +942,38 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       <Modal
         isOpen={openEditPipeline}
         onClose={handleCloseEditPipeline}
-        title="Edit Procurement Pipeline"
-        subtitle="Update milestone status and estimated arrival date"
+        title={t("Edit Procurement Pipeline")}
+        subtitle={t("Update milestone status and estimated arrival date")}
         size="md"
       >
         <div className="space-y-4">
           <Input
-            label="Milestone Action"
+            label={t("Milestone Action")}
             type="text"
             value={editPipelineMilestone}
             onChange={(e) => setEditPipelineMilestone(e.target.value)}
           />
 
           <Input
-            label="Supplier / Mill"
+            label={t("Supplier / Mill")}
             type="text"
             value={editPipelineSupplier}
             onChange={(e) => setEditPipelineSupplier(e.target.value)}
           />
 
           <Select
-            label="Status"
+            label={t("Status")}
             value={editPipelineStatus}
             onChange={(e) => setEditPipelineStatus(e.target.value)}
           >
-            <option value="Under Negotiations">Under Negotiations</option>
-            <option value="Under Contract">Under Contract</option>
-            <option value="Secured">Secured</option>
-            <option value="Delivered">Delivered</option>
+            <option value="Under Negotiations">{t("Under Negotiations")}</option>
+            <option value="Under Contract">{t("Under Contract")}</option>
+            <option value="Secured">{t("Secured")}</option>
+            <option value="Delivered">{t("Delivered")}</option>
           </Select>
 
           <Input
-            label="Estimated Arrival (ETA)"
+            label={t("Estimated Arrival (ETA)")}
             type="text"
             placeholder="e.g. 2026-06-15"
             value={editPipelineEta}
@@ -981,8 +981,8 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
           />
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="secondary" onClick={handleCloseEditPipeline}>Cancel</Button>
-            <Button variant="primary" disabled={!editPipelineMilestone} onClick={handleUpdatePipeline}>Update Pipeline</Button>
+            <Button variant="secondary" onClick={handleCloseEditPipeline}>{t("Cancel")}</Button>
+            <Button variant="primary" disabled={!editPipelineMilestone} onClick={handleUpdatePipeline}>{t("Update Pipeline")}</Button>
           </div>
         </div>
       </Modal>

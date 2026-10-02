@@ -391,8 +391,8 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="text-base shrink-0">⚡</span>
             <div className="min-w-0">
-              <span className="font-bold text-amber-950">Free Starter Plan: </span>
-              <span className="text-amber-800 font-medium">({staff.length}/2 staff registered). Upgrade to Commercial Pro for unlimited workers.</span>
+              <span className="font-bold text-amber-950">{t("Free Starter Plan:")} </span>
+              <span className="text-amber-800 font-medium">({staff.length}/2 {t("staff registered")}). {t("Upgrade to Commercial Pro for unlimited workers.")}</span>
             </div>
           </div>
           <button
@@ -570,7 +570,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                   <TableSortHeader label={t("Staff Member")} sortKey="staffId" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
                   <TableSortHeader label={t("Period")} sortKey="period" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
                   <TableSortHeader label={t("Amount Paid")} sortKey="amount" currentSort={payrollTable.sortConfig} onSort={payrollTable.handleSort} />
-                  {canEdit && <th className="px-4 py-3 text-slate-500 text-right">{t("Del")}</th>}
+                  {canEdit && <th className="px-4 py-3 text-slate-500 text-right">{t("Delete")}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-mono">
@@ -592,7 +592,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                         <td className="px-4 py-3 text-right font-semibold text-emerald-600">₦{log.amount.toLocaleString()}</td>
                         {canEdit && (
                           <td className="px-4 py-3 text-right">
-                            <button onClick={() => handleDeletePayrollLog(log.id)} className="p-1 hover:bg-red-100 rounded" title="Delete">
+                            <button onClick={() => handleDeletePayrollLog(log.id)} className="p-1 hover:bg-red-100 rounded" title={t("Delete")}>
                               <Trash2 size={13} className="text-red-500" />
                             </button>
                           </td>

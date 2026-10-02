@@ -457,7 +457,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                   {invoicesTable.data.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-center py-10 text-slate-400">
-                        No invoices found. Click <strong>+ Generate New Invoice</strong> to create your first customer invoice.
+                        {t("No invoices found.")} {t("Click")} <strong>+ {t("Generate New Invoice")}</strong> {t("to create your first customer invoice.")}
                       </td>
                     </tr>
                   ) : (
@@ -475,7 +475,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-amber-100 text-amber-800'
                           }`}>
-                            ● {inv.status}
+                            ● {t(inv.status)}
                           </span>
                         </td>
                         <td className="px-4 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
@@ -484,29 +484,29 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                               <button
                                 onClick={() => handleUpdateInvoiceStatus(inv.id, 'Paid')}
                                 className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold transition-colors cursor-pointer border border-emerald-200 shrink-0"
-                                title="Mark as Paid"
+                                title={t("Mark as Paid")}
                               >
-                                Mark Paid
+                                {t("Mark Paid")}
                               </button>
                             )}
                             <button
                               onClick={() => handleViewInvoice(inv)}
                               className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
-                              title="View Invoice"
+                              title={t("View Invoice")}
                             >
                               <FileText size={15} />
                             </button>
                             <button
                               onClick={() => handleCopyPaymentLink(inv)}
                               className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition-colors"
-                              title="Copy Online Payment Link"
+                              title={t("Copy Online Payment Link")}
                             >
                               <LinkIcon size={15} />
                             </button>
                             <button
                               onClick={() => handleShareWhatsApp(inv)}
                               className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
-                              title="Share on WhatsApp"
+                              title={t("Share on WhatsApp")}
                             >
                               <MessageSquare size={15} />
                             </button>
@@ -514,7 +514,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                               <button
                                 onClick={() => handleDeleteInvoice(inv.id)}
                                 className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
-                                title="Delete Invoice"
+                                title={t("Delete Invoice")}
                               >
                                 <Trash2 size={15} />
                               </button>
@@ -607,15 +607,15 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       <Modal
         isOpen={open}
         onClose={handleClose}
-        title="Record New Farm Sale"
-        subtitle={`Log an immediate commercial sales transaction for ${farmName}`}
+        title={t("Record New Farm Sale")}
+        subtitle={`${t("Log an immediate commercial sales transaction for")} ${farmName}`}
         size="lg"
       >
         <form
           onSubmit={(e) => {
             e.preventDefault();
             if (!customerName.trim() || !quantity || !totalAmount) {
-              toast.error('Please enter customer name, quantity, and total amount');
+              toast.error(t("Please enter customer name, quantity, and total amount"));
               return;
             }
             handleAddSale();
@@ -623,8 +623,8 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           className="space-y-4 font-sans"
         >
           <Input
-            label="Customer Name / Business *"
-            placeholder="e.g. John Doe / City Hotel"
+            label={t("Customer Name / Business *")}
+            placeholder={t("e.g. John Doe / City Hotel")}
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
             required
@@ -632,24 +632,24 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
-              label="Product Type"
+              label={t("Product Type")}
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
-              <option value="Eggs">Eggs (Cracked / Fresh)</option>
-              <option value="Chickens">Chickens (Spent Layers / Broilers)</option>
-              <option value="Manure">Organic Manure / Fertilizer</option>
-              <option value="Feeds">Feed Inventory Resale</option>
+              <option value="Eggs">{t("Eggs (Cracked / Fresh)")}</option>
+              <option value="Chickens">{t("Chickens (Spent Layers / Broilers)")}</option>
+              <option value="Manure">{t("Organic Manure / Fertilizer")}</option>
+              <option value="Feeds">{t("Feed Inventory Resale")}</option>
             </Select>
 
             <Select
-              label="Flock Batch"
+              label={t("Flock Batch")}
               value={selectedBatchId}
               onChange={(e) => setSelectedBatchId(e.target.value)}
             >
               {activeBatches.map(b => (
                 <option key={b.id} value={b.id}>
-                  {b.breed} ({b.id} - {b.quantity} birds)
+                  {b.breed} ({b.id} - {b.quantity} {t("birds")})
                 </option>
               ))}
             </Select>
@@ -657,7 +657,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Quantity Sold *"
+              label={t("Quantity Sold *")}
               type="number"
               min="1"
               placeholder="e.g. 50"
@@ -667,7 +667,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             />
 
             <Input
-              label={`Total Amount Received (${currencySymbol}) *`}
+              label={`${t("Total Amount Received")} (${currencySymbol}) *`}
               type="number"
               min="0"
               step="any"
@@ -680,18 +680,18 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
-              label="Payment Method"
+              label={t("Payment Method")}
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
             >
-              <option value="Bank transfer">Bank Transfer</option>
-              <option value="Cash">Cash</option>
-              <option value="POS">POS Terminal</option>
-              <option value="Paystack">Paystack Online</option>
+              <option value="Bank transfer">{t("Bank Transfer")}</option>
+              <option value="Cash">{t("Cash")}</option>
+              <option value="POS">{t("POS Terminal")}</option>
+              <option value="Paystack">{t("Paystack Online")}</option>
             </Select>
 
             <Input
-              label="Sale Date"
+              label={t("Sale Date")}
               type="date"
               value={saleDate}
               onChange={(e) => setSaleDate(e.target.value)}
@@ -700,10 +700,10 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
             <Button variant="secondary" onClick={handleClose}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit" variant="primary">
-              Save New Sale
+              {t("Save New Sale")}
             </Button>
           </div>
         </form>
@@ -713,8 +713,8 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       <Modal
         isOpen={openInvoiceModal}
         onClose={() => setOpenInvoiceModal(false)}
-        title="Generate Commercial Invoice"
-        subtitle={`Issue an authentic merchant invoice on behalf of ${farmName}`}
+        title={t("Generate Commercial Invoice")}
+        subtitle={`${t("Issue an authentic merchant invoice on behalf of")} ${farmName}`}
         size="xl"
       >
         <form
@@ -728,24 +728,24 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
             <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center">1</span>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Customer & Billing Details</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">{t("Customer & Billing Details")}</h4>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Input
-                label="Customer / Business Name *"
+                label={t("Customer / Business Name *")}
                 placeholder="e.g. Maitama Supermarket Ltd"
                 value={invCustomerName}
                 onChange={(e) => setInvCustomerName(e.target.value)}
                 required
               />
               <Input
-                label="Customer Phone / WhatsApp"
+                label={t("Customer Phone / WhatsApp")}
                 placeholder="e.g. +234 803 123 4567"
                 value={invPhone}
                 onChange={(e) => setInvPhone(e.target.value)}
               />
               <Input
-                label="Customer Email"
+                label={t("Customer Email")}
                 type="email"
                 placeholder="e.g. billing@maitama.com"
                 value={invEmail}
@@ -758,11 +758,11 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
             <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center">2</span>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Line Items & Pricing</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">{t("Line Items & Pricing")}</h4>
             </div>
             
             <Input
-              label="Invoice Items / Description *"
+              label={t("Invoice Items / Description *")}
               placeholder="e.g. 50 Crates of Large Eggs + Packaging"
               value={invItems}
               onChange={(e) => setInvItems(e.target.value)}
@@ -771,7 +771,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Input
-                label="Quantity *"
+                label={t("Quantity *")}
                 type="number"
                 min="1"
                 placeholder="50"
@@ -780,7 +780,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 required
               />
               <Input
-                label={`Unit Price (${currencySymbol}) *`}
+                label={`${t("Unit Price")} (${currencySymbol}) *`}
                 type="number"
                 min="0"
                 step="any"
@@ -790,7 +790,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 required
               />
               <Input
-                label="Payment Due Date"
+                label={t("Payment Due Date")}
                 type="date"
                 value={invDueDate}
                 onChange={(e) => setInvDueDate(e.target.value)}
@@ -799,8 +799,8 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
 
             <div className="p-4 bg-indigo-50/80 rounded-xl border border-indigo-100 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-900 block">Total Invoice Valuation</span>
-                <span className="text-[11px] text-slate-500">Calculated as Quantity × Unit Price</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-900 block">{t("Total Invoice Valuation")}</span>
+                <span className="text-[11px] text-slate-500">{t("Calculated as Quantity × Unit Price")}</span>
               </div>
               <div className="text-xl sm:text-2xl font-black font-mono text-indigo-700">
                 {currencySymbol}{(Number(invQuantity || 1) * Number(invUnitPrice || 0)).toLocaleString()}
@@ -812,27 +812,27 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
             <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center">3</span>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Initial Payment Status</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">{t("Initial Payment Status")}</h4>
             </div>
             <Select
               value={invStatus}
               onChange={(e) => setInvStatus(e.target.value)}
             >
-              <option value="Unpaid">Unpaid (Generate Paystack/Online Checkout Link)</option>
-              <option value="Paid">Paid (Already Settled Offline via Cash/Bank Transfer)</option>
+              <option value="Unpaid">{t("Unpaid (Generate Paystack/Online Checkout Link)")}</option>
+              <option value="Paid">{t("Paid (Already Settled Offline via Cash/Bank Transfer)")}</option>
             </Select>
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span className="text-xs text-slate-500 hidden sm:inline">
-              Generates an official record with live payment link and PDF generation.
+              {t("Generates an official record with live payment link and PDF generation.")}
             </span>
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
               <Button variant="secondary" onClick={() => setOpenInvoiceModal(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" variant="primary" leftIcon={<FileText size={16} />}>
-                Generate & Issue Invoice
+                {t("Generate & Issue Invoice")}
               </Button>
             </div>
           </div>
@@ -843,8 +843,8 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       <Modal
         isOpen={openInvoiceView}
         onClose={handleCloseInvoiceView}
-        title={`Commercial Invoice #${selectedInvoice?.id || ''}`}
-        subtitle={`Issued by ${farmName} • Status: ${selectedInvoice?.status || 'Unpaid'}`}
+        title={`${t("Commercial Invoice")} #${selectedInvoice?.id || ''}`}
+        subtitle={`${t("Issued by")} ${farmName} • ${t("Status")}: ${t(selectedInvoice?.status || 'Unpaid')}`}
         size="2xl"
       >
         <div className="space-y-6 font-sans">
@@ -857,10 +857,10 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                   : 'bg-amber-100 text-amber-800 border border-amber-300'
               }`}>
                 {selectedInvoice?.status === 'Paid' ? <CheckCircle2 size={13} /> : <Clock size={13} />}
-                {selectedInvoice?.status || 'Unpaid'}
+                {t(selectedInvoice?.status || 'Unpaid')}
               </span>
               <span className="text-xs text-slate-500 font-mono hidden sm:inline">
-                Issued {selectedInvoice?.date}
+                {t("Issued")} {selectedInvoice?.date}
               </span>
             </div>
 
@@ -871,7 +871,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 leftIcon={<Copy size={13} />}
                 onClick={() => selectedInvoice && handleCopyPaymentLink(selectedInvoice)}
               >
-                Copy Link
+                {t("Copy Link")}
               </Button>
               <Button
                 variant="success"
@@ -879,7 +879,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 leftIcon={<MessageSquare size={13} />}
                 onClick={() => selectedInvoice && handleShareWhatsApp(selectedInvoice)}
               >
-                WhatsApp
+                {t("WhatsApp")}
               </Button>
               <Button
                 variant="primary"
@@ -887,7 +887,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 leftIcon={<Printer size={13} />}
                 onClick={handlePrint}
               >
-                Print PDF
+                {t("Print PDF")}
               </Button>
             </div>
           </div>
@@ -898,7 +898,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               <div className="flex items-center gap-2 min-w-0">
                 <ShieldCheck size={16} className="text-indigo-600 shrink-0" />
                 <span className="truncate">
-                  Direct Payment Link: <strong className="font-mono text-indigo-700">{typeof window !== 'undefined' ? window.location.origin : ''}/pay-invoice/{selectedInvoice.id}</strong>
+                  {t("Direct Payment Link")}: <strong className="font-mono text-indigo-700">{typeof window !== 'undefined' ? window.location.origin : ''}/pay-invoice/{selectedInvoice.id}</strong>
                 </span>
               </div>
               <button
@@ -906,7 +906,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                 onClick={() => handleCopyPaymentLink(selectedInvoice)}
                 className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline shrink-0 cursor-pointer"
               >
-                Copy
+                {t("Copy")}
               </button>
             </div>
           )}
@@ -930,31 +930,31 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                   <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">
                     {farmName}
                   </h2>
-                  <p className="text-xs text-slate-500 font-semibold">{farmType} • Commercial Farm Operations</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Support: {farmEmail} | Tel: {farmPhone}</p>
+                  <p className="text-xs text-slate-500 font-semibold">{farmType} • {t("Commercial Farm Operations")}</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{t("Support")}: {farmEmail} | {t("Tel")}: {farmPhone}</p>
                 </div>
               </div>
 
               <div className="text-left sm:text-right">
-                <span className="text-2xl font-black tracking-tight text-slate-900 font-mono block">INVOICE</span>
+                <span className="text-2xl font-black tracking-tight text-slate-900 font-mono block">{t("INVOICE")}</span>
                 <p className="text-xs font-bold text-indigo-600 font-mono">#{selectedInvoice?.id}</p>
-                <p className="text-xs text-slate-500 mt-0.5">Date: <strong className="text-slate-800 font-mono">{selectedInvoice?.date}</strong></p>
+                <p className="text-xs text-slate-500 mt-0.5">{t("Date")}: <strong className="text-slate-800 font-mono">{selectedInvoice?.date}</strong></p>
               </div>
             </div>
 
             {/* Billing Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 sm:p-5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Billed Customer</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">{t("Billed Customer")}</span>
                 <h4 className="text-sm sm:text-base font-extrabold text-slate-900">{selectedInvoice?.customerName}</h4>
-                <p className="text-slate-500 text-[11px] mt-0.5">Commercial Wholesale Client</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">{t("Commercial Wholesale Client")}</p>
               </div>
               <div className="sm:text-right">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Valuation Due</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">{t("Total Valuation Due")}</span>
                 <div className="text-2xl sm:text-3xl font-black font-mono text-indigo-700">
                   {currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Payment Terms: Immediate Settlement</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t("Payment Terms: Immediate Settlement")}</p>
               </div>
             </div>
 
@@ -963,10 +963,10 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
               <table className="w-full text-left text-xs min-w-[420px]">
                 <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-[10px] tracking-wider border-b border-slate-200">
                   <tr>
-                    <th className="py-3 px-4">Item Description</th>
-                    <th className="py-3 px-4 text-center">Qty</th>
-                    <th className="py-3 px-4 text-right">Unit Price</th>
-                    <th className="py-3 px-4 text-right">Line Total</th>
+                    <th className="py-3 px-4">{t("Item Description")}</th>
+                    <th className="py-3 px-4 text-center">{t("Qty")}</th>
+                    <th className="py-3 px-4 text-right">{t("Unit Price")}</th>
+                    <th className="py-3 px-4 text-right">{t("Line Total")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono text-xs">
@@ -977,15 +977,15 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                     <td className="py-4 px-4 text-right font-extrabold text-slate-900">{currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}</td>
                   </tr>
                   <tr className="bg-slate-50/70 font-sans text-[11px]">
-                    <td colSpan={3} className="py-2.5 px-4 text-right text-slate-500 font-semibold">Subtotal:</td>
+                    <td colSpan={3} className="py-2.5 px-4 text-right text-slate-500 font-semibold">{t("Subtotal")}:</td>
                     <td className="py-2.5 px-4 text-right font-mono font-bold text-slate-800">{currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}</td>
                   </tr>
                   <tr className="bg-slate-50/70 font-sans text-[11px]">
-                    <td colSpan={3} className="py-2 px-4 text-right text-slate-500 font-semibold">VAT / Farm Produce Tax (0%):</td>
+                    <td colSpan={3} className="py-2 px-4 text-right text-slate-500 font-semibold">{t("VAT / Farm Produce Tax (0%)")}:</td>
                     <td className="py-2 px-4 text-right font-mono text-slate-500">{currencySymbol}0.00</td>
                   </tr>
                   <tr className="bg-indigo-50/60 font-sans text-xs">
-                    <td colSpan={3} className="py-3 px-4 text-right text-indigo-950 font-black uppercase tracking-wider">Grand Total Due:</td>
+                    <td colSpan={3} className="py-3 px-4 text-right text-indigo-950 font-black uppercase tracking-wider">{t("Grand Total Due")}:</td>
                     <td className="py-3 px-4 text-right font-mono font-black text-indigo-700 text-sm">{currencySymbol}{selectedInvoice?.totalAmount.toLocaleString()}</td>
                   </tr>
                 </tbody>
@@ -995,15 +995,15 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
             {/* Payment Settlement & Status Modifier Drawer */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="text-xs font-bold text-slate-600 uppercase">Change Status:</span>
+                <span className="text-xs font-bold text-slate-600 uppercase">{t("Change Status")}:</span>
                 <select
                   value={selectedInvoice?.status || 'Unpaid'}
                   onChange={(e) => selectedInvoice && handleUpdateInvoiceStatus(selectedInvoice.id, e.target.value)}
                   className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-sm"
                 >
-                  <option value="Unpaid">Unpaid</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Paid">Paid</option>
+                  <option value="Unpaid">{t("Unpaid")}</option>
+                  <option value="Pending">{t("Pending")}</option>
+                  <option value="Paid">{t("Paid")}</option>
                 </select>
 
                 {selectedInvoice?.status !== 'Paid' && (
@@ -1013,26 +1013,26 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                     leftIcon={<CheckCircle2 size={13} />}
                     onClick={() => selectedInvoice && handleUpdateInvoiceStatus(selectedInvoice.id, 'Paid')}
                   >
-                    Mark as Paid (Offline)
+                    {t("Mark as Paid (Offline)")}
                   </Button>
                 )}
               </div>
 
               <div className="text-[11px] text-slate-400 font-medium sm:text-right">
-                Verified Commercial Transaction • {farmName}
+                {t("Verified Commercial Transaction")} • {farmName}
               </div>
             </div>
           </div>
 
           {/* Modal Footer Controls */}
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-mono">Invoice #{selectedInvoice?.id}</span>
+            <span className="text-xs text-slate-400 font-mono">{t("Invoice")} #{selectedInvoice?.id}</span>
             <div className="flex items-center gap-2">
               <Button variant="secondary" onClick={handleCloseInvoiceView}>
-                Close Preview
+                {t("Close Preview")}
               </Button>
               <Button variant="primary" leftIcon={<Printer size={15} />} onClick={handlePrint}>
-                Print Receipt PDF
+                {t("Print Receipt PDF")}
               </Button>
             </div>
           </div>

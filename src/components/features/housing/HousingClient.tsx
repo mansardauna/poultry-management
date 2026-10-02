@@ -152,8 +152,8 @@ export function HousingClient({ role }: { role: string }) {
                     </td>
                     {canEdit && (
                       <td className="px-4 py-3 flex gap-2">
-                        <button onClick={() => handleEdit(p)} className="p-1 hover:bg-blue-100 rounded transition-colors" title="Edit"><Edit2 size={14} className="text-blue-600" /></button>
-                        <button onClick={() => handleDelete(p.id)} className="p-1 hover:bg-red-100 rounded transition-colors" title="Delete"><Trash2 size={14} className="text-red-600" /></button>
+                        <button onClick={() => handleEdit(p)} className="p-1 hover:bg-blue-100 rounded transition-colors" title={t("Edit")}><Edit2 size={14} className="text-blue-600" /></button>
+                        <button onClick={() => handleDelete(p.id)} className="p-1 hover:bg-red-100 rounded transition-colors" title={t("Delete")}><Trash2 size={14} className="text-red-600" /></button>
                       </td>
                     )}
                   </tr>
