@@ -1,5 +1,11 @@
 'use strict';
 import { Language } from './types';
+import { arPhrases } from './locales/phrases_ar';
+import { esPhrases } from './locales/phrases_es';
+import { frPhrases } from './locales/phrases_fr';
+import { yoPhrases } from './locales/phrases_yo';
+import { igPhrases } from './locales/phrases_ig';
+import { haPhrases } from './locales/phrases_ha';
 
 export const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
   en: {
@@ -5538,5 +5544,12 @@ export const GLOBAL_PHRASES: Record<Language, Record<string, string>> = {
     "Passwords match": "Manenosiri yanalingana",
     "Password must be at least 6 characters": "Nenosiri lazima liwe na angalau herufi 6",
     "Specify and confirm your new account password below.": "Bainisha na uthibitishe nenosiri jipya la akaunti yako hapa chini.",
-  }
+  },
+  ar: arPhrases,
+  es: esPhrases,
+  fr: frPhrases,
+  yo: yoPhrases,
+  ig: igPhrases,
+  ha: haPhrases,
 };
+

@@ -317,17 +317,36 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
         <div className="flex items-center justify-between h-20 border-b border-indigo-900 px-4 relative">
           {isSuperAdmin ? (
             !isCollapsed ? (
-              <div className="flex items-center gap-3 px-2 py-2 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0 shadow-sm">
-                  <ShieldCheck size={22} />
-                </div>
+              <div className="flex items-center gap-2.5 px-2 py-2 flex-1 min-w-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={whiteLabel.logoUrl || '/icon.png'} 
+                  alt={whiteLabel.brandName || "Logo"} 
+                  className="w-8 h-8 rounded-lg object-contain flex-shrink-0 shadow-sm bg-white/10 p-0.5" 
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+                  }}
+                />
                 <div className="flex flex-col truncate">
-                  <span className="font-bold text-white text-sm truncate">Super Admin</span>
-                  <span className="text-xs text-purple-300 font-medium">Master Console</span>
+                  <span className="font-bold text-white text-sm truncate">{whiteLabel.brandName || 'Super Admin'}</span>
+                  <div className="flex items-center gap-1.5 text-xs text-purple-300 font-medium">
+                    <ShieldCheck size={12} className="text-purple-400 shrink-0" />
+                    <span className="truncate">Super Admin Console</span>
+                  </div>
                 </div>
               </div>
             ) : (
-              <ShieldCheck size={28} className="text-purple-400 mx-auto" />
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img 
+                src={whiteLabel.logoUrl || '/icon.png'} 
+                alt={whiteLabel.brandName || "Logo"} 
+                className="w-8 h-8 rounded-lg object-contain mx-auto shadow-sm bg-white/10 p-0.5" 
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  if (!target.src.endsWith('/icon.png')) target.src = '/icon.png';
+                }}
+              />
             )
           ) : !isCollapsed ? (
             <div className="relative flex-1">

@@ -7,8 +7,14 @@
  * id: Indonesian (Indonesia - Bahasa Indonesia)
  * hi: Hindi (India - हिन्दी)
  * sw: Swahili (East Africa - Kiswahili)
+ * ar: Arabic (العربية - Middle East & North Africa)
+ * es: Spanish (Español - Spain & Latin America)
+ * fr: French (Français - France & Francophone)
+ * yo: Yoruba (Èdè Yorùbá - West Africa)
+ * ig: Igbo (Asụsụ Igbo - West Africa)
+ * ha: Hausa (Harshen Hausa - West Africa)
  */
-export type Language = 'en' | 'zh' | 'id' | 'hi' | 'sw';
+export type Language = 'en' | 'zh' | 'id' | 'hi' | 'sw' | 'ar' | 'es' | 'fr' | 'yo' | 'ig' | 'ha';
 
 export interface TranslationDict {
   common: {
@@ -212,5 +218,11 @@ export const SUPPORTED_LANGUAGES: SupportedLanguageInfo[] = [
   { id: 'zh', name: 'Chinese', nativeName: '中文', code: 'ZH', region: 'China' },
   { id: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', code: 'ID', region: 'Indonesia' },
   { id: 'hi', name: 'Hindi', nativeName: 'हिन्दी', code: 'HI', region: 'India' },
-  { id: 'sw', name: 'Swahili', nativeName: 'Kiswahili', code: 'SW', region: 'East Africa' }
+  { id: 'sw', name: 'Swahili', nativeName: 'Kiswahili', code: 'SW', region: 'East Africa' },
+  { id: 'ar', name: 'Arabic', nativeName: 'العربية', code: 'AR', region: 'Middle East' },
+  { id: 'es', name: 'Spanish', nativeName: 'Español', code: 'ES', region: 'Spain & Americas' },
+  { id: 'fr', name: 'French', nativeName: 'Français', code: 'FR', region: 'France & Francophone' },
+  { id: 'yo', name: 'Yoruba', nativeName: 'Èdè Yorùbá', code: 'YO', region: 'West Africa' },
+  { id: 'ig', name: 'Igbo', nativeName: 'Asụsụ Igbo', code: 'IG', region: 'West Africa' },
+  { id: 'ha', name: 'Hausa', nativeName: 'Harshen Hausa', code: 'HA', region: 'West Africa' },
 ];

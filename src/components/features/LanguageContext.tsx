@@ -9,6 +9,12 @@ import { zhDict } from '@/lib/i18n/locales/zh';
 import { idDict } from '@/lib/i18n/locales/id';
 import { hiDict } from '@/lib/i18n/locales/hi';
 import { swDict } from '@/lib/i18n/locales/sw';
+import { arDict } from '@/lib/i18n/locales/ar';
+import { esDict } from '@/lib/i18n/locales/es';
+import { frDict } from '@/lib/i18n/locales/fr';
+import { yoDict } from '@/lib/i18n/locales/yo';
+import { igDict } from '@/lib/i18n/locales/ig';
+import { haDict } from '@/lib/i18n/locales/ha';
 import { GLOBAL_PHRASES } from '@/lib/i18n/phrases';
 
 export type { Language, TranslationDict, SupportedLanguageInfo };
@@ -19,7 +25,13 @@ export const translations: Record<Language, TranslationDict> = {
   zh: zhDict,
   id: idDict,
   hi: hiDict,
-  sw: swDict
+  sw: swDict,
+  ar: arDict,
+  es: esDict,
+  fr: frDict,
+  yo: yoDict,
+  ig: igDict,
+  ha: haDict,
 };
 
 /**
@@ -65,13 +77,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const dir: 'ltr' | 'rtl' = 'ltr';
+  const dir: 'ltr' | 'rtl' = language === 'ar' ? 'rtl' : 'ltr';
   const locale = useMemo(() => {
     switch (language) {
       case 'zh': return 'zh-CN';
       case 'id': return 'id-ID';
       case 'hi': return 'hi-IN';
       case 'sw': return 'sw-KE';
+      case 'ar': return 'ar-SA';
+      case 'es': return 'es-ES';
+      case 'fr': return 'fr-FR';
+      case 'yo': return 'yo-NG';
+      case 'ig': return 'ig-NG';
+      case 'ha': return 'ha-NG';
       case 'en':
       default: return 'en-US';
     }

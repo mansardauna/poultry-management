@@ -39,6 +39,8 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useSidebar } from './SidebarContext';
 import { useLanguage, Language } from '@/components/features/LanguageContext';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
+import { SUPPORTED_LANGUAGES } from '@/lib/i18n/types';
 import { useTimeFilter, TimeRange } from '@/components/features/TimeFilterContext';
 import toast from 'react-hot-toast';
 
@@ -459,19 +461,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         )}
 
         {/* Desktop Language Selection Dropdown (Hidden on mobile) */}
-        <div className="hidden md:flex relative items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
-          <Globe size={15} className="text-indigo-500 mr-1.5" />
-          <select 
-            value={language} 
-            onChange={(e) => setLanguage(e.target.value as Language)}
-            className="bg-transparent border-0 outline-none cursor-pointer font-semibold text-slate-700 focus:ring-0 py-0 pr-4 pl-0 appearance-none text-xs"
-          >
-            <option value="en">English (EN)</option>
-            <option value="zh">中文 (ZH) - China</option>
-            <option value="id">Bahasa Indonesia (ID) - Indonesia</option>
-            <option value="hi">हिन्दी (HI) - India</option>
-            <option value="sw">Kiswahili (SW) - Swahili</option>
-          </select>
+        <div className="hidden md:flex items-center">
+          <LanguageSelector variant="light" />
         </div>
 
         {/* Notification Bell */}
@@ -720,28 +711,25 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                     <Globe size={14} className="text-indigo-600" />
                     {t("Language")}
                   </label>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {[
-                      { id: 'en', name: 'English', code: 'EN', region: 'Global' },
-                      { id: 'zh', name: '中文 (Chinese)', code: 'ZH', region: 'China' },
-                      { id: 'id', name: 'Bahasa Indonesia', code: 'ID', region: 'Indonesia' },
-                      { id: 'hi', name: 'हिन्दी (Hindi)', code: 'HI', region: 'India' },
-                      { id: 'sw', name: 'Kiswahili (Swahili)', code: 'SW', region: 'East Africa' },
-                    ].map((lang) => (
+                  <div className="grid grid-cols-1 gap-1.5 max-h-64 overflow-y-auto pr-1">
+                    {SUPPORTED_LANGUAGES.map((lang) => (
                       <button
                         key={lang.id}
                         type="button"
                         onClick={() => {
-                          setLanguage(lang.id as Language);
+                          setLanguage(lang.id);
                         }}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
+                        className={`w-full flex items-center justify-between px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
                           language === lang.id
                             ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold'
                             : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                       >
-                        <span>{lang.name}</span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-mono ${
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="truncate">{lang.nativeName}</span>
+                          <span className="text-[10px] text-slate-400 font-normal truncate">({lang.name})</span>
+                        </div>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-mono shrink-0 ml-2 ${
                           language === lang.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
                         }`}>
                           {lang.code}
