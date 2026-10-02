@@ -21,7 +21,8 @@ import {
   Lock,
   Printer,
   Plus,
-  Egg
+  Egg,
+  TrendingUp
 } from 'lucide-react';
 import { Modal } from "@/components/ui/Modal";
 import { Input, Select } from "@/components/ui/Input";
@@ -255,12 +256,15 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       const dateStr = d.toISOString().split('T')[0];
       const eggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
       const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
-      const revenueThatDay = normalizedSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
+      const salesThatDay = normalizedSales.filter(s => s.date === dateStr);
+      const revenueThatDay = salesThatDay.reduce((sum, s) => sum + s.totalAmount, 0);
+      const eggSalesThatDay = salesThatDay.filter(s => s.type === 'Eggs').reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
         name: d.toLocaleDateString(currentLocale, { weekday: 'short' }),
         Eggs: eggsThatDay,
         CrackedSpoilt: badEggsThatDay,
         Revenue: revenueThatDay,
+        EggSales: eggSalesThatDay,
         Label: texts.dashboard.observed
       });
       currentYield += eggsThatDay;
@@ -279,12 +283,15 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
       const dateStr = d.toISOString().split('T')[0];
       const eggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
       const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
-      const revenueThatDay = normalizedSales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.totalAmount, 0);
+      const salesThatDay = normalizedSales.filter(s => s.date === dateStr);
+      const revenueThatDay = salesThatDay.reduce((sum, s) => sum + s.totalAmount, 0);
+      const eggSalesThatDay = salesThatDay.filter(s => s.type === 'Eggs').reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
         name: d.toLocaleDateString(currentLocale, { day: 'numeric', month: 'short' }),
         Eggs: eggsThatDay,
         CrackedSpoilt: badEggsThatDay,
         Revenue: revenueThatDay,
+        EggSales: eggSalesThatDay,
         Label: texts.dashboard.observed
       });
       currentYield += eggsThatDay;
@@ -312,16 +319,19 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
          return ed.getFullYear() === year && ed.getMonth() === month;
       }).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
 
-      const revenueInMonth = normalizedSales.filter(s => {
+      const salesInMonth = normalizedSales.filter(s => {
          const sd = new Date(s.date);
          return sd.getFullYear() === year && sd.getMonth() === month;
-      }).reduce((sum, s) => sum + s.totalAmount, 0);
+      });
+      const revenueInMonth = salesInMonth.reduce((sum, s) => sum + s.totalAmount, 0);
+      const eggSalesInMonth = salesInMonth.filter(s => s.type === 'Eggs').reduce((sum, s) => sum + s.totalAmount, 0);
 
       chartData.push({
         name: d.toLocaleDateString(currentLocale, { month: 'short' }),
         Eggs: eggsInMonth,
         CrackedSpoilt: badEggsInMonth,
         Revenue: revenueInMonth,
+        EggSales: eggSalesInMonth,
         Label: texts.dashboard.observed
       });
       currentYield += eggsInMonth;
@@ -569,8 +579,9 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
         {/* Production Charts */}
         <Card className="flex flex-col justify-between">
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-semibold text-slate-700">
-              {texts.dashboard.eggProductionVolumeChart} & {t("Sales Trend")}
+            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Egg size={18} className="text-amber-500" />
+              {texts.dashboard.eggProductionVolumeChart}
             </CardTitle>
             {isPro && (
               <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
@@ -622,69 +633,85 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </CardContent>
         </Card>
 
-        {/* Multi-Farm Production & Vet Inspection Calendar */}
+        {/* Sales & Revenue Trend Line Chart */}
         <Card className="flex flex-col justify-between border border-slate-200 bg-white rounded-2xl shadow-sm">
           <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Calendar size={18} className="text-indigo-600" /> {t("Multi-Farm Production & Schedule")}
+            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <TrendingUp size={18} className="text-emerald-600" />
+              {t("Sales Trend")} & {texts.dashboard.eggRevenue}
             </CardTitle>
-            <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2.5 py-1 rounded font-mono">
-              {todayFormatted}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded border border-emerald-200">
+                {formatCurrency(totalRevenue)}
+              </span>
+              {isPro && (
+                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
+                  {t("Live Data")}
+                </span>
+              )}
+            </div>
           </CardHeader>
 
-          <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-emerald-700 block">{t("Vaccination & Health")}</span>
-                <p className="text-slate-900 font-bold text-sm">
-                  {data.batches[0] ? `${data.batches[0].breed} (${data.batches[0].type || 'Layers'})` : 'Flock Health Routine'}
-                </p>
-                <p className="text-[10px] text-slate-500 font-mono">
-                  {data.batches[0] ? `Age: ${data.batches[0].ageInWeeks || 18} Weeks` : 'Status: Active'}
-                </p>
+          <CardContent className="pt-6 flex-1">
+            {isFree ? (
+              <div className="p-8 text-center rounded-2xl border border-slate-200 bg-white h-full flex flex-col justify-center items-center space-y-4">
+                <div className="space-y-2 max-w-md">
+                  <span className="bg-amber-100 text-amber-800 font-extrabold text-[10px] px-3 py-1 rounded-full border border-amber-200">
+                    Pro & Enterprise Feature
+                  </span>
+                  <h3 className="text-lg font-extrabold text-slate-900 pt-1">{t("Sales Analytics Charts Locked")}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                    Upgrade to Commercial Pro or Enterprise Plus to unlock real-time revenue line charts and financial telemetry.
+                  </p>
+                </div>
+                {userRole !== 'Staff' && (
+                  <button 
+                    onClick={() => router.push('/dashboard/settings?tab=subscription')}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-3 rounded-xl shadow cursor-pointer transition-all inline-flex items-center gap-2"
+                  >
+                    <Sparkles size={16} /> {t("Upgrade to Commercial Pro")}
+                  </button>
+                )}
               </div>
-
-              <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-indigo-700 block">{t("Feed Stock Level")}</span>
-                <p className="text-slate-900 font-bold text-sm">
-                  {data.feeds[0] ? `${data.feeds[0].quantityKg}kg ${data.feeds[0].type}` : 'Feed Inventory Normal'}
-                </p>
-                <p className="text-[10px] text-slate-500 font-mono">
-                  {totalFeedKg < 50 ? '⚠️ Low Stock Alert' : 'Stock Status: Optimal'}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-purple-700 block">{t("Vet & Diagnostics")}</span>
-                <p className="text-slate-900 font-bold text-sm">
-                  {data.alertLogs[0] ? data.alertLogs[0].message : 'Scheduled Farm Audit'}
-                </p>
-                <p className="text-[10px] text-slate-500 font-mono">
-                  {data.alertLogs[0] ? `Date: ${data.alertLogs[0].date}` : 'Audit Status: Certified'}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
-                <span className="text-[10px] font-bold text-amber-800 block">{t("Sales Dispatch Log")}</span>
-                <p className="text-slate-900 font-bold text-sm">
-                  {data.sales[0] ? `${data.sales[0].customerName} (${formatCurrency(data.sales[0].totalAmount)})` : 'Recent Wholesale Dispatch'}
-                </p>
-                <p className="text-[10px] text-slate-500 font-mono">
-                  {data.sales[0] ? `Date: ${data.sales[0].date}` : 'Dispatch Status: Dispatched'}
-                </p>
-              </div>
-            </div>
-
-            {!isEnterprise && (
-              <div className="bg-purple-50 border border-purple-200 p-3 rounded-xl flex items-center justify-between text-xs">
-                <span className="text-purple-900 font-semibold">{t("Unlock multi-farm branch calendar & cross-transfers")}</span>
-                <button
-                  onClick={() => router.push('/dashboard/settings?tab=subscription')}
-                  className="bg-purple-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg cursor-pointer hover:bg-purple-700"
-                >
-                  {t("Enterprise Tier")}
-                </button>
+            ) : (
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <LineChart data={chartData} margin={{ top: 10, right: 15, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                    <YAxis 
+                      stroke="#64748b" 
+                      fontSize={12} 
+                      tickLine={false} 
+                      tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(0)}k` : `${val}`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      labelClassName="text-slate-800 text-xs font-bold"
+                      formatter={(val: any, name?: any) => [formatCurrency(Number(val) || 0), String(name || '')]}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="Revenue" 
+                      stroke="#10b981" 
+                      strokeWidth={3} 
+                      dot={{ r: 3, fill: '#10b981' }} 
+                      activeDot={{ r: 6 }} 
+                      name={t("Total Revenue")} 
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="EggSales" 
+                      stroke="#6366f1" 
+                      strokeWidth={2} 
+                      strokeDasharray="4 4"
+                      dot={{ r: 2.5, fill: '#6366f1' }} 
+                      activeDot={{ r: 5 }} 
+                      name={t("Egg Sales")} 
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             )}
           </CardContent>
@@ -765,36 +792,81 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
           </CardContent>
         </Card>
 
-        {/* Managed Branches / Farms */}
-        <Card>
-          <CardHeader className="border-b border-slate-100">
+        {/* Farm Production & Operations Schedule */}
+        <Card className="flex flex-col justify-between border border-slate-200 bg-white rounded-2xl shadow-sm">
+          <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <MapPin size={18} className="text-indigo-650" /> {texts.dashboard.managedBranchesFarms} ({formatNumber(workspaces.length)})
+              <Calendar size={18} className="text-indigo-600" /> {t("Production & Schedule")}
             </CardTitle>
+            <span className="text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2 py-0.5 rounded border border-indigo-200 font-mono">
+              {todayFormatted}
+            </span>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-2.5 max-h-[220px] overflow-y-auto text-xs font-mono">
-              {workspaces.map((ws) => (
-                <div 
-                  key={ws.id}
-                  className={`p-3 rounded-xl border transition-colors flex items-center justify-between ${
-                    activeWorkspace?.id === ws.id ? 'border-indigo-500 bg-indigo-50/60 font-bold' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <MapPin size={14} className={activeWorkspace?.id === ws.id ? 'text-indigo-600' : 'text-slate-400'} />
-                    <span className="text-slate-800 truncate max-w-[140px]">{ws.name}</span>
-                  </div>
-                  {activeWorkspace?.id === ws.id ? (
-                    <span className="bg-indigo-600 text-white text-[9px] px-2 py-0.5 rounded font-sans uppercase font-bold">
-                      {texts.common.active}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-slate-400 font-sans">{ws.type || 'Branch'}</span>
-                  )}
+
+          <CardContent className="p-4 space-y-2.5 flex-1 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between">
+                <div className="truncate mr-2">
+                  <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider block">{t("Vaccination & Health")}</span>
+                  <p className="text-slate-900 font-bold text-xs truncate">
+                    {data.batches[0] ? `${data.batches[0].breed} (${data.batches[0].type || 'Layers'})` : 'Flock Health Routine'}
+                  </p>
                 </div>
-              ))}
+                <span className="text-[10px] text-emerald-800 font-mono font-semibold bg-emerald-100/80 px-2 py-0.5 rounded shrink-0">
+                  {data.batches[0] ? `${data.batches[0].ageInWeeks || 18} Wks` : 'Active'}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl border border-indigo-200 bg-indigo-50/50 flex items-center justify-between">
+                <div className="truncate mr-2">
+                  <span className="text-[9px] font-bold text-indigo-700 uppercase tracking-wider block">{t("Feed Stock Level")}</span>
+                  <p className="text-slate-900 font-bold text-xs truncate">
+                    {data.feeds[0] ? `${data.feeds[0].quantityKg}kg ${data.feeds[0].type}` : 'Feed Inventory'}
+                  </p>
+                </div>
+                <span className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded shrink-0 ${
+                  totalFeedKg < 50 ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-700'
+                }`}>
+                  {totalFeedKg < 50 ? 'Low Stock' : 'Optimal'}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl border border-purple-200 bg-purple-50/50 flex items-center justify-between">
+                <div className="truncate mr-2">
+                  <span className="text-[9px] font-bold text-purple-700 uppercase tracking-wider block">{t("Vet & Diagnostics")}</span>
+                  <p className="text-slate-900 font-bold text-xs truncate">
+                    {data.alertLogs[0] ? data.alertLogs[0].message : 'Farm Audit Routine'}
+                  </p>
+                </div>
+                <span className="text-[10px] text-purple-800 font-mono font-semibold bg-purple-100/80 px-2 py-0.5 rounded shrink-0">
+                  Certified
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl border border-amber-200 bg-amber-50/50 flex items-center justify-between">
+                <div className="truncate mr-2">
+                  <span className="text-[9px] font-bold text-amber-800 uppercase tracking-wider block">{t("Sales Dispatch Log")}</span>
+                  <p className="text-slate-900 font-bold text-xs truncate">
+                    {data.sales[0] ? `${data.sales[0].customerName}` : 'Wholesale Dispatch'}
+                  </p>
+                </div>
+                <span className="text-[10px] text-amber-800 font-mono font-semibold bg-amber-100/80 px-2 py-0.5 rounded shrink-0">
+                  {data.sales[0] ? formatCurrency(data.sales[0].totalAmount) : 'Dispatched'}
+                </span>
+              </div>
             </div>
+
+            {!isEnterprise && (
+              <div className="bg-purple-50/70 border border-purple-100 p-2.5 rounded-xl flex items-center justify-between text-xs mt-1">
+                <span className="text-purple-900 font-semibold text-[11px] truncate">{t("Multi-farm schedule & sync")}</span>
+                <button
+                  onClick={() => router.push('/dashboard/settings?tab=subscription')}
+                  className="bg-purple-600 text-white font-bold text-[9px] px-2.5 py-1 rounded cursor-pointer hover:bg-purple-700 shrink-0 ml-2"
+                >
+                  {t("Enterprise")}
+                </button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
