@@ -3,10 +3,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, KeyRound, X, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Dialog, DialogContent } from '@mui/material';
 import { useLanguage } from '@/components/features/LanguageContext';
 import { useWhiteLabel } from '@/components/features/WhiteLabelContext';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
@@ -17,11 +16,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 2FA Challenge State
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [tempToken, setTempToken] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+
   const router = useRouter();
 
   useEffect(() => {
+    // Check existing auth
     fetch('/api/auth/me')
       .then(res => res.json())
       .then(data => {
@@ -34,14 +41,17 @@ export default function LoginPage() {
         }
       })
       .catch(() => {});
-  }, [router]);
 
-  // Forgot Password State
-  const [showResetModal, setShowResetModal] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [resetStatus, setResetStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
-  const [resetMsg, setResetMsg] = useState('');
+    // Restore remembered email
+    if (typeof window !== 'undefined') {
+      const isRemembered = localStorage.getItem('pfms_remember_me') === 'true';
+      const savedEmail = localStorage.getItem('pfms_saved_email');
+      if (isRemembered && savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,20 +59,47 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
+      const payload: any = { rememberMe };
+      if (requires2FA) {
+        payload.tempToken = tempToken;
+        payload.twoFactorCode = twoFactorCode.trim();
+      } else {
+        payload.email = email.trim();
+        payload.password = password;
+      }
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(payload),
       });
 
       setIsSubmitting(false);
-
       const body = await response.json().catch(() => null);
 
-      if (response.ok) {
+      if (response.ok && body?.ok) {
+        // Handle Remember Me persistence
+        if (typeof window !== 'undefined') {
+          if (rememberMe) {
+            localStorage.setItem('pfms_remember_me', 'true');
+            localStorage.setItem('pfms_saved_email', email.trim());
+          } else {
+            localStorage.removeItem('pfms_remember_me');
+            localStorage.removeItem('pfms_saved_email');
+          }
+        }
+
         const cleanEmail = email.trim().toLowerCase();
         const isSuper = body?.role === 'SuperAdmin' || cleanEmail === 'owner@poultry.com' || cleanEmail === 'superadmin@pfms.com';
         window.location.href = isSuper ? '/dashboard/admin' : '/dashboard';
+        return;
+      }
+
+      // Check if 2FA code is needed
+      if (body?.requires2FA) {
+        setRequires2FA(true);
+        setTempToken(body.tempToken || '');
+        setError('');
         return;
       }
 
@@ -71,27 +108,6 @@ export default function LoginPage() {
     } catch (err: any) {
       setIsSubmitting(false);
       setError(err?.message || 'Network connection failed while attempting to reach backend server.');
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!resetEmail.trim()) return;
-
-    setResetStatus('submitting');
-    try {
-      const res = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: resetEmail, newPassword })
-      });
-
-      const data = await res.json();
-      setResetStatus('success');
-      setResetMsg(data.message || 'Password reset instructions have been dispatched!');
-    } catch (_err) {
-      setResetStatus('idle');
-      setResetMsg('Failed to process password reset. Please try again.');
     }
   };
 
@@ -122,7 +138,7 @@ export default function LoginPage() {
           </div>
         </div>
         
-        {/* Right Side: Wider Login Form */}
+        {/* Right Side: Login Form */}
         <div className="w-full md:w-1/2 lg:w-[45%] p-6 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between bg-white relative">
           {/* Top-Right Language Switcher */}
           <div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-10">
@@ -147,157 +163,148 @@ export default function LoginPage() {
                 </span>
               </Link>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
-                {t("Welcome back")}
+                {requires2FA ? t("Two-Factor Verification", "Two-Factor Verification") : t("Welcome back")}
               </h1>
-              <p className="text-xs sm:text-sm font-medium text-slate-500">{t("Sign in to manage your farm branches and operations.")}</p>
+              <p className="text-xs sm:text-sm font-medium text-slate-500">
+                {requires2FA
+                  ? t("Enter the 6-digit security code from your authenticator app to complete sign in.", "Enter the 6-digit security code from your authenticator app to complete sign in.")
+                  : t("Sign in to manage your farm branches and operations.")}
+              </p>
             </div>
             
-            <form onSubmit={handleLogin} className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-5">
               {error && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm text-center border border-red-200 font-semibold shadow-sm">
                   {error}
                 </div>
               )}
-              
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Email address")}</label>
-                  <input 
-                    type="text" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-xl p-4 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
-                    placeholder="e.g. owner@poultry.com or username"
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-sm font-medium text-slate-700">{t("Password")}</label>
+
+              {requires2FA ? (
+                /* 2FA Challenge View */
+                <div className="space-y-5">
+                  <div className="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-100 flex items-center gap-3">
+                    <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-600/30">
+                      <ShieldCheck size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-indigo-950 uppercase tracking-wider">{t("Two-Factor Protected", "Two-Factor Protected")}</h4>
+                      <p className="text-xs text-indigo-700 font-medium">{t("Authenticator verification required for this account.", "Authenticator verification required for this account.")}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("6-Digit Authentication Code *", "6-Digit Authentication Code *")}</label>
+                    <input 
+                      type="text"
+                      value={twoFactorCode}
+                      onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                      placeholder="000000"
+                      maxLength={6}
+                      className="w-full border-2 border-slate-200 rounded-xl p-4 text-center text-3xl font-mono font-bold tracking-widest focus:outline-none focus:border-indigo-600 bg-white"
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting || twoFactorCode.length < 6}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-2 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
+                  >
+                    {isSubmitting ? t('Verifying…', 'Verifying…') : t('Verify & Sign In', 'Verify & Sign In')}
+                  </button>
+
+                  <div className="text-center pt-2">
                     <button
                       type="button"
-                      onClick={() => setShowResetModal(true)}
-                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setRequires2FA(false);
+                        setTwoFactorCode('');
+                        setError('');
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors cursor-pointer"
                     >
-                      {t("Forgot password?")}
+                      <ArrowLeft size={14} /> {t("Back to Password Entry", "Back to Password Entry")}
                     </button>
                   </div>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-xl p-4 pr-14 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
-                    placeholder={t("Enter your password")}
-                    required
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-[42px] text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
                 </div>
-              </div>
+              ) : (
+                /* Standard Credentials View */
+                <>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Email address")}</label>
+                      <input 
+                        type="text" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-xl p-3.5 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
+                        placeholder="e.g. owner@poultry.com or username"
+                        required
+                      />
+                    </div>
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Password")}</label>
+                      <input 
+                        type={showPassword ? "text" : "password"} 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full border-2 border-slate-200 rounded-xl p-3.5 pr-14 text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-slate-50 focus:bg-white font-medium"
+                        placeholder={t("Enter your password")}
+                        required
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-[40px] text-slate-400 hover:text-indigo-600 transition-colors p-1 cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
 
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
-              >
-                {isSubmitting ? t('Authenticating…') : t('Sign in')}
-              </button>
+                    {/* Remember Me Checkbox & Forgot Password Link */}
+                    <div className="flex items-center justify-between pt-1">
+                      <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-600">
+                        <input 
+                          type="checkbox" 
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                        />
+                        <span className="font-medium text-slate-700">{t("Remember me", "Remember me")}</span>
+                      </label>
+                      <Link
+                        href={`/reset-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                      >
+                        {t("Forgot password?")}
+                      </Link>
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-4 mt-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-indigo-400 disabled:active:scale-100 shadow-xl shadow-indigo-600/25 cursor-pointer"
+                  >
+                    {isSubmitting ? t('Authenticating…') : t('Sign in')}
+                  </button>
+                </>
+              )}
             </form>
             
-            <div className="text-center mt-8">
+            <div className="text-center mt-6">
               <Link href="/signup" className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer inline-block p-2">
                 {t("Don't have an account? Sign up here →")}
               </Link>
             </div>
           </div>
 
-          <div className="pt-8 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 mt-6">
+          <div className="pt-6 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 mt-6">
             <p>&copy; 2026 Poultry Farm Management System. All rights reserved.</p>
           </div>
         </div>
       </div>
-
-      {/* Forgot Password Reset Modal */}
-      <Dialog open={showResetModal} onClose={() => setShowResetModal(false)} fullWidth maxWidth="xs" slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}>
-        <DialogContent className="p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
-                <KeyRound size={20} />
-              </div>
-              <h3 className="font-bold text-slate-900 text-base">{t("Reset Your Password")}</h3>
-            </div>
-            <button onClick={() => setShowResetModal(false)} className="text-slate-400 hover:text-slate-600">
-              <X size={18} />
-            </button>
-          </div>
-
-          {resetStatus === 'success' ? (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-5 rounded-2xl text-center space-y-2">
-              <CheckCircle2 size={36} className="mx-auto text-emerald-600" />
-              <h4 className="font-bold text-sm">{t("Reset Link Dispatched!")}</h4>
-              <p className="text-xs text-emerald-700 leading-relaxed">{resetMsg}</p>
-              <button
-                onClick={() => setShowResetModal(false)}
-                className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors w-full"
-              >
-                {t("Back to Login")}
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleResetPassword} className="space-y-4 pt-1">
-              <p className="text-xs text-slate-500 leading-relaxed">
-                {t("Enter your account email below. We'll send instructions and let you specify a new password.")}
-              </p>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">{t("Account email *")}</label>
-                <input 
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="e.g. owner@poultry.com"
-                  className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">{t("New password (optional)")}</label>
-                <input 
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Minimum 6 characters"
-                  className="w-full border-2 border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none focus:border-indigo-500 bg-slate-50"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowResetModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700"
-                >
-                  {t("Cancel")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={resetStatus === 'submitting'}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm disabled:bg-indigo-300"
-                >
-                  {resetStatus === 'submitting' ? t('Processing…', 'Processing…') : t('Send Reset Link')}
-                </button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 import { isSupabaseMode } from '@/lib/authdb';
 import bcrypt from 'bcryptjs';
+import { createResetToken, verifyResetToken, consumeResetToken } from '@/lib/resetTokenStore';
 
 function localIdentifierPart(email: string): string {
   return email.split('@')[0].toLowerCase();
@@ -15,7 +16,7 @@ async function findLocalUser(identifier: string) {
   const { data: users } = await supabase
     .from('users')
     .select('*')
-    .or(`username.eq.${clean},username.eq.${localIdentifierPart(clean)}`)
+    .or(`email.eq.${clean},username.eq.${clean},username.eq.${localIdentifierPart(clean)}`)
     .limit(1);
   return (users && users.length > 0) ? users[0] : null;
 }
@@ -33,9 +34,107 @@ export async function POST(request: Request) {
   try {
     const authUser = await getAuthUser();
     const body = await request.json();
-    const { email, currentPassword, newPassword } = body;
+    const { action, email, token, currentPassword, newPassword } = body;
 
-    // ---- Local database mode (MySQL/PostgreSQL): passwords live in the users table ----
+    // =========================================================================
+    // 1. ACTION: REQUEST VERIFICATION TOKEN / CODE
+    // =========================================================================
+    if (action === 'request_token') {
+      if (!email || typeof email !== 'string' || !email.trim()) {
+        return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
+      }
+
+      const cleanEmail = email.trim().toLowerCase();
+      
+      // Check if user exists (or if it's admin)
+      const user = await findLocalUser(cleanEmail);
+      const isAdmin = cleanEmail === 'owner@poultry.com' || cleanEmail === 'owner' || cleanEmail === 'superadmin@pfms.com';
+
+      if (!user && !isAdmin) {
+        // Return friendly message without exposing whether user exists
+        return NextResponse.json({
+          success: true,
+          message: 'If an account matches this email, a 6-digit verification code has been dispatched.',
+        });
+      }
+
+      const { token: genToken, emailSent } = await createResetToken(cleanEmail);
+
+      return NextResponse.json({
+        success: true,
+        message: emailSent 
+          ? 'A 6-digit verification code has been dispatched to your email address.'
+          : 'Verification code generated. Please check your inbox or use the verification code below.',
+        devToken: genToken, // Provided so dev/local testing without SMTP credentials is fully functional
+      });
+    }
+
+    // =========================================================================
+    // 2. ACTION: VERIFY TOKEN / CODE
+    // =========================================================================
+    if (action === 'verify_token') {
+      if (!email || !token) {
+        return NextResponse.json({ error: 'Email and verification code are required' }, { status: 400 });
+      }
+
+      const verifyResult = verifyResetToken(email, token);
+      if (!verifyResult.valid) {
+        return NextResponse.json({ error: verifyResult.error || 'Invalid or expired verification code' }, { status: 400 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Verification code verified successfully. You may now specify a new password.',
+      });
+    }
+
+    // =========================================================================
+    // 3. ACTION: CONFIRM RESET (WITH TOKEN & NEW PASSWORD)
+    // =========================================================================
+    if (action === 'confirm_reset') {
+      if (!email || !token || !newPassword) {
+        return NextResponse.json({ error: 'Email, verification code, and new password are required' }, { status: 400 });
+      }
+
+      if (typeof newPassword !== 'string' || newPassword.length < 6) {
+        return NextResponse.json({ error: 'New password must be at least 6 characters' }, { status: 400 });
+      }
+
+      const consumeResult = consumeResetToken(email, token);
+      if (!consumeResult.valid) {
+        return NextResponse.json({ error: consumeResult.error || 'Invalid or expired verification code' }, { status: 400 });
+      }
+
+      const cleanEmail = email.trim().toLowerCase();
+      const user = await findLocalUser(cleanEmail);
+
+      if (user) {
+        const ok = await updateLocalPassword(user.id, newPassword);
+        if (!ok) {
+          return NextResponse.json({ error: 'Failed to update password in database' }, { status: 500 });
+        }
+      }
+
+      // Also sync Supabase Auth if running in Supabase mode
+      if (await isSupabaseMode()) {
+        try {
+          const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
+          const authAccount = authUsers?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
+          if (authAccount?.id) {
+            await supabase.auth.admin.updateUserById(authAccount.id, { password: newPassword });
+          }
+        } catch (_listErr) {}
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Your password has been reset successfully! You can now log in with your new password.',
+      });
+    }
+
+    // =========================================================================
+    // 4. LEGACY / AUTHENTICATED USER PASSWORD UPDATE (SETTINGS PAGE)
+    // =========================================================================
     if (!(await isSupabaseMode())) {
       if (!newPassword || newPassword.length < 6) {
         return NextResponse.json({ error: 'New password must be at least 6 characters' }, { status: 400 });
@@ -72,14 +171,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, message: 'Password updated successfully!' });
     }
 
-    // ---- Supabase mode ----
-    // Logged-in user updating password
+    // ---- Supabase mode authenticated update ----
     if (authUser && newPassword) {
       if (newPassword.length < 6) {
         return NextResponse.json({ error: 'New password must be at least 6 characters' }, { status: 400 });
       }
 
-      // Verify the current password against the actual login store (Supabase Auth)
       if (currentPassword) {
         const { error: verifyErr } = await supabase.auth.signInWithPassword({
           email: authUser.email,
@@ -90,10 +187,8 @@ export async function POST(request: Request) {
         }
       }
 
-      // Update Supabase Auth password (source of truth for real login)
       const { error: authUpdateErr } = await supabase.auth.admin.updateUserById(authUser.id, { password: newPassword });
 
-      // Keep legacy users-table hash in sync for fallback login paths
       const passwordHash = await bcrypt.hash(newPassword, 10);
       const { error: updateErr } = await supabase
         .from('users')
@@ -110,50 +205,8 @@ export async function POST(request: Request) {
       });
     }
 
-    // Unauthenticated reset request via email
-    if (!email || !email.trim()) {
-      return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const { data: users } = await supabase
-      .from('users')
-      .select('*')
-      .or(`username.eq.${cleanEmail},username.eq.${email.trim()}`)
-      .limit(1);
-
-    if (users && users.length > 0) {
-      const user = users[0];
-      if (newPassword && newPassword.length >= 6) {
-        const passwordHash = await bcrypt.hash(newPassword, 10);
-        await supabase
-          .from('users')
-          .update({ passwordHash })
-          .eq('id', user.id);
-
-        // Also update the Supabase Auth password for the matching auth account
-        try {
-          const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
-          const authAccount = authUsers?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
-          if (authAccount?.id) {
-            await supabase.auth.admin.updateUserById(authAccount.id, { password: newPassword });
-          }
-        } catch (_listErr) {
-          // Ignore auth account sync failure gracefully
-        }
-
-        return NextResponse.json({
-          success: true,
-          message: 'Your password has been reset successfully! You can now log in.'
-        });
-      }
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      message: 'If an account exists with this email, password reset instructions have been dispatched.' 
-    });
+    return NextResponse.json({ error: 'Invalid request parameters' }, { status: 400 });
   } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to process password reset' }, { status: 500 });
+    return NextResponse.json({ error: err?.message || 'Failed to process password reset' }, { status: 500 });
   }
 }

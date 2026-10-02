@@ -18,6 +18,7 @@ function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const plan = searchParams.get('plan');
@@ -36,6 +37,12 @@ function SignupForm() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!agreeTerms) {
+      setError(t("You must agree to the Terms of Service and Privacy Policy to continue.", "You must agree to the Terms of Service and Privacy Policy to continue."));
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -137,11 +144,33 @@ function SignupForm() {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+
+          {/* Terms & Privacy Agreement Checkbox */}
+          <div className="flex items-start gap-2.5 pt-1">
+            <input 
+              type="checkbox"
+              id="agreeTerms"
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+              required
+            />
+            <label htmlFor="agreeTerms" className="text-xs text-slate-600 leading-relaxed cursor-pointer select-none">
+              {t("I agree to the", "I agree to the")}{' '}
+              <Link href="/terms" target="_blank" className="font-semibold text-indigo-600 hover:text-indigo-800 underline">
+                {t("Terms of Service", "Terms of Service")}
+              </Link>{' '}
+              {t("and", "and")}{' '}
+              <Link href="/privacy" target="_blank" className="font-semibold text-indigo-600 hover:text-indigo-800 underline">
+                {t("Privacy Policy", "Privacy Policy")}
+              </Link>
+            </label>
+          </div>
         </div>
 
         <button 
           type="submit" 
-          disabled={isSubmitting}
+          disabled={isSubmitting || !agreeTerms}
           className="w-full bg-indigo-600 text-white font-semibold text-sm py-3.5 mt-2 rounded-lg hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-indigo-400 shadow-md shadow-indigo-200 cursor-pointer"
         >
           {isSubmitting ? t('Creating account…', 'Creating account…') : t('Sign Up')}

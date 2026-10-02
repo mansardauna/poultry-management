@@ -19,7 +19,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap, Crown, ShieldCheck } from 'lucide-react';
+import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap, Crown, ShieldCheck, QrCode, Copy, Check } from 'lucide-react';
 import { useWorkspace } from '../WorkspaceContext';
 import { useLanguage } from '../LanguageContext';
 
@@ -225,6 +225,93 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
       toast.error('An error occurred while updating password');
     } finally {
       setIsUpdatingPassword(false);
+    }
+  };
+
+  // Two-Factor Authentication (2FA) State
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
+  const [twoFactorSetup, setTwoFactorSetup] = useState<{ setupSecret?: string; qrCodeUrl?: string } | null>(null);
+  const [twoFactorCodeInput, setTwoFactorCodeInput] = useState('');
+  const [is2FASubmitting, setIs2FASubmitting] = useState(false);
+  const [copiedSecret, setCopiedSecret] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/2fa')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.enabled) {
+          setTwoFactorEnabled(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleOpen2FASetup = async () => {
+    try {
+      const res = await fetch('/api/auth/2fa');
+      const data = await res.json();
+      if (data?.setupSecret) {
+        setTwoFactorSetup(data);
+        setShowTwoFactorModal(true);
+      }
+    } catch {
+      toast.error(t('Failed to initialize 2FA setup', 'Failed to initialize 2FA setup'));
+    }
+  };
+
+  const handleConfirmEnable2FA = async () => {
+    if (!twoFactorCodeInput || twoFactorCodeInput.trim().length < 6) {
+      toast.error(t('Please enter the 6-digit verification code', 'Please enter the 6-digit verification code'));
+      return;
+    }
+    setIs2FASubmitting(true);
+    try {
+      const res = await fetch('/api/auth/2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'enable',
+          code: twoFactorCodeInput.trim(),
+          secret: twoFactorSetup?.setupSecret,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || t('Two-Factor Authentication activated successfully!', 'Two-Factor Authentication activated successfully!'));
+        setTwoFactorEnabled(true);
+        setShowTwoFactorModal(false);
+        setTwoFactorCodeInput('');
+      } else {
+        toast.error(data.error || t('Failed to activate 2FA', 'Failed to activate 2FA'));
+      }
+    } catch {
+      toast.error(t('Network error while activating 2FA', 'Network error while activating 2FA'));
+    } finally {
+      setIs2FASubmitting(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!confirm(t("Are you sure you want to disable Two-Factor Authentication?", "Are you sure you want to disable Two-Factor Authentication?"))) return;
+    setIs2FASubmitting(true);
+    try {
+      const res = await fetch('/api/auth/2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'disable' }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || t('2FA disabled', '2FA disabled'));
+        setTwoFactorEnabled(false);
+      } else {
+        toast.error(data.error || t('Failed to disable 2FA', 'Failed to disable 2FA'));
+      }
+    } catch {
+      toast.error(t('Failed to disable 2FA', 'Failed to disable 2FA'));
+    } finally {
+      setIs2FASubmitting(false);
     }
   };
 
@@ -702,8 +789,152 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   {isUpdatingPassword ? t('Updating Password...') : t('Update Password')}
                 </MuiButton>
               </div>
+
+              {/* Two-Factor Authentication (2FA) Subsection */}
+              <div className="pt-6 border-t border-slate-100 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <div className={`p-3 rounded-xl ${twoFactorEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
+                      <ShieldCheck size={22} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-slate-800 text-sm">{t("Two-Factor Authentication (2FA)", "Two-Factor Authentication (2FA)")}</h4>
+                        <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${twoFactorEnabled ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-200 text-slate-600'}`}>
+                          {twoFactorEnabled ? t("Active", "Active") : t("Disabled", "Disabled")}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {twoFactorEnabled
+                          ? t("Your account is fortified with an authenticator app (Google Authenticator, Microsoft Authenticator).", "Your account is fortified with an authenticator app (Google Authenticator, Microsoft Authenticator).")
+                          : t("Require a 6-digit verification code from your authenticator app each time you sign in.", "Require a 6-digit verification code from your authenticator app each time you sign in.")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {twoFactorEnabled ? (
+                      <button
+                        type="button"
+                        onClick={handleDisable2FA}
+                        disabled={is2FASubmitting}
+                        className="px-4 py-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-colors cursor-pointer"
+                      >
+                        {is2FASubmitting ? t("Processing…") : t("Disable 2FA", "Disable 2FA")}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleOpen2FASetup}
+                        className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                      >
+                        <ShieldCheck size={14} />
+                        {t("Enable 2FA", "Enable 2FA")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
+
+          {/* 2FA Setup Modal */}
+          <Dialog open={showTwoFactorModal} onClose={() => setShowTwoFactorModal(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}>
+            <DialogContent className="p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">{t("Enable Two-Factor Authentication", "Enable Two-Factor Authentication")}</h3>
+                    <p className="text-xs text-slate-500">{t("Scan QR code with your authenticator app", "Scan QR code with your authenticator app")}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowTwoFactorModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="text-xs text-slate-600 space-y-1.5 leading-relaxed bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-100">
+                  <p className="font-semibold text-indigo-950">
+                    {t("Step 1: Scan the QR Code", "Step 1: Scan the QR Code")}
+                  </p>
+                  <p>
+                    {t("Open Google Authenticator, Microsoft Authenticator, or 1Password and scan this code to link your account:", "Open Google Authenticator, Microsoft Authenticator, or 1Password and scan this code to link your account:")}
+                  </p>
+                </div>
+
+                {twoFactorSetup?.qrCodeUrl && (
+                  <div className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-slate-200">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={twoFactorSetup.qrCodeUrl} 
+                      alt="2FA QR Code" 
+                      className="w-44 h-44 object-contain rounded-lg border border-slate-100"
+                    />
+                    <div className="mt-3 text-center space-y-1">
+                      <p className="text-[11px] text-slate-400 font-medium">{t("Can't scan? Enter secret key manually:", "Can't scan? Enter secret key manually:")}</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <code className="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded border border-slate-200 select-all">
+                          {twoFactorSetup.setupSecret}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (twoFactorSetup?.setupSecret) {
+                              navigator.clipboard.writeText(twoFactorSetup.setupSecret);
+                              setCopiedSecret(true);
+                              setTimeout(() => setCopiedSecret(false), 2000);
+                              toast.success(t("Secret copied to clipboard", "Secret copied to clipboard"));
+                            }
+                          }}
+                          className="p-1 text-slate-500 hover:text-indigo-600 cursor-pointer"
+                          title="Copy Secret"
+                        >
+                          {copiedSecret ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <label className="block text-xs font-bold text-slate-700">
+                    {t("Step 2: Enter the 6-Digit Code from Authenticator", "Step 2: Enter the 6-Digit Code from Authenticator")}
+                  </label>
+                  <input
+                    type="text"
+                    value={twoFactorCodeInput}
+                    onChange={(e) => setTwoFactorCodeInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                    placeholder="000000"
+                    maxLength={6}
+                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-center text-xl font-mono font-bold tracking-widest focus:outline-none focus:border-indigo-600 bg-slate-50"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowTwoFactorModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+                >
+                  {t("Cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmEnable2FA}
+                  disabled={is2FASubmitting || twoFactorCodeInput.length < 6}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 cursor-pointer flex items-center gap-1.5"
+                >
+                  <ShieldCheck size={14} />
+                  {is2FASubmitting ? t("Verifying…") : t("Verify & Enable 2FA", "Verify & Enable 2FA")}
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
 

@@ -3,7 +3,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { KeyRound, Eye, EyeOff, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { KeyRound, Eye, EyeOff, CheckCircle2, ArrowLeft, Mail, ShieldCheck, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -17,64 +17,176 @@ function ResetPasswordForm() {
   const { t } = useLanguage();
   const whiteLabel = useWhiteLabel();
 
+  // Current step: 1 = Email, 2 = Token, 3 = Password
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+
   const [email, setEmail] = useState(emailParam);
+  const [token, setToken] = useState('');
+  const [devTokenNotice, setDevTokenNotice] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Step 1: Request Token
+  const handleRequestToken = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email.trim()) {
-      toast.error('Email address is required');
-      return;
-    }
-
-    if (!newPassword || newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('Email address is required'));
       return;
     }
 
     setIsSubmitting(true);
-    toast.loading('Resetting password...', { id: 'reset-toast' });
+    const toastId = toast.loading(t('Sending verification code…', 'Sending verification code…'));
 
     try {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), newPassword })
+        body: JSON.stringify({ action: 'request_token', email: email.trim() }),
       });
 
-      toast.dismiss('reset-toast');
+      const data = await res.json();
+      toast.dismiss(toastId);
+
       if (res.ok) {
-        setIsSuccess(true);
-        toast.success('Password updated successfully!');
+        toast.success(data.message || t('Verification code sent!', 'Verification code sent!'));
+        if (data.devToken) {
+          setDevTokenNotice(data.devToken);
+        }
+        setStep(2);
       } else {
-        const data = await res.json();
-        toast.error(data?.error || 'Failed to reset password');
+        toast.error(data.error || t('Failed to send verification code', 'Failed to send verification code'));
       }
     } catch (_e) {
-      toast.dismiss('reset-toast');
-      toast.error('An error occurred. Please try again.');
+      toast.dismiss(toastId);
+      toast.error(t('Network error while requesting verification code', 'Network error while requesting verification code'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Step 2: Verify Token
+  const handleVerifyToken = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token.trim()) {
+      toast.error(t('Please enter the 6-digit verification code', 'Please enter the 6-digit verification code'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    const toastId = toast.loading(t('Verifying code…', 'Verifying code…'));
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify_token', email: email.trim(), token: token.trim() }),
+      });
+
+      const data = await res.json();
+      toast.dismiss(toastId);
+
+      if (res.ok) {
+        toast.success(t('Code verified! Set your new password.', 'Code verified! Set your new password.'));
+        setStep(3);
+      } else {
+        toast.error(data.error || t('Invalid or expired verification code', 'Invalid or expired verification code'));
+      }
+    } catch (_e) {
+      toast.dismiss(toastId);
+      toast.error(t('Network error while verifying code', 'Network error while verifying code'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Resend Token
+  const handleResendToken = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    const toastId = toast.loading(t('Resending verification code…', 'Resending verification code…'));
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'request_token', email: email.trim() }),
+      });
+
+      const data = await res.json();
+      toast.dismiss(toastId);
+
+      if (res.ok) {
+        toast.success(t('A new code has been sent!', 'A new code has been sent!'));
+        if (data.devToken) {
+          setDevTokenNotice(data.devToken);
+        }
+      } else {
+        toast.error(data.error || t('Failed to resend code', 'Failed to resend code'));
+      }
+    } catch (_e) {
+      toast.dismiss(toastId);
+      toast.error(t('Network error while resending code', 'Network error while resending code'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Step 3: Confirm Reset with New Password
+  const handleConfirmReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newPassword || newPassword.length < 6) {
+      toast.error(t('Password must be at least 6 characters'));
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error(t('Passwords do not match'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    const toastId = toast.loading(t('Updating password…', 'Updating password…'));
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'confirm_reset',
+          email: email.trim(),
+          token: token.trim(),
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+      toast.dismiss(toastId);
+
+      if (res.ok) {
+        setIsSuccess(true);
+        toast.success(t('Password updated successfully!'));
+      } else {
+        toast.error(data?.error || t('Failed to reset password'));
+      }
+    } catch (_e) {
+      toast.dismiss(toastId);
+      toast.error(t('An error occurred. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 p-6 sm:p-12 lg:p-14 space-y-8 relative">
+    <div className="w-full max-w-lg lg:max-w-xl bg-white shadow-2xl shadow-indigo-950/10 rounded-3xl overflow-hidden border border-slate-200/80 p-6 sm:p-10 lg:p-12 space-y-6 relative">
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
         <LanguageSelector variant="light" />
       </div>
 
-      <div className="text-center space-y-3">
+      <div className="text-center space-y-2">
         <Link href="/" className="inline-flex items-center gap-2.5 mb-2 group cursor-pointer">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
@@ -87,9 +199,58 @@ function ResetPasswordForm() {
             }}
           />
         </Link>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{t("Reset Your Password")}</h1>
-        <p className="text-sm text-slate-500 font-medium">{t("Enter your account email and specify your new password below.", "Enter your account email and specify your new password below.")}</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          {t("Reset Your Password")}
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 font-medium">
+          {step === 1 && t("Enter your account email to receive a recovery code.", "Enter your account email to receive a recovery code.")}
+          {step === 2 && t("Enter the 6-digit verification code sent to your email.", "Enter the 6-digit verification code sent to your email.")}
+          {step === 3 && t("Specify your new account password below.", "Specify your new account password below.")}
+        </p>
       </div>
+
+      {/* 3-Step Flow Indicator */}
+      {!isSuccess && (
+        <div className="flex items-center justify-center gap-2 sm:gap-3 py-2 border-y border-slate-100">
+          <div className={`flex items-center gap-1.5 text-xs font-bold ${step >= 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${step >= 1 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+              1
+            </span>
+            <span>{t("Email", "Email")}</span>
+          </div>
+          <span className="text-slate-300">→</span>
+          <div className={`flex items-center gap-1.5 text-xs font-bold ${step >= 2 ? 'text-indigo-600' : 'text-slate-400'}`}>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${step >= 2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+              2
+            </span>
+            <span>{t("Verification", "Verification")}</span>
+          </div>
+          <span className="text-slate-300">→</span>
+          <div className={`flex items-center gap-1.5 text-xs font-bold ${step === 3 ? 'text-indigo-600' : 'text-slate-400'}`}>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${step === 3 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+              3
+            </span>
+            <span>{t("New Password", "New Password")}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Dev Token Notification Banner (if email provider offline or in dev mode) */}
+      {devTokenNotice && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-center justify-between">
+          <div>
+            <strong className="font-bold">{t("Verification Code:", "Verification Code:")}</strong>{' '}
+            <span className="font-mono font-extrabold tracking-widest text-indigo-700 bg-white px-2 py-0.5 rounded border border-amber-200">{devTokenNotice}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToken(devTokenNotice)}
+            className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline ml-2 cursor-pointer"
+          >
+            {t("Auto-Fill", "Auto-Fill")}
+          </button>
+        </div>
+      )}
 
       {isSuccess ? (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-6 rounded-2xl text-center space-y-3">
@@ -101,26 +262,95 @@ function ResetPasswordForm() {
           <div className="pt-2">
             <button
               onClick={() => router.push('/login')}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md cursor-pointer"
             >
               {t("Proceed to Login", "Proceed to Login")}
             </button>
           </div>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+      ) : step === 1 ? (
+        /* STEP 1: COLLECT EMAIL */
+        <form onSubmit={handleRequestToken} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("Account email *")}</label>
+            <div className="relative">
+              <input 
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e.g. owner@poultry.com"
+                className="w-full border-2 border-slate-200 rounded-xl p-3.5 pl-10 text-sm focus:outline-none focus:border-indigo-600 bg-slate-50 font-medium"
+                required
+              />
+              <Mail size={18} className="absolute left-3.5 top-4 text-slate-400" />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 mt-2 cursor-pointer"
+          >
+            {isSubmitting ? t('Sending verification code…', 'Sending verification code…') : t('Send Verification Code', 'Send Verification Code')}
+          </button>
+
+          <div className="pt-2 text-center">
+            <Link href="/login" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors">
+              <ArrowLeft size={14} /> {t("Back to Login")}
+            </Link>
+          </div>
+        </form>
+      ) : step === 2 ? (
+        /* STEP 2: ENTER VERIFICATION CODE / TOKEN */
+        <form onSubmit={handleVerifyToken} className="space-y-4">
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-600 text-center">
+            {t("Code sent to", "Code sent to")}: <strong className="text-slate-900">{email}</strong>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("6-Digit Verification Code *", "6-Digit Verification Code *")}</label>
             <input 
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. owner@poultry.com"
-              className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 bg-slate-50 font-medium"
+              type="text"
+              value={token}
+              onChange={(e) => setToken(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+              placeholder="123456"
+              maxLength={6}
+              className="w-full border-2 border-slate-200 rounded-xl p-3.5 text-center text-2xl font-mono font-bold tracking-widest focus:outline-none focus:border-indigo-600 bg-white"
               required
+              autoFocus
             />
           </div>
 
+          <button
+            type="submit"
+            disabled={isSubmitting || token.length < 6}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/20 disabled:bg-indigo-300 cursor-pointer"
+          >
+            {isSubmitting ? t('Verifying code…', 'Verifying code…') : t('Verify Code & Proceed', 'Verify Code & Proceed')}
+          </button>
+
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+            >
+              <ArrowLeft size={14} /> {t("Change Email", "Change Email")}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleResendToken}
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+            >
+              <RefreshCw size={14} /> {t("Resend Code", "Resend Code")}
+            </button>
+          </div>
+        </form>
+      ) : (
+        /* STEP 3: SET NEW PASSWORD */
+        <form onSubmit={handleConfirmReset} className="space-y-4">
           <div className="relative">
             <label className="block text-sm font-medium text-slate-700 mb-1.5">{t("New password *", "New password *")}</label>
             <input 
@@ -160,7 +390,7 @@ function ResetPasswordForm() {
             {isSubmitting ? t('Updating password…', 'Updating password…') : t('Update password', 'Update password')}
           </button>
 
-          <div className="pt-3 text-center">
+          <div className="pt-2 text-center">
             <Link href="/login" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors">
               <ArrowLeft size={14} /> {t("Back to Login")}
             </Link>
