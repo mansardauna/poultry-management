@@ -124,7 +124,7 @@ export function StatCard({
                   <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                 )}
               </div>
-              <p className={`text-2xl sm:text-3xl font-extrabold ${styles.valueText}`}>{value}</p>
+              <p className={`text-2xl sm:text-3xl font-normal ${styles.valueText}`}>{value}</p>
               {subtext && (
                 <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1`}>
                   {t(subtext)}

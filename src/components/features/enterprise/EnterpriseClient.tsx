@@ -239,40 +239,38 @@ export function EnterpriseClient({
   if (!isEnterprise) {
     return (
       <div className="space-y-6 max-w-4xl pb-16 font-sans">
-        <div className="bg-slate-900 text-white p-8 md:p-12 rounded-3xl text-center space-y-6 shadow-2xl relative overflow-hidden border border-slate-800">
-          <div className="w-20 h-20 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto border border-purple-500/30 animate-pulse">
-            <Building2 size={40} />
-          </div>
+        <div className="bg-white border border-slate-200 p-8 sm:p-12 rounded-3xl text-center space-y-6 shadow-sm">
+          <Building2 size={36} className="text-indigo-600 mx-auto" />
           <div className="space-y-2 max-w-lg mx-auto">
-            <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-1 rounded-full shadow">
+            <span className="bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-[10px] px-3 py-1 rounded-full">
               ENTERPRISE TIER REQUIRED
             </span>
-            <h2 className="text-3xl font-extrabold text-white">Enterprise Suite & White-Label Portal</h2>
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <h2 className="text-2xl font-extrabold text-slate-900 pt-1">Enterprise Suite & White-Label Portal</h2>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               Multi-farm matrix telemetry, white-label cooperative custom branding, 24/7 priority veterinarian hotline, custom REST API keys, and wholesale bulk feed pools are exclusively available on Enterprise Plus.
             </p>
           </div>
 
-          <div className="pt-4 max-w-md mx-auto">
+          <div className="pt-2 max-w-md mx-auto">
             <button
               onClick={() => router.push('/dashboard/settings?tab=subscription')}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-4 rounded-2xl shadow-xl transition-all cursor-pointer"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl shadow transition-all cursor-pointer"
             >
               Upgrade to Enterprise & Cooperative (₦45,000/mo)
             </button>
           </div>
 
-          <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left border-t border-slate-800 text-xs text-slate-300">
+          <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left border-t border-slate-100 text-xs text-slate-600">
             <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-indigo-400 flex-shrink-0" />
+              <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" />
               <span>Multi-Farm Central Matrix</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-purple-400 flex-shrink-0" />
+              <CheckCircle2 size={16} className="text-purple-600 flex-shrink-0" />
               <span>White-Label Custom Portal</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
+              <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
               <span>24/7 Priority Vet Hotline</span>
             </div>
           </div>
@@ -288,36 +286,31 @@ export function EnterpriseClient({
 
   return (
     <div className="space-y-8 max-w-6xl pb-16 font-sans">
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Sparkles size={12} /> Enterprise Suite
-            </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
-              Active Unlimited Tier
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{coopName}</h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Building2 size={24} className="text-indigo-600 shrink-0" />
+            {coopName || 'Enterprise Management Portal'}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Multi-farm matrix management, white-label custom themes, 24/7 veterinarian tickets, and API logistics.
           </p>
         </div>
 
         {/* Aggregated Real Matrix Stat Chips */}
-        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3 w-full md:w-auto text-xs font-mono">
-          <div className="bg-slate-800/90 border border-slate-700 p-3 rounded-2xl text-center">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono">
+          <div className="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-sm text-center">
             <span className="text-[10px] text-slate-400 block font-sans font-medium">Total birds</span>
-            <span className="text-lg font-bold text-emerald-400">{totalBirdsAll.toLocaleString()}</span>
+            <span className="text-sm font-bold text-slate-900">{totalBirdsAll.toLocaleString()}</span>
           </div>
-          <div className="bg-slate-800/90 border border-slate-700 p-3 rounded-2xl text-center">
+          <div className="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-sm text-center">
             <span className="text-[10px] text-slate-400 block font-sans font-medium">Total eggs</span>
-            <span className="text-lg font-bold text-indigo-300">{totalEggsAll.toLocaleString()}</span>
+            <span className="text-sm font-bold text-indigo-600">{totalEggsAll.toLocaleString()}</span>
           </div>
-          <div className="bg-slate-800/90 border border-slate-700 p-3 rounded-2xl text-center col-span-2 sm:col-span-1">
+          <div className="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-sm text-center">
             <span className="text-[10px] text-slate-400 block font-sans font-medium">Net revenue</span>
-            <span className="text-lg font-bold text-amber-400">₦{totalRevenueAll.toLocaleString()}</span>
+            <span className="text-sm font-bold text-emerald-600">₦{totalRevenueAll.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -832,9 +825,12 @@ export function EnterpriseClient({
       {openVetModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
-              <h3 className="font-bold text-sm">Dispatch emergency vet ticket</h3>
-              <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-white cursor-pointer">✕</button>
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <PhoneCall size={18} className="text-emerald-600 shrink-0" />
+                Dispatch Emergency Vet Ticket
+              </h3>
+              <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
             </div>
             <div className="p-5 space-y-4">
               <div>

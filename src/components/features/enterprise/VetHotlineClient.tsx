@@ -114,54 +114,50 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Sparkles size={12} /> Enterprise Suite
-            </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
-              24/7 Vet Hotline
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">24/7 Priority Vet & Inspection Hotline</h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <PhoneCall size={24} className="text-emerald-600 shrink-0" />
+            24/7 Priority Vet & Inspection Hotline
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Direct priority hotline to certified poultry disease specialists and emergency outbreak inspection tickets.
           </p>
         </div>
 
         <button
           onClick={() => setOpenVetModal(true)}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-1.5"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
         >
-          <Plus size={16} /> Dispatch Emergency Vet Ticket
+          <Plus size={15} /> Dispatch Emergency Vet Ticket
         </button>
       </div>
 
-      <Card className="rounded-2xl border-2 border-emerald-200 shadow-sm">
-        <CardHeader className="border-b border-slate-100 bg-emerald-50/40">
+      <Card className="rounded-2xl border border-slate-200 shadow-sm">
+        <CardHeader className="border-b border-slate-100">
           <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <PhoneCall size={20} className="text-emerald-600" /> Dedicated Poultry Doctor & Audit Logs
+            <PhoneCall size={18} className="text-emerald-600 shrink-0" /> Dedicated Poultry Doctor & Audit Logs
           </CardTitle>
         </CardHeader>
 
         <CardContent className="p-6 space-y-6">
-          <div className="bg-slate-900 text-white p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="bg-emerald-50/60 border border-emerald-200 p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <span className="text-[10px] bg-emerald-500 text-slate-950 font-black px-2.5 py-0.5 rounded font-mono">
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2.5 py-0.5 rounded font-mono">
                 24/7 Dedicated Vet Consultant
               </span>
-              <h3 className="text-lg font-bold text-white">On-Call Certified Veterinary Specialist</h3>
-              <p className="text-xs text-slate-300 font-mono">+234 800-POULTRY-VET (Direct Emergency Line)</p>
+              <h3 className="text-lg font-bold text-slate-900">On-Call Certified Veterinary Specialist</h3>
+              <p className="text-xs text-slate-600 font-mono">+234 800-POULTRY-VET (Direct Emergency Line)</p>
             </div>
 
             <a 
               href="https://wa.me/2348000000000?text=Hello%20Doctor,%20I%20need%20urgent%20consultation%20for%20my%20poultry%20farm" 
               target="_blank" 
               rel="noreferrer"
-              className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-3 rounded-xl shadow-lg transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-5 py-3 rounded-xl shadow-sm transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <PhoneCall size={16} /> Call Vet Specialist
+              <PhoneCall size={15} /> Call Vet Specialist
             </a>
           </div>
 
@@ -193,11 +189,14 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
 
       {/* Emergency Vet Ticket Modal */}
       {openVetModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
-              <h3 className="font-extrabold text-sm">Dispatch Emergency Vet Ticket</h3>
-              <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-white cursor-pointer">✕</button>
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <PhoneCall size={18} className="text-emerald-600 shrink-0" />
+                <h3 className="font-bold text-slate-900 text-sm">Dispatch Emergency Vet Ticket</h3>
+              </div>
+              <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
             </div>
             <div className="p-5 space-y-4 text-xs">
               <div>

@@ -121,22 +121,25 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
         </button>
       </div>
 
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Sparkles size={12} /> Enterprise Suite
-            </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
-              Global White-Labeling
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">White-Label Portal & Branding</h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Palette size={24} className="text-purple-600 shrink-0" />
+            White-Label Portal & Branding
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Customize your farm title, custom subdomain, brand logo, report headers, and invoice footer notes across the whole app.
           </p>
         </div>
+
+        <button
+          onClick={handleSaveWhiteLabel}
+          disabled={isSaving}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-2"
+        >
+          <Sparkles size={15} /> {isSaving ? 'Saving...' : 'Save Branding'}
+        </button>
       </div>
 
       <Card className="rounded-2xl border border-slate-200 shadow-sm">

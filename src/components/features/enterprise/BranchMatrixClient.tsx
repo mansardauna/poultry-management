@@ -198,29 +198,30 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
         </button>
       </div>
 
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Sparkles size={12} /> Enterprise Suite
-            </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
-              Branch Matrix & Transfers
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Multi-Farm Branch Matrix</h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Building2 size={24} className="text-indigo-600 shrink-0" />
+            Multi-Farm Branch Matrix
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Real live aggregated metrics per branch, cross-branch stock transfers, and permanent branch management.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setOpenTransferModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
-            <ArrowRightLeft size={16} /> Transfer Stock Between Branches
+            <ArrowRightLeft size={15} /> Transfer Stock
+          </button>
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <Plus size={15} /> Add Farm Branch
           </button>
         </div>
       </div>
@@ -230,16 +231,10 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
         <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Building2 size={20} className="text-indigo-600" /> Active Farm Locations ({workspaces.length})
+              <Building2 size={18} className="text-indigo-600 shrink-0" /> Active Farm Locations ({workspaces.length})
             </CardTitle>
             <p className="text-xs text-slate-500 mt-0.5">Real live telemetry aggregated from database records across all farm branches</p>
           </div>
-          <button 
-            onClick={() => setShowAddModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <Plus size={16} /> Add Regional Branch
-          </button>
         </CardHeader>
 
         {showAddModal && (
@@ -322,14 +317,14 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
 
       {/* 2. Cross-Branch Stock Transfer Modal */}
       {openTransferModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ArrowRightLeft size={18} className="text-indigo-400" />
-                <h3 className="font-extrabold text-sm">Cross-Branch Stock Transfer</h3>
+                <ArrowRightLeft size={18} className="text-indigo-600 shrink-0" />
+                <h3 className="font-bold text-slate-900 text-sm">Cross-Branch Stock Transfer</h3>
               </div>
-              <button onClick={() => setOpenTransferModal(false)} className="text-slate-400 hover:text-white cursor-pointer">✕</button>
+              <button onClick={() => setOpenTransferModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
             </div>
 
             <div className="p-5 space-y-4 text-xs">
@@ -404,23 +399,24 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
 
       {/* 3. Delete Branch Confirm Modal */}
       {deletingBranch && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-red-200">
-            <div className="bg-red-600 text-white p-5 flex items-center justify-between">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <AlertTriangle size={20} />
-                <h3 className="font-extrabold text-sm">Permanently Delete Branch</h3>
+                <AlertTriangle size={18} className="text-red-600 shrink-0" />
+                <h3 className="font-bold text-slate-900 text-sm">Permanently Delete Branch</h3>
               </div>
-              <button onClick={() => setDeletingBranch(null)} className="text-white hover:text-red-200 cursor-pointer">✕</button>
+              <button onClick={() => setDeletingBranch(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
             </div>
 
             <div className="p-5 space-y-4 text-xs">
               <p className="text-slate-700 leading-relaxed font-semibold">
                 Are you sure you want to permanently delete farm branch <strong className="text-slate-950">"{deletingBranch.name}"</strong>?
               </p>
-              <p className="text-red-600 bg-red-50 p-3 rounded-xl border border-red-200">
-                ⚠️ Warning: This action will permanently remove this branch location from your Supabase database.
-              </p>
+              <div className="text-red-700 bg-red-50 p-3 rounded-xl border border-red-200 flex items-start gap-2">
+                <AlertTriangle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                <span>Warning: This action will permanently remove this branch location from your database.</span>
+              </div>
 
               <div className="flex justify-end gap-3 pt-2">
                 <button

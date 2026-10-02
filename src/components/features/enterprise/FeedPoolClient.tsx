@@ -111,18 +111,14 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <Sparkles size={12} /> Enterprise Suite
-            </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-3 py-1 rounded-full">
-              Wholesale Feed Pool
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Cooperative Wholesale Feed Purchasing Pool</h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Wheat size={24} className="text-amber-600 shrink-0" />
+            Wholesale Feed Purchasing Pool
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Pool feed orders with regional cooperative member farms to unlock 15% wholesale volume discounts.
           </p>
         </div>
