@@ -44,6 +44,8 @@ export async function POST(request: Request) {
         adminPhone: body.adminPhone || '',
         farmName: body.farmName || '',
         billingRegion: body.billingRegion || 'Nigeria & West Africa (NGN)',
+        currencySymbol: body.currencySymbol || '$',
+        exchangeRate: Number(body.exchangeRate) > 0 ? Number(body.exchangeRate) : 1.0,
         ...(body.paystackPublicKey ? { paystackPublicKey: body.paystackPublicKey } : {}),
         ...(body.paystackSecretKey ? { paystackSecretKey: body.paystackSecretKey } : {}),
         ...(body.stripePublicKey ? { stripePublicKey: body.stripePublicKey } : {}),

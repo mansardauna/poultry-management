@@ -3,6 +3,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
+import { getDefaultExchangeRate } from '@/lib/currency';
 import bcrypt from 'bcryptjs';
 
 export async function GET() {
@@ -51,7 +52,7 @@ export async function GET() {
     if (!gateways.stripePublicKey) gateways.stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
     if (!gateways.stripeSecretKey) gateways.stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
     if (!gateways.aiApiKey) gateways.aiApiKey = process.env.GEMINI_API_KEY || '';
-    if (!gateways.currencySymbol || gateways.currencySymbol === '?' || gateways.currencySymbol === '₦') {
+    if (!gateways.currencySymbol || gateways.currencySymbol === '?') {
       gateways.currencySymbol = '$';
     }
     if (!gateways.aiModel || gateways.aiModel === 'gemini-2.0-flash' || gateways.aiModel === 'gemini-1.5-flash') {
@@ -112,10 +113,15 @@ export async function POST(request: Request) {
       } catch (_e) {}
     }
 
+    const effectiveExchangeRate = Number(body.exchangeRate) > 0 
+      ? Number(body.exchangeRate) 
+      : getDefaultExchangeRate(String(currencySymbol).trim());
+
     const updatedConfig = {
       ...existingConfig,
       platformName: String(platformName).trim(),
       currencySymbol: String(currencySymbol).trim(),
+      exchangeRate: effectiveExchangeRate,
       paystackPublicKey: String(paystackPublicKey).trim(),
       paystackSecretKey: String(paystackSecretKey).trim(),
       stripePublicKey: String(stripePublicKey).trim(),
@@ -142,7 +148,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Failed to save gateways: ${saveErr.message}` }, { status: 500 });
     }
 
-    // Synchronize platformName and currencySymbol to landing_page_cms
+    // Synchronize platformName, currencySymbol, and exchangeRate to landing_page_cms
     try {
       const { data: cmsRow } = await serviceRoleClient
         .from('systemSettings')
@@ -160,6 +166,7 @@ export async function POST(request: Request) {
       const updatedCms = {
         ...cmsParsed,
         currencySymbol: String(currencySymbol).trim(),
+        exchangeRate: effectiveExchangeRate,
         brandName: String(platformName).trim(),
       };
 

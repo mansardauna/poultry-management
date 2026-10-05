@@ -144,7 +144,7 @@ export function PricingSection() {
 
                   <div className="mb-6">
                     <span className={`text-4xl md:text-5xl font-extrabold ${isFeatured ? 'text-white' : 'text-slate-900'}`}>
-                      {formatCurrency(plan.priceMonthly)}
+                      {formatCurrency(plan.priceMonthly, (plan as any).currencySymbol)}
                     </span>
                     <span className={isFeatured ? 'text-slate-400 text-sm' : 'text-slate-500 text-sm'}>/{t("mo", "mo")}</span>
                   </div>

@@ -44,7 +44,7 @@ interface FinanceClientProps {
 export function FinanceClient({ initialSales, initialExpenses, role }: FinanceClientProps) {
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
-  const { texts, t, formatNumber } = useLanguage();
+  const { texts, t, formatNumber, formatCurrency, currencySymbol } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
   const { confirm } = useConfirm();
   const [open, setOpen] = useState(false);
@@ -353,12 +353,12 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
 
                 <div className="flex justify-between font-semibold text-slate-900 border-t border-slate-200 pt-2 mt-2">
                   <span>Total Operational Disbursements:</span>
-                  <span className="text-red-605">-₦{totalExpenses.toLocaleString()}</span>
+                  <span className="text-red-605">-{formatCurrency(totalExpenses)}</span>
                 </div>
 
                 <div className="flex justify-between font-semibold text-indigo-900 bg-indigo-50 border-2 border-indigo-200 p-3 mt-4 text-sm">
                   <span>Reconciled Net Balance Asset:</span>
-                  <span>₦{netBalance.toLocaleString()}</span>
+                  <span>{formatCurrency(netBalance)}</span>
                 </div>
               </div>
             </div>
@@ -402,7 +402,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-600 font-semibold">{expense.description}</td>
-                    <td className="px-4 py-3 font-semibold text-red-600">-₦{expense.amount.toLocaleString()}</td>
+                    <td className="px-4 py-3 font-semibold text-red-600">-{formatCurrency(expense.amount)}</td>
                     {canEdit && (
                       <td className="px-4 py-3 flex gap-2">
                         <button onClick={() => handleOpenEdit(expense)} className="p-1 hover:bg-blue-100 rounded transition-colors" title="Edit">
@@ -452,7 +452,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
             </Select>
           </FormControl>
           <TextField
-            label={t("Amount (₦)")}
+            label={`${t("Amount")} (${currencySymbol})`}
             type="number"
             fullWidth
             variant="outlined"
@@ -498,7 +498,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
               <MenuItem value="Utilities">{t("Utilities & Fuel")}</MenuItem>
             </Select>
           </FormControl>
-          <TextField label={t("Amount (₦)")} type="number" fullWidth variant="outlined" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <TextField label={`${t("Amount")} (${currencySymbol})`} type="number" fullWidth variant="outlined" value={amount} onChange={(e) => setAmount(e.target.value)} />
           <TextField label={t("Description / Purpose")} fullWidth variant="outlined" value={description} onChange={(e) => setDescription(e.target.value)} />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>

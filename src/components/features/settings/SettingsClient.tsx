@@ -23,6 +23,12 @@ import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, Cre
 import { useWorkspace } from '../WorkspaceContext';
 import { useLanguage } from '../LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { 
+  SUPPORTED_CURRENCIES, 
+  getCurrencyInfo, 
+  getDefaultExchangeRate, 
+  convertBetweenCurrencies 
+} from '@/lib/currency';
 
 /**
  * Represents a workspace.
@@ -40,6 +46,8 @@ interface SystemSettings {
   id?: string;
   farmName?: string;
   billingRegion?: string;
+  currencySymbol?: string;
+  exchangeRate?: number;
   eggCratePriceSmall?: number;
   eggCratePriceLarge?: number;
   adminName?: string;
@@ -83,7 +91,7 @@ interface SettingsClientProps {
  * @param props - Component properties.
  */
 export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin', currentUser }: SettingsClientProps) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { texts, t, formatNumber, formatCurrency } = useLanguage();
   const { confirm } = useConfirm();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -131,6 +139,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const activePlan = saasPlans.find(p => p.id === currentTier);
   const proPlan = saasPlans.find(p => p.id === 'pro');
   const enterprisePlan = saasPlans.find(p => p.id === 'enterprise');
+  const planCurrency = proPlan?.currencySymbol || activePlan?.currencySymbol || '$';
 
   useEffect(() => {
     const match = document.cookie.match(/pfms_tier=([^;]+)/);
@@ -174,6 +183,36 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [adminEmail, setAdminEmail] = useState(systemSettings?.adminEmail || '');
   const [adminPhone, setAdminPhone] = useState(systemSettings?.adminPhone || '');
   const [billingRegion, setBillingRegion] = useState(systemSettings?.billingRegion || 'Nigeria & West Africa (NGN)');
+  const [farmCurrency, setFarmCurrency] = useState(systemSettings?.currencySymbol || '$');
+  const [farmExchangeRate, setFarmExchangeRate] = useState(String(systemSettings?.exchangeRate || '1.0'));
+
+  const handleFarmCurrencyChange = (newCurrency: string) => {
+    const oldCurrency = farmCurrency;
+    const oldRate = Number(farmExchangeRate) > 0 ? Number(farmExchangeRate) : getDefaultExchangeRate(oldCurrency);
+    const newRate = getDefaultExchangeRate(newCurrency);
+
+    setFarmCurrency(newCurrency);
+    setFarmExchangeRate(String(newRate));
+
+    // Convert egg crate prices from old currency to new currency using USD as base
+    const smallNum = Number(eggCratePriceSmall);
+    if (smallNum > 0) {
+      const convertedSmall = convertBetweenCurrencies(smallNum, oldCurrency, newCurrency, oldRate, newRate);
+      setEggCratePriceSmall(String(convertedSmall));
+    }
+
+    const largeNum = Number(eggCratePriceLarge);
+    if (largeNum > 0) {
+      const convertedLarge = convertBetweenCurrencies(largeNum, oldCurrency, newCurrency, oldRate, newRate);
+      setEggCratePriceLarge(String(convertedLarge));
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('pfms_currency_updated', { detail: { currencySymbol: newCurrency } }));
+    }
+
+    toast.success(t(`Farm currency switched to ${newCurrency}. Converted prices from base USD.`));
+  };
   const [paystackPublicKey, setPaystackPublicKey] = useState(systemSettings?.paystackPublicKey || '');
   const [paystackSecretKey, setPaystackSecretKey] = useState(systemSettings?.paystackSecretKey || '');
   const [stripePublicKey, setStripePublicKey] = useState(systemSettings?.stripePublicKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
@@ -357,6 +396,8 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
           adminEmail,
           adminPhone,
           billingRegion,
+          currencySymbol: farmCurrency,
+          exchangeRate: Number(farmExchangeRate) > 0 ? Number(farmExchangeRate) : 1.0,
           eggCratePriceSmall: Number(eggCratePriceSmall),
           eggCratePriceLarge: Number(eggCratePriceLarge),
           paystackPublicKey,
@@ -621,7 +662,12 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-extrabold text-slate-900">
-                      ₦{((activePlan ? (isAnnual ? Math.round(activePlan.priceAnnual / 12) : activePlan.priceMonthly) : (currentTier === 'enterprise' ? 45000 : currentTier === 'pro' ? 15000 : 0))).toLocaleString()}
+                      {formatCurrency(
+                        activePlan 
+                          ? (isAnnual ? Math.round(activePlan.priceAnnual / 12) : activePlan.priceMonthly) 
+                          : (currentTier === 'enterprise' ? (enterprisePlan?.priceMonthly || 45) : currentTier === 'pro' ? (proPlan?.priceMonthly || 15) : 0),
+                        planCurrency
+                      )}
                     </span>
                     <span className="text-xs text-slate-500 font-medium">{t("/ month")}</span>
                   </div>
@@ -727,15 +773,38 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                   <TextField label={t("Admin Full Name")} fullWidth variant="outlined" value={adminName} onChange={(e) => setAdminName(e.target.value)} />
                   <TextField label={t("Admin Email Address")} type="email" fullWidth variant="outlined" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
                   <TextField label={t("Admin Contact Phone")} fullWidth variant="outlined" value={adminPhone} onChange={(e) => setAdminPhone(e.target.value)} />
-                  <TextField label={t("Billing Region / Currency")} fullWidth variant="outlined" value={billingRegion} onChange={(e) => setBillingRegion(e.target.value)} helperText={t("e.g. Nigeria & West Africa (NGN)")} />
+                  <FormControl fullWidth variant="outlined">
+                    <InputLabel id="farm-currency-select-label">{t("Farm Local Currency")}</InputLabel>
+                    <Select
+                      labelId="farm-currency-select-label"
+                      label={t("Farm Local Currency")}
+                      value={farmCurrency}
+                      onChange={(e) => handleFarmCurrencyChange(e.target.value as string)}
+                    >
+                      {SUPPORTED_CURRENCIES.map(c => (
+                        <MenuItem key={c.code} value={c.symbol}>
+                          {c.symbol} - {c.name} ({c.code})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <TextField 
+                    label={t("USD Exchange Rate (1 USD =)")} 
+                    type="number" 
+                    fullWidth 
+                    variant="outlined" 
+                    value={farmExchangeRate} 
+                    onChange={(e) => setFarmExchangeRate(e.target.value)} 
+                    helperText={t(`Current: 1 USD ($) = ${farmExchangeRate} ${farmCurrency}. Changing currency converts amounts from USD base.`)} 
+                  />
                   
                   <div className="md:col-span-2 pt-4 border-t border-slate-100">
                     <p className="text-xs font-semibold text-slate-500 mb-3 flex items-center gap-1">
-                      <DollarSign size={14} /> {t("Egg Pricing Configuration")}
+                      <DollarSign size={14} /> {t("Egg Pricing Configuration")} ({farmCurrency})
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <TextField label={t("Egg Price Per Crate (Small) - ₦")} type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
-                      <TextField label={t("Egg Price Per Crate (Large) - ₦")} type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
+                      <TextField label={`${t("Egg Price Per Crate (Small)")} - ${farmCurrency}`} type="number" fullWidth variant="outlined" value={eggCratePriceSmall} onChange={(e) => setEggCratePriceSmall(e.target.value)} />
+                      <TextField label={`${t("Egg Price Per Crate (Large)")} - ${farmCurrency}`} type="number" fullWidth variant="outlined" value={eggCratePriceLarge} onChange={(e) => setEggCratePriceLarge(e.target.value)} />
                     </div>
                   </div>
                 </div>
@@ -1102,7 +1171,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <p className="text-xs text-slate-500 mb-4 h-10">{t("Manage single farm branch and basic flock logs for small setups.")}</p>
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
-                  <div className="text-3xl font-extrabold text-slate-900">₦0</div>
+                  <div className="text-3xl font-extrabold text-slate-900">{formatCurrency(0, planCurrency)}</div>
                   <div className="text-[10px] text-slate-400 font-bold mt-0.5">{t("Free Forever")}</div>
                 </div>
 
@@ -1154,7 +1223,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
                 <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 mb-6">
                   <div className="text-3xl font-extrabold text-white">
-                    ₦{((isAnnual ? (proPlan?.priceAnnual || 144000) : (proPlan?.priceMonthly || 15000))).toLocaleString()}
+                    {formatCurrency(isAnnual ? (proPlan?.priceAnnual || 144) : (proPlan?.priceMonthly || 15), planCurrency)}
                   </div>
                   <div className="text-[10px] text-indigo-300 font-bold mt-0.5">
                     {isAnnual ? t('Billed Annually') : t('Billed Monthly')}
@@ -1209,7 +1278,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
                   <div className="text-3xl font-extrabold text-slate-900">
-                    ₦{((isAnnual ? (enterprisePlan?.priceAnnual || 432000) : (enterprisePlan?.priceMonthly || 45000))).toLocaleString()}
+                    {formatCurrency(isAnnual ? (enterprisePlan?.priceAnnual || 432) : (enterprisePlan?.priceMonthly || 45), planCurrency)}
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold mt-0.5">
                     {isAnnual ? t('Billed Annually') : t('Billed Monthly')}

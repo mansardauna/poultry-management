@@ -69,6 +69,7 @@ export async function POST(request: Request) {
       const updatedGw = {
         ...gwParsed,
         ...(cmsData.currencySymbol ? { currencySymbol: cmsData.currencySymbol } : {}),
+        ...(cmsData.exchangeRate ? { exchangeRate: Number(cmsData.exchangeRate) } : {}),
         platformName: effectiveBrandName,
         logoUrl: effectiveLogoUrl
       };

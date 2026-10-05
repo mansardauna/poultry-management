@@ -3,52 +3,7 @@ import { redirect } from 'next/navigation';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 import { AdminCmsClient, SaasPlanConfig } from '@/components/features/admin/AdminCmsClient';
-
-const DEFAULT_PLANS: SaasPlanConfig[] = [
-  {
-    id: 'free',
-    name: 'Free Starter',
-    description: 'Perfect for small farms getting started with digital log management.',
-    priceMonthly: 0,
-    priceAnnual: 0,
-    maxBranches: 1,
-    chartsEnabled: false,
-    cctvEnabled: false,
-    aiLoggerEnabled: false,
-    exportReportsEnabled: false,
-    enterpriseHubEnabled: false,
-    features: ['1 Farm Branch Included', 'Basic Egg & Feed Logs', 'Community Forum Support', '2 Staff Accounts']
-  },
-  {
-    id: 'pro',
-    name: 'Commercial Pro',
-    description: 'For growing poultry farms requiring AI telemetry and automated reports.',
-    priceMonthly: 15000,
-    priceAnnual: 144000,
-    maxBranches: 5,
-    chartsEnabled: true,
-    cctvEnabled: true,
-    aiLoggerEnabled: true,
-    exportReportsEnabled: true,
-    enterpriseHubEnabled: false,
-    features: ['Up to 5 Farm Branches', 'CCTV Live Surveillance', 'AI Voice Auto-Logger', 'PDF & Excel Export Reports', 'Unlimited Staff Accounts']
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise & Cooperative',
-    description: 'For multi-farm operations, cooperative white-label portals, and API access.',
-    priceMonthly: 45000,
-    priceAnnual: 432000,
-    maxBranches: 999,
-    chartsEnabled: true,
-    cctvEnabled: true,
-    aiLoggerEnabled: true,
-    exportReportsEnabled: true,
-    enterpriseHubEnabled: true,
-    features: ['Unlimited Farm Branches', 'Cooperative White-Label Portal', '24/7 Priority Consultant Hotline', 'Custom REST API Keys', 'Multi-Farm Matrix Dashboard']
-  }
-];
-
+import { getPublicPlans } from '@/lib/plans';
 import { AccessDenied } from '@/components/layout/AccessDenied';
 
 export default async function AdminCmsPage() {
@@ -77,23 +32,7 @@ export default async function AdminCmsPage() {
     return <AccessDenied role={user?.role || cookieRole || 'Staff'} path="/dashboard/admin" />;
   }
 
-  let plans: SaasPlanConfig[] = DEFAULT_PLANS;
-  try {
-    const { data: configData } = await serviceRoleClient
-      .from('systemSettings')
-      .select('adminName')
-      .eq('id', 'saas_plans_config')
-      .single();
-
-    if (configData?.adminName) {
-      const parsed = JSON.parse(configData.adminName);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        plans = parsed as SaasPlanConfig[];
-      }
-    }
-  } catch (_e) {
-    // Fallback to default
-  }
+  const plans = (await getPublicPlans()) as unknown as SaasPlanConfig[];
 
   let allSubscriptions: any[] = [];
   let allHistory: any[] = [];

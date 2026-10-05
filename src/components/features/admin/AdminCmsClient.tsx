@@ -58,6 +58,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useLanguage } from '@/components/features/LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { 
+  SUPPORTED_CURRENCIES, 
+  getCurrencyInfo, 
+  getDefaultExchangeRate, 
+  convertUsdToCurrency 
+} from '@/lib/currency';
 
 export const AI_PRESETS: Record<string, { 
   name: string; 
@@ -231,6 +237,60 @@ export function AdminCmsClient({
   const [accentColor, setAccentColor] = useState('#7c3aed');
   const [footerText, setFooterText] = useState('PFMS Inc. All rights reserved.');
   const [currencySymbol, setCurrencySymbol] = useState('$');
+  const [exchangeRate, setExchangeRate] = useState<number>(1.0);
+
+  const handleCurrencyChange = (newSymbol: string) => {
+    const info = getCurrencyInfo(newSymbol);
+    const newRate = getDefaultExchangeRate(newSymbol);
+    setCurrencySymbol(info.symbol);
+    setExchangeRate(newRate);
+
+    // Rate conversion from base USD
+    setPlans(prev => prev.map(p => {
+      let baseMonthly = (p as any).basePriceMonthly;
+      let baseAnnual = (p as any).basePriceAnnual;
+
+      if (baseMonthly === undefined || baseMonthly === null) {
+        if (p.id === 'pro') baseMonthly = 15;
+        else if (p.id === 'enterprise') baseMonthly = 45;
+        else baseMonthly = 0;
+      }
+      if (baseAnnual === undefined || baseAnnual === null) {
+        if (p.id === 'pro') baseAnnual = 144;
+        else if (p.id === 'enterprise') baseAnnual = 432;
+        else baseAnnual = 0;
+      }
+
+      const convertedMonthly = info.code === 'USD' ? baseMonthly : convertUsdToCurrency(baseMonthly, info.symbol, newRate);
+      const convertedAnnual = info.code === 'USD' ? baseAnnual : convertUsdToCurrency(baseAnnual, info.symbol, newRate);
+
+      return {
+        ...p,
+        basePriceMonthly: baseMonthly,
+        basePriceAnnual: baseAnnual,
+        priceMonthly: convertedMonthly,
+        priceAnnual: convertedAnnual,
+      };
+    }));
+  };
+
+  const handleExchangeRateChange = (newRate: number) => {
+    setExchangeRate(newRate);
+    if (newRate <= 0) return;
+
+    setPlans(prev => prev.map(p => {
+      const baseMonthly = (p as any).basePriceMonthly ?? (p.id === 'pro' ? 15 : p.id === 'enterprise' ? 45 : 0);
+      const baseAnnual = (p as any).basePriceAnnual ?? (p.id === 'pro' ? 144 : p.id === 'enterprise' ? 432 : 0);
+      const convertedMonthly = currencySymbol === '$' ? baseMonthly : convertUsdToCurrency(baseMonthly, currencySymbol, newRate);
+      const convertedAnnual = currencySymbol === '$' ? baseAnnual : convertUsdToCurrency(baseAnnual, currencySymbol, newRate);
+
+      return {
+        ...p,
+        priceMonthly: convertedMonthly,
+        priceAnnual: convertedAnnual,
+      };
+    }));
+  };
   const [superAdminEmailState, setSuperAdminEmailState] = useState(currentUserEmail || 'owner@poultry.com');
   const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -426,6 +486,7 @@ export function AdminCmsClient({
           const g = data.gateways;
           if (g.platformName) setPlatformName(g.platformName);
           if (g.currencySymbol) setCurrencySymbol(g.currencySymbol);
+          if (g.exchangeRate) setExchangeRate(Number(g.exchangeRate));
           if (g.fromEmail) setFromEmail(g.fromEmail);
           if (g.paystackPublicKey) setPaystackPublicKey(g.paystackPublicKey);
           if (g.paystackSecretKey) setPaystackSecretKey(g.paystackSecretKey);
@@ -457,6 +518,8 @@ export function AdminCmsClient({
         if (data.primaryColor) setPrimaryColor(data.primaryColor);
         if (data.accentColor) setAccentColor(data.accentColor);
         if (data.footerText) setFooterText(data.footerText);
+        if (data.currencySymbol) setCurrencySymbol(data.currencySymbol);
+        if (data.exchangeRate) setExchangeRate(Number(data.exchangeRate));
         if (data.heroHeading) setHeroHeading(data.heroHeading);
         if (data.heroSubtitle) setHeroSubtitle(data.heroSubtitle);
         if (data.announcementBanner) setAnnouncementBanner(data.announcementBanner);
@@ -476,6 +539,7 @@ export function AdminCmsClient({
         body: JSON.stringify({
           platformName,
           currencySymbol,
+          exchangeRate,
           superAdminEmail: superAdminEmailState,
           superAdminPassword: superAdminPassword || undefined,
           paystackPublicKey,
@@ -623,6 +687,7 @@ export function AdminCmsClient({
           accentColor,
           footerText,
           currencySymbol,
+          exchangeRate,
           heroHeading,
           heroSubtitle,
           announcementBanner,
@@ -1550,6 +1615,52 @@ export function AdminCmsClient({
             </div>
           </div>
 
+          <div className="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-indigo-600 text-white rounded-xl shrink-0 shadow-sm">
+                <DollarSign size={20} />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-indigo-950 uppercase tracking-wider">{t("Active Plan Currency & USD Conversion")}</h3>
+                <p className="text-xs text-indigo-700">
+                  {t("Base currency is USD ($). When currency or rate changes, prices convert from base USD.")}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <div>
+                <label className="block text-[10px] font-bold text-indigo-900 uppercase tracking-wider mb-1">{t("Currency")}</label>
+                <select
+                  value={currencySymbol}
+                  onChange={(e) => handleCurrencyChange(e.target.value)}
+                  className="border-2 border-indigo-300 rounded-xl px-3 py-1.5 text-xs font-bold text-indigo-900 bg-white outline-none cursor-pointer"
+                >
+                  {SUPPORTED_CURRENCIES.map(c => (
+                    <option key={c.code} value={c.symbol}>{c.symbol} - {c.name} ({c.code})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-indigo-900 uppercase tracking-wider mb-1">
+                  {t("Exchange Rate (1 USD =)")}
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    step="any"
+                    min="0.0001"
+                    value={exchangeRate}
+                    onChange={(e) => handleExchangeRateChange(Number(e.target.value))}
+                    className="w-24 border-2 border-indigo-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-indigo-900 bg-white outline-none"
+                  />
+                  <span className="text-xs font-bold text-indigo-800">{currencySymbol}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {plans.map((plan) => (
               <Card key={plan.id} className="border-2 border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
@@ -1834,19 +1945,29 @@ export function AdminCmsClient({
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t("Platform Currency")}</label>
                 <select
                   value={currencySymbol}
-                  onChange={(e) => setCurrencySymbol(e.target.value)}
+                  onChange={(e) => handleCurrencyChange(e.target.value)}
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-emerald-700 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none cursor-pointer"
                 >
-                  <option value="₦">₦ - Nigerian Naira (NGN)</option>
-                  <option value="$">$ - US Dollar (USD)</option>
-                  <option value="€">€ - Euro (EUR)</option>
-                  <option value="£">£ - British Pound (GBP)</option>
-                  <option value="KSh">KSh - Kenyan Shilling (KES)</option>
-                  <option value="GH₵">GH₵ - Ghanaian Cedi (GHS)</option>
-                  <option value="CFA">CFA - West African Franc (XOF)</option>
-                  <option value="R">R - South African Rand (ZAR)</option>
-                  <option value="UGX">UGX - Ugandan Shilling (UGX)</option>
+                  {SUPPORTED_CURRENCIES.map(c => (
+                    <option key={c.code} value={c.symbol}>{c.symbol} - {c.name} ({c.code})</option>
+                  ))}
                 </select>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">
+                    {t("1 USD ($) =")}
+                  </span>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0.0001"
+                    value={exchangeRate}
+                    onChange={(e) => handleExchangeRateChange(Number(e.target.value))}
+                    className="w-28 border border-slate-200 rounded-lg p-1.5 text-xs font-bold text-slate-900 bg-white focus:border-indigo-500 outline-none"
+                  />
+                  <span className="text-[11px] font-bold text-slate-600">
+                    {currencySymbol}
+                  </span>
+                </div>
               </div>
             </div>
 

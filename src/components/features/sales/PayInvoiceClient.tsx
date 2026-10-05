@@ -59,6 +59,7 @@ export function PayInvoiceClient({
 
   const hasBankDetails = Boolean(bankName && accountNumber);
   const fallbackKey = paystackPublicKey || process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_3793f0a514d7924ef937e0e47089eeaa1a15f019';
+  const currencySymbol = (invoice as any).currencySymbol || '$';
 
   // Dynamically load Paystack inline script
   useEffect(() => {
@@ -286,7 +287,7 @@ export function PayInvoiceClient({
               <div className="flex justify-between items-start gap-2">
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm">{invoice.items || 'Poultry products'}</h4>
-                  <p className="text-xs text-slate-500 font-mono mt-0.5">Rate: ₦{Number(invoice.unitPrice || 0).toLocaleString()} per unit</p>
+                  <p className="text-xs text-slate-500 font-mono mt-0.5">Rate: {currencySymbol}{Number(invoice.unitPrice || 0).toLocaleString()} per unit</p>
                 </div>
                 <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold font-mono text-slate-700">
                   Qty: {invoice.quantity || 1}
@@ -294,7 +295,7 @@ export function PayInvoiceClient({
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-slate-200 text-xs font-bold">
                 <span className="text-slate-500">Subtotal:</span>
-                <span className="font-mono text-slate-900 text-sm">₦{Number(invoice.totalAmount || 0).toLocaleString()}</span>
+                <span className="font-mono text-slate-900 text-sm">{currencySymbol}{Number(invoice.totalAmount || 0).toLocaleString()}</span>
               </div>
             </div>
 
@@ -313,8 +314,8 @@ export function PayInvoiceClient({
                   <tr>
                     <td className="py-3.5 px-4 font-semibold text-slate-900 font-sans">{invoice.items || 'Poultry products'}</td>
                     <td className="py-3.5 px-4 text-center text-slate-600">{invoice.quantity || 1}</td>
-                    <td className="py-3.5 px-4 text-right text-slate-600">₦{Number(invoice.unitPrice || 0).toLocaleString()}</td>
-                    <td className="py-3.5 px-4 text-right font-extrabold text-slate-900">₦{Number(invoice.totalAmount || 0).toLocaleString()}</td>
+                    <td className="py-3.5 px-4 text-right text-slate-600">{currencySymbol}{Number(invoice.unitPrice || 0).toLocaleString()}</td>
+                    <td className="py-3.5 px-4 text-right font-extrabold text-slate-900">{currencySymbol}{Number(invoice.totalAmount || 0).toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
@@ -328,7 +329,7 @@ export function PayInvoiceClient({
               <span className="text-xs text-slate-500">Zero additional fees • Guaranteed merchant receipt</span>
             </div>
             <div className="text-2xl sm:text-3xl font-black font-mono text-indigo-700">
-              ₦{Number(invoice.totalAmount || 0).toLocaleString()}
+              {currencySymbol}{Number(invoice.totalAmount || 0).toLocaleString()}
             </div>
           </div>
 
@@ -340,7 +341,7 @@ export function PayInvoiceClient({
               <div>
                 <h3 className="text-lg sm:text-xl font-extrabold text-emerald-950">Official Settlement Completed</h3>
                 <p className="text-xs text-emerald-700 max-w-md mx-auto mt-1">
-                  Payment of <strong>₦{Number(invoice.totalAmount || 0).toLocaleString()}</strong> has been credited to <strong>{farmName}</strong> and logged into farm records.
+                  Payment of <strong>{currencySymbol}{Number(invoice.totalAmount || 0).toLocaleString()}</strong> has been credited to <strong>{farmName}</strong> and logged into farm records.
                 </p>
               </div>
 
@@ -429,7 +430,7 @@ export function PayInvoiceClient({
                     fullWidth
                     icon={<CreditCard size={18} />}
                   >
-                    {isProcessing ? 'Connecting to Gateway...' : `Pay ₦${Number(invoice.totalAmount || 0).toLocaleString()} Now`}
+                    {isProcessing ? 'Connecting to Gateway...' : `Pay ${currencySymbol}${Number(invoice.totalAmount || 0).toLocaleString()} Now`}
                   </Button>
                 </div>
               )}
@@ -473,7 +474,7 @@ export function PayInvoiceClient({
                     </div>
                   ) : (
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600">
-                      Transfer or pay <strong>₦{Number(invoice.totalAmount || 0).toLocaleString()}</strong> directly to the farm, then submit your payment details below to update this invoice.
+                      Transfer or pay <strong>{currencySymbol}{Number(invoice.totalAmount || 0).toLocaleString()}</strong> directly to the farm, then submit your payment details below to update this invoice.
                     </div>
                   )}
 

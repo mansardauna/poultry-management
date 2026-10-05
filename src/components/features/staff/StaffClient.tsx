@@ -46,7 +46,7 @@ interface StaffClientProps {
  * @param props - Component properties.
  */
 export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier = 'free' }: StaffClientProps) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { texts, t, formatNumber, formatCurrency, currencySymbol } = useLanguage();
   const { confirm } = useConfirm();
   const router = useRouter();
   const canEdit = role === 'Admin';
@@ -471,7 +471,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                       </td>
                       <td className="px-4 py-3 text-slate-500">{employee.contact}</td>
                       <td className="px-4 py-3 text-center font-semibold text-indigo-650">{employee.attendanceDays} {t("days")}</td>
-                      <td className="px-4 py-3 font-semibold">₦{employee.salary.toLocaleString()}</td>
+                      <td className="px-4 py-3 font-semibold">{formatCurrency(employee.salary)}</td>
                       <td className="px-4 py-3 text-right">
                           <button 
                           onClick={() => handleMarkAttendance(employee.id)}
@@ -590,7 +590,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                         <td className="px-4 py-3 text-slate-600 font-semibold">{log.date}</td>
                         <td className="px-4 py-3 font-semibold text-slate-800">{member ? `${member.name} (${member.role})` : log.staffId}</td>
                         <td className="px-4 py-3 text-slate-600">{log.period}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-emerald-600">₦{log.amount.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-emerald-600">{formatCurrency(log.amount)}</td>
                         {canEdit && (
                           <td className="px-4 py-3 text-right">
                             <button onClick={() => handleDeletePayrollLog(log.id)} className="p-1 hover:bg-red-100 rounded" title={t("Delete")}>
@@ -643,7 +643,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
             </Select>
           </FormControl>
           <TextField
-            label={t("Monthly Salary (₦)")}
+            label={`${t("Monthly Salary")} (${currencySymbol})`}
             type="number"
             fullWidth
             variant="outlined"

@@ -182,7 +182,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { workspaces, activeWorkspace, isLoading, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
-  const { texts, t } = useLanguage();
+  const { texts, t, formatCurrency } = useLanguage();
   const { confirm } = useConfirm();
   const whiteLabel = useWhiteLabel();
 
@@ -199,7 +199,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const planParam = searchParams.get('plan');
   const isUpgraded = searchParams.get('upgraded') === 'true';
   const [currentTier, setCurrentTier] = useState(tier);
-  const [proPrice, setProPrice] = useState(15000);
+  const [proPrice, setProPrice] = useState(15);
+  const [proCurrency, setProCurrency] = useState('$');
 
   useEffect(() => {
     fetch('/api/plans', { cache: 'no-store' })
@@ -207,7 +208,8 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
       .then(data => {
         if (Array.isArray(data)) {
           const proPlan = data.find((p: any) => p.id === 'pro');
-          if (proPlan?.priceMonthly) setProPrice(proPlan.priceMonthly);
+          if (proPlan?.priceMonthly !== undefined) setProPrice(proPlan.priceMonthly);
+          if (proPlan?.currencySymbol) setProCurrency(proPlan.currencySymbol);
         }
       })
       .catch(() => {});
@@ -587,7 +589,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                             if (role === 'Staff') {
                               toast.error(`${item.name} is not enabled on your farm's plan. Please contact your farm administrator to upgrade.`);
                             } else {
-                              toast.error('Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!');
+                              toast.error(t('Enterprise Hub is an Enterprise tier feature. Upgrade your subscription to unlock!'));
                               router.push('/dashboard/settings?tab=subscription');
                             }
                             return;
@@ -687,7 +689,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               }}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 rounded-md transition-colors shadow-sm cursor-pointer"
             >
-              {t("Upgrade to Pro")} (₦{proPrice.toLocaleString()}/{t("mo")})
+              {t("Upgrade to Pro")} ({formatCurrency(proPrice, proCurrency)}/{t("mo")})
             </button>
           </div>
         )}

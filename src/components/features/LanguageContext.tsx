@@ -133,20 +133,44 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const fetchCurrency = () => {
-      fetch('/api/branding')
+      fetch('/api/settings')
         .then(res => res.ok ? res.json() : null)
         .then(data => {
-          if (data?.currencySymbol) setCurrencySymbol(data.currencySymbol);
+          if (data?.systemSettings?.currencySymbol) {
+            setCurrencySymbol(data.systemSettings.currencySymbol);
+            return;
+          }
+          return fetch('/api/branding')
+            .then(res => res.ok ? res.json() : null)
+            .then(bData => {
+              if (bData?.currencySymbol) setCurrencySymbol(bData.currencySymbol);
+            });
         })
-        .catch(() => {});
+        .catch(() => {
+          fetch('/api/branding')
+            .then(res => res.ok ? res.json() : null)
+            .then(bData => {
+              if (bData?.currencySymbol) setCurrencySymbol(bData.currencySymbol);
+            })
+            .catch(() => {});
+        });
     };
 
     fetchCurrency();
 
     if (typeof window !== 'undefined') {
-      window.addEventListener('pfms_brand_updated', fetchCurrency);
+      const handleCustom = (e: any) => {
+        if (e?.detail?.currencySymbol) {
+          setCurrencySymbol(e.detail.currencySymbol);
+        } else {
+          fetchCurrency();
+        }
+      };
+      window.addEventListener('pfms_brand_updated', handleCustom);
+      window.addEventListener('pfms_currency_updated', handleCustom);
       return () => {
-        window.removeEventListener('pfms_brand_updated', fetchCurrency);
+        window.removeEventListener('pfms_brand_updated', handleCustom);
+        window.removeEventListener('pfms_currency_updated', handleCustom);
       };
     }
   }, []);

@@ -1,6 +1,7 @@
 'use strict';
 
 import { supabase as serviceRoleClient } from '@/lib/supabase';
+import { getCurrencyInfo, getDefaultExchangeRate } from '@/lib/currency';
 
 export const DEFAULT_CMS = {
   brandName: 'PFMS',
@@ -16,7 +17,10 @@ export const DEFAULT_CMS = {
   ctaText: 'Get Started Free',
   supportPhone: '+234 800 768 5879',
   supportEmail: 'support@pfms-poultry.com',
-  currencySymbol: '$'
+  currencySymbol: '$',
+  currencyCode: 'USD',
+  exchangeRate: 1.0,
+  platformName: 'PFMS'
 };
 
 export async function getPublicBranding() {
@@ -50,11 +54,10 @@ export async function getPublicBranding() {
     const brandName = cmsParsed.brandName || gatewayParsed.platformName || DEFAULT_CMS.brandName;
     const logoUrl = cmsParsed.logoUrl || gatewayParsed.logoUrl || DEFAULT_CMS.logoUrl;
 
-    const currencySymbol = (cmsParsed.currencySymbol && cmsParsed.currencySymbol !== '?' && cmsParsed.currencySymbol !== '₦') 
-      ? cmsParsed.currencySymbol 
-      : (gatewayParsed.currencySymbol && gatewayParsed.currencySymbol !== '?' && gatewayParsed.currencySymbol !== '₦')
-      ? gatewayParsed.currencySymbol
-      : (DEFAULT_CMS.currencySymbol || '$');
+    const rawCurrencySymbol = cmsParsed.currencySymbol || gatewayParsed.currencySymbol || DEFAULT_CMS.currencySymbol || '$';
+    const currencyInfo = getCurrencyInfo(rawCurrencySymbol);
+    const currencySymbol = currencyInfo.symbol;
+    const exchangeRate = cmsParsed.exchangeRate || gatewayParsed.exchangeRate || getDefaultExchangeRate(currencySymbol);
 
     const sanitized = {
       brandName,
@@ -72,6 +75,8 @@ export async function getPublicBranding() {
       supportPhone: cmsParsed.supportPhone || DEFAULT_CMS.supportPhone,
       supportEmail: cmsParsed.supportEmail || DEFAULT_CMS.supportEmail,
       currencySymbol,
+      currencyCode: currencyInfo.code,
+      exchangeRate,
     };
 
     return sanitized;
@@ -79,3 +84,4 @@ export async function getPublicBranding() {
     return DEFAULT_CMS;
   }
 }
+

@@ -13,7 +13,7 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps) {
-  const { t } = useLanguage();
+  const { t, currencySymbol } = useLanguage();
   const { addWorkspace, updateWorkspace, workspaces, setActiveWorkspace, activeWorkspace } = useWorkspace();
   
   // Target workspace context for draft isolation
@@ -608,7 +608,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Monthly Salary (₦)", "Monthly Salary (₦)")}</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t("Monthly Salary", "Monthly Salary")} ({currencySymbol})</label>
                     <input 
                       type="number" 
                       value={staffSalary}

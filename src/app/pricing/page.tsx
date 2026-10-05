@@ -136,7 +136,7 @@ export default function PricingPage() {
                   
                   <div className="my-6">
                     <span className={`text-4xl font-extrabold ${isFeatured ? 'text-white' : 'text-slate-900'}`}>
-                      {formatCurrency(price)}
+                      {formatCurrency(price, (plan as any).currencySymbol)}
                     </span>
                     <span className={`text-xs font-medium ${isFeatured ? 'text-indigo-300' : 'text-slate-500'}`}>/{t("mo", "month")}</span>
                   </div>
