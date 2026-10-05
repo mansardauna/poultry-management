@@ -46,8 +46,6 @@ export function OnboardingWidget({
     };
   }, []);
 
-  if (userRole !== 'Admin') return null;
-
   const step1Done = branchCompleted || workspacesCount > 0 || batchesCount > 0;
   const step2Done = batchesCount > 0 || branchCompleted;
   const step3Done = staffCount > 0 || branchCompleted;
@@ -109,7 +107,7 @@ export function OnboardingWidget({
     }
   }, [completedCount, isDismissed]);
 
-  if (isDismissed) return null;
+  if (userRole !== 'Admin' || isDismissed) return null;
 
   return (
     <div className="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 border border-slate-800 mb-8 font-sans shadow-xl">
