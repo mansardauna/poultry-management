@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS: WhiteLabelSettings = {
   platformName: 'PFMS',
   brandLogoText: 'P',
   primaryColor: '#4f46e5',
-  currencySymbol: '₦',
+  currencySymbol: '$',
   customReportHeader: 'Official Farm Management Analytics Report',
   customInvoiceFooter: 'Thank you for buying from our certified organic poultry farm!',
   themeMode: 'modern',

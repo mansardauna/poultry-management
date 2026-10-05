@@ -26,7 +26,7 @@ export async function getGatewaysConfig(): Promise<GatewaysConfig> {
     paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
     resendApiKey: process.env.RESEND_API_KEY || '',
     fromEmail: process.env.RESEND_FROM_EMAIL || process.env.FROM_EMAIL || 'support@pfms-poultry.com',
-    currencySymbol: '₦',
+    currencySymbol: '$',
     platformName: 'PFMS',
     aiApiKey: process.env.GEMINI_API_KEY || '',
     aiModel: 'gemini-3.5-flash',

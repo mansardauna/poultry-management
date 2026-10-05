@@ -32,21 +32,22 @@ export default async function DashboardLayout({
   const headerRole = headersList.get('x-user-role');
   const headerEmail = headersList.get('x-user-email');
 
-  const isSuperAdmin = 
+  const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';
+  const impersonatedOrgName = cookieStore.get('pfms_impersonate_org_name')?.value;
+  const impersonatedEmail = cookieStore.get('pfms_email')?.value;
+
+  const isSuperAdmin = !isImpersonating && (
     isSuperAdminPath ||
     headerRole === 'SuperAdmin' ||
     roleCookie === 'SuperAdmin' ||
     emailCookie === 'owner@poultry.com' ||
     emailCookie === 'superadmin@pfms.com' ||
     headerEmail === 'owner@poultry.com' ||
-    headerEmail === 'superadmin@pfms.com';
+    headerEmail === 'superadmin@pfms.com'
+  );
 
-  const role = isSuperAdmin ? 'SuperAdmin' : (headerRole || roleCookie || 'Staff');
-  const tier = isSuperAdmin ? 'enterprise' : (headersList.get('x-user-tier') || cookieStore.get('pfms_tier')?.value || 'free');
-
-  const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';
-  const impersonatedOrgName = cookieStore.get('pfms_impersonate_org_name')?.value;
-  const impersonatedEmail = cookieStore.get('pfms_email')?.value;
+  const role = isSuperAdmin ? 'SuperAdmin' : (roleCookie || headerRole || 'Admin');
+  const tier = isSuperAdmin ? 'enterprise' : (cookieStore.get('pfms_tier')?.value || headersList.get('x-user-tier') || 'free');
 
   const isAllowed = !currentPath || isRouteAllowedForRole(currentPath, role);
 

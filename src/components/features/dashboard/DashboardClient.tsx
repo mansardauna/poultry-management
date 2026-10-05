@@ -59,13 +59,14 @@ import {
 interface DashboardClientProps {
   initialData: DatabaseSchema;
   userRole?: string;
+  chartsEnabled?: boolean;
 }
 
 /**
  * Client component for the main dashboard view.
  * @param {DashboardClientProps} props - The component props.
  */
-export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardClientProps) {
+export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled }: DashboardClientProps) {
   const [data, setData] = useState<DatabaseSchema>(initialData);
   const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
   const { activeWorkspace, workspaces } = useWorkspace();
@@ -165,7 +166,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
     printComprehensiveFarmReport({
       farmName: activeWorkspace?.name || 'Poultry Farm Enterprise',
       workspaceName: activeWorkspace?.name || 'Main Farm Workspace',
-      currencySymbol: '₦',
+      currencySymbol: '$',
       batches: data.batches || [],
       eggs: data.eggs || [],
       feeds: data.feeds || [],
@@ -442,7 +443,8 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
   const isPro = isEnterprise || normTier === 'pro';
-  const isFree = !isPro;
+  const isChartsUnlocked = chartsEnabled !== undefined ? chartsEnabled : isPro;
+  const isFree = !isChartsUnlocked;
 
   return (
     <div className="space-y-6">
@@ -583,7 +585,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               <Egg size={18} className="text-amber-500" />
               {texts.dashboard.eggProductionVolumeChart}
             </CardTitle>
-            {isPro && (
+            {isChartsUnlocked && (
               <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
                 {t("Live Data")}
               </span>
@@ -644,7 +646,7 @@ export function DashboardClient({ initialData, userRole = 'Admin' }: DashboardCl
               <span className="text-[11px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded border border-emerald-200">
                 {formatCurrency(totalRevenue)}
               </span>
-              {isPro && (
+              {isChartsUnlocked && (
                 <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
                   {t("Live Data")}
                 </span>

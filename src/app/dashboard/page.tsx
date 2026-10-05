@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { getWorkspaceId, applyWorkspaceFilter } from "@/lib/workspace";
+import { getFeatureSwitchesForTier } from "@/lib/featureSwitches";
 import { DashboardClient } from "@/components/features/dashboard/DashboardClient";
 import type {
   DatabaseSchema,
@@ -40,7 +41,9 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const cookieEmail = cookieStore.get('pfms_email')?.value;
   const user = await getAuthUser();
 
-  const isSuperAdminUser = 
+  const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';
+
+  const isSuperAdminUser = !isImpersonating && (
     headerRole === 'SuperAdmin' ||
     cookieRole === 'SuperAdmin' ||
     user?.role === 'SuperAdmin' ||
@@ -49,11 +52,15 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     headerEmail === 'superadmin@pfms.com' ||
     headerEmail === 'owner@poultry.com' ||
     cookieEmail === 'superadmin@pfms.com' ||
-    cookieEmail === 'owner@poultry.com';
+    cookieEmail === 'owner@poultry.com'
+  );
 
   if (isSuperAdminUser) {
     redirect('/dashboard/admin');
   }
+
+  const tier = cookieStore.get('pfms_tier')?.value || headersList?.get('x-user-tier') || 'free';
+  const featureSwitches = await getFeatureSwitchesForTier(tier);
 
   const workspaceId = await getWorkspaceId();
   const searchParams = await props.searchParams;
@@ -158,9 +165,12 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     notifyWhatsapp: true,
   };
 
+  const effectiveRole = isImpersonating ? (cookieRole || 'Admin') : (user?.role || cookieRole || 'Admin');
+
   return (
     <DashboardClient
-      userRole={user?.role || 'Admin'}
+      userRole={effectiveRole}
+      chartsEnabled={featureSwitches.chartsEnabled}
       initialData={{
         batches,
         eggs,

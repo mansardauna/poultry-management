@@ -54,7 +54,7 @@ export function SetupWizardClient() {
 
   // Form State
   const [platformName, setPlatformName] = useState('PFMS');
-  const [currencySymbol, setCurrencySymbol] = useState('₦');
+  const [currencySymbol, setCurrencySymbol] = useState('$');
   const [superAdminEmail, setSuperAdminEmail] = useState('owner@poultry.com');
   const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

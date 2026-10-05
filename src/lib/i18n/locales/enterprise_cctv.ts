@@ -3,7 +3,8 @@ import { Language } from '../types';
 
 export const ENTERPRISE_CCTV_PHRASES: Record<Language, Record<string, string>> = {
   en: {
-    // CCTV
+    // CCTV & Plan Controls
+    "Production Analytics Graphs & Charts": "Production Analytics Graphs & Charts",
     "CCTV Live Surveillance": "CCTV Live Surveillance",
     "CCTV Live Surveillance is restricted by Super Admin feature controls or requires a Commercial Pro or Enterprise Plus subscription tier.": "CCTV Live Surveillance is restricted by Super Admin feature controls or requires a Commercial Pro or Enterprise Plus subscription tier.",
     "Hardware Gateway & WebRTC": "Hardware Gateway & WebRTC",

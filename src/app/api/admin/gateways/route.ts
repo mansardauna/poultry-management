@@ -29,7 +29,7 @@ export async function GET() {
       resendApiKey: '',
       fromEmail: 'support@pfms-poultry.com',
       platformName: 'PFMS',
-      currencySymbol: '₦',
+      currencySymbol: '$',
       aiProvider: 'gemini',
       aiApiKey: process.env.GEMINI_API_KEY || '',
       aiModel: 'gemini-3.5-flash',
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       platformName = 'PFMS',
-      currencySymbol = '₦',
+      currencySymbol = '$',
       superAdminEmail,
       superAdminPassword,
       paystackPublicKey = '',

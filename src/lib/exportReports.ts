@@ -218,7 +218,7 @@ export function printComprehensiveFarmReport(data: ComprehensiveFarmReportData) 
 
   const farmName = data.farmName || 'Poultry Farm Enterprise';
   const workspace = data.workspaceName || 'Main Farm Headquarters';
-  const currency = data.currencySymbol || '₦';
+  const currency = data.currencySymbol || '$';
   const today = new Date().toLocaleDateString('en-US', { 
     year: 'numeric', 
     month: 'long', 

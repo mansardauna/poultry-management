@@ -20,7 +20,7 @@ const DEFAULT_CMS = {
   ctaText: 'Get Started Free',
   supportPhone: '+234 800 768 5879',
   supportEmail: 'support@pfms-poultry.com',
-  currencySymbol: '₦'
+  currencySymbol: '$'
 };
 
 export async function GET() {
@@ -58,7 +58,7 @@ export async function GET() {
       ...DEFAULT_CMS,
       ...gatewayParsed,
       ...cmsParsed,
-      currencySymbol: cmsParsed.currencySymbol || gatewayParsed.currencySymbol || DEFAULT_CMS.currencySymbol || '₦',
+      currencySymbol: cmsParsed.currencySymbol || gatewayParsed.currencySymbol || DEFAULT_CMS.currencySymbol || '$',
       brandName,
       platformName: brandName,
       logoUrl: logoUrl || '/icon.png'

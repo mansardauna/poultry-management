@@ -129,7 +129,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [locale]);
 
-  const [currencySymbol, setCurrencySymbol] = useState<string>('₦');
+  const [currencySymbol, setCurrencySymbol] = useState<string>('$');
 
   useEffect(() => {
     const fetchCurrency = () => {

@@ -1,4 +1,5 @@
 import { cookies, headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 import { AdminCmsClient, SaasPlanConfig } from '@/components/features/admin/AdminCmsClient';
@@ -11,6 +12,7 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
     priceMonthly: 0,
     priceAnnual: 0,
     maxBranches: 1,
+    chartsEnabled: false,
     cctvEnabled: false,
     aiLoggerEnabled: false,
     exportReportsEnabled: false,
@@ -24,6 +26,7 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
     priceMonthly: 15000,
     priceAnnual: 144000,
     maxBranches: 5,
+    chartsEnabled: true,
     cctvEnabled: true,
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
@@ -37,6 +40,7 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
     priceMonthly: 45000,
     priceAnnual: 432000,
     maxBranches: 999,
+    chartsEnabled: true,
     cctvEnabled: true,
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
@@ -56,6 +60,11 @@ export default async function AdminCmsPage() {
   const cookieEmail = cookieStore.get('pfms_email')?.value;
   const user = await getAuthUser();
   const userEmail = user?.email || headerEmail || cookieEmail || 'owner@poultry.com';
+
+  const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';
+  if (isImpersonating) {
+    redirect('/dashboard');
+  }
 
   const isSuperAdmin = 
     user?.role === 'SuperAdmin' ||

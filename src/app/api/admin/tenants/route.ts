@@ -117,6 +117,7 @@ export async function POST(request: Request) {
       response.cookies.delete('pfms_impersonate_by');
       response.cookies.delete('pfms_impersonate_org_name');
       response.cookies.set('pfms_role', 'SuperAdmin', { path: '/', maxAge: 60 * 60 * 24 * 7 });
+      response.cookies.set('pfms_tier', 'enterprise', { path: '/', maxAge: 60 * 60 * 24 * 7 });
       response.cookies.set('pfms_email', 'owner@poultry.com', { path: '/', maxAge: 60 * 60 * 24 * 7 });
       response.cookies.set('pfms_workspace', 'main-org_owner_main', { path: '/', maxAge: 60 * 60 * 24 * 7 });
       response.cookies.set('pfms_org_id', 'global', { path: '/', maxAge: 60 * 60 * 24 * 7 });
@@ -407,6 +408,7 @@ export async function POST(request: Request) {
       response.cookies.set('pfms_email', targetEmail, { path: '/', maxAge: 60 * 60 * 24 });
       response.cookies.set('pfms_user_id', targetUserId, { path: '/', maxAge: 60 * 60 * 24 });
       response.cookies.set('pfms_org_id', id, { path: '/', maxAge: 60 * 60 * 24 });
+      response.cookies.set('pfms_tier', org.subscriptionTier || 'free', { path: '/', maxAge: 60 * 60 * 24 });
       response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/', maxAge: 60 * 60 * 24 });
 
       return response;

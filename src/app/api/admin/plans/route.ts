@@ -16,6 +16,7 @@ const DEFAULT_PLANS = [
     paystackMonthlyPlanCode: '',
     paystackAnnualPlanCode: '',
     maxBranches: 1,
+    chartsEnabled: false,
     cctvEnabled: false,
     aiLoggerEnabled: false,
     exportReportsEnabled: false,
@@ -40,6 +41,7 @@ const DEFAULT_PLANS = [
     paystackMonthlyPlanCode: '',
     paystackAnnualPlanCode: '',
     maxBranches: 5,
+    chartsEnabled: true,
     cctvEnabled: true,
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
@@ -65,6 +67,7 @@ const DEFAULT_PLANS = [
     paystackMonthlyPlanCode: '',
     paystackAnnualPlanCode: '',
     maxBranches: 999,
+    chartsEnabled: true,
     cctvEnabled: true,
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
@@ -132,7 +135,8 @@ export async function POST(request: Request) {
           cctvEnabled: !!p.cctvEnabled,
           aiLoggerEnabled: !!p.aiLoggerEnabled,
           exportReportsEnabled: !!p.exportReportsEnabled,
-          enterpriseHubEnabled: !!p.enterpriseHubEnabled
+          enterpriseHubEnabled: !!p.enterpriseHubEnabled,
+          chartsEnabled: !!p.chartsEnabled
         })
         .eq('subscriptionTier', p.id);
     }

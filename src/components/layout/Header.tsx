@@ -604,36 +604,35 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
           )}
         </button>
 
-        {/* Role Badge or Desktop Upgrade CTA */}
+        {/* Role Tag */}
         {isSuperAdmin ? (
-          <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
-            <span className="bg-indigo-600 text-white text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg whitespace-nowrap">
+          <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
+            <span className="inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0 animate-pulse" />
               {t("Super Admin")}
             </span>
           </div>
         ) : role === 'Staff' ? (
-          <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
-            <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg whitespace-nowrap">
+          <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
+            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
               {t("Staff Portal")}
             </span>
           </div>
         ) : role === 'Manager' ? (
-          <div className="flex items-center gap-2 border-l border-slate-200 pl-2.5 sm:pl-4">
-            <span className="bg-blue-100 text-blue-800 border border-blue-300 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg whitespace-nowrap">
+          <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
+            <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
               {t("Farm Manager")}
             </span>
           </div>
         ) : (
-          role === 'Admin' && currentTier === 'free' && (
-            <div className="hidden md:flex items-center gap-2 border-l border-slate-200 pl-3 md:pl-4">
-              <button
-                onClick={() => router.push('/dashboard/settings?tab=subscription')}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors cursor-pointer"
-              >
-                <span>{t("Upgrade")}</span>
-              </button>
-            </div>
-          )
+          <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
+            <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+              {t("Farm Admin")}
+            </span>
+          </div>
         )}
       </div>
 

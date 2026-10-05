@@ -4,6 +4,7 @@ import { supabase as serviceRoleClient } from './supabase';
 import { SaasPlanConfig } from '@/components/features/admin/AdminCmsClient';
 
 export interface FeatureSwitches {
+  chartsEnabled: boolean;
   cctvEnabled: boolean;
   aiLoggerEnabled: boolean;
   exportReportsEnabled: boolean;
@@ -19,6 +20,7 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
     priceMonthly: 0,
     priceAnnual: 0,
     maxBranches: 1,
+    chartsEnabled: false,
     cctvEnabled: false,
     aiLoggerEnabled: false,
     exportReportsEnabled: false,
@@ -32,6 +34,7 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
     priceMonthly: 15000,
     priceAnnual: 144000,
     maxBranches: 5,
+    chartsEnabled: true,
     cctvEnabled: true,
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
@@ -45,6 +48,7 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
     priceMonthly: 45000,
     priceAnnual: 432000,
     maxBranches: 999,
+    chartsEnabled: true,
     cctvEnabled: true,
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
@@ -86,6 +90,7 @@ export async function getFeatureSwitchesForTier(tier: string): Promise<FeatureSw
   const matchedPlan = plans.find(p => p.id === effectiveTier) || plans.find(p => p.id === 'free') || DEFAULT_PLANS[0];
 
   return {
+    chartsEnabled: matchedPlan.chartsEnabled !== undefined ? Boolean(matchedPlan.chartsEnabled) : (effectiveTier !== 'free'),
     cctvEnabled: Boolean(matchedPlan.cctvEnabled),
     aiLoggerEnabled: Boolean(matchedPlan.aiLoggerEnabled),
     exportReportsEnabled: Boolean(matchedPlan.exportReportsEnabled),
