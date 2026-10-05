@@ -74,7 +74,6 @@ const menuItems = [
   { name: 'Inventory', href: '/dashboard/inventory', icon: Wrench, roles: ['Admin', 'Manager'] },
   { name: 'Contacts', href: '/dashboard/contacts', icon: UserSquare2, roles: ['Admin', 'Manager'] },
   { name: 'Enterprise Hub', href: '/dashboard/enterprise', icon: Building2, roles: ['Admin', 'Manager'] },
-  { name: 'CCTV Monitoring', href: '/dashboard/cctv', icon: Video, roles: ['Admin'] },
 ];
 
 const FARM_TYPES = ['Layer Farm', 'Broiler Farm', 'Hatchery', 'Mixed Use', 'Main'];
@@ -570,8 +569,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                   
                 const normTier = (currentTier || '').toLowerCase();
                 const isEnterpriseTier = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
-                const isProTier = isEnterpriseTier || normTier === 'pro';
-                const isLocked = (item.name === 'CCTV Monitoring' && !isProTier) || (item.name === 'Enterprise Hub' && !isEnterpriseTier);
+                const isLocked = item.name === 'Enterprise Hub' && !isEnterpriseTier;
                   
                 return (
                   <div key={item.name}>
@@ -579,7 +577,6 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                       data-tour={
                         item.name === 'Eggs' ? 'eggs-nav' : 
                         item.name === 'Enterprise Hub' ? 'enterprise-nav' : 
-                        item.name === 'CCTV Monitoring' ? 'cctv-nav' : 
                         item.name === 'Batches' ? 'sidebar-menu' : 
                         undefined
                       }
@@ -590,11 +587,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
                             if (role === 'Staff') {
                               toast.error(`${item.name} is not enabled on your farm's plan. Please contact your farm administrator to upgrade.`);
                             } else {
-                              toast.error(
-                                item.name === 'Enterprise Hub' 
-                                  ? 'Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!' 
-                                  : 'CCTV Monitoring is a Pro feature. Upgrade to unlock!'
-                              );
+                              toast.error('Enterprise Hub is an Enterprise tier feature (₦45,000/mo). Upgrade to unlock!');
                               router.push('/dashboard/settings?tab=subscription');
                             }
                             return;
@@ -686,7 +679,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               <span className="text-[10px] font-semibold text-amber-300">{t("Free Starter")}</span>
               <span className="text-[10px] bg-amber-500 text-slate-950 font-semibold px-1.5 py-0.2 rounded">{t("1 Branch Limit")}</span>
             </div>
-            <p className="text-[11px] text-indigo-200 mb-2 leading-tight">{t("Unlock CCTV, voice logging and unlimited branches")}</p>
+            <p className="text-[11px] text-indigo-200 mb-2 leading-tight">{t("Unlock AI voice logging, analytics and unlimited branches")}</p>
             <button
               onClick={() => {
                 setIsMobileOpen(false);

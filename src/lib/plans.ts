@@ -48,7 +48,7 @@ export const DEFAULT_PLANS = [
       'Up to 5 Regional Farm Branches',
       'Production Analytics Bar & Line Charts',
       'Voice & Text AI Auto-Logger Widget',
-      'CCTV Live Surveillance Gateway',
+      'CCTV Surveillance (On Roadmap)',
       'PDF & Excel Exportable Financial Reports',
       'Shift Checklist Queue & Payroll Indicators',
       'Unlimited Staff Accounts'

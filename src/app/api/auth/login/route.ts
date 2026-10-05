@@ -118,18 +118,24 @@ export async function POST(request: Request) {
 
   try {
     const emailInput = rawEmailInput.toLowerCase();
-    const userClean = emailInput.includes('@') ? emailInput.split('@')[0] : emailInput;
+    const isEmailInput = emailInput.includes('@');
 
     // 1. Primary DB lookup in `users`
-    const { data: userRecords } = await adminClient
-      .from('users')
-      .select('*')
-      .or(`email.eq.${emailInput},username.eq.${emailInput},username.eq.${userClean}`)
-      .limit(1);
+    // If user typed an email, query ONLY by exact email. If user typed a username, query ONLY by exact username.
+    const userQuery = isEmailInput
+      ? adminClient.from('users').select('*').eq('email', emailInput).limit(1)
+      : adminClient.from('users').select('*').eq('username', emailInput).limit(1);
+
+    const { data: userRecords } = await userQuery;
 
     if (userRecords && userRecords.length > 0) {
       const userRec = userRecords[0];
-      if (await verifyPassword(password, userRec.passwordHash)) {
+      // Enforce strict exact match between entered credential and stored value
+      const isExactMatch = isEmailInput
+        ? (userRec.email && userRec.email.trim().toLowerCase() === emailInput)
+        : (userRec.username && userRec.username.trim().toLowerCase() === emailInput);
+
+      if (isExactMatch && (await verifyPassword(password, userRec.passwordHash))) {
         const is2FA =
           (userRec.twoFactorEnabled === 'true' || userRec.twoFactorEnabled === true) &&
           Boolean(userRec.twoFactorSecret);
@@ -159,15 +165,19 @@ export async function POST(request: Request) {
     }
 
     // 2. Staff table lookup (attendants/managers without a `users` row)
-    const { data: staffRecords } = await adminClient
-      .from('staff')
-      .select('*')
-      .or(`username.eq.${emailInput},username.eq.${userClean}`)
-      .limit(1);
+    const staffQuery = isEmailInput
+      ? adminClient.from('staff').select('*').or(`username.eq.${emailInput},contact.eq.${emailInput}`).limit(1)
+      : adminClient.from('staff').select('*').eq('username', emailInput).limit(1);
+
+    const { data: staffRecords } = await staffQuery;
 
     if (staffRecords && staffRecords.length > 0) {
       const staffRec = staffRecords[0];
-      if (await verifyPassword(password, staffRec.password)) {
+      const isStaffExactMatch = isEmailInput
+        ? (staffRec.username?.trim().toLowerCase() === emailInput || staffRec.contact?.trim().toLowerCase() === emailInput)
+        : (staffRec.username?.trim().toLowerCase() === emailInput);
+
+      if (isStaffExactMatch && (await verifyPassword(password, staffRec.password))) {
         const staffRole = staffRec.role === 'Manager' ? 'Manager' : 'Staff';
         const branches = parseBranches(staffRec.assignedBranches);
         const workspaceId = branches[0] || staffRec.workspaceId || '';
@@ -194,7 +204,7 @@ export async function POST(request: Request) {
     if (
       envAdminUser &&
       envAdminPass.length >= 12 &&
-      (emailInput === envAdminUser || userClean === envAdminUser) &&
+      emailInput === envAdminUser &&
       safeEqual(password, envAdminPass)
     ) {
       const payload: SessionPayload = {

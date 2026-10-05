@@ -137,7 +137,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: Wheat },
     { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: DollarSign },
     { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: Pill },
-    { name: 'CCTV Camera Surveillance', desc: 'Pair cameras via WebRTC phone scanner or QR image', href: '/dashboard/cctv', category: 'Security & CCTV', icon: Video },
+    { name: 'CCTV Surveillance (Roadmap)', desc: 'Upcoming hardware camera streaming & AI predator detection', href: '/dashboard/cctv', category: 'Roadmap & Future', icon: Video },
     { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: Home },
     { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: Wrench },
     { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: Contact },
@@ -763,7 +763,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       {t("Upgrade to Commercial Pro")}
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      {t("Get unlimited branches, exportable custom PDF reports, CCTV phone scanning, and multi-staff rosters.")}
+                      {t("Get unlimited branches, exportable custom PDF reports, AI auto-logging, and multi-staff rosters.")}
                     </p>
                     <button
                       onClick={() => {

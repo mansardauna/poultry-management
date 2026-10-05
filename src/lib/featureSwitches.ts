@@ -39,7 +39,7 @@ const DEFAULT_PLANS: SaasPlanConfig[] = [
     aiLoggerEnabled: true,
     exportReportsEnabled: true,
     enterpriseHubEnabled: false,
-    features: ['Up to 5 Farm Branches', 'CCTV Live Surveillance', 'AI Voice Auto-Logger', 'PDF & Excel Export Reports', 'Unlimited Staff Accounts']
+    features: ['Up to 5 Farm Branches', 'CCTV Surveillance (On Roadmap)', 'AI Voice Auto-Logger', 'PDF & Excel Export Reports', 'Unlimited Staff Accounts']
   },
   {
     id: 'enterprise',
