@@ -4,9 +4,14 @@ import { supabase } from '@/lib/supabase';
 import { getWorkspaceId, applyWorkspaceFilter, applyStaffWorkspaceFilter } from '@/lib/workspace';
 import { getAuthUser } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 /** Exported function GET */
 export async function GET() {
+  const user = await getAuthUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const workspaceId = await getWorkspaceId();
   const [staffRes, tasksRes, payrollLogsRes] = await Promise.all([
     applyStaffWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
@@ -64,8 +69,12 @@ export async function GET() {
 /** Exported function POST */
 export async function POST(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const workspaceId = await getWorkspaceId();
     const body = await request.json();
-    const workspaceId = body?.workspaceId || (await getWorkspaceId());
     
     if (body.action === 'attendance') {
       const { data: members } = await supabase.from('staff').select('*').eq('id', body.staffId).eq('workspaceId', workspaceId);
@@ -114,7 +123,6 @@ export async function POST(request: Request) {
     }
 
     // Default: Add new staff member
-    const user = await getAuthUser();
     const adminUsername = user?.email?.split('@')[0] || 'admin';
 
     // Resolve organization ID for staff
@@ -145,7 +153,8 @@ export async function POST(request: Request) {
     const staffUsername = (typeof body.username === 'string' && body.username.trim()) 
       ? body.username.trim() 
       : staffNameStr.toLowerCase().replace(/\s+/g, '');
-    const staffPassword = (typeof body.password === 'string' && body.password.trim()) ? body.password.trim() : 'staff123';
+    const defaultStaffPass = crypto.randomBytes(8).toString('base64url');
+    const staffPassword = (typeof body.password === 'string' && body.password.trim()) ? body.password.trim() : defaultStaffPass;
     const staffRole = body.role === 'Manager' ? 'Manager' : 'Staff';
 
     // Check if an onboarding staff member already exists in this workspace to update instead of duplicate
@@ -179,7 +188,7 @@ export async function POST(request: Request) {
         workspaceId: targetBranchId,
         name: staffNameStr,
         username: staffUsername,
-        password: staffPassword,
+        password: passwordHash,
         role: body.role || existing.role || 'Staff',
         salary: Number(body.salary) || existing.salary || 45000,
         assignedBranches: assignedBranchList
@@ -201,7 +210,7 @@ export async function POST(request: Request) {
         }]);
       } catch {}
 
-      return NextResponse.json({ ...existing, ...updated }, { status: 200 });
+      return NextResponse.json({ ...existing, ...updated, password: passwordHash }, { status: 200 });
     }
 
     const newStaff = {
@@ -209,7 +218,7 @@ export async function POST(request: Request) {
       workspaceId: targetBranchId,
       name: staffNameStr,
       username: staffUsername,
-      password: staffPassword,
+      password: passwordHash,
       role: body.role || 'Staff',
       salary: Number(body.salary) || 45000,
       attendanceDays: Number(body.attendanceDays) || 0,

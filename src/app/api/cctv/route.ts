@@ -6,6 +6,9 @@ import { getWorkspaceId } from '@/lib/workspace';
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
+  if (workspaceId === '__unauthenticated__') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const { data: cctvLogsData } = await supabase.from('cctvLogs').select('*').eq('workspaceId', workspaceId);
   const { data: cctvCamerasData } = await supabase.from('cctv_cameras').select('*').eq('workspaceId', workspaceId);
 
@@ -44,6 +47,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     
     if (body.action === 'pair_camera') {
@@ -147,6 +153,10 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
     if (!id) {
@@ -154,7 +164,7 @@ export async function DELETE(request: Request) {
       id = body.id;
     }
     if (!id) return NextResponse.json({ error: 'Camera ID required' }, { status: 400 });
-    const { error } = await supabase.from('cctv_cameras').delete().eq('id', id);
+    const { error } = await supabase.from('cctv_cameras').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch (err: any) {

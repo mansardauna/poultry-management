@@ -6,6 +6,9 @@ import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
+  if (workspaceId === '__unauthenticated__') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const { data: batchesData } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId);
   const normalized = (batchesData || []).map((b: any) => ({
     id: String(b.id),
@@ -27,11 +30,14 @@ export async function GET() {
 /** Exported function POST */
 export async function POST(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
-    const workspaceId = body?.workspaceId || (await getWorkspaceId());
     
     if (body.action === 'mortality') {
-      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).limit(1);
+      const { data: batchesData } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId).eq('id', body.batchId).limit(1);
       const batch = batchesData?.[0];
       if (batch) {
         const count = Number(body.mortalityCount) || 1;
@@ -65,7 +71,7 @@ export async function POST(request: Request) {
     }
 
     if (body.action === 'vaccination') {
-      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).limit(1);
+      const { data: batchesData } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId).eq('id', body.batchId).limit(1);
       const batch = batchesData?.[0];
       if (batch) {
         await supabase.from('batches')
@@ -87,7 +93,7 @@ export async function POST(request: Request) {
     }
 
     if (body.action === 'transfer') {
-      const { data: batchesData } = await supabase.from('batches').select('*').eq('id', body.batchId).limit(1);
+      const { data: batchesData } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId).eq('id', body.batchId).limit(1);
       const batch = batchesData?.[0];
       if (batch) {
         const oldSection = batch.farmSection;
@@ -165,6 +171,9 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     const { id, ...updateData } = body;
     if (!id) return NextResponse.json({ error: 'Batch ID is required' }, { status: 400 });
@@ -182,6 +191,10 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
     if (!id) {
@@ -190,7 +203,7 @@ export async function DELETE(request: Request) {
     }
     if (!id) return NextResponse.json({ error: 'Batch ID is required' }, { status: 400 });
 
-    const { error } = await supabase.from('batches').delete().eq('id', id);
+    const { error } = await supabase.from('batches').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch (err: any) {

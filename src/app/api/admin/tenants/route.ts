@@ -4,13 +4,15 @@ import { NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { attachSession } from '@/lib/sessionCookies';
 
 export async function GET(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
+    const isSuperAdmin = user?.role === 'SuperAdmin' && !user?.impersonatedBy;
     if (!user || !isSuperAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      return NextResponse.json({ error: 'Unauthorized: Super Admin access required' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -137,29 +139,61 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
-    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const { action } = body;
 
-    // Handle exit_impersonate even if user role was temporarily switched
+    // Exit impersonation: ONLY valid for a verified, signed impersonation session.
     if (action === 'exit_impersonate') {
+      if (!user.impersonatedBy) {
+        return NextResponse.json({ error: 'No active impersonation session.' }, { status: 403 });
+      }
+
+      // Re-validate the original SuperAdmin against the database where possible.
+      let restoredEmail = '';
+      let restoredId = user.impersonatedBy;
+      let restoredName = 'Super Admin';
+
+      const { data: superRec } = await serviceRoleClient
+        .from('users')
+        .select('id, email, username, role')
+        .eq('id', user.impersonatedBy)
+        .limit(1)
+        .maybeSingle();
+
+      if (superRec) {
+        if (superRec.role !== 'SuperAdmin') {
+          return NextResponse.json({ error: 'Original account is no longer a Super Admin.' }, { status: 403 });
+        }
+        restoredId = superRec.id;
+        restoredEmail = superRec.email || '';
+        restoredName = superRec.username || restoredName;
+      } else if (user.impersonatedBy !== 'env_superadmin' && !user.impersonatedBy.startsWith('setup_')) {
+        // Unknown impersonator id that isn't a known non-DB SuperAdmin identity
+        return NextResponse.json({ error: 'Original Super Admin account not found.' }, { status: 403 });
+      }
+
       const response = NextResponse.json({
         success: true,
         message: 'Exited impersonation successfully. Restored Super Admin access.',
         redirectUrl: '/dashboard/admin?tab=orgs'
       });
-      response.cookies.delete('pfms_impersonate_by');
-      response.cookies.delete('pfms_impersonate_org_name');
-      response.cookies.set('pfms_role', 'SuperAdmin', { path: '/', maxAge: 60 * 60 * 24 * 7 });
-      response.cookies.set('pfms_tier', 'enterprise', { path: '/', maxAge: 60 * 60 * 24 * 7 });
-      response.cookies.set('pfms_email', 'owner@poultry.com', { path: '/', maxAge: 60 * 60 * 24 * 7 });
-      response.cookies.set('pfms_workspace', 'main-org_owner_main', { path: '/', maxAge: 60 * 60 * 24 * 7 });
-      response.cookies.set('pfms_org_id', 'global', { path: '/', maxAge: 60 * 60 * 24 * 7 });
-      return response;
+      return attachSession(response, {
+        userId: restoredId,
+        email: restoredEmail || user.impersonatorEmail || '',
+        role: 'SuperAdmin',
+        orgId: 'org_superadmin',
+        workspaceId: 'org_superadmin',
+        name: restoredName,
+        tier: 'enterprise',
+      }, { request });
     }
 
-    if (!user || !isSuperAdmin) {
+    const isSuperAdmin = user.role === 'SuperAdmin' && !user.impersonatedBy;
+    if (!isSuperAdmin) {
       return NextResponse.json({ error: 'Unauthorized: Super Admin access required' }, { status: 403 });
     }
 
@@ -173,7 +207,8 @@ export async function POST(request: Request) {
       const userClean = emailClean.split('@')[0];
       const orgId = `org_${Date.now()}`;
       const defaultWorkspaceId = `main-${orgId}`;
-      const defaultPassword = password?.trim() || 'FarmAdmin123!';
+      const generatedPassword = crypto.randomBytes(9).toString('base64url');
+      const defaultPassword = password?.trim() || generatedPassword;
       const passwordHash = bcrypt.hashSync(defaultPassword, 10);
       const newUserId = `u_${Date.now()}`;
       const assignedTier = packageId || 'free';
@@ -436,17 +471,18 @@ export async function POST(request: Request) {
         redirectUrl: '/dashboard'
       });
 
-      // Issue impersonation cookies
-      response.cookies.set('pfms_impersonate_by', 'superadmin', { path: '/', maxAge: 60 * 60 * 24 });
-      response.cookies.set('pfms_impersonate_org_name', org.name, { path: '/', maxAge: 60 * 60 * 24 });
-      response.cookies.set('pfms_role', 'Admin', { path: '/', maxAge: 60 * 60 * 24 });
-      response.cookies.set('pfms_email', targetEmail, { path: '/', maxAge: 60 * 60 * 24 });
-      response.cookies.set('pfms_user_id', targetUserId, { path: '/', maxAge: 60 * 60 * 24 });
-      response.cookies.set('pfms_org_id', id, { path: '/', maxAge: 60 * 60 * 24 });
-      response.cookies.set('pfms_tier', org.subscriptionTier || 'free', { path: '/', maxAge: 60 * 60 * 24 });
-      response.cookies.set('pfms_workspace', targetWorkspaceId, { path: '/', maxAge: 60 * 60 * 24 });
-
-      return response;
+      return attachSession(response, {
+        userId: targetUserId,
+        email: targetEmail,
+        role: 'Admin',
+        orgId: id,
+        workspaceId: targetWorkspaceId,
+        tier: org.subscriptionTier || 'free',
+        name: org.name,
+        impersonatedBy: String(user.id),
+        impersonatorEmail: String(user.email || ''),
+        impersonatedOrgName: org.name,
+      }, { request, maxAge: 60 * 60 * 24 });
     }
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
@@ -458,7 +494,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
+    const isSuperAdmin = user?.role === 'SuperAdmin' && !user?.impersonatedBy;
     if (!user || !isSuperAdmin) {
       return NextResponse.json({ error: 'Unauthorized: Super Admin access required' }, { status: 403 });
     }

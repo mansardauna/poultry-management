@@ -23,17 +23,24 @@ function parseBranches(raw: any): string[] {
  * Fast, cookie-first workspace ID resolution per organization / user.
  */
 export async function getWorkspaceId(): Promise<string> {
-  const cookieStore = await cookies();
-  const workspaceCookie = cookieStore.get('pfms_workspace')?.value?.trim();
-  const cookieOrgId = cookieStore.get('pfms_org_id')?.value?.trim();
-
   const user = await getAuthUser();
-  if (user?.email === 'owner@poultry.com') {
-    return 'main-org_owner_main';
+  if (!user) {
+    return '__unauthenticated__';
   }
 
-  // If user is Staff, strictly lock them to their assigned branches
-  if (user && user.role === 'Staff') {
+  const cookieStore = await cookies();
+  const workspaceCookie = cookieStore.get('pfms_workspace')?.value?.trim();
+
+  // SuperAdmin can access requested workspace or default
+  if (user.role === 'SuperAdmin') {
+    if (workspaceCookie && workspaceCookie !== 'main') {
+      return workspaceCookie;
+    }
+    return user.workspaceId || 'main-org_owner_main';
+  }
+
+  // Staff: strictly lock to assigned branches
+  if (user.role === 'Staff') {
     const rawUsername = (user.username || user.email || '').replace(/@poultry\.local$/, '').toLowerCase();
     const staffIdFromUser = user.id?.startsWith('usr_') ? user.id.replace('usr_', '') : '';
     try {
@@ -56,62 +63,45 @@ export async function getWorkspaceId(): Promise<string> {
         return staffRec.workspaceId;
       }
     } catch {}
+    return user.workspaceId || '__unauthorized_staff__';
   }
 
-  // If a valid tenant workspace cookie is present (and not stale generic 'main'), return it
+  // Admin & Manager: strictly validate that workspace belongs to user's organization
+  let orgId = user.orgId || '';
+  if (!orgId && user.workspaceId) {
+    const match = user.workspaceId.match(/org_[a-zA-Z0-9]+/);
+    if (match) orgId = match[0];
+  }
+
   if (workspaceCookie && workspaceCookie !== 'main') {
-    return workspaceCookie;
-  }
-
-  // If generic 'main' was stored in cookie but we have the tenant orgId, scope to this tenant
-  if (cookieOrgId) {
-    return `main-${cookieOrgId}`;
-  }
-
-  if (user?.email) {
-    const userClean = user.email.split('@')[0].toLowerCase();
-
-    // Check staff record for workspace or assigned branches
+    // 1. Direct org match in workspace ID string
+    if (orgId && workspaceCookie.includes(orgId)) {
+      return workspaceCookie;
+    }
+    // 2. Database validation against tenant's workspaces
     try {
-      const { data: staffRec } = await serviceRoleClient
-        .from('staff')
-        .select('workspaceId, assignedBranches')
-        .or(`name.eq.${user.email},contact.eq.${user.email},name.eq.${userClean},username.eq.${user.email},username.eq.${userClean}`)
+      const { data: ws } = await serviceRoleClient
+        .from('workspaces')
+        .select('id, orgId')
+        .eq('id', workspaceCookie)
         .limit(1)
         .maybeSingle();
 
-      const assigned = parseBranches(staffRec?.assignedBranches);
-      if (assigned.length > 0) {
-        return assigned[0];
-      }
-      if (staffRec?.workspaceId && staffRec.workspaceId !== 'main') {
-        return staffRec.workspaceId;
+      if (ws && orgId && (ws.orgId === orgId || ws.id.includes(orgId))) {
+        return workspaceCookie;
       }
     } catch {}
-
-    // Check user record for workspace or orgId
-    try {
-      const { data: userRec } = await serviceRoleClient
-        .from('users')
-        .select('workspaceId, orgId')
-        .eq('email', user.email)
-        .limit(1)
-        .maybeSingle();
-
-      if (userRec?.workspaceId && userRec.workspaceId !== 'main') {
-        return userRec.workspaceId;
-      }
-      if (userRec?.orgId) {
-        return `main-${userRec.orgId}`;
-      }
-    } catch {}
+    // Reject foreign tenant workspace cookie and fall back to user's verified workspace
   }
 
-  if (user?.id && user.id !== 'local_user') {
-    return `main-org_${user.id.replace(/-/g, '').slice(0, 10)}`;
+  if (user.workspaceId && user.workspaceId !== 'main') {
+    return user.workspaceId;
+  }
+  if (orgId) {
+    return `main-${orgId}`;
   }
 
-  return workspaceCookie || 'main-default';
+  return user.id ? `main-org_${user.id.replace(/-/g, '').slice(0, 10)}` : '__unauthorized__';
 }
 
 /**
@@ -147,6 +137,9 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
   const orgIdVal = cookieOrgId || cookieStore.get('pfms_org_id')?.value?.trim() || '';
 
   const authUser = user || (await getAuthUser());
+  if (!authUser) {
+    return [];
+  }
   const userClean = (authUser?.email || 'admin').split('@')[0].toLowerCase();
 
   // If Staff role: return ONLY assigned branches

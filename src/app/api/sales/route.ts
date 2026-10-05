@@ -6,6 +6,9 @@ import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
+  if (workspaceId === '__unauthenticated__') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const [salesRes, invoicesRes, batchesRes] = await Promise.all([
     applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId),
@@ -54,6 +57,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     
     if (body.action === 'createInvoice') {
@@ -173,18 +179,21 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
 
     if (body.action === 'updateInvoiceStatus' || body.type === 'invoice') {
       const { id, status } = body;
       if (!id || !status) return NextResponse.json({ error: 'Invoice ID and status required' }, { status: 400 });
 
-      const { error: updateErr } = await supabase.from('invoices').update({ status }).eq('id', id);
+      const { error: updateErr } = await supabase.from('invoices').update({ status }).eq('id', id).eq('workspaceId', workspaceId);
       if (updateErr) {
         return NextResponse.json({ error: updateErr.message }, { status: 500 });
       }
 
-      const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).limit(1).maybeSingle();
+      const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).eq('workspaceId', workspaceId).limit(1).maybeSingle();
 
       if (status === 'Paid') {
         if (invData) {
@@ -237,6 +246,10 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
     let type = searchParams.get('type');
@@ -250,7 +263,7 @@ export async function DELETE(request: Request) {
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
     if (type === 'invoice' || id.startsWith('inv')) {
-      const { error: invErr } = await supabase.from('invoices').delete().eq('id', id);
+      const { error: invErr } = await supabase.from('invoices').delete().eq('id', id).eq('workspaceId', workspaceId);
       if (invErr) {
         return NextResponse.json({ error: invErr.message }, { status: 500 });
       }
@@ -259,8 +272,8 @@ export async function DELETE(request: Request) {
 
     // Delete sale and associated invoice if exists
     await Promise.all([
-      supabase.from('sales').delete().eq('id', id),
-      supabase.from('invoices').delete().eq('saleId', id)
+      supabase.from('sales').delete().eq('id', id).eq('workspaceId', workspaceId),
+      supabase.from('invoices').delete().eq('saleId', id).eq('workspaceId', workspaceId)
     ]);
 
     return NextResponse.json({ success: true, message: 'Sale deleted' });

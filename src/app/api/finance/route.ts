@@ -6,6 +6,9 @@ import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
+  if (workspaceId === '__unauthenticated__') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const [
     { data: sales },
     { data: expenses },
@@ -58,6 +61,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     
     if (body.action === 'payroll') {
@@ -136,6 +142,9 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
@@ -149,6 +158,10 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
 
@@ -158,7 +171,7 @@ export async function DELETE(request: Request) {
     }
 
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    const { error } = await supabase.from('expenses').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch (err: any) {

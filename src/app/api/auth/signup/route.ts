@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { supabase as serviceRoleClient, isSupabaseConfigured } from '@/lib/supabase';
 import { createClient } from '@/lib/supabaseServer';
 import bcrypt from 'bcryptjs';
+import { attachSession } from '@/lib/sessionCookies';
 
 /** Exported function POST */
 export async function POST(request: Request) {
@@ -16,6 +17,14 @@ export async function POST(request: Request) {
       { error: 'Email and password are required' },
       { status: 400 },
     );
+  }
+
+  if (/[,()\s]/.test(rawEmail) || !rawEmail.includes('@')) {
+    return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
+  }
+
+  if (password.length < 8) {
+    return NextResponse.json({ error: 'Password must be at least 8 characters long.' }, { status: 400 });
   }
 
   try {
@@ -94,14 +103,20 @@ export async function POST(request: Request) {
       } catch (_e) {}
     }
 
-    // 5. Return success response with all session cookies
-    const response = NextResponse.json({ ok: true, role });
-    response.cookies.set('pfms_workspace', defaultWorkspaceId, { path: '/' });
-    response.cookies.set('pfms_org_id', orgId, { path: '/' });
-    response.cookies.set('pfms_tier', 'free', { path: '/' });
-    response.cookies.set('pfms_role', role, { path: '/' });
-    response.cookies.set('pfms_email', email, { path: '/' });
-    return response;
+    // 5. Return success response with a signed session
+    return attachSession(
+      NextResponse.json({ ok: true, role }),
+      {
+        userId: newUserId,
+        email,
+        role,
+        orgId,
+        workspaceId: defaultWorkspaceId,
+        name: userClean,
+        tier: 'free',
+      },
+      { request }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { error: `Internal server error: ${error?.message || error}` },

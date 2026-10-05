@@ -39,10 +39,11 @@ function getLocalEngine(): 'mysql' | 'postgres' | 'supabase' {
   return 'postgres';
 }
 
-// 1.0s Strict Timeout Fetch for Supabase to prevent network hangs & retries
+// Configurable timeout fetch for Supabase (default 15s) to avoid flaky aborts under network load
 function fastFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const timeoutMs = Number(process.env.SUPABASE_FETCH_TIMEOUT_MS) || 15000;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 1000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   const signal = init?.signal
     ? (AbortSignal as any).any([init.signal, controller.signal])
     : controller.signal;

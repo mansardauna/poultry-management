@@ -10,6 +10,9 @@ import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
  */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
+  if (workspaceId === '__unauthenticated__') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const [
     { data: feeds },
     { data: feedLogs },
@@ -54,6 +57,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
 
     if (body.action === 'logisticsProcure') {
@@ -195,6 +201,9 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
 
     if (body.action === 'updatePipeline') {
@@ -223,6 +232,10 @@ export async function PUT(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
     let action = searchParams.get('action');
@@ -238,12 +251,12 @@ export async function DELETE(request: Request) {
     }
 
     if (action === 'deletePipeline') {
-      const { error } = await supabase.from('procurePipeline').delete().eq('id', id);
+      const { error } = await supabase.from('procurePipeline').delete().eq('id', id).eq('workspaceId', workspaceId);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
       return NextResponse.json({ success: true, deleted: 'pipeline' });
     }
 
-    const { error } = await supabase.from('feedLogs').delete().eq('id', id);
+    const { error } = await supabase.from('feedLogs').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, deleted: 'feed' });
   } catch (err: any) {

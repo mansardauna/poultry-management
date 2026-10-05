@@ -8,6 +8,7 @@ import { getAuthUser } from '@/lib/auth';
 import { isSystemInstalled } from '@/lib/dbCheck';
 import { loadDatabaseConfig } from '@/lib/authdb';
 import { APP_VERSION } from '@/lib/version';
+import { attachSession } from '@/lib/sessionCookies';
 
 /**
  * GET Handler: Check system setup status, database connectivity, and gateway configurations
@@ -254,11 +255,15 @@ export async function POST(request: Request) {
         });
         localResponse.cookies.set('pfms_installation_completed', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
         localResponse.cookies.set('pms_db_mode', '1', { path: '/', maxAge: 60 * 60 * 24 * 365 });
-        localResponse.cookies.set('pfms_role', 'SuperAdmin', { path: '/' });
-        localResponse.cookies.set('pfms_email', cleanEmail, { path: '/' });
-        localResponse.cookies.set('pfms_workspace', 'main-org_superadmin', { path: '/' });
-        localResponse.cookies.set('pfms_org_id', 'org_superadmin', { path: '/' });
-        return localResponse;
+        return attachSession(localResponse, {
+          userId: `setup_${cleanEmail}`,
+          email: cleanEmail,
+          role: 'SuperAdmin',
+          orgId: 'org_superadmin',
+          workspaceId: 'org_superadmin',
+          name: 'Super Admin',
+          tier: 'enterprise',
+        }, { request });
       } catch (err: unknown) {
         return NextResponse.json(
           { error: err instanceof Error ? err.message : 'Installation failed while configuring the local database.' },
@@ -477,14 +482,17 @@ export async function POST(request: Request) {
       dashboardUrl: '/dashboard/admin',
     });
 
-    // Set installation and SuperAdmin session cookies
+    // Set installation flag and a signed SuperAdmin session
     response.cookies.set('pfms_installation_completed', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
-    response.cookies.set('pfms_role', 'SuperAdmin', { path: '/' });
-    response.cookies.set('pfms_email', cleanEmail, { path: '/' });
-    response.cookies.set('pfms_workspace', 'main-org_superadmin', { path: '/' });
-    response.cookies.set('pfms_org_id', 'org_superadmin', { path: '/' });
-
-    return response;
+    return attachSession(response, {
+      userId: userId || `setup_${cleanEmail}`,
+      email: cleanEmail,
+      role: 'SuperAdmin',
+      orgId: 'org_superadmin',
+      workspaceId: 'org_superadmin',
+      name: 'Super Admin',
+      tier: 'enterprise',
+    }, { request });
   } catch (err: unknown) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error during setup' }, { status: 500 });
   }

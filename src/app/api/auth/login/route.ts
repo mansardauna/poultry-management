@@ -1,8 +1,11 @@
 'use strict';
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { supabase as adminClient, isSupabaseConfigured } from '@/lib/supabase';
 import { createClient } from '@/lib/supabaseServer';
-import bcrypt from 'bcryptjs';
+import { attachSession, orgIdFromWorkspace } from '@/lib/sessionCookies';
+import type { SessionPayload } from '@/lib/session';
 import {
   verifyTwoFactorCode,
   createPending2FAToken,
@@ -10,37 +13,61 @@ import {
   consumePending2FASession,
 } from '@/lib/twoFactor';
 
-/** Helper to issue auth cookies */
-function createAuthResponse(userRec: any, emailInput: string, rememberMe: boolean) {
-  const isSuperAdminUser =
-    userRec.role === 'SuperAdmin' ||
-    emailInput === 'owner@poultry.com' ||
-    emailInput === 'superadmin@pfms.com';
-  const staffRole = isSuperAdminUser ? 'SuperAdmin' : (userRec.role || 'Admin');
-  const targetWorkspaceId = isSuperAdminUser
+const GENERIC_AUTH_ERROR = 'Invalid username/email or password.';
+
+/** bcrypt-only password verification. Plaintext stored values are never accepted. */
+async function verifyPassword(plain: string, stored: unknown): Promise<boolean> {
+  if (typeof stored !== 'string' || !/^\$2[aby]\$/.test(stored)) return false;
+  try {
+    return await bcrypt.compare(plain, stored);
+  } catch {
+    return false;
+  }
+}
+
+/** Constant-time string comparison (for env-configured credentials). */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
+}
+
+function parseBranches(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.filter(Boolean).map(String);
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+    } catch {}
+  }
+  return [];
+}
+
+/** Build a signed session from a `users` table record. Role comes ONLY from the DB record. */
+async function createUserSessionResponse(userRec: any, rememberMe: boolean, request: Request) {
+  const role: string = userRec.role || 'Admin';
+  const isSuperAdmin = role === 'SuperAdmin';
+
+  const workspaceId: string = isSuperAdmin
     ? 'org_superadmin'
     : (userRec.workspaceId || `main-org_${userRec.id}`);
-  let orgId = isSuperAdminUser ? 'org_superadmin' : (userRec.orgId || '');
-  if (!orgId && targetWorkspaceId) {
-    const match = targetWorkspaceId.match(/org_[a-zA-Z0-9]+/);
-    if (match) orgId = match[0];
-  }
-  if (!orgId) {
-    orgId = targetWorkspaceId.startsWith('main-') ? targetWorkspaceId.slice(5) : 'org_owner_main';
-  }
-  const tier = isSuperAdminUser ? 'enterprise' : (userRec.subscriptionTier || 'free');
 
-  const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24; // 30 days if rememberMe, else 24 hours
-  const cookieOptions = { path: '/', maxAge, sameSite: 'lax' as const };
+  let orgId: string = isSuperAdmin ? 'org_superadmin' : (userRec.orgId || orgIdFromWorkspace(workspaceId));
+  if (!orgId) orgId = workspaceId.startsWith('main-') ? workspaceId.slice(5) : '';
 
-  const response = NextResponse.json({ ok: true, role: staffRole });
-  response.cookies.set('pfms_workspace', targetWorkspaceId, cookieOptions);
-  response.cookies.set('pfms_org_id', orgId, cookieOptions);
-  response.cookies.set('pfms_tier', tier, cookieOptions);
-  response.cookies.set('pfms_role', staffRole, cookieOptions);
-  response.cookies.set('pfms_email', userRec.email || emailInput, cookieOptions);
-  response.cookies.set('pfms_name', userRec.name || userRec.username || '', cookieOptions);
-  return response;
+  const payload: SessionPayload = {
+    userId: String(userRec.id),
+    email: userRec.email || '',
+    role,
+    orgId,
+    workspaceId,
+    name: userRec.name || userRec.username || '',
+    tier: isSuperAdmin ? 'enterprise' : (userRec.subscriptionTier || 'free'),
+  };
+
+  const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
+  return attachSession(NextResponse.json({ ok: true, role }), payload, { maxAge, request });
 }
 
 /** Exported function POST */
@@ -67,10 +94,14 @@ export async function POST(request: Request) {
     }
 
     consumePending2FASession(body.tempToken);
-    return createAuthResponse(pending.userRec, pending.email, rememberMe);
+    return createUserSessionResponse(pending.userRec, rememberMe, request);
   }
 
-  const rawEmailInput = typeof body?.email === 'string' ? body.email.trim() : '';
+  const rawEmailInput = typeof body?.email === 'string'
+    ? body.email.trim()
+    : typeof body?.username === 'string'
+      ? body.username.trim()
+      : '';
   const password = typeof body?.password === 'string' ? body.password : '';
 
   if (!rawEmailInput || !password) {
@@ -80,11 +111,16 @@ export async function POST(request: Request) {
     );
   }
 
+  // Reject characters that could alter PostgREST `.or()` filter syntax
+  if (/[,()]/.test(rawEmailInput)) {
+    return NextResponse.json({ error: GENERIC_AUTH_ERROR }, { status: 401 });
+  }
+
   try {
     const emailInput = rawEmailInput.toLowerCase();
     const userClean = emailInput.includes('@') ? emailInput.split('@')[0] : emailInput;
 
-    // 1. Primary DB Table Lookup in `users` (Works for self-hosted DBs & production)
+    // 1. Primary DB lookup in `users`
     const { data: userRecords } = await adminClient
       .from('users')
       .select('*')
@@ -93,20 +129,7 @@ export async function POST(request: Request) {
 
     if (userRecords && userRecords.length > 0) {
       const userRec = userRecords[0];
-      let isPasswordValid = false;
-      const storedHash = userRec.passwordHash || '';
-      if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$')) {
-        try {
-          isPasswordValid = bcrypt.compareSync(password, storedHash);
-        } catch {
-          isPasswordValid = false;
-        }
-      } else {
-        isPasswordValid = password === storedHash;
-      }
-
-      if (isPasswordValid) {
-        // Check if user has 2FA enabled
+      if (await verifyPassword(password, userRec.passwordHash)) {
         const is2FA =
           (userRec.twoFactorEnabled === 'true' || userRec.twoFactorEnabled === true) &&
           Boolean(userRec.twoFactorSecret);
@@ -123,8 +146,7 @@ export async function POST(request: Request) {
             });
           }
 
-          const isCodeValid = verifyTwoFactorCode(userRec.twoFactorSecret, twoFactorCode);
-          if (!isCodeValid) {
+          if (!verifyTwoFactorCode(userRec.twoFactorSecret, twoFactorCode)) {
             return NextResponse.json(
               { error: 'Invalid 6-digit authentication code. Please check your authenticator app.' },
               { status: 401 },
@@ -132,118 +154,100 @@ export async function POST(request: Request) {
           }
         }
 
-        return createAuthResponse(userRec, emailInput, rememberMe);
+        return createUserSessionResponse(userRec, rememberMe, request);
       }
     }
 
-    // 2. Staff Table Lookup (for farm attendants/managers created in onboarding or staff module)
+    // 2. Staff table lookup (attendants/managers without a `users` row)
     const { data: staffRecords } = await adminClient
       .from('staff')
       .select('*')
-      .or(`username.eq.${emailInput},username.eq.${userClean},name.eq.${emailInput}`)
+      .or(`username.eq.${emailInput},username.eq.${userClean}`)
       .limit(1);
 
     if (staffRecords && staffRecords.length > 0) {
       const staffRec = staffRecords[0];
-      const storedPass = staffRec.password || '';
-      let isPasswordValid = false;
+      if (await verifyPassword(password, staffRec.password)) {
+        const staffRole = staffRec.role === 'Manager' ? 'Manager' : 'Staff';
+        const branches = parseBranches(staffRec.assignedBranches);
+        const workspaceId = branches[0] || staffRec.workspaceId || '';
+        const orgId = orgIdFromWorkspace(workspaceId || staffRec.workspaceId);
 
-      if (storedPass) {
-        if (storedPass.startsWith('$2a$') || storedPass.startsWith('$2b$')) {
-          try {
-            isPasswordValid = bcrypt.compareSync(password, storedPass);
-          } catch {
-            isPasswordValid = false;
-          }
-        } else {
-          isPasswordValid = password === storedPass;
-        }
-      }
-
-      if (isPasswordValid) {
-        const staffRole = staffRec.role || 'Staff';
-        let assignedBranch = staffRec.workspaceId || 'main-org_owner_main';
-        if (Array.isArray(staffRec.assignedBranches) && staffRec.assignedBranches[0]) {
-          assignedBranch = staffRec.assignedBranches[0];
-        } else if (typeof staffRec.assignedBranches === 'string') {
-          try {
-            const parsed = JSON.parse(staffRec.assignedBranches);
-            if (Array.isArray(parsed) && parsed[0]) assignedBranch = parsed[0];
-          } catch {}
-        }
-        let staffOrgId = '';
-        const match = (assignedBranch || staffRec.workspaceId || '').match(/org_[a-zA-Z0-9]+/);
-        if (match) staffOrgId = match[0];
-        if (!staffOrgId) staffOrgId = 'org_owner_main';
-
+        const payload: SessionPayload = {
+          userId: `usr_${staffRec.id}`,
+          email: staffRec.username || emailInput,
+          role: staffRole,
+          orgId,
+          workspaceId,
+          name: staffRec.name || staffRec.username || '',
+          tier: 'free',
+        };
         const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
-        const cookieOptions = { path: '/', maxAge, sameSite: 'lax' as const };
-
-        const response = NextResponse.json({ ok: true, role: staffRole });
-        response.cookies.set('pfms_workspace', assignedBranch, cookieOptions);
-        response.cookies.set('pfms_org_id', staffOrgId, cookieOptions);
-        response.cookies.set('pfms_tier', 'free', cookieOptions);
-        response.cookies.set('pfms_role', staffRole, cookieOptions);
-        response.cookies.set('pfms_email', staffRec.username || staffRec.name || emailInput, cookieOptions);
-        response.cookies.set('pfms_name', staffRec.name || staffRec.username || '', cookieOptions);
-        return response;
+        return attachSession(NextResponse.json({ ok: true, role: staffRole }), payload, { maxAge, request });
       }
     }
 
-    // 3. Fallback: Check environment-configured admin credentials
-    const adminUser = process.env.PFMS_ADMIN_USERNAME || 'owner';
-    const adminPass = process.env.PFMS_ADMIN_PASSWORD || 'PoultryFarm@2026!';
+    // 3. Optional env-configured break-glass SuperAdmin.
+    //    Only active when BOTH variables are explicitly set; there is no built-in default.
+    const envAdminUser = (process.env.PFMS_ADMIN_USERNAME || '').trim().toLowerCase();
+    const envAdminPass = process.env.PFMS_ADMIN_PASSWORD || '';
     if (
-      (emailInput === adminUser.toLowerCase() || emailInput === 'owner@poultry.com' || userClean === adminUser.toLowerCase()) &&
-      password === adminPass
+      envAdminUser &&
+      envAdminPass.length >= 12 &&
+      (emailInput === envAdminUser || userClean === envAdminUser) &&
+      safeEqual(password, envAdminPass)
     ) {
-      const staffRole = 'SuperAdmin';
-      const targetWorkspaceId = 'org_superadmin';
-      const orgId = 'org_superadmin';
-      const tier = 'enterprise';
-
+      const payload: SessionPayload = {
+        userId: 'env_superadmin',
+        email: emailInput.includes('@') ? emailInput : `${envAdminUser}@localhost`,
+        role: 'SuperAdmin',
+        orgId: 'org_superadmin',
+        workspaceId: 'org_superadmin',
+        name: 'Super Admin',
+        tier: 'enterprise',
+      };
       const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
-      const cookieOptions = { path: '/', maxAge, sameSite: 'lax' as const };
-
-      const response = NextResponse.json({ ok: true, role: staffRole });
-      response.cookies.set('pfms_workspace', targetWorkspaceId, cookieOptions);
-      response.cookies.set('pfms_org_id', orgId, cookieOptions);
-      response.cookies.set('pfms_tier', tier, cookieOptions);
-      response.cookies.set('pfms_role', staffRole, cookieOptions);
-      response.cookies.set('pfms_email', 'owner@poultry.com', cookieOptions);
-      response.cookies.set('pfms_name', 'Super Admin', cookieOptions);
-      return response;
+      return attachSession(NextResponse.json({ ok: true, role: 'SuperAdmin' }), payload, { maxAge, request });
     }
 
-    // 4. Optional Supabase Auth Fallback (if explicitly configured and user not found locally)
+    // 4. Optional Supabase Auth fallback. Role is resolved from the DB, never from user_metadata.
     if (isSupabaseConfigured) {
       try {
         const supabase = await createClient();
-        const res = await supabase.auth.signInWithPassword({ email: emailInput, password }).catch(() => ({ data: { user: null }, error: null }));
+        const res = await supabase.auth
+          .signInWithPassword({ email: emailInput, password })
+          .catch(() => ({ data: { user: null }, error: null }));
 
-        if (res.data?.user) {
-          const user = res.data.user;
-          const userRole = user.user_metadata?.role || 'Admin';
-          const targetWorkspaceId = user.user_metadata?.workspaceId || `main-org_${user.id.slice(0, 8)}`;
+        const sbUser = res.data?.user;
+        if (sbUser) {
+          const { data: dbUser } = await adminClient
+            .from('users')
+            .select('*')
+            .eq('email', sbUser.email || emailInput)
+            .limit(1)
+            .maybeSingle();
+
+          if (dbUser) {
+            return createUserSessionResponse(dbUser, rememberMe, request);
+          }
+
+          const workspaceId = `main-org_${sbUser.id.replace(/-/g, '').slice(0, 10)}`;
+          const payload: SessionPayload = {
+            userId: sbUser.id,
+            email: sbUser.email || emailInput,
+            role: 'Admin',
+            orgId: orgIdFromWorkspace(workspaceId),
+            workspaceId,
+            tier: 'free',
+          };
           const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
-          const cookieOptions = { path: '/', maxAge, sameSite: 'lax' as const };
-
-          const response = NextResponse.json({ ok: true, role: userRole });
-          response.cookies.set('pfms_workspace', targetWorkspaceId, cookieOptions);
-          response.cookies.set('pfms_org_id', `org_${user.id.slice(0, 8)}`, cookieOptions);
-          response.cookies.set('pfms_tier', 'free', cookieOptions);
-          response.cookies.set('pfms_role', userRole, cookieOptions);
-          response.cookies.set('pfms_email', user.email || emailInput, cookieOptions);
-          return response;
+          return attachSession(NextResponse.json({ ok: true, role: 'Admin' }), payload, { maxAge, request });
         }
       } catch (_e) {}
     }
 
-    return NextResponse.json(
-      { error: 'Invalid username/email or password.' },
-      { status: 401 }
-    );
-  } catch (error: any) {
+    return NextResponse.json({ error: GENERIC_AUTH_ERROR }, { status: 401 });
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Internal server error while processing login.' },
       { status: 500 }

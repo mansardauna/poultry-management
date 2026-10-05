@@ -6,6 +6,9 @@ import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
+  if (workspaceId === '__unauthenticated__') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const [
     { data: eggs },
     { data: cushionAudits },
@@ -54,6 +57,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     
     if (body.action === 'cushionAudit') {

@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { isSupabaseMode, loadDatabaseConfig, deleteSession } from '@/lib/authdb';
+import { clearSession } from '@/lib/sessionCookies';
 
 /** Exported function POST */
 export async function POST() {
@@ -27,11 +28,7 @@ export async function POST() {
   response.cookies.set('pms_session', '', { maxAge: 0, path: '/' });
   response.cookies.set('pms_db_mode', '', { maxAge: 0, path: '/' });
   response.cookies.set('pms_session_user', '', { maxAge: 0, path: '/' });
-  response.cookies.set('pfms_workspace', '', { maxAge: 0, path: '/' });
-  response.cookies.set('pfms_org_id', '', { maxAge: 0, path: '/' });
-  response.cookies.set('pfms_tier', '', { maxAge: 0, path: '/' });
-  response.cookies.set('pfms_role', '', { maxAge: 0, path: '/' });
-  response.cookies.set('pfms_email', '', { maxAge: 0, path: '/' });
+  clearSession(response);
 
   return response;
 }
