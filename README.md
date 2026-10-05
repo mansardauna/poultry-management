@@ -31,6 +31,9 @@ PMS uses a decoupled data adapter layer (`src/lib/dataAdapter.ts` and `src/lib/s
 
 The active engine is determined via `data/database.config.json` or standard environment variables (`DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`).
 
+> [!NOTE]
+> **Database Flexibility**: Cloud Supabase is **strictly optional**. The application can run 100% offline and self-hosted on local MySQL or PostgreSQL (e.g., XAMPP, Docker, or bare metal) without any Supabase account or external cloud dependencies. You can configure your database interactively during first launch via the setup wizard at `/setup`.
+
 ---
 
 ## Getting Started
