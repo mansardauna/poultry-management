@@ -92,13 +92,16 @@ CREATE TABLE IF NOT EXISTS public."alertSettings" (
     "workspaceId" VARCHAR(255) NOT NULL UNIQUE,
     "feedThresholdKg" NUMERIC(10, 2) DEFAULT 50.00,
     "eggDropPercentage" NUMERIC(5, 2) DEFAULT 15.00,
+    "minDailyEggCount" INTEGER DEFAULT 0,
+    "tempMin" NUMERIC(5, 2) DEFAULT 18.00,
+    "tempMax" NUMERIC(5, 2) DEFAULT 28.00,
     "notifySms" BOOLEAN DEFAULT false,
     "notifyEmail" BOOLEAN DEFAULT true,
     "notifyWhatsapp" BOOLEAN DEFAULT true,
     "createdAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS and permissions
+-- Enable RLS and permissions (All access is managed through server-side service-role client with application workspace isolation)
 ALTER TABLE public."alertSettings" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow authenticated read/write on alertSettings" ON public."alertSettings" FOR ALL USING (true);
 ```
@@ -146,5 +149,56 @@ CREATE POLICY "Allow authenticated read/write on enterprise_consultants" ON publ
 
 ---
 
-## 8. Verify Setup
-After running the SQL queries above in Supabase, your settings, multi-payment gateways, saved card methods, subscription history, and Enterprise multi-farm tables will be fully active!
+## 8. Create `farmPens` Table
+Stores farm pens, brooding sections, capacity, and temperature log history for housing telemetry.
+
+```sql
+CREATE TABLE IF NOT EXISTS public."farmPens" (
+    id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    "workspaceId" VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    capacity INTEGER DEFAULT 0,
+    "currentBatchId" VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'Active',
+    "temperatureLogs" JSONB DEFAULT '[]'::jsonb,
+    "tempMin" NUMERIC(5, 2) DEFAULT NULL,
+    "tempMax" NUMERIC(5, 2) DEFAULT NULL,
+    "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS and permissions (Server-side service-role client enforces tenant isolation)
+ALTER TABLE public."farmPens" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read/write on farmPens" ON public."farmPens" FOR ALL USING (true);
+```
+
+---
+
+## 9. Idempotent Migration Script for Existing Installations
+Run these queries if you have an existing Supabase or PostgreSQL database to safely add new columns without dropping data:
+
+```sql
+-- Add missing columns idempotently to alertSettings:
+ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "eggDropPercentage" NUMERIC(5, 2) DEFAULT 15.00;
+ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "minDailyEggCount" INTEGER DEFAULT 0;
+ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "tempMin" NUMERIC(5, 2) DEFAULT 18.00;
+ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "tempMax" NUMERIC(5, 2) DEFAULT 28.00;
+ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "notifySms" BOOLEAN DEFAULT false;
+ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "notifyEmail" BOOLEAN DEFAULT true;
+ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "notifyWhatsapp" BOOLEAN DEFAULT true;
+
+-- Add missing columns idempotently to farmPens:
+ALTER TABLE public."farmPens" ADD COLUMN IF NOT EXISTS "temperatureLogs" JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public."farmPens" ADD COLUMN IF NOT EXISTS "tempMin" NUMERIC(5, 2) DEFAULT NULL;
+ALTER TABLE public."farmPens" ADD COLUMN IF NOT EXISTS "tempMax" NUMERIC(5, 2) DEFAULT NULL;
+```
+
+---
+
+## 10. Workspace Isolation & Security Architecture Note
+All database access in the application is executed via the server-side Supabase client (`serviceRoleClient` / server database adapter). Direct frontend/browser queries to Supabase are never permitted. Multi-tenant workspace isolation is strictly enforced at the API route and server proxy layer via `getWorkspaceId()` and `applyWorkspaceFilter(query, workspaceId)`. If you wish to enable end-user direct Supabase client queries in the future, replace the permissive RLS policies with JWT-based claim policies (e.g. `USING (auth.jwt() ->> 'workspace_id' = "workspaceId")`).
+
+---
+
+## 11. Verify Setup
+After running the SQL queries above in Supabase, your settings, multi-payment gateways, saved card methods, subscription history, housing pens, and Enterprise multi-farm tables will be fully active!
+

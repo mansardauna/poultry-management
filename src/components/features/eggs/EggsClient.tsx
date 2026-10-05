@@ -47,7 +47,7 @@ interface EggsClientProps {
 export function EggsClient({ initialEggs, batches, initialCushionAudits, initialMaturationLogs, role }: EggsClientProps) {
   const [eggs, setEggs] = useState<EggRecord[]>(initialEggs);
   const { texts, t, formatNumber } = useLanguage();
-  const { filterByTimeRange } = useTimeFilter();
+  const { filterByTimeRange, timeRange } = useTimeFilter();
   const { confirm } = useConfirm();
   const router = useRouter();
   const [tier, setTier] = useState('free');
@@ -489,15 +489,48 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   const totalSpoiltEggs = filteredEggs.reduce((sum, e) => sum + (Number(e.spoiltEggs) || 0), 0);
   const totalCollected = totalGoodEggs + totalBrokenEggs + totalSpoiltEggs;
 
-  // Laying Rate calculation (Hen-Day Egg Production %):
-  // Formula: (Total Eggs Collected / (Active Laying Hens * Days in Period)) * 100
-  const layerBatches = batches.filter(b => !b.type || b.type.toLowerCase() === 'layers');
-  const activeLayers = (layerBatches.length > 0 ? layerBatches : batches)
+  // Laying Rate calculation (Estimated Hen-Day Production %):
+  // Formula: (Total Eggs Produced / (Active Layer Hens * Days Logged)) * 100
+  const layerBatches = batches.filter(b => b.type && b.type.toLowerCase() === 'layers');
+  const hasLayerBatches = layerBatches.length > 0;
+  const activeLayers = (hasLayerBatches ? layerBatches : [])
     .reduce((sum, b) => sum + Math.max(0, Number(b.quantity || 0) - Number(b.mortalityCount || 0)), 0);
-  const uniqueCollectionDays = Math.max(1, new Set(filteredEggs.map(e => e.date)).size);
-  const layingPercentage = activeLayers > 0
-    ? Math.min(100, Math.round(((totalCollected / (activeLayers * uniqueCollectionDays)) * 100) * 10) / 10)
+
+  // Compute period calendar days based on active time filter
+  let periodCalendarDays = 7;
+  if (timeRange === 'weekly') {
+    periodCalendarDays = 7;
+  } else if (timeRange === 'monthly') {
+    periodCalendarDays = 30;
+  } else if (timeRange === 'yearly') {
+    periodCalendarDays = 365;
+  } else {
+    // 'all' timeRange: calculate calendar span from earliest log to today
+    if (filteredEggs.length > 0) {
+      const dates = filteredEggs.map(e => new Date(e.date).getTime()).filter(t => !isNaN(t));
+      if (dates.length > 0) {
+        const minDate = Math.min(...dates);
+        const maxDate = Math.max(...dates, Date.now());
+        periodCalendarDays = Math.max(1, Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)));
+      }
+    } else {
+      periodCalendarDays = 1;
+    }
+  }
+
+  // Unique calendar dates that have egg logs in this period
+  const uniqueLoggedDays = new Set(filteredEggs.map(e => e.date)).size;
+  // Denominator caps at periodCalendarDays to prevent distortion
+  const effectiveLoggedDays = Math.min(periodCalendarDays, Math.max(1, uniqueLoggedDays));
+
+  // Treating unlogged days as missing rather than zero to calculate actual laying performance on active days
+  const henDayRate = hasLayerBatches && activeLayers > 0 && uniqueLoggedDays > 0
+    ? Math.min(100, Math.round(((totalCollected / (activeLayers * effectiveLoggedDays)) * 100) * 10) / 10)
     : 0;
+
+  const sampleSizeLabel = hasLayerBatches && activeLayers > 0
+    ? (uniqueLoggedDays > 0 ? `${uniqueLoggedDays} of ${periodCalendarDays} days logged` : t('0 days logged in period'))
+    : t('No layer batches registered');
 
   return (
     <div className="space-y-6">
@@ -577,24 +610,33 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
           </CardContent>
         </Card>
 
-        {/* Laying Rate (%) */}
+        {/* Estimated Hen-Day Rate */}
         <Card className="hover:border-indigo-300 transition-colors">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t("Laying Rate (%)")}</p>
+                <div className="flex items-center gap-1.5" title={t("Hen-Day Laying Rate Formula: (Total Eggs Produced / (Active Layer Hens × Days Logged)) × 100. Unlogged days are treated as missing observations to prevent distortion.")}>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t("Estimated Hen-Day Rate")}</p>
+                  <span className="text-[10px] text-slate-400 cursor-help" title={t("Hen-Day Laying Rate Formula: (Total Eggs Produced / (Active Layer Hens × Days Logged)) × 100. Unlogged days are treated as missing observations to prevent distortion.")}>ℹ️</span>
+                </div>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <p className="text-3xl font-semibold text-indigo-600">{layingPercentage.toFixed(1)}%</p>
+                  <p className="text-3xl font-semibold text-indigo-600">
+                    {hasLayerBatches && activeLayers > 0 && uniqueLoggedDays > 0 ? `${henDayRate.toFixed(1)}%` : t("N/A")}
+                  </p>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    layingPercentage >= 85 ? 'bg-emerald-100 text-emerald-800' :
-                    layingPercentage >= 70 ? 'bg-indigo-100 text-indigo-800' :
-                    layingPercentage > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                    !hasLayerBatches || activeLayers === 0 ? 'bg-slate-100 text-slate-600' :
+                    henDayRate >= 85 ? 'bg-emerald-100 text-emerald-800' :
+                    henDayRate >= 70 ? 'bg-indigo-100 text-indigo-800' :
+                    henDayRate > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
                   }`}>
-                    {layingPercentage >= 85 ? t("Optimal") : layingPercentage >= 70 ? t("Good") : layingPercentage > 0 ? t("Sub-optimal") : t("N/A")}
+                    {!hasLayerBatches || activeLayers === 0 ? t("N/A") :
+                     henDayRate >= 85 ? t("Optimal") :
+                     henDayRate >= 70 ? t("Good") :
+                     henDayRate > 0 ? t("Sub-optimal") : t("N/A")}
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1 font-medium truncate">
-                  {formatNumber(activeLayers)} {t("hens")} &bull; {uniqueCollectionDays} {t("day(s)")}
+                <p className="text-[10px] text-slate-400 mt-1 font-medium truncate" title={sampleSizeLabel}>
+                  {sampleSizeLabel} &bull; {formatNumber(activeLayers)} {t("hens")}
                 </p>
               </div>
               <div className="text-indigo-600 shrink-0">

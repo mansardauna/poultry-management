@@ -168,6 +168,8 @@ export interface AlertSettings {
   feedThresholdKg: number;
   eggDropPercentage: number;
   minDailyEggCount?: number;
+  tempMin?: number;
+  tempMax?: number;
   notifySms: boolean;
   notifyEmail: boolean;
   notifyWhatsapp: boolean;

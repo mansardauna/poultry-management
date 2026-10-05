@@ -96,13 +96,39 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: updateErr.message }, { status: 500 });
       }
 
-      // Check temperature thresholds: safe range is 18°C - 30°C
-      if (tempCelsius > 30 || tempCelsius < 18) {
-        const isCritical = tempCelsius >= 34 || tempCelsius <= 15;
+      // Configurable temperature limits with alertSettings and per-pen overrides
+      const DEFAULT_TEMP_MIN = 18.0;
+      const DEFAULT_TEMP_MAX = 28.0;
+      const TEMP_CRITICAL_BELOW_OFFSET = 3.0; // <= (min - 3) is Critical
+      const TEMP_CRITICAL_ABOVE_OFFSET = 4.0; // >= (max + 4) is Critical
+
+      const { data: alertSettingsRows } = await supabase
+        .from('alertSettings')
+        .select('*')
+        .eq('workspaceId', workspaceId)
+        .limit(1);
+      const alertSettings = alertSettingsRows?.[0] || {};
+
+      const penMin = pen.tempMin !== null && pen.tempMin !== undefined ? Number(pen.tempMin) : undefined;
+      const penMax = pen.tempMax !== null && pen.tempMax !== undefined ? Number(pen.tempMax) : undefined;
+
+      const effectiveMin = penMin !== undefined && !isNaN(penMin)
+        ? penMin
+        : (alertSettings.tempMin !== undefined && alertSettings.tempMin !== null ? Number(alertSettings.tempMin) : DEFAULT_TEMP_MIN);
+
+      const effectiveMax = penMax !== undefined && !isNaN(penMax)
+        ? penMax
+        : (alertSettings.tempMax !== undefined && alertSettings.tempMax !== null ? Number(alertSettings.tempMax) : DEFAULT_TEMP_MAX);
+
+      const criticalMin = effectiveMin - TEMP_CRITICAL_BELOW_OFFSET;
+      const criticalMax = effectiveMax + TEMP_CRITICAL_ABOVE_OFFSET;
+
+      if (tempCelsius > effectiveMax || tempCelsius < effectiveMin) {
+        const isCritical = tempCelsius >= criticalMax || tempCelsius <= criticalMin;
         const severity = isCritical ? 'Critical' : 'Warning';
-        const alertMsg = tempCelsius > 30
-          ? `${severity.toUpperCase()}: High temperature of ${tempCelsius}°C recorded in ${pen.name} (exceeds 30°C optimal threshold). Risk of heat stress.`
-          : `${severity.toUpperCase()}: Low temperature of ${tempCelsius}°C recorded in ${pen.name} (below 18°C optimal threshold). Risk of chilling.`;
+        const alertMsg = tempCelsius > effectiveMax
+          ? `${severity.toUpperCase()}: High temperature of ${tempCelsius}°C recorded in ${pen.name} (exceeds ${effectiveMax}°C optimal limit). Risk of heat stress.`
+          : `${severity.toUpperCase()}: Low temperature of ${tempCelsius}°C recorded in ${pen.name} (below ${effectiveMin}°C optimal limit). Risk of chilling.`;
 
         await supabase.from('alertLogs').insert([{
           id: 'al-' + Date.now(),
@@ -125,7 +151,7 @@ export async function POST(request: Request) {
           id: 't-' + Date.now().toString().slice(-8),
           workspaceId,
           assignedTo: assignedStaff,
-          taskName: `Regulate temperature in ${pen.name}: Current ${tempCelsius}°C (Target: 20-25°C)`,
+          taskName: `Regulate temperature in ${pen.name}: Current ${tempCelsius}°C (Target: ${effectiveMin}-${effectiveMax}°C)`,
           status: 'Pending',
           date: newLog.date
         }]);
@@ -137,6 +163,8 @@ export async function POST(request: Request) {
         pen: {
           ...pen,
           capacity: Number(pen.capacity || 0),
+          tempMin: pen.tempMin !== null && pen.tempMin !== undefined ? Number(pen.tempMin) : null,
+          tempMax: pen.tempMax !== null && pen.tempMax !== undefined ? Number(pen.tempMax) : null,
           temperatureLogs: updatedLogs
         }
       }, { status: 201 });

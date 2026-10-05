@@ -139,98 +139,174 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: insErr.message || 'Failed to record eggs' }, { status: 500 });
     }
     
-    if (newRecord.brokenEggs > 0) {
-      await supabase.from('alertLogs').insert([{
-        id: 'al-' + Date.now(),
-        workspaceId,
-        date: new Date().toISOString().split('T')[0],
-        message: `WARNING: ${newRecord.brokenEggs} cracked/broken eggs logged from Batch ${newRecord.batchId}. Cushioning audit suggested.`,
-        severity: 'Warning'
-      }]);
-      
-      await supabase.from('tasks').insert([{
-        id: 't-' + Date.now().toString().slice(-8),
-        workspaceId,
-        assignedTo: 'Flock Manager',
-        taskName: `Audit laying box cushioning due to ${newRecord.brokenEggs} cracked eggs in Batch ${newRecord.batchId}`,
-        status: 'Pending',
-        date: new Date().toISOString().split('T')[0]
-      }]);
-    }
-
-    // Evaluate egg production against configured alert threshold settings
-    try {
-      const { data: alertSettingsRows } = await supabase
-        .from('alertSettings')
-        .select('*')
-        .eq('workspaceId', workspaceId)
-        .limit(1);
-      const alertSettings = alertSettingsRows?.[0] || {};
-      const eggDropThresholdPct = Number(alertSettings.eggDropPercentage) || 15;
-      const minDailyEggThreshold = Number(alertSettings.minDailyEggCount) || 0;
-      const totalCollected = newRecord.goodEggs + newRecord.brokenEggs + newRecord.spoiltEggs;
-
-      // Check 1: Drop below configured minimum daily egg count
-      if (minDailyEggThreshold > 0 && totalCollected < minDailyEggThreshold) {
-        await supabase.from('alertLogs').insert([{
-          id: 'al-' + Date.now(),
-          workspaceId,
-          date: newRecord.date,
-          message: `CRITICAL: Egg collection for Batch ${newRecord.batchId} (${totalCollected} eggs) is below the configured daily minimum threshold (${minDailyEggThreshold} eggs)!`,
-          severity: 'Critical'
-        }]);
-
-        await supabase.from('tasks').insert([{
-          id: 't-' + Date.now().toString().slice(-8),
-          workspaceId,
-          assignedTo: 'Flock Supervisor',
-          taskName: `Investigate low egg yield in Batch ${newRecord.batchId} (${totalCollected} vs minimum target ${minDailyEggThreshold})`,
-          status: 'Pending',
-          date: newRecord.date
-        }]);
-      }
-
-      // Check 2: Drop compared to previous collection for this batch
-      const { data: prevRecords } = await supabase
-        .from('eggs')
-        .select('*')
-        .eq('workspaceId', workspaceId)
-        .eq('batchId', newRecord.batchId)
-        .neq('id', newRecord.id)
-        .order('date', { ascending: false })
-        .limit(1);
-
-      if (prevRecords && prevRecords.length > 0) {
-        const prev = prevRecords[0];
-        const prevTotal = Number(prev.goodEggs || 0) + Number(prev.brokenEggs || 0) + Number(prev.spoiltEggs || 0);
-        if (prevTotal > 0 && totalCollected < prevTotal) {
-          const dropPct = ((prevTotal - totalCollected) / prevTotal) * 100;
-          if (dropPct >= eggDropThresholdPct) {
-            await supabase.from('alertLogs').insert([{
-              id: 'al-' + Date.now(),
-              workspaceId,
-              date: newRecord.date,
-              message: `CRITICAL: Egg production for Batch ${newRecord.batchId} dropped by ${dropPct.toFixed(1)}% (from ${prevTotal} to ${totalCollected} eggs), exceeding the ${eggDropThresholdPct}% alert threshold!`,
-              severity: 'Critical'
-            }]);
-
-            await supabase.from('tasks').insert([{
-              id: 't-' + Date.now().toString().slice(-8),
-              workspaceId,
-              assignedTo: 'Veterinarian / Farm Manager',
-              taskName: `Urgent flock health inspection: Batch ${newRecord.batchId} egg production dropped by ${dropPct.toFixed(1)}%`,
-              status: 'Pending',
-              date: newRecord.date
-            }]);
-          }
-        }
-      }
-    } catch (_alertErr) {}
+    // Re-evaluate egg production thresholds using the day's full aggregate for this batch
+    await evaluateEggProductionThresholds(workspaceId, newRecord.batchId, newRecord.date);
     
     return NextResponse.json(newRecord, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to record eggs' }, { status: 500 });
   }
+}
+
+/**
+ * Evaluates daily egg aggregate per batch and workspace:
+ * - Sums all records on the target date (morning + afternoon + evening collections)
+ * - Compares daily aggregate against minDailyEggCount and against previous logged day's total
+ * - De-duplicates and upserts alertLogs and tasks using deterministic prefixes
+ * - Cleans up stale alerts when thresholds are satisfied or records edited/removed
+ */
+async function evaluateEggProductionThresholds(workspaceId: string, batchId: string, targetDate: string) {
+  try {
+    const { data: alertSettingsRows } = await supabase
+      .from('alertSettings')
+      .select('*')
+      .eq('workspaceId', workspaceId)
+      .limit(1);
+    const alertSettings = alertSettingsRows?.[0] || {};
+    const eggDropThresholdPct = Number(alertSettings.eggDropPercentage) || 15;
+    const minDailyEggThreshold = Number(alertSettings.minDailyEggCount) || 0;
+
+    // 1. Re-query all records for targetDate + batchId (including newly inserted/updated ones)
+    const { data: dayRecords } = await supabase
+      .from('eggs')
+      .select('*')
+      .eq('workspaceId', workspaceId)
+      .eq('batchId', batchId)
+      .eq('date', targetDate);
+
+    const dailyGood = (dayRecords || []).reduce((sum: number, r: any) => sum + (Number(r.goodEggs) || 0), 0);
+    const dailyBroken = (dayRecords || []).reduce((sum: number, r: any) => sum + (Number(r.brokenEggs) || 0), 0);
+    const dailySpoilt = (dayRecords || []).reduce((sum: number, r: any) => sum + (Number(r.spoiltEggs) || 0), 0);
+    const dailyTotal = dailyGood + dailyBroken + dailySpoilt;
+
+    // Optional workspace-wide rollup for context
+    const { data: wsDayRecords } = await supabase
+      .from('eggs')
+      .select('*')
+      .eq('workspaceId', workspaceId)
+      .eq('date', targetDate);
+    const wsDailyTotal = (wsDayRecords || []).reduce((sum: number, r: any) => 
+      sum + (Number(r.goodEggs) || 0) + (Number(r.brokenEggs) || 0) + (Number(r.spoiltEggs) || 0), 0);
+
+    // 2. Query preceding distinct date for this batch to evaluate drop consistently (handles backdated logs)
+    const { data: priorRecords } = await supabase
+      .from('eggs')
+      .select('*')
+      .eq('workspaceId', workspaceId)
+      .eq('batchId', batchId)
+      .lt('date', targetDate)
+      .order('date', { ascending: false });
+
+    let prevDayTotal = 0;
+    let prevDate = '';
+    if (priorRecords && priorRecords.length > 0) {
+      prevDate = priorRecords[0].date;
+      prevDayTotal = priorRecords
+        .filter((r: any) => r.date === prevDate)
+        .reduce((sum: number, r: any) => sum + (Number(r.goodEggs) || 0) + (Number(r.brokenEggs) || 0) + (Number(r.spoiltEggs) || 0), 0);
+    }
+
+    // Prefixes for deterministic de-duplication
+    const cushionPrefix = `[CUSHION_BATCH_${batchId}]`;
+    const minPrefix = `[MIN_YIELD_BATCH_${batchId}]`;
+    const dropPrefix = `[DROP_YIELD_BATCH_${batchId}]`;
+
+    const { data: existingAlerts } = await supabase
+      .from('alertLogs')
+      .select('*')
+      .eq('workspaceId', workspaceId)
+      .eq('date', targetDate);
+
+    const findAlert = (prefix: string) => 
+      (existingAlerts || []).find((a: any) => a.message && a.message.includes(prefix));
+
+    // A) Cracked/broken cushioning check
+    const existingCushionAlert = findAlert(cushionPrefix);
+    if (dailyBroken > 0) {
+      const cushionMsg = `${cushionPrefix} WARNING: ${dailyBroken} cracked/broken eggs logged for Batch ${batchId} on ${targetDate}. Nesting box cushioning audit recommended.`;
+      if (existingCushionAlert) {
+        await supabase.from('alertLogs').update({ message: cushionMsg, severity: 'Warning' }).eq('id', existingCushionAlert.id);
+      } else {
+        await supabase.from('alertLogs').insert([{
+          id: 'al-' + Date.now() + '-cushion',
+          workspaceId,
+          date: targetDate,
+          message: cushionMsg,
+          severity: 'Warning'
+        }]);
+        await supabase.from('tasks').insert([{
+          id: 't-' + Date.now().toString().slice(-8),
+          workspaceId,
+          assignedTo: 'Flock Manager',
+          taskName: `Audit nesting box cushioning: Batch ${batchId} recorded ${dailyBroken} cracked eggs on ${targetDate}`,
+          status: 'Pending',
+          date: targetDate
+        }]);
+      }
+    } else if (existingCushionAlert) {
+      await supabase.from('alertLogs').delete().eq('id', existingCushionAlert.id);
+    }
+
+    // B) Minimum Daily Yield Check (Per Batch + Workspace Rollup)
+    // Equality edge case: strictly less than minDailyEggThreshold triggers alert
+    const existingMinAlert = findAlert(minPrefix);
+    if (minDailyEggThreshold > 0 && (dayRecords && dayRecords.length > 0) && dailyTotal < minDailyEggThreshold) {
+      const minMsg = `${minPrefix} CRITICAL: Daily egg yield for Batch ${batchId} (${dailyTotal} eggs) is below the configured daily minimum threshold (${minDailyEggThreshold} eggs) on ${targetDate} (Farm total: ${wsDailyTotal}).`;
+      if (existingMinAlert) {
+        await supabase.from('alertLogs').update({ message: minMsg, severity: 'Critical' }).eq('id', existingMinAlert.id);
+      } else {
+        await supabase.from('alertLogs').insert([{
+          id: 'al-' + Date.now() + '-min',
+          workspaceId,
+          date: targetDate,
+          message: minMsg,
+          severity: 'Critical'
+        }]);
+        await supabase.from('tasks').insert([{
+          id: 't-' + Date.now().toString().slice(-8),
+          workspaceId,
+          assignedTo: 'Flock Supervisor',
+          taskName: `Investigate low daily egg yield: Batch ${batchId} produced ${dailyTotal} vs minimum threshold ${minDailyEggThreshold} eggs on ${targetDate}`,
+          status: 'Pending',
+          date: targetDate
+        }]);
+      }
+    } else if (existingMinAlert) {
+      await supabase.from('alertLogs').delete().eq('id', existingMinAlert.id);
+    }
+
+    // C) Production Drop Check compared to previous logged day's total
+    const existingDropAlert = findAlert(dropPrefix);
+    if (prevDayTotal > 0 && (dayRecords && dayRecords.length > 0) && dailyTotal < prevDayTotal) {
+      const dropPct = ((prevDayTotal - dailyTotal) / prevDayTotal) * 100;
+      if (dropPct >= eggDropThresholdPct) {
+        const dropMsg = `${dropPrefix} CRITICAL: Batch ${batchId} daily egg output dropped by ${dropPct.toFixed(1)}% on ${targetDate} (from ${prevDayTotal} on ${prevDate} to ${dailyTotal} eggs), exceeding the ${eggDropThresholdPct}% alert limit!`;
+        if (existingDropAlert) {
+          await supabase.from('alertLogs').update({ message: dropMsg, severity: 'Critical' }).eq('id', existingDropAlert.id);
+        } else {
+          await supabase.from('alertLogs').insert([{
+            id: 'al-' + Date.now() + '-drop',
+            workspaceId,
+            date: targetDate,
+            message: dropMsg,
+            severity: 'Critical'
+          }]);
+          await supabase.from('tasks').insert([{
+            id: 't-' + Date.now().toString().slice(-8),
+            workspaceId,
+            assignedTo: 'Veterinarian / Farm Manager',
+            taskName: `Urgent flock health check: Batch ${batchId} egg production dropped by ${dropPct.toFixed(1)}% on ${targetDate} (previous ${prevDate}: ${prevDayTotal} eggs)`,
+            status: 'Pending',
+            date: targetDate
+          }]);
+        }
+      } else if (existingDropAlert) {
+        await supabase.from('alertLogs').delete().eq('id', existingDropAlert.id);
+      }
+    } else if (existingDropAlert) {
+      await supabase.from('alertLogs').delete().eq('id', existingDropAlert.id);
+    }
+  } catch (_alertErr) {}
 }
 
 /** Exported function PUT */
@@ -262,13 +338,21 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    await supabase.from('eggs')
+    const { data: existingRows } = await supabase.from('eggs').select('*').eq('id', body.id).eq('workspaceId', workspaceId);
+    const existingEgg = existingRows?.[0];
+
+    const { error: updErr } = await supabase.from('eggs')
       .update({
-        goodEggs: body.goodEggs,
-        brokenEggs: body.brokenEggs,
-        spoiltEggs: body.spoiltEggs
+        goodEggs: Number(body.goodEggs) || 0,
+        brokenEggs: Number(body.brokenEggs) || 0,
+        spoiltEggs: Number(body.spoiltEggs) || 0
       })
       .eq('id', body.id).eq('workspaceId', workspaceId);
+    if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+
+    if (existingEgg) {
+      await evaluateEggProductionThresholds(workspaceId, existingEgg.batchId, existingEgg.date);
+    }
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update record' }, { status: 500 });
@@ -278,6 +362,7 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
+    const workspaceId = await getWorkspaceId();
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
     let action = searchParams.get('action');
@@ -304,8 +389,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: true, deleted: 'maturation' });
     }
 
-    const { error } = await supabase.from('eggs').delete().eq('id', id);
+    const { data: existingRows } = await supabase.from('eggs').select('*').eq('id', id).eq('workspaceId', workspaceId);
+    const existingEgg = existingRows?.[0];
+
+    const { error } = await supabase.from('eggs').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    if (existingEgg) {
+      await evaluateEggProductionThresholds(workspaceId, existingEgg.batchId, existingEgg.date);
+    }
     return NextResponse.json({ success: true, deleted: 'egg' });
   } catch (err: any) {
     return NextResponse.json({ error: 'Failed to delete record: ' + (err?.message || String(err)) }, { status: 500 });

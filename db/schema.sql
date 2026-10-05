@@ -223,6 +223,8 @@ CREATE TABLE IF NOT EXISTS `farmPens` (
   `currentBatchId` VARCHAR(64),
   `status` VARCHAR(64) DEFAULT 'Active',
   `temperatureLogs` TEXT,
+  `tempMin` DECIMAL(5, 2) DEFAULT NULL,
+  `tempMax` DECIMAL(5, 2) DEFAULT NULL,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_farmPens_workspaceId` (`workspaceId`)
 );
@@ -289,6 +291,11 @@ CREATE TABLE IF NOT EXISTS `alertSettings` (
   `mortalityThreshold` INT DEFAULT 5,
   `tempMin` DECIMAL(5, 2) DEFAULT 18.0,
   `tempMax` DECIMAL(5, 2) DEFAULT 28.0,
+  `eggDropPercentage` DECIMAL(5, 2) DEFAULT 15.00,
+  `minDailyEggCount` INT DEFAULT 0,
+  `notifySms` TINYINT(1) DEFAULT 0,
+  `notifyEmail` TINYINT(1) DEFAULT 1,
+  `notifyWhatsapp` TINYINT(1) DEFAULT 1,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_alertSettings_workspaceId` (`workspaceId`)
 );
@@ -323,3 +330,19 @@ CREATE TABLE IF NOT EXISTS `systemSettings` (
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- ============================================================================
+-- IDEMPOTENT MIGRATIONS FOR EXISTING INSTALLATIONS
+-- Run these statements on existing databases to upgrade them safely:
+-- ============================================================================
+-- MySQL 8.0+ / MariaDB / PostgreSQL compatible idempotent alterations:
+-- ALTER TABLE `alertSettings` ADD COLUMN IF NOT EXISTS `eggDropPercentage` DECIMAL(5, 2) DEFAULT 15.00;
+-- ALTER TABLE `alertSettings` ADD COLUMN IF NOT EXISTS `minDailyEggCount` INT DEFAULT 0;
+-- ALTER TABLE `alertSettings` ADD COLUMN IF NOT EXISTS `tempMin` DECIMAL(5, 2) DEFAULT 18.0;
+-- ALTER TABLE `alertSettings` ADD COLUMN IF NOT EXISTS `tempMax` DECIMAL(5, 2) DEFAULT 28.0;
+-- ALTER TABLE `alertSettings` ADD COLUMN IF NOT EXISTS `notifySms` TINYINT(1) DEFAULT 0;
+-- ALTER TABLE `alertSettings` ADD COLUMN IF NOT EXISTS `notifyEmail` TINYINT(1) DEFAULT 1;
+-- ALTER TABLE `alertSettings` ADD COLUMN IF NOT EXISTS `notifyWhatsapp` TINYINT(1) DEFAULT 1;
+-- ALTER TABLE `farmPens` ADD COLUMN IF NOT EXISTS `tempMin` DECIMAL(5, 2) DEFAULT NULL;
+-- ALTER TABLE `farmPens` ADD COLUMN IF NOT EXISTS `tempMax` DECIMAL(5, 2) DEFAULT NULL;
+

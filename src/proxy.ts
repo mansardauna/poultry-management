@@ -52,7 +52,7 @@ export async function proxy(request: NextRequest) {
 
   // 1. Verify Cryptographic JWT Session Cookie
   const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  let verifiedSession = sessionToken ? await verifySession(sessionToken) : null;
+  const verifiedSession = sessionToken ? await verifySession(sessionToken) : null;
 
   // 2. Secondary Supabase Auth lookup if session token is missing
   let supabaseUser: any = null;
