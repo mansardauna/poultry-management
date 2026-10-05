@@ -38,6 +38,8 @@ const PUBLIC_API_PREFIXES = [
   '/api/webhooks',
   '/api/pay-invoice',
   '/api/staff/validate',
+  '/api/branding',
+  '/api/plans',
 ];
 
 export async function proxy(request: NextRequest) {
@@ -45,7 +47,7 @@ export async function proxy(request: NextRequest) {
 
   const isPublicStatic = path.includes('.') || path.startsWith('/_next');
   const isPublicExact = PUBLIC_EXACT_PATHS.has(path) || path.startsWith('/pay-invoice');
-  const isPublicApi = PUBLIC_API_PREFIXES.some(prefix => path.startsWith(prefix));
+  const isPublicApi = PUBLIC_API_PREFIXES.some(prefix => path.startsWith(prefix)) || ((path === '/api/admin/cms' || path === '/api/admin/plans') && request.method === 'GET');
   const isPublicPath = isPublicStatic || isPublicExact || isPublicApi;
 
   // 1. Verify Cryptographic JWT Session Cookie
@@ -93,7 +95,9 @@ export async function proxy(request: NextRequest) {
   if (path.startsWith('/api/admin')) {
     // exit_impersonate is handled inside tenants route with signed impersonation verification
     const isExitImpersonate = path === '/api/admin/tenants' && request.method === 'POST';
-    if (!isExitImpersonate) {
+    const isPublicAdminCmsGet = path === '/api/admin/cms' && request.method === 'GET';
+    const isPublicAdminPlansGet = path === '/api/admin/plans' && request.method === 'GET';
+    if (!isExitImpersonate && !isPublicAdminCmsGet && !isPublicAdminPlansGet) {
       if (!isAuthenticated || !isSuperAdmin) {
         return NextResponse.json(
           { error: 'Unauthorized: Super Admin access required.' },

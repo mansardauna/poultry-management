@@ -120,7 +120,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [saasPlans, setSaasPlans] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/plans')
+    fetch('/api/plans')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setSaasPlans(data);

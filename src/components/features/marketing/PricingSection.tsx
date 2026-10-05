@@ -91,7 +91,7 @@ export function PricingSection() {
   const { t, formatCurrency } = useLanguage();
 
   useEffect(() => {
-    fetch('/api/admin/plans', { cache: 'no-store' })
+    fetch('/api/plans', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {

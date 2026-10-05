@@ -60,7 +60,7 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
 
   const loadBrandAndSettings = () => {
     // 1. Fetch Global Platform CMS / Branding / Currency (propagate to all tenants & public visitors)
-    fetch('/api/admin/cms')
+    fetch('/api/branding')
       .then(res => res.ok ? res.json() : null)
       .then(cms => {
         if (cms) {
@@ -91,25 +91,32 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
       })
       .catch(() => {});
 
-    // 2. Fetch cooperative/tenant specific settings if on an enterprise branch
-    fetch('/api/enterprise')
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data?.cooperative) {
-          const c = data.cooperative;
-          setSettings(prev => ({
-            ...prev,
-            coopName: c.coopName || prev.coopName,
-            subdomain: c.subdomain || prev.subdomain,
-            logoUrl: c.logoUrl || prev.logoUrl || '/icon.png',
-            brandColor: (c.brandColor || prev.brandColor) as any,
-            customReportHeader: c.customReportHeader || prev.customReportHeader,
-            customInvoiceFooter: c.customInvoiceFooter || prev.customInvoiceFooter,
-            themeMode: c.themeMode || prev.themeMode,
-          }));
-        }
-      })
-      .catch(() => {});
+    // 2. Fetch cooperative/tenant specific settings only when inside authenticated dashboard
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const isPublic = ['/', '/login', '/signup', '/pricing', '/about', '/contact', '/privacy', '/terms', '/documentation', '/reset-password', '/setup'].some(
+      p => pathname === p || pathname.startsWith('/pay-invoice')
+    );
+
+    if (!isPublic && pathname.startsWith('/dashboard')) {
+      fetch('/api/enterprise')
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.cooperative) {
+            const c = data.cooperative;
+            setSettings(prev => ({
+              ...prev,
+              coopName: c.coopName || prev.coopName,
+              subdomain: c.subdomain || prev.subdomain,
+              logoUrl: c.logoUrl || prev.logoUrl || '/icon.png',
+              brandColor: (c.brandColor || prev.brandColor) as any,
+              customReportHeader: c.customReportHeader || prev.customReportHeader,
+              customInvoiceFooter: c.customInvoiceFooter || prev.customInvoiceFooter,
+              themeMode: c.themeMode || prev.themeMode,
+            }));
+          }
+        })
+        .catch(() => {});
+    }
   };
 
   useEffect(() => {

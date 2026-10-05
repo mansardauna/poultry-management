@@ -203,7 +203,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const [proPrice, setProPrice] = useState(15000);
 
   useEffect(() => {
-    fetch('/api/admin/plans', { cache: 'no-store' })
+    fetch('/api/plans', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

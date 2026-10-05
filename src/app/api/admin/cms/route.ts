@@ -6,72 +6,11 @@ import { supabase as serviceRoleClient } from '@/lib/supabase';
 import fs from 'fs';
 import path from 'path';
 
-const DEFAULT_CMS = {
-  brandName: 'PFMS',
-  brandTagline: 'Smart Poultry Operating System',
-  brandLogoText: 'P',
-  logoUrl: '/icon.png',
-  primaryColor: '#4f46e5',
-  accentColor: '#7c3aed',
-  footerText: 'PFMS Inc. All rights reserved.',
-  heroHeading: 'AI-Driven poultry farms with human-level precision',
-  heroSubtitle: 'Empower your farm managers with AI-driven insights to help them track flock health, predict egg yields, and perform at peak efficiency.',
-  announcementBanner: 'New Release: AI Voice Auto-Logger & Multi-Farm Enterprise Hub live now',
-  ctaText: 'Get Started Free',
-  supportPhone: '+234 800 768 5879',
-  supportEmail: 'support@pfms-poultry.com',
-  currencySymbol: '$'
-};
+import { getPublicBranding, DEFAULT_CMS } from '@/lib/branding';
 
 export async function GET() {
-  try {
-    const { data: cmsRow } = await serviceRoleClient
-      .from('systemSettings')
-      .select('adminName')
-      .eq('id', 'landing_page_cms')
-      .maybeSingle();
-
-    const { data: gatewayRow } = await serviceRoleClient
-      .from('systemSettings')
-      .select('adminName')
-      .eq('id', 'gateways_config')
-      .maybeSingle();
-
-    let cmsParsed: any = {};
-    if (cmsRow?.adminName) {
-      try {
-        cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
-      } catch (_e) {}
-    }
-
-    let gatewayParsed: any = {};
-    if (gatewayRow?.adminName) {
-      try {
-        gatewayParsed = typeof gatewayRow.adminName === 'string' ? JSON.parse(gatewayRow.adminName) : gatewayRow.adminName;
-      } catch (_e) {}
-    }
-
-    const brandName = cmsParsed.brandName || gatewayParsed.platformName || DEFAULT_CMS.brandName;
-    const logoUrl = cmsParsed.logoUrl || gatewayParsed.logoUrl || DEFAULT_CMS.logoUrl;
-
-    const merged = {
-      ...DEFAULT_CMS,
-      ...gatewayParsed,
-      ...cmsParsed,
-      currencySymbol: (cmsParsed.currencySymbol && cmsParsed.currencySymbol !== '?' && cmsParsed.currencySymbol !== '₦') 
-        ? cmsParsed.currencySymbol 
-        : (gatewayParsed.currencySymbol && gatewayParsed.currencySymbol !== '?' && gatewayParsed.currencySymbol !== '₦')
-        ? gatewayParsed.currencySymbol
-        : '$',
-      brandName,
-      platformName: brandName,
-      logoUrl: logoUrl || '/icon.png'
-    };
-
-    return NextResponse.json(merged);
-  } catch (_err: any) {
-    return NextResponse.json(DEFAULT_CMS);
-  }
+  const data = await getPublicBranding();
+  return NextResponse.json(data);
 }
 
 export async function POST(request: Request) {

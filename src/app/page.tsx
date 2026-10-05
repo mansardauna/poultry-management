@@ -37,7 +37,7 @@ export default function LandingPage() {
         setIsLoggedIn(false);
       });
 
-    fetch('/api/admin/cms')
+    fetch('/api/branding')
       .then(res => res.json())
       .then(data => {
         if (data.heroHeading || data.brandName) setCms(prev => ({ ...prev, ...data }));

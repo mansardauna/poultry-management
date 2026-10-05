@@ -133,7 +133,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const fetchCurrency = () => {
-      fetch('/api/admin/cms')
+      fetch('/api/branding')
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data?.currencySymbol) setCurrencySymbol(data.currencySymbol);

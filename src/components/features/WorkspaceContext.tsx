@@ -2,6 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 /**
@@ -35,6 +36,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
  * @param props - Component properties.
  */
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspaceState] = useState<Workspace | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,10 +45,23 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setIsMounted(true);
 
+    const isPublic = [
+      '/', '/login', '/signup', '/pricing', '/about', '/contact', '/privacy', '/terms', '/documentation', '/reset-password'
+    ].some(p => pathname === p || pathname?.startsWith('/pay-invoice'));
+
+    if (isPublic && !pathname?.startsWith('/dashboard') && !pathname?.startsWith('/setup')) {
+      setIsLoading(false);
+      return;
+    }
+
     async function loadWorkspaces() {
       try {
         const res = await fetch('/api/workspaces');
-        const data = res.ok ? await res.json() : [];
+        if (!res.ok) {
+          setIsLoading(false);
+          return;
+        }
+        const data = await res.json();
 
         const cookieWorkspaceId = Cookies.get('pfms_workspace')?.trim();
         const cookieOrgId = Cookies.get('pfms_org_id')?.trim();
@@ -100,7 +115,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }
 
     loadWorkspaces();
-  }, []);
+  }, [pathname]);
 
   const setActiveWorkspace = (workspace: Workspace, shouldReload = true) => {
     setActiveWorkspaceState(workspace);
