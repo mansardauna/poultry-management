@@ -7,12 +7,19 @@ export default async function BranchMatrixPage() {
   const tier = await getTenantTier();
   const workspaces = await getTenantWorkspaces();
 
-  // Fetch real database records across all farm branches
+  // Isolate records strictly to the authenticated tenant's workspaces
+  const workspaceIds = (workspaces || []).map((w: any) => w.id).filter(Boolean);
+
+  if (workspaceIds.length === 0) {
+    return <BranchMatrixClient tier={tier} workspaces={[]} branchMetrics={{}} />;
+  }
+
+  // Fetch real database records across ONLY this tenant's farm branches
   const [batchesRes, eggsRes, feedsRes, salesRes] = await Promise.all([
-    supabase.from('batches').select('id, quantity, workspaceId'),
-    supabase.from('eggs').select('id, quantity, workspaceId'),
-    supabase.from('feeds').select('id, quantity, quantityKg, workspaceId'),
-    supabase.from('sales').select('id, totalAmount, workspaceId')
+    supabase.from('batches').select('id, quantity, workspaceId').in('workspaceId', workspaceIds),
+    supabase.from('eggs').select('id, quantity, workspaceId').in('workspaceId', workspaceIds),
+    supabase.from('feeds').select('id, quantity, quantityKg, workspaceId').in('workspaceId', workspaceIds),
+    supabase.from('sales').select('id, totalAmount, workspaceId').in('workspaceId', workspaceIds)
   ]);
 
   const batches = batchesRes.data || [];

@@ -1,6 +1,7 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getAuthUser } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -21,11 +22,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    // If updating status directly or recording offline payment
-    const isOffline = action === 'offlinePayment' || Boolean(paymentMethod && paymentMethod.includes('Offline') || paymentMethod === 'Bank Transfer' || paymentMethod === 'Cash' || paymentMethod === 'POS');
+    // Determine if updating status directly or recording offline payment
+    const isOffline = action === 'offlinePayment' || Boolean(
+      (paymentMethod && paymentMethod.includes('Offline')) || 
+      paymentMethod === 'Bank Transfer' || 
+      paymentMethod === 'Cash' || 
+      paymentMethod === 'POS'
+    );
     const targetStatus = newStatus || 'Paid';
     const methodUsed = paymentMethod || (isOffline ? 'Bank Transfer (Offline)' : 'Paystack / Online Gateway');
-    const finalRef = reference || (isOffline ? `OFFLINE-${Date.now().toString().slice(-6)}` : `PAY-${Date.now()}`);
+    const finalRef = (reference || '').trim();
 
     if (invoice.status === 'Paid' && targetStatus === 'Paid') {
       return NextResponse.json({ success: true, message: 'Already marked as paid', status: 'Paid' });
@@ -35,9 +41,35 @@ export async function POST(request: Request) {
     let verifyData: any = null;
 
     if (isOffline) {
+      // Offline payments and manual status reconciliation REQUIRE authenticated staff or admin
+      const authUser = await getAuthUser();
+      if (!authUser) {
+        return NextResponse.json(
+          { error: 'Unauthorized: Offline payment recording and manual status updates require staff or admin authentication.' },
+          { status: 401 }
+        );
+      }
+
+      // Verify the authenticated user has access to this invoice's workspace
+      const isSuper = authUser.role === 'SuperAdmin' || authUser.email === 'superadmin@pfms.com' || authUser.email === 'owner@poultry.com';
+      const userWs = authUser.workspaceId?.replace(/"/g, '').trim();
+      const invWs = (invoice.workspaceId || '').replace(/"/g, '').trim();
+
+      if (!isSuper && userWs && invWs && userWs !== invWs && !userWs.includes(invWs) && !invWs.includes(userWs)) {
+        return NextResponse.json(
+          { error: 'Forbidden: You do not have permissions to modify invoices for this workspace.' },
+          { status: 403 }
+        );
+      }
+
       isVerified = true;
     } else {
-      // 2. Fetch the farm's secret key or fallback to platform key
+      // Online payment MUST supply a valid transaction reference
+      if (!finalRef) {
+        return NextResponse.json({ error: 'Missing transaction reference for online payment verification' }, { status: 400 });
+      }
+
+      // Fetch the farm's secret key or fallback to platform key
       const { data: systemSettings } = await supabase
         .from('systemSettings')
         .select('paystackSecretKey')
@@ -47,28 +79,25 @@ export async function POST(request: Request) {
 
       const secretKey = systemSettings?.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY;
 
-      if (secretKey && !secretKey.includes('placeholder')) {
-        try {
-          const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${finalRef}`, {
-            headers: { Authorization: `Bearer ${secretKey}` }
-          });
-          verifyData = await verifyRes.json();
-          if (verifyData?.status && verifyData?.data?.status === 'success') {
-            isVerified = true;
-          }
-        } catch (_err) {
-          // Handled gracefully below
-        }
+      if (!secretKey || secretKey.includes('placeholder')) {
+        return NextResponse.json({ error: 'Payment gateway configuration is missing or inactive for this farm.' }, { status: 500 });
       }
 
-      // Accept reference if starts with standard prefix or test transaction
-      if (!isVerified && (finalRef.startsWith('PAY-') || finalRef.startsWith('T') || finalRef.length >= 4)) {
-        isVerified = true;
+      try {
+        const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(finalRef)}`, {
+          headers: { Authorization: `Bearer ${secretKey}` }
+        });
+        verifyData = await verifyRes.json();
+        if (verifyData?.status === true && verifyData?.data?.status === 'success') {
+          isVerified = true;
+        }
+      } catch (_err) {
+        return NextResponse.json({ error: 'Failed to communicate with payment gateway' }, { status: 502 });
       }
     }
 
     if (!isVerified) {
-      return NextResponse.json({ error: 'Payment verification failed with gateway.' }, { status: 400 });
+      return NextResponse.json({ error: 'Payment verification failed with gateway. Transaction was not confirmed.' }, { status: 400 });
     }
 
     // 4. Verify total amount paid matches invoice amount if gateway returned payload

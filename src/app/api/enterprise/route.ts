@@ -1,13 +1,33 @@
 'use strict';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getWorkspaceId, getTenantWorkspaces } from '@/lib/workspace';
+import { getWorkspaceId, getTenantWorkspaces, getTenantTier } from '@/lib/workspace';
+import { getAuthUser } from '@/lib/auth';
 
 /** Exported function GET */
 export async function GET() {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
+    }
+
+    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
+    if (!isManagerOrAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Enterprise features require Admin or Manager privileges.' }, { status: 403 });
+    }
+
+    const tier = await getTenantTier(user);
+    if (tier !== 'enterprise' && !isSuperAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Enterprise features require an active Enterprise subscription plan.' }, { status: 403 });
+    }
+
     const workspaceId = await getWorkspaceId();
-    const workspaces = await getTenantWorkspaces();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const workspaces = await getTenantWorkspaces(user);
 
     const [coopRes, apiKeysRes, consultantsRes, bulkOrdersRes] = await Promise.all([
       supabase.from('enterprise_cooperatives').select('*').eq('workspaceId', workspaceId).limit(1),
@@ -31,7 +51,26 @@ export async function GET() {
 /** Exported function POST */
 export async function POST(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
+    }
+
+    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
+    if (!isManagerOrAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Enterprise management requires Admin or Manager privileges.' }, { status: 403 });
+    }
+
+    const tier = await getTenantTier(user);
+    if (tier !== 'enterprise' && !isSuperAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Enterprise management requires an active Enterprise subscription plan.' }, { status: 403 });
+    }
+
     const workspaceId = await getWorkspaceId();
+    if (workspaceId === '__unauthenticated__') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
 
     // 1. Save White-Label Cooperative Branding

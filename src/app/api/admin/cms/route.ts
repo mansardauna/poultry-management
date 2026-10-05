@@ -16,15 +16,17 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = 
-      !user || // development fallback
-      user?.email === 'superadmin@pfms.com' || 
-      user?.email === 'owner@poultry.com' || 
-      user?.role === 'SuperAdmin' ||
-      user?.role === 'Admin';
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
+    }
 
-    if (user && !isSuperAdmin) {
-      return NextResponse.json({ error: 'Unauthorized: Only Super Admin can edit landing CMS and brand settings' }, { status: 403 });
+    const isSuperAdmin = 
+      user.email === 'superadmin@pfms.com' || 
+      user.email === 'owner@poultry.com' || 
+      user.role === 'SuperAdmin';
+
+    if (!isSuperAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Only Super Admin can edit landing CMS and brand settings.' }, { status: 403 });
     }
 
     const cmsData = await request.json();

@@ -2,9 +2,21 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
+import { getAuthUser } from '@/lib/auth';
 
 /** Exported function GET */
 export async function GET() {
+  const user = await getAuthUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
+  }
+
+  const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+  const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
+  if (!isManagerOrAdmin) {
+    return NextResponse.json({ error: 'Forbidden: Financial records are restricted to Admins and Managers.' }, { status: 403 });
+  }
+
   const workspaceId = await getWorkspaceId();
   if (workspaceId === '__unauthenticated__') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -60,6 +72,17 @@ export async function GET() {
 /** Exported function POST */
 export async function POST(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
+    }
+
+    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
+    if (!isManagerOrAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Only Admins and Managers can manage financial records and payroll.' }, { status: 403 });
+    }
+
     const workspaceId = await getWorkspaceId();
     if (workspaceId === '__unauthenticated__') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -141,6 +164,17 @@ export async function POST(request: Request) {
 /** Exported function PUT */
 export async function PUT(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
+    }
+
+    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
+    if (!isManagerOrAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Only Admins and Managers can update financial records.' }, { status: 403 });
+    }
+
     const workspaceId = await getWorkspaceId();
     if (workspaceId === '__unauthenticated__') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -158,6 +192,17 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
+    }
+
+    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
+    if (!isManagerOrAdmin) {
+      return NextResponse.json({ error: 'Forbidden: Only Admins and Managers can delete financial records.' }, { status: 403 });
+    }
+
     const workspaceId = await getWorkspaceId();
     if (workspaceId === '__unauthenticated__') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

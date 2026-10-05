@@ -291,7 +291,16 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
       // 3. Commit Staff Member (Scoped to current branch)
       const effectiveStaffName = staffName.trim() || 'Farm Attendant';
       const effectiveUsername = staffUsername.trim() || effectiveStaffName.toLowerCase().replace(/\s+/g, '');
-      const effectivePassword = staffPassword.trim() || 'staff123';
+      const generateSecurePassword = () => {
+        const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+          const arr = new Uint8Array(12);
+          window.crypto.getRandomValues(arr);
+          return Array.from(arr, byte => charset[byte % charset.length]).join('');
+        }
+        return Math.random().toString(36).slice(-8) + 'A1!';
+      };
+      const effectivePassword = staffPassword.trim() || generateSecurePassword();
 
       if (staffName.trim() || staffUsername.trim()) {
         await fetch('/api/staff', {
@@ -647,7 +656,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                       type="password" 
                       value={staffPassword}
                       onChange={(e) => setStaffPassword(e.target.value)}
-                      placeholder={t("Set password", "Set password")}
+                      placeholder={t("Set password (or leave blank to auto-generate)", "Set password (or leave blank to auto-generate)")}
                       className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-colors bg-slate-50 font-medium"
                     />
                   </div>

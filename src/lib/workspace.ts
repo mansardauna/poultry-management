@@ -131,11 +131,7 @@ export function applyStaffWorkspaceFilter(query: any, workspaceId: string) {
 /**
  * Reusable tenant isolation helper for fetching ONLY the workspaces belonging to the authenticated user/organization.
  */
-export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
-  const cookieStore = await cookies();
-  const cookieWs = cookieStore.get('pfms_workspace')?.value?.trim();
-  const orgIdVal = cookieOrgId || cookieStore.get('pfms_org_id')?.value?.trim() || '';
-
+export async function getTenantWorkspaces(user?: any) {
   const authUser = user || (await getAuthUser());
   if (!authUser) {
     return [];
@@ -178,8 +174,8 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
     } catch {}
   }
 
-  // Resolve authoritative organization ID
-  let resolvedOrgId = orgIdVal;
+  // Resolve authoritative organization ID strictly from verified auth session or database lookup (rejecting raw/unsigned cookies)
+  let resolvedOrgId = authUser.orgId || '';
 
   if (!resolvedOrgId && authUser?.email) {
     try {
@@ -233,9 +229,7 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
     }
   } catch {}
 
-  const primaryWsId = (cookieWs && cookieWs !== 'main')
-    ? cookieWs
-    : (finalOrgId ? `main-${finalOrgId}` : `main-org_${userClean}`);
+  const primaryWsId = finalOrgId ? `main-${finalOrgId}` : `main-org_${userClean}`;
 
   return [{
     id: primaryWsId,
@@ -246,14 +240,24 @@ export async function getTenantWorkspaces(user?: any, cookieOrgId?: string) {
   }];
 }
 
-export async function getTenantTier(user?: any, cookieOrgId?: string, cookieTier?: string) {
+export async function getTenantTier(user?: any) {
   const authUser = user || (await getAuthUser());
+  if (!authUser) {
+    return 'free';
+  }
   const isSuperAdmin = authUser?.email === 'superadmin@pfms.com' || authUser?.email === 'owner@poultry.com' || authUser?.role === 'SuperAdmin';
   if (isSuperAdmin) {
     return 'enterprise';
   }
 
-  // If user is authenticated, query the real tier from organization or subscriptions table
+  // 1. Check verified session token tier
+  if (authUser?.tier) {
+    const tier = (authUser.tier || '').toLowerCase();
+    if (tier === 'enterprise' || tier === 'entrepreneur' || tier === 'enterprise_plus') return 'enterprise';
+    if (tier === 'pro') return 'pro';
+  }
+
+  // 2. Query authoritative organization subscription from database
   if (authUser?.id) {
     try {
       const { data: memberData } = await serviceRoleClient
@@ -263,7 +267,7 @@ export async function getTenantTier(user?: any, cookieOrgId?: string, cookieTier
         .limit(1)
         .maybeSingle();
 
-      const targetOrgId = memberData?.orgId || cookieOrgId;
+      const targetOrgId = memberData?.orgId || authUser.orgId;
       if (targetOrgId) {
         const { data: org } = await serviceRoleClient
           .from('organizations')
@@ -283,19 +287,6 @@ export async function getTenantTier(user?: any, cookieOrgId?: string, cookieTier
       }
     } catch {}
   }
-
-  try {
-    const cookieStore = await cookies();
-    const cTier = cookieTier || cookieStore.get('pfms_tier')?.value || '';
-    const normCookie = (cTier || '').toLowerCase();
-
-    if (normCookie === 'enterprise' || normCookie === 'entrepreneur' || normCookie === 'enterprise_plus') {
-      return 'enterprise';
-    }
-    if (normCookie === 'pro') {
-      return 'pro';
-    }
-  } catch {}
 
   return 'free';
 }
