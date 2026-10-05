@@ -607,29 +607,25 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         {/* Role Tag */}
         {isSuperAdmin ? (
           <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
-            <span className="inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0 animate-pulse" />
+            <span className="inline-flex items-center bg-purple-50 text-purple-700 border border-purple-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
               {t("Super Admin")}
             </span>
           </div>
         ) : role === 'Staff' ? (
           <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
-            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
               {t("Staff Portal")}
             </span>
           </div>
         ) : role === 'Manager' ? (
           <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
-            <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+            <span className="inline-flex items-center bg-blue-50 text-blue-700 border border-blue-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
               {t("Farm Manager")}
             </span>
           </div>
         ) : (
           <div className="flex items-center border-l border-slate-200 pl-2.5 sm:pl-4">
-            <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+            <span className="inline-flex items-center bg-indigo-50 text-indigo-700 border border-indigo-200/90 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap select-none pointer-events-none cursor-default shadow-none">
               {t("Farm Admin")}
             </span>
           </div>
