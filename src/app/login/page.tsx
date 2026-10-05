@@ -89,8 +89,7 @@ export default function LoginPage() {
           }
         }
 
-        const cleanEmail = email.trim().toLowerCase();
-        const isSuper = body?.role === 'SuperAdmin' || cleanEmail === 'owner@poultry.com' || cleanEmail === 'superadmin@pfms.com';
+        const isSuper = body?.role === 'SuperAdmin';
         window.location.href = isSuper ? '/dashboard/admin' : '/dashboard';
         return;
       }
@@ -256,7 +255,7 @@ export default function LoginPage() {
                             ? 'border-red-500 bg-red-50/20 focus:border-red-600'
                             : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600'
                         }`}
-                        placeholder="e.g. owner@poultry.com or username"
+                        placeholder="e.g. user@example.com or username"
                         required
                       />
                     </div>

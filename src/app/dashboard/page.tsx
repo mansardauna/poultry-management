@@ -46,13 +46,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const isSuperAdminUser = !isImpersonating && (
     headerRole === 'SuperAdmin' ||
     cookieRole === 'SuperAdmin' ||
-    user?.role === 'SuperAdmin' ||
-    user?.email === 'superadmin@pfms.com' ||
-    user?.email === 'owner@poultry.com' ||
-    headerEmail === 'superadmin@pfms.com' ||
-    headerEmail === 'owner@poultry.com' ||
-    cookieEmail === 'superadmin@pfms.com' ||
-    cookieEmail === 'owner@poultry.com'
+    user?.role === 'SuperAdmin'
   );
 
   if (isSuperAdminUser) {

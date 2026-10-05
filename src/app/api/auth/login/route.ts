@@ -12,6 +12,7 @@ import {
   getPending2FASession,
   consumePending2FASession,
 } from '@/lib/twoFactor';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 const GENERIC_AUTH_ERROR = 'Invalid username/email or password.';
 
@@ -108,6 +109,18 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: 'Username/Email and password are required' },
       { status: 400 },
+    );
+  }
+
+  // Rate limiting: 10 attempts per 15 minutes per IP + user combination
+  const clientIp = getClientIp(request);
+  const rateLimitKey = `login:${clientIp}:${rawEmailInput.toLowerCase()}`;
+  const rateCheck = rateLimit(rateLimitKey, { windowMs: 15 * 60 * 1000, max: 10 });
+
+  if (!rateCheck.success) {
+    return NextResponse.json(
+      { error: `Too many login attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.` },
+      { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
     );
   }
 

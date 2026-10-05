@@ -14,7 +14,7 @@ export default async function AdminCmsPage() {
   const cookieRole = cookieStore.get('pfms_role')?.value;
   const cookieEmail = cookieStore.get('pfms_email')?.value;
   const user = await getAuthUser();
-  const userEmail = user?.email || headerEmail || cookieEmail || 'owner@poultry.com';
+  const userEmail = user?.email || headerEmail || cookieEmail || '';
 
   const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';
   if (isImpersonating) {
@@ -24,9 +24,7 @@ export default async function AdminCmsPage() {
   const isSuperAdmin = 
     user?.role === 'SuperAdmin' ||
     headerRole === 'SuperAdmin' ||
-    cookieRole === 'SuperAdmin' ||
-    userEmail === 'owner@poultry.com' ||
-    userEmail === 'superadmin@pfms.com';
+    cookieRole === 'SuperAdmin';
 
   if (!isSuperAdmin) {
     return <AccessDenied role={user?.role || cookieRole || 'Staff'} path="/dashboard/admin" />;

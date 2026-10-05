@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 import { GoogleGenAI } from '@google/genai';
 import { getWorkspaceId } from '@/lib/workspace';
+import { getAuthUser } from '@/lib/auth';
 import crypto from 'crypto';
 
 /**
@@ -135,30 +136,40 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Fall back to active workspace if no Bearer key
-    if (!workspaceId || workspaceId === 'org_superadmin') {
+    // 2. Fall back to active authenticated session workspace if no Bearer key
+    if (!workspaceId) {
+      const user = await getAuthUser();
+      if (!user) {
+        return NextResponse.json(
+          { error: 'Unauthorized: Valid Authorization: Bearer <API_KEY> or authenticated user session required.' },
+          { status: 401 }
+        );
+      }
       try {
         workspaceId = await getWorkspaceId();
       } catch {}
+    }
+
+    if (!workspaceId || workspaceId === '__unauthenticated__' || workspaceId === 'org_superadmin') {
+      return NextResponse.json(
+        { error: 'No active tenant workspace found. Provide a valid Bearer API key or sign in to a farm workspace.' },
+        { status: 400 }
+      );
     }
     
     // Ensure workspaceId is mapped to a real existing farm workspace
     const { data: realWs } = await serviceRoleClient
       .from('workspaces')
       .select('id')
-      .eq('id', workspaceId || '')
+      .eq('id', workspaceId)
       .limit(1)
       .maybeSingle();
 
     if (!realWs) {
-      const { data: firstWs } = await serviceRoleClient.from('workspaces').select('id').limit(1).maybeSingle();
-      if (firstWs?.id) {
-        workspaceId = firstWs.id;
-      }
-    }
-
-    if (!workspaceId) {
-      return NextResponse.json({ error: 'No active workspace found. Provide Authorization: Bearer <API_KEY> or log in.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Tenant workspace not found. Cross-tenant fallback is disallowed.' },
+        { status: 404 }
+      );
     }
 
     const { text } = await request.json();

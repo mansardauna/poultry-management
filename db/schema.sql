@@ -163,8 +163,10 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   `unitPrice` DECIMAL(12, 2) DEFAULT 0,
   `totalAmount` DECIMAL(12, 2) DEFAULT 0,
   `status` VARCHAR(64) DEFAULT 'Unpaid',
+  `paymentReference` VARCHAR(255) DEFAULT NULL,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX `idx_invoices_workspaceId` (`workspaceId`)
+  INDEX `idx_invoices_workspaceId` (`workspaceId`),
+  INDEX `idx_invoices_paymentReference` (`paymentReference`)
 );
 
 CREATE TABLE IF NOT EXISTS `expenses` (

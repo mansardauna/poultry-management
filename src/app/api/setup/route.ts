@@ -109,7 +109,7 @@ export async function GET() {
     const { data: superAdmin } = await envServiceRoleClient
       .from('users')
       .select('id, username, email, role')
-      .or('role.eq.SuperAdmin,username.eq.superadmin@pfms.com,email.eq.owner@poultry.com')
+      .eq('role', 'SuperAdmin')
       .limit(1)
       .maybeSingle();
 
@@ -135,7 +135,7 @@ export async function GET() {
       isDatabaseConnected,
       isSetupCompleted: gateways.isSetupCompleted || Boolean(superAdmin),
       superAdminExists: Boolean(superAdmin),
-      superAdminEmail: superAdmin?.email || superAdmin?.username || 'owner@poultry.com',
+      superAdminEmail: superAdmin?.email || superAdmin?.username || '',
       gateways,
       databaseConfig,
       tenantsCount,
@@ -149,16 +149,43 @@ export async function GET() {
   }
 }
 
+// In-memory atomic setup lock to prevent concurrent first-run race conditions
+let isSetupInProgress = false;
+
 /**
  * POST Handler: Process System Setup & Initial Deployment Configuration
  */
 export async function POST(request: Request) {
+  if (isSetupInProgress) {
+    return NextResponse.json(
+      { error: 'Setup installation is already in progress. Please wait for completion.' },
+      { status: 409 }
+    );
+  }
+
+  isSetupInProgress = true;
   try {
     const installed = await isSystemInstalled();
     if (installed) {
       const user = await getAuthUser();
       if (!user || user.role !== 'SuperAdmin') {
         return NextResponse.json({ error: 'Access denied: System is already installed. Re-running the installer is prohibited.' }, { status: 403 });
+      }
+    } else {
+      // First-run protection: check if deployment environment specifies a SETUP_TOKEN / SETUP_SECRET
+      const requiredSetupToken = process.env.SETUP_TOKEN || process.env.SETUP_SECRET;
+      if (requiredSetupToken) {
+        const headerToken = request.headers.get('x-setup-token');
+        const urlToken = new URL(request.url).searchParams.get('token');
+        const bodyClone = await request.clone().json().catch(() => ({}));
+        const providedToken = headerToken || urlToken || bodyClone?.setupToken;
+
+        if (!providedToken || providedToken !== requiredSetupToken) {
+          return NextResponse.json(
+            { error: 'Unauthorized: Invalid or missing SETUP_TOKEN. First-run setup requires authorization.' },
+            { status: 401 }
+          );
+        }
       }
     }
 
@@ -495,5 +522,7 @@ export async function POST(request: Request) {
     }, { request });
   } catch (err: unknown) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error during setup' }, { status: 500 });
+  } finally {
+    isSetupInProgress = false;
   }
 }

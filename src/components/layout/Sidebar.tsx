@@ -189,7 +189,6 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const isSuperAdmin = 
     role === 'SuperAdmin' || 
     (typeof window !== 'undefined' && Cookies.get('pfms_role') === 'SuperAdmin') || 
-    (typeof window !== 'undefined' && (Cookies.get('pfms_email') === 'owner@poultry.com' || Cookies.get('pfms_email') === 'superadmin@pfms.com')) ||
     pathname.startsWith('/dashboard/admin');
   const isAdmin = role === 'Admin' || isSuperAdmin;
   const visibleItems = menuItems.filter(item => item.roles.includes(role));

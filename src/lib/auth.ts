@@ -79,12 +79,12 @@ export async function getAuthUser(): Promise<AuthUser | null> {
           }
         } catch {}
 
-        // No DB record: least-privileged tenant role. NEVER trust user_metadata.role
+        // No DB record: assign least-privileged Staff role. NEVER trust user_metadata.role
         // (it is writable by the end user through supabase.auth.updateUser).
         return {
           id: user.id,
           email,
-          role: 'Admin',
+          role: 'Staff',
           username: email.split('@')[0],
         };
       }

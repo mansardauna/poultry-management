@@ -245,7 +245,7 @@ export async function getTenantTier(user?: any) {
   if (!authUser) {
     return 'free';
   }
-  const isSuperAdmin = authUser?.email === 'superadmin@pfms.com' || authUser?.email === 'owner@poultry.com' || authUser?.role === 'SuperAdmin';
+  const isSuperAdmin = authUser?.role === 'SuperAdmin';
   if (isSuperAdmin) {
     return 'enterprise';
   }

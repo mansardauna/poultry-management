@@ -149,7 +149,6 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const isSuperAdmin = 
     role === 'SuperAdmin' || 
     (typeof window !== 'undefined' && Cookies.get('pfms_role') === 'SuperAdmin') || 
-    (typeof window !== 'undefined' && (Cookies.get('pfms_email') === 'owner@poultry.com' || Cookies.get('pfms_email') === 'superadmin@pfms.com')) ||
     pathname.startsWith('/dashboard/admin');
   const currentSearchItems = isSuperAdmin ? SUPERADMIN_SEARCH_ITEMS : FARM_SEARCH_ITEMS;
 

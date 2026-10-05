@@ -39,11 +39,7 @@ export default async function DashboardLayout({
   const isSuperAdmin = !isImpersonating && (
     isSuperAdminPath ||
     headerRole === 'SuperAdmin' ||
-    roleCookie === 'SuperAdmin' ||
-    emailCookie === 'owner@poultry.com' ||
-    emailCookie === 'superadmin@pfms.com' ||
-    headerEmail === 'owner@poultry.com' ||
-    headerEmail === 'superadmin@pfms.com'
+    roleCookie === 'SuperAdmin'
   );
 
   const role = isSuperAdmin ? 'SuperAdmin' : (roleCookie || headerRole || 'Admin');

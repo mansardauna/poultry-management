@@ -55,7 +55,7 @@ export function SetupWizardClient() {
   // Form State
   const [platformName, setPlatformName] = useState('PFMS');
   const [currencySymbol, setCurrencySymbol] = useState('$');
-  const [superAdminEmail, setSuperAdminEmail] = useState('owner@poultry.com');
+  const [superAdminEmail, setSuperAdminEmail] = useState('');
   const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [fromEmail, setFromEmail] = useState('support@pfms-poultry.com');
@@ -608,7 +608,7 @@ export function SetupWizardClient() {
                       value={superAdminEmail}
                       onChange={(e) => setSuperAdminEmail(e.target.value)}
                       className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors bg-white"
-                      placeholder="e.g. owner@poultry.com"
+                      placeholder="e.g. admin@yourdomain.com"
                       required
                     />
                   </div>

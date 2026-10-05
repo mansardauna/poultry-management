@@ -20,7 +20,13 @@ function resolveSecret(): Uint8Array {
     return cachedKey;
   }
 
-  // Persisted, auto-generated secret (Node.js runtime only)
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'SESSION_SECRET environment variable is required in production (minimum 32 characters). Set SESSION_SECRET in your server environment to prevent session divergence across serverless instances.'
+    );
+  }
+
+  // Persisted, auto-generated secret for local development only (Node.js runtime)
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const fs = require('fs') as typeof import('fs');

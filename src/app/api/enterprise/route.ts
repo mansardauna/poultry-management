@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
     }
 
-    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isSuperAdmin = user.role === 'SuperAdmin';
     const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
     if (!isManagerOrAdmin) {
       return NextResponse.json({ error: 'Forbidden: Enterprise features require Admin or Manager privileges.' }, { status: 403 });
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
     }
 
-    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isSuperAdmin = user.role === 'SuperAdmin';
     const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
     if (!isManagerOrAdmin) {
       return NextResponse.json({ error: 'Forbidden: Enterprise management requires Admin or Manager privileges.' }, { status: 403 });

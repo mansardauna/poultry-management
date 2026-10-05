@@ -42,12 +42,22 @@ const PUBLIC_API_PREFIXES = [
   '/api/plans',
 ];
 
+const STATIC_EXTENSIONS = /\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot|mp4|webm|json|xml|txt|map)$/i;
+
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  const isPublicStatic = path.includes('.') || path.startsWith('/_next');
-  const isPublicExact = PUBLIC_EXACT_PATHS.has(path) || path.startsWith('/pay-invoice');
-  const isPublicApi = PUBLIC_API_PREFIXES.some(prefix => path.startsWith(prefix)) || ((path === '/api/admin/cms' || path === '/api/admin/plans') && request.method === 'GET');
+  // Strict static asset check: files matching extensions, _next bundles, or uploads, excluding API paths
+  const isPublicStatic = path.startsWith('/_next') || path.startsWith('/uploads/') || (STATIC_EXTENSIONS.test(path) && !path.startsWith('/api/'));
+  const isPublicExact = PUBLIC_EXACT_PATHS.has(path) || path === '/pay-invoice' || path.startsWith('/pay-invoice/');
+  
+  // Check for Bearer API token on programmatic endpoints like /api/ai-parse
+  const isBearerApiRequest = (path === '/api/ai-parse' || path.startsWith('/api/ai-parse/')) &&
+    Boolean(request.headers.get('authorization')?.startsWith('Bearer '));
+
+  const isPublicApi = PUBLIC_API_PREFIXES.some(prefix => path === prefix || path.startsWith(prefix + '/')) ||
+    ((path === '/api/admin/cms' || path === '/api/admin/plans') && request.method === 'GET') ||
+    isBearerApiRequest;
   const isPublicPath = isPublicStatic || isPublicExact || isPublicApi;
 
   // 1. Verify Cryptographic JWT Session Cookie
@@ -87,7 +97,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const isAuthenticated = Boolean(verifiedSession || supabaseUser);
-  const userRole = verifiedSession?.role || (supabaseUser ? 'Admin' : '');
+  const userRole = verifiedSession?.role || (supabaseUser ? 'Staff' : '');
   const userEmail = verifiedSession?.email || supabaseUser?.email || '';
   const isSuperAdmin = userRole === 'SuperAdmin';
 

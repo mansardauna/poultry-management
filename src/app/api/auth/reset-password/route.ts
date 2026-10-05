@@ -6,6 +6,7 @@ import { getAuthUser } from '@/lib/auth';
 import { isSupabaseMode } from '@/lib/authdb';
 import bcrypt from 'bcryptjs';
 import { createResetToken, verifyResetToken, consumeResetToken } from '@/lib/resetTokenStore';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 function localIdentifierPart(email: string): string {
   return email.split('@')[0].toLowerCase();
@@ -36,6 +37,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, email, token, currentPassword, newPassword } = body;
 
+    const ip = getClientIp(request);
+
     // =========================================================================
     // 1. ACTION: REQUEST VERIFICATION TOKEN / CODE
     // =========================================================================
@@ -45,12 +48,20 @@ export async function POST(request: Request) {
       }
 
       const cleanEmail = email.trim().toLowerCase();
-      
-      // Check if user exists (or if it's admin)
-      const user = await findLocalUser(cleanEmail);
-      const isAdmin = cleanEmail === 'owner@poultry.com' || cleanEmail === 'owner' || cleanEmail === 'superadmin@pfms.com';
 
-      if (!user && !isAdmin) {
+      // Rate limit: max 5 requests per 15 minutes per IP + email
+      const rateCheck = rateLimit(`reset_req:${ip}:${cleanEmail}`, { windowMs: 15 * 60 * 1000, max: 5 });
+      if (!rateCheck.success) {
+        return NextResponse.json(
+          { error: `Too many password reset requests. Please try again in ${rateCheck.retryAfterSeconds} seconds.` },
+          { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
+        );
+      }
+      
+      // Check if user exists
+      const user = await findLocalUser(cleanEmail);
+
+      if (!user) {
         return NextResponse.json({
           error: 'No account registered with this email address. Please check your email or create an account.',
         }, { status: 400 });
@@ -74,6 +85,14 @@ export async function POST(request: Request) {
     // 2. ACTION: VERIFY TOKEN / CODE
     // =========================================================================
     if (action === 'verify_token') {
+      const rateCheck = rateLimit(`verify_token:${ip}`, { windowMs: 15 * 60 * 1000, max: 10 });
+      if (!rateCheck.success) {
+        return NextResponse.json(
+          { error: `Too many verification attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.` },
+          { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
+        );
+      }
+
       if (!email || !token) {
         return NextResponse.json({ error: 'Email and verification code are required' }, { status: 400 });
       }
@@ -93,6 +112,14 @@ export async function POST(request: Request) {
     // 3. ACTION: CONFIRM RESET (WITH TOKEN & NEW PASSWORD)
     // =========================================================================
     if (action === 'confirm_reset') {
+      const rateCheck = rateLimit(`confirm_reset:${ip}`, { windowMs: 15 * 60 * 1000, max: 10 });
+      if (!rateCheck.success) {
+        return NextResponse.json(
+          { error: `Too many password reset attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.` },
+          { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
+        );
+      }
+
       if (!email || !token || !newPassword) {
         return NextResponse.json({ error: 'Email, verification code, and new password are required' }, { status: 400 });
       }

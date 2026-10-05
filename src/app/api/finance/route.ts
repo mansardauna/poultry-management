@@ -11,7 +11,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
   }
 
-  const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+  const isSuperAdmin = user.role === 'SuperAdmin';
   const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
   if (!isManagerOrAdmin) {
     return NextResponse.json({ error: 'Forbidden: Financial records are restricted to Admins and Managers.' }, { status: 403 });
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
     }
 
-    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isSuperAdmin = user.role === 'SuperAdmin';
     const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
     if (!isManagerOrAdmin) {
       return NextResponse.json({ error: 'Forbidden: Only Admins and Managers can manage financial records and payroll.' }, { status: 403 });
@@ -169,7 +169,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
     }
 
-    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isSuperAdmin = user.role === 'SuperAdmin';
     const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
     if (!isManagerOrAdmin) {
       return NextResponse.json({ error: 'Forbidden: Only Admins and Managers can update financial records.' }, { status: 403 });
@@ -197,7 +197,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
     }
 
-    const isSuperAdmin = user.role === 'SuperAdmin' || user.email === 'superadmin@pfms.com' || user.email === 'owner@poultry.com';
+    const isSuperAdmin = user.role === 'SuperAdmin';
     const isManagerOrAdmin = isSuperAdmin || user.role === 'Admin' || user.role === 'Manager';
     if (!isManagerOrAdmin) {
       return NextResponse.json({ error: 'Forbidden: Only Admins and Managers can delete financial records.' }, { status: 403 });

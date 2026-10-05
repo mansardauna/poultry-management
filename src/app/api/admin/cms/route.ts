@@ -20,10 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required.' }, { status: 401 });
     }
 
-    const isSuperAdmin = 
-      user.email === 'superadmin@pfms.com' || 
-      user.email === 'owner@poultry.com' || 
-      user.role === 'SuperAdmin';
+    const isSuperAdmin = user.role === 'SuperAdmin';
 
     if (!isSuperAdmin) {
       return NextResponse.json({ error: 'Forbidden: Only Super Admin can edit landing CMS and brand settings.' }, { status: 403 });

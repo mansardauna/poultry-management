@@ -40,6 +40,23 @@ export async function POST(request: Request) {
     let isVerified = false;
     let verifyData: any = null;
 
+    // Check for payment reference replay if a reference was supplied
+    if (finalRef) {
+      const { data: existingRef } = await supabase
+        .from('invoices')
+        .select('id, customerName, totalAmount')
+        .eq('paymentReference', finalRef)
+        .neq('id', invoiceId)
+        .maybeSingle();
+
+      if (existingRef) {
+        return NextResponse.json(
+          { error: `Payment reference '${finalRef}' has already been consumed by another invoice (#${existingRef.id}). Reused references are rejected.` },
+          { status: 409 }
+        );
+      }
+    }
+
     if (isOffline) {
       // Offline payments and manual status reconciliation REQUIRE authenticated staff or admin
       const authUser = await getAuthUser();
@@ -51,7 +68,7 @@ export async function POST(request: Request) {
       }
 
       // Verify the authenticated user has access to this invoice's workspace
-      const isSuper = authUser.role === 'SuperAdmin' || authUser.email === 'superadmin@pfms.com' || authUser.email === 'owner@poultry.com';
+      const isSuper = authUser.role === 'SuperAdmin';
       const userWs = authUser.workspaceId?.replace(/"/g, '').trim();
       const invWs = (invoice.workspaceId || '').replace(/"/g, '').trim();
 
@@ -105,10 +122,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Insufficient payment amount detected' }, { status: 400 });
     }
 
-    // 5. Update invoice status
+    // 5. Update invoice status and store paymentReference
+    const updatePayload: Record<string, any> = { status: targetStatus };
+    if (finalRef) {
+      updatePayload.paymentReference = finalRef;
+    }
     await supabase
       .from('invoices')
-      .update({ status: targetStatus })
+      .update(updatePayload)
       .eq('id', invoiceId);
       
     // 6. Ensure completed sale record exists in sales table if paid

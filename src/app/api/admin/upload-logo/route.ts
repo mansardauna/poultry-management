@@ -17,14 +17,7 @@ import path from 'path';
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = 
-      !user || // If accessed within admin context or self-hosted dev
-      user?.email === 'superadmin@pfms.com' || 
-      user?.email === 'owner@poultry.com' || 
-      user?.role === 'SuperAdmin' ||
-      user?.role === 'Admin';
-
-    if (user && !isSuperAdmin) {
+    if (!user || user.role !== 'SuperAdmin') {
       return NextResponse.json(
         { error: 'Unauthorized: Only Super Admin can upload the platform brand logo' },
         { status: 403 }
@@ -202,15 +195,8 @@ export async function POST(request: Request) {
 export async function DELETE() {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = 
-      !user ||
-      user?.email === 'superadmin@pfms.com' || 
-      user?.email === 'owner@poultry.com' || 
-      user?.role === 'SuperAdmin' ||
-      user?.role === 'Admin';
-
-    if (user && !isSuperAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    if (!user || user.role !== 'SuperAdmin') {
+      return NextResponse.json({ error: 'Unauthorized: Only Super Admin can reset the platform brand logo' }, { status: 403 });
     }
 
     // Reset logoUrl in database

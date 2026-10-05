@@ -291,7 +291,7 @@ export function AdminCmsClient({
       };
     }));
   };
-  const [superAdminEmailState, setSuperAdminEmailState] = useState(currentUserEmail || 'owner@poultry.com');
+  const [superAdminEmailState, setSuperAdminEmailState] = useState(currentUserEmail || '');
   const [superAdminPassword, setSuperAdminPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [fromEmail, setFromEmail] = useState('support@pfms-poultry.com');

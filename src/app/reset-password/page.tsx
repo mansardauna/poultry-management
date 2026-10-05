@@ -266,7 +266,7 @@ function ResetPasswordForm() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. owner@poultry.com"
+                placeholder="e.g. user@example.com"
                 className={`w-full border-2 rounded-xl p-3.5 pl-10 text-sm sm:text-base font-medium transition-colors focus:outline-none focus:ring-0 shadow-none ${
                   showEmailError
                     ? 'border-red-500 bg-red-50/20 focus:border-red-600'

@@ -23,12 +23,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
   }
 
+  const email = rawEmail.toLowerCase();
+  const RESERVED_SUPERADMIN_EMAILS = ['owner@poultry.com', 'superadmin@pfms.com', 'admin@pfms.com', 'superadmin@poultry.com'];
+  if (RESERVED_SUPERADMIN_EMAILS.includes(email) || email.startsWith('superadmin@') || email === 'owner@poultry.com') {
+    return NextResponse.json(
+      { error: 'This email address is reserved for system administration. Please register with a different email address.' },
+      { status: 400 }
+    );
+  }
+
   if (password.length < 8) {
     return NextResponse.json({ error: 'Password must be at least 8 characters long.' }, { status: 400 });
   }
 
   try {
-    const email = rawEmail.toLowerCase();
     const userClean = email.split('@')[0];
     const orgId = `org_${Date.now()}`;
     const defaultWorkspaceId = `main-${orgId}`;

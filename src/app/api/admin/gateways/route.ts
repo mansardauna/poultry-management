@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 export async function GET() {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
+    const isSuperAdmin = user?.role === 'SuperAdmin';
 
     if (!user || !isSuperAdmin) {
       return NextResponse.json({ error: 'Unauthorized: Access restricted to Super Admin.' }, { status: 403 });
@@ -62,7 +62,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       gateways,
-      superAdminEmail: user.email || 'owner@poultry.com'
+      superAdminEmail: user.email || ''
     });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to fetch gateway configuration' }, { status: 500 });
@@ -72,7 +72,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    const isSuperAdmin = user?.email === 'superadmin@pfms.com' || user?.email === 'owner@poultry.com' || user?.role === 'SuperAdmin';
+    const isSuperAdmin = user?.role === 'SuperAdmin';
 
     if (!user || !isSuperAdmin) {
       return NextResponse.json({ error: 'Unauthorized: Access restricted to Super Admin.' }, { status: 403 });
