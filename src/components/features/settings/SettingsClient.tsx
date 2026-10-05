@@ -157,6 +157,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   }, [isUpgraded, searchParams, router]);
   const [feedThresholdKg, setFeedThresholdKg] = useState(String(initialSettings?.feedThresholdKg || 50));
   const [eggDropPercentage, setEggDropPercentage] = useState(String(initialSettings?.eggDropPercentage || 15));
+  const [minDailyEggCount, setMinDailyEggCount] = useState(String(initialSettings?.minDailyEggCount || 0));
   const [notifySms, setNotifySms] = useState(initialSettings?.notifySms || false);
   const [notifyEmail, setNotifyEmail] = useState(initialSettings?.notifyEmail || false);
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(initialSettings?.notifyWhatsapp || false);
@@ -327,6 +328,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         body: JSON.stringify({
           feedThresholdKg: Number(feedThresholdKg),
           eggDropPercentage: Number(eggDropPercentage),
+          minDailyEggCount: Number(minDailyEggCount) || 0,
           notifySms,
           notifyEmail,
           notifyWhatsapp
@@ -949,9 +951,10 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TextField label={t("Feed Shortfall Critical Threshold (kg)")} type="number" fullWidth variant="outlined" value={feedThresholdKg} onChange={(e) => setFeedThresholdKg(e.target.value)} helperText={t("Triggers critical dashboard/feed warnings when feed drops below this level.")} />
-              <TextField label={t("Egg Output Drop Percentage Warning limit (%)")} type="number" fullWidth variant="outlined" value={eggDropPercentage} onChange={(e) => setEggDropPercentage(e.target.value)} helperText={t("Warns if egg collection dips by more than this percentage.")} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TextField label={t("Feed Shortfall Critical Threshold (kg)")} type="number" fullWidth variant="outlined" value={feedThresholdKg} onChange={(e) => setFeedThresholdKg(e.target.value)} helperText={t("Triggers critical feed warnings and replenishment tasks when feed drops below this level.")} />
+              <TextField label={t("Egg Output Drop Warning Limit (%)")} type="number" fullWidth variant="outlined" value={eggDropPercentage} onChange={(e) => setEggDropPercentage(e.target.value)} helperText={t("Warns if egg collection dips by more than this percentage compared to previous record.")} />
+              <TextField label={t("Minimum Daily Egg Threshold (Count)")} type="number" fullWidth variant="outlined" value={minDailyEggCount} onChange={(e) => setMinDailyEggCount(e.target.value)} helperText={t("Warns if daily collection count drops below this fixed count (0 to disable).")} />
             </div>
 
             <div className="pt-4 border-t border-slate-100">

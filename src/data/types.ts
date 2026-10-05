@@ -167,6 +167,7 @@ export interface StaffTask {
 export interface AlertSettings {
   feedThresholdKg: number;
   eggDropPercentage: number;
+  minDailyEggCount?: number;
   notifySms: boolean;
   notifyEmail: boolean;
   notifyWhatsapp: boolean;
@@ -260,6 +261,16 @@ export interface ContactRecord {
   notes: string;
 }
 
+export interface TemperatureLog {
+  id: string;
+  date: string;
+  time?: string;
+  tempCelsius: number;
+  humidity?: number | null;
+  notes?: string;
+  recordedBy?: string;
+}
+
 /**
  * @interface
  */
@@ -269,7 +280,7 @@ export interface FarmPen {
   capacity: number;
   currentBatchId: string | null;
   status: string; // 'Active' | 'Cleaning' | 'Empty'
-  temperatureLogs: unknown; // { date: string; tempCelsius: number }[]
+  temperatureLogs: TemperatureLog[];
 }
 
 /**

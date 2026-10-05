@@ -149,14 +149,83 @@ export async function POST(request: Request) {
       }]);
       
       await supabase.from('tasks').insert([{
-        id: 't-' + Date.now(),
+        id: 't-' + Date.now().toString().slice(-8),
         workspaceId,
-        assignedTo: 'Abdulrahman Monsur',
-        taskName: `Audit laying box cushioning due to cracked eggs in Batch ${newRecord.batchId}`,
+        assignedTo: 'Flock Manager',
+        taskName: `Audit laying box cushioning due to ${newRecord.brokenEggs} cracked eggs in Batch ${newRecord.batchId}`,
         status: 'Pending',
         date: new Date().toISOString().split('T')[0]
       }]);
     }
+
+    // Evaluate egg production against configured alert threshold settings
+    try {
+      const { data: alertSettingsRows } = await supabase
+        .from('alertSettings')
+        .select('*')
+        .eq('workspaceId', workspaceId)
+        .limit(1);
+      const alertSettings = alertSettingsRows?.[0] || {};
+      const eggDropThresholdPct = Number(alertSettings.eggDropPercentage) || 15;
+      const minDailyEggThreshold = Number(alertSettings.minDailyEggCount) || 0;
+      const totalCollected = newRecord.goodEggs + newRecord.brokenEggs + newRecord.spoiltEggs;
+
+      // Check 1: Drop below configured minimum daily egg count
+      if (minDailyEggThreshold > 0 && totalCollected < minDailyEggThreshold) {
+        await supabase.from('alertLogs').insert([{
+          id: 'al-' + Date.now(),
+          workspaceId,
+          date: newRecord.date,
+          message: `CRITICAL: Egg collection for Batch ${newRecord.batchId} (${totalCollected} eggs) is below the configured daily minimum threshold (${minDailyEggThreshold} eggs)!`,
+          severity: 'Critical'
+        }]);
+
+        await supabase.from('tasks').insert([{
+          id: 't-' + Date.now().toString().slice(-8),
+          workspaceId,
+          assignedTo: 'Flock Supervisor',
+          taskName: `Investigate low egg yield in Batch ${newRecord.batchId} (${totalCollected} vs minimum target ${minDailyEggThreshold})`,
+          status: 'Pending',
+          date: newRecord.date
+        }]);
+      }
+
+      // Check 2: Drop compared to previous collection for this batch
+      const { data: prevRecords } = await supabase
+        .from('eggs')
+        .select('*')
+        .eq('workspaceId', workspaceId)
+        .eq('batchId', newRecord.batchId)
+        .neq('id', newRecord.id)
+        .order('date', { ascending: false })
+        .limit(1);
+
+      if (prevRecords && prevRecords.length > 0) {
+        const prev = prevRecords[0];
+        const prevTotal = Number(prev.goodEggs || 0) + Number(prev.brokenEggs || 0) + Number(prev.spoiltEggs || 0);
+        if (prevTotal > 0 && totalCollected < prevTotal) {
+          const dropPct = ((prevTotal - totalCollected) / prevTotal) * 100;
+          if (dropPct >= eggDropThresholdPct) {
+            await supabase.from('alertLogs').insert([{
+              id: 'al-' + Date.now(),
+              workspaceId,
+              date: newRecord.date,
+              message: `CRITICAL: Egg production for Batch ${newRecord.batchId} dropped by ${dropPct.toFixed(1)}% (from ${prevTotal} to ${totalCollected} eggs), exceeding the ${eggDropThresholdPct}% alert threshold!`,
+              severity: 'Critical'
+            }]);
+
+            await supabase.from('tasks').insert([{
+              id: 't-' + Date.now().toString().slice(-8),
+              workspaceId,
+              assignedTo: 'Veterinarian / Farm Manager',
+              taskName: `Urgent flock health inspection: Batch ${newRecord.batchId} egg production dropped by ${dropPct.toFixed(1)}%`,
+              status: 'Pending',
+              date: newRecord.date
+            }]);
+          }
+        }
+      }
+    } catch (_alertErr) {}
     
     return NextResponse.json(newRecord, { status: 201 });
   } catch (err: any) {

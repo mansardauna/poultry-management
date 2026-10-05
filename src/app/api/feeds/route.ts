@@ -130,11 +130,19 @@ export async function POST(request: Request) {
       const feedThresholdKg = alertSettingsResult && alertSettingsResult.length > 0 ? alertSettingsResult[0].feedThresholdKg : 50;
 
       if (newQuantityKg > feedThresholdKg) {
+        // Auto-complete pending replenishment tasks for this feed type
+        await supabase
+          .from('tasks')
+          .update({ status: 'Completed' })
+          .eq('workspaceId', workspaceId)
+          .eq('status', 'Pending')
+          .like('taskName', `%Replenish ${feedType}%`);
+
         await supabase.from('alertLogs').insert([{
           id: 'al-' + Date.now(),
           workspaceId,
           date: new Date().toISOString().split('T')[0],
-          message: `INFO: Feed stock level for ${feedType} recovered to ${newQuantityKg}kg. Safety threshold cleared.`,
+          message: `INFO: Feed stock level for ${feedType} recovered to ${newQuantityKg}kg. Safety threshold cleared and pending replenishment task resolved.`,
           severity: 'Info'
         }]);
       }
@@ -173,11 +181,42 @@ export async function POST(request: Request) {
         const feedThresholdKg = alertSettingsResult && alertSettingsResult.length > 0 ? alertSettingsResult[0].feedThresholdKg : 50;
 
         if (newQty <= feedThresholdKg) {
+          // Resolve staff member for task assignment
+          const { data: staffMembers } = await supabase
+            .from('staff')
+            .select('name, role')
+            .eq('workspaceId', workspaceId);
+            
+          const assignedStaff = staffMembers?.find((s: any) => s.role === 'Manager' || s.role === 'Staff')?.name || 
+            staffMembers?.[0]?.name || 
+            'Inventory & Feed Team';
+
+          // Check if a pending replenishment task already exists to avoid redundant duplicate tasks
+          const { data: existingTasks } = await supabase
+            .from('tasks')
+            .select('id')
+            .eq('workspaceId', workspaceId)
+            .eq('status', 'Pending')
+            .like('taskName', `%Replenish ${feed.type}%`)
+            .limit(1);
+
+          if (!existingTasks || existingTasks.length === 0) {
+            const replenishmentTask = {
+              id: 't-' + Date.now().toString().slice(-8),
+              workspaceId,
+              assignedTo: assignedStaff,
+              taskName: `Replenish ${feed.type} stock (${newQty}kg left, threshold: ${feedThresholdKg}kg)`,
+              status: 'Pending',
+              date: new Date().toISOString().split('T')[0]
+            };
+            await supabase.from('tasks').insert([replenishmentTask]);
+          }
+
           await supabase.from('alertLogs').insert([{
             id: 'al-' + Date.now(),
             workspaceId,
             date: new Date().toISOString().split('T')[0],
-            message: `CRITICAL: Feed stock level for ${feed.type} drops to ${newQty}kg (safety threshold: ${feedThresholdKg}kg)!`,
+            message: `CRITICAL: Feed stock level for ${feed.type} drops to ${newQty}kg (safety threshold: ${feedThresholdKg}kg). Replenishment task assigned to ${assignedStaff}.`,
             severity: 'Critical'
           }]);
         }

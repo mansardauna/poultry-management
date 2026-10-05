@@ -102,6 +102,7 @@ export async function POST(request: Request) {
       workspaceId,
       feedThresholdKg: Number(body.feedThresholdKg) || 50,
       eggDropPercentage: Number(body.eggDropPercentage) || 15,
+      minDailyEggCount: Number(body.minDailyEggCount) || 0,
       notifySms: !!body.notifySms,
       notifyEmail: !!body.notifyEmail,
       notifyWhatsapp: !!body.notifyWhatsapp

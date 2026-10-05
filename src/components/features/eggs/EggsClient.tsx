@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
-import { Plus, BarChart2, AlertTriangle, CheckSquare, Edit2, Trash2, Download, Printer } from 'lucide-react';
+import { Plus, BarChart2, AlertTriangle, CheckSquare, Edit2, Trash2, Download, Printer, TrendingUp } from 'lucide-react';
 import { downloadCSV, printBrandedReport } from '@/lib/exportReports';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from "../LanguageContext";
@@ -489,6 +489,16 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   const totalSpoiltEggs = filteredEggs.reduce((sum, e) => sum + (Number(e.spoiltEggs) || 0), 0);
   const totalCollected = totalGoodEggs + totalBrokenEggs + totalSpoiltEggs;
 
+  // Laying Rate calculation (Hen-Day Egg Production %):
+  // Formula: (Total Eggs Collected / (Active Laying Hens * Days in Period)) * 100
+  const layerBatches = batches.filter(b => !b.type || b.type.toLowerCase() === 'layers');
+  const activeLayers = (layerBatches.length > 0 ? layerBatches : batches)
+    .reduce((sum, b) => sum + Math.max(0, Number(b.quantity || 0) - Number(b.mortalityCount || 0)), 0);
+  const uniqueCollectionDays = Math.max(1, new Set(filteredEggs.map(e => e.date)).size);
+  const layingPercentage = activeLayers > 0
+    ? Math.min(100, Math.round(((totalCollected / (activeLayers * uniqueCollectionDays)) * 100) * 10) / 10)
+    : 0;
+
   return (
     <div className="space-y-6">
       {/* Header and Controls */}
@@ -550,59 +560,90 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         </div>
       )}
 
-      {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Stats Cards Grid - 5 Cards including Laying Rate */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Total Collected */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.totalCollected}</p>
                 <p className="text-3xl font-semibold text-slate-900 mt-2">{formatNumber(totalCollected)}</p>
               </div>
               <div className="text-indigo-650">
-                <BarChart2 size={32} />
+                <BarChart2 size={30} />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Laying Rate (%) */}
+        <Card className="hover:border-indigo-300 transition-colors">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t("Laying Rate (%)")}</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <p className="text-3xl font-semibold text-indigo-600">{layingPercentage.toFixed(1)}%</p>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    layingPercentage >= 85 ? 'bg-emerald-100 text-emerald-800' :
+                    layingPercentage >= 70 ? 'bg-indigo-100 text-indigo-800' :
+                    layingPercentage > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {layingPercentage >= 85 ? t("Optimal") : layingPercentage >= 70 ? t("Good") : layingPercentage > 0 ? t("Sub-optimal") : t("N/A")}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1 font-medium truncate">
+                  {formatNumber(activeLayers)} {t("hens")} &bull; {uniqueCollectionDays} {t("day(s)")}
+                </p>
+              </div>
+              <div className="text-indigo-600 shrink-0">
+                <TrendingUp size={30} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Good Eggs */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.goodEggs}</p>
                 <p className="text-3xl font-semibold text-emerald-650 mt-2">{formatNumber(totalGoodEggs)}</p>
               </div>
               <div className="text-emerald-600">
-                <BarChart2 size={32} />
+                <BarChart2 size={30} />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Broken Eggs */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.brokenEggs}</p>
                 <p className="text-3xl font-semibold text-red-650 mt-2">{formatNumber(totalBrokenEggs)}</p>
               </div>
               <div className="text-red-600">
-                <AlertTriangle size={32} />
+                <AlertTriangle size={30} />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Spoilt Eggs */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.spoiltEggs}</p>
                 <p className="text-3xl font-semibold text-amber-600 mt-2">{formatNumber(totalSpoiltEggs)}</p>
               </div>
               <div className="text-amber-500">
-                <AlertTriangle size={32} />
+                <AlertTriangle size={30} />
               </div>
             </div>
           </CardContent>
@@ -764,40 +805,60 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                   <TableSortHeader label={t("Good Eggs")} sortKey="goodEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
                   <TableSortHeader label={t("Broken / Cracked")} sortKey="brokenEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
                   <TableSortHeader label={t("Spoilt")} sortKey="spoiltEggs" currentSort={eggsLogic.sortConfig} onSort={eggsLogic.handleSort} />
+                  <th className="px-4 py-3">{t("Laying Rate")}</th>
                   {canEdit && <th className="px-4 py-3">{texts.common.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {eggsLogic.data.map((egg) => (
-                  <tr key={egg.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-semibold text-slate-950">{egg.date}</td>
-                    <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{egg.batchId}</td>
-                    <td className="px-4 py-3 font-semibold text-emerald-600">{egg.goodEggs}</td>
-                    <td className="px-4 py-3 font-semibold text-red-600">{egg.brokenEggs}</td>
-                    <td className="px-4 py-3 font-semibold text-amber-600">{egg.spoiltEggs}</td>
-                    {canEdit && (
-                      <td className="px-4 py-3 flex gap-2">
-                        <button
-                          onClick={() => handleOpenEditCollection(egg)}
-                          className="p-1 hover:bg-blue-100 rounded transition-colors"
-                          title={t("Edit")}
-                        >
-                          <Edit2 size={16} className="text-blue-600" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteCollection(egg.id)}
-                          className="p-1 hover:bg-red-100 rounded transition-colors"
-                          title={t("Delete")}
-                        >
-                          <Trash2 size={16} className="text-red-600" />
-                        </button>
+                {eggsLogic.data.map((egg) => {
+                  const batch = batches.find(b => b.id === egg.batchId);
+                  const activeHens = batch ? Math.max(0, Number(batch.quantity || 0) - Number(batch.mortalityCount || 0)) : 0;
+                  const rowTotal = (Number(egg.goodEggs) || 0) + (Number(egg.brokenEggs) || 0) + (Number(egg.spoiltEggs) || 0);
+                  const rate = activeHens > 0 ? Math.min(100, (rowTotal / activeHens) * 100) : 0;
+
+                  return (
+                    <tr key={egg.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 font-semibold text-slate-950">{egg.date}</td>
+                      <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{egg.batchId}</td>
+                      <td className="px-4 py-3 font-semibold text-emerald-600">{egg.goodEggs}</td>
+                      <td className="px-4 py-3 font-semibold text-red-600">{egg.brokenEggs}</td>
+                      <td className="px-4 py-3 font-semibold text-amber-600">{egg.spoiltEggs}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            rate >= 85 ? 'bg-emerald-100 text-emerald-800' :
+                            rate >= 70 ? 'bg-indigo-100 text-indigo-800' :
+                            rate > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {activeHens > 0 ? `${rate.toFixed(1)}%` : '—'}
+                          </span>
+                          {activeHens > 0 && <span className="text-[10px] text-slate-400 font-mono">({rowTotal}/{activeHens})</span>}
+                        </div>
                       </td>
-                    )}
-                  </tr>
-                ))}
+                      {canEdit && (
+                        <td className="px-4 py-3 flex gap-2">
+                          <button
+                            onClick={() => handleOpenEditCollection(egg)}
+                            className="p-1 hover:bg-blue-100 rounded transition-colors"
+                            title={t("Edit")}
+                          >
+                            <Edit2 size={16} className="text-blue-600" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCollection(egg.id)}
+                            className="p-1 hover:bg-red-100 rounded transition-colors"
+                            title={t("Delete")}
+                          >
+                            <Trash2 size={16} className="text-red-600" />
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
                 {eggsLogic.data.length === 0 && (
                   <tr>
-                    <td colSpan={canEdit ? 6 : 5} className="text-center py-4 text-slate-400 font-sans italic">
+                    <td colSpan={canEdit ? 7 : 6} className="text-center py-4 text-slate-400 font-sans italic">
                       {t("No egg collections recorded.")}
                     </td>
                   </tr>

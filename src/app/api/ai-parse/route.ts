@@ -21,11 +21,11 @@ function smartParsePoultryText(text: string, today: string) {
     staffChanges: { add: [], removeAll: false }
   };
 
-  // Egg Collection (e.g. "collected 4500 good eggs, but 12 were cracked", "30 crates")
   const eggCrateMatch = textLower.match(/(\d+)\s*(crates|crate)/);
   const eggPiecesMatch = textLower.match(/(\d+)\s*(good\s*)?(eggs|pieces)/);
   let totalEggs = 0;
   let crackedEggs = 0;
+  let spoiltEggs = 0;
 
   if (eggCrateMatch) {
     totalEggs += parseInt(eggCrateMatch[1], 10) * 30;
@@ -34,16 +34,23 @@ function smartParsePoultryText(text: string, today: string) {
     totalEggs += parseInt(eggPiecesMatch[1], 10);
   }
 
-  const crackedMatch = textLower.match(/(\d+)\s*(cracked|broken|spoilt)/);
+  const crackedMatch = textLower.match(/(\d+)\s*(cracked|broken)/);
   if (crackedMatch) {
     crackedEggs = parseInt(crackedMatch[1], 10);
   }
 
-  if (totalEggs > 0) {
+  const spoiltMatch = textLower.match(/(\d+)\s*(spoilt|spoiled|bad|rotten)/);
+  if (spoiltMatch) {
+    spoiltEggs = parseInt(spoiltMatch[1], 10);
+  }
+
+  if (totalEggs > 0 || crackedEggs > 0 || spoiltEggs > 0) {
+    const rawTotal = totalEggs > 0 ? totalEggs : (crackedEggs + spoiltEggs);
     result.eggs.push({
       date: today,
-      goodEggs: Math.max(0, totalEggs - crackedEggs),
+      goodEggs: Math.max(0, rawTotal - crackedEggs - spoiltEggs),
       crackedEggs: crackedEggs,
+      spoiltEggs: spoiltEggs,
       notes: 'AI Auto-Logged'
     });
   }
@@ -217,11 +224,12 @@ Here are the farm rules:
 - 1 crate of eggs = 30 pieces.
 - If a date is not specified, use today's date: ${today}.
 - Expense categories must be one of: "Feed", "Drugs", "Salaries", "Maintenance", "Utilities".
+- For eggs: categorize intact/clean eggs as goodEggs, broken/cracked eggs as crackedEggs, and spoiled/bad/rotten eggs as spoiltEggs.
 
 Return a JSON object with this exact structure:
 {
   "staffChanges": { "removeAll": false, "add": [] },
-  "eggs": [ { "date": "YYYY-MM-DD", "goodEggs": number, "crackedEggs": number, "notes": "string" } ],
+  "eggs": [ { "date": "YYYY-MM-DD", "goodEggs": number, "crackedEggs": number, "spoiltEggs": number, "notes": "string" } ],
   "expenses": [ { "date": "YYYY-MM-DD", "category": "string", "amount": number, "description": "string" } ],
   "sales": [ { "date": "YYYY-MM-DD", "type": "string", "quantity": number, "totalAmount": number, "customerName": "string" } ],
   "feedUsedKg": number,
@@ -419,9 +427,9 @@ Return a JSON object with this exact structure:
         workspaceId,
         batchId,
         date: e.date || today,
-        goodEggs: e.goodEggs || 0,
-        brokenEggs: e.crackedEggs || 0,
-        spoiltEggs: 0,
+        goodEggs: Number(e.goodEggs) || 0,
+        brokenEggs: Number(e.crackedEggs ?? e.brokenEggs) || 0,
+        spoiltEggs: Number(e.spoiltEggs ?? e.spoiledEggs) || 0,
       }));
       await serviceRoleClient.from('eggs').insert(eggInsert);
     }
