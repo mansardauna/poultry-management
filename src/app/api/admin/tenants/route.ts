@@ -18,7 +18,42 @@ export async function GET(request: Request) {
 
     if (!orgId) {
       // List all tenants
-      const { data: orgs } = await serviceRoleClient.from('organizations').select('*');
+      let orgs: any[] = [];
+      const { data: orgData } = await serviceRoleClient.from('organizations').select('*');
+      if (orgData && Array.isArray(orgData)) orgs = [...orgData];
+
+      try {
+        const { data: adminUsers } = await serviceRoleClient.from('users').select('*');
+        const { data: workspaces } = await serviceRoleClient.from('workspaces').select('*');
+        const existingOrgIds = new Set(orgs.map((o: any) => o.id));
+
+        if (adminUsers && Array.isArray(adminUsers)) {
+          for (const u of adminUsers) {
+            if (u.role !== 'Admin') continue;
+            const userOrgId = u.orgId || (u.workspaceId ? `org_${u.workspaceId}` : `org_${u.username}`);
+            if (!existingOrgIds.has(userOrgId)) {
+              const farmWorkspace = workspaces?.find((w: any) => w.ownerUsername === u.username || w.id === u.workspaceId);
+              const orgName = farmWorkspace?.name && farmWorkspace.name !== 'Main Branch'
+                ? `${farmWorkspace.name} Farm`
+                : `${u.username ? u.username.charAt(0).toUpperCase() + u.username.slice(1) : 'Farm'} Organization`;
+
+              const newOrg = {
+                id: userOrgId,
+                name: orgName,
+                subscriptionTier: u.subscriptionTier || 'free',
+                subscriptionStatus: 'active',
+                ownerUsername: u.username,
+                ownerEmail: u.email,
+                createdAt: u.createdAt || new Date().toISOString()
+              };
+              orgs.push(newOrg);
+              existingOrgIds.add(userOrgId);
+              await serviceRoleClient.from('organizations').upsert([newOrg]).catch(() => {});
+            }
+          }
+        }
+      } catch (_syncErr) {}
+
       return NextResponse.json({ organizations: orgs || [] });
     }
 

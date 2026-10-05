@@ -1,7 +1,7 @@
 'use strict';
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { 
@@ -294,7 +294,40 @@ export function AdminCmsClient({
   };
 
   // Tenant Management & Impersonation State
-  const [orgsList, setOrgsList] = useState<any[]>(allOrgs);
+  const [orgsList, setOrgsList] = useState<any[]>(allOrgs || []);
+  const [isFetchingTenants, setIsFetchingTenants] = useState(false);
+
+  const fetchTenants = useCallback(async () => {
+    setIsFetchingTenants(true);
+    try {
+      const res = await fetch('/api/admin/tenants');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data?.organizations)) {
+          setOrgsList(data.organizations);
+        }
+      }
+    } catch {} finally {
+      setIsFetchingTenants(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (Array.isArray(allOrgs) && allOrgs.length > 0) {
+      setOrgsList(allOrgs);
+    }
+  }, [allOrgs]);
+
+  useEffect(() => {
+    fetchTenants();
+  }, [fetchTenants]);
+
+  useEffect(() => {
+    if (activeTab === 'orgs' || activeTab === 'overview') {
+      fetchTenants();
+    }
+  }, [activeTab, fetchTenants]);
+
   const [selectedTenant, setSelectedTenant] = useState<any | null>(null);
   const [tenantDetail, setTenantDetail] = useState<any | null>(null);
   const [isLoadingTenant, setIsLoadingTenant] = useState(false);
@@ -2072,13 +2105,25 @@ export function AdminCmsClient({
               </p>
             </div>
 
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
-            >
-              <UserPlus size={16} />
-              <span>{t("Create Farm Account")}</span>
-            </button>
+            <div className="flex items-center gap-2.5 self-start sm:self-auto">
+              <button
+                onClick={() => fetchTenants()}
+                disabled={isFetchingTenants}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                title={t("Refresh tenant list")}
+              >
+                <RefreshCw size={14} className={isFetchingTenants ? "animate-spin text-purple-600" : ""} />
+                <span>{t("Refresh")}</span>
+              </button>
+
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              >
+                <UserPlus size={16} />
+                <span>{t("Create Farm Account")}</span>
+              </button>
+            </div>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
