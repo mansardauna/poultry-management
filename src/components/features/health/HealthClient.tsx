@@ -38,6 +38,13 @@ export function HealthClient({ role }: { role: string }) {
   const [batches, setBatches] = useState<ChickenBatch[]>([]);
   const canEdit = role === 'Admin' || role === 'Manager';
 
+  // Log Health Event State
+  const [openLogHealth, setOpenLogHealth] = useState(false);
+  const [logBatchId, setLogBatchId] = useState('');
+  const [logMedicationName, setLogMedicationName] = useState('');
+  const [logType, setLogType] = useState<'Vaccine' | 'Medication' | 'Supplement'>('Vaccine');
+  const [logDate, setLogDate] = useState(new Date().toISOString().split('T')[0]);
+
   // Dialog states
   const [openTemplate, setOpenTemplate] = useState(false);
   const [templateName, setTemplateName] = useState('');
@@ -72,6 +79,37 @@ export function HealthClient({ role }: { role: string }) {
     refreshData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleLogHealth = async () => {
+    if (!logBatchId || !logMedicationName.trim()) return;
+    try {
+      const res = await fetch('/api/health', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'addSchedule',
+          batchId: logBatchId,
+          medicationName: logMedicationName.trim(),
+          type: logType,
+          scheduledDate: logDate
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.schedule) {
+          setSchedules(prev => [data.schedule, ...prev]);
+        }
+        refreshData();
+        setOpenLogHealth(false);
+        setLogMedicationName('');
+        toast.success(t('Health event logged!'));
+      } else {
+        toast.error(t('Failed to log health event'));
+      }
+    } catch {
+      toast.error(t('Network error'));
+    }
+  };
 
   const handleSaveTemplate = async () => {
     try {
@@ -187,16 +225,28 @@ export function HealthClient({ role }: { role: string }) {
         {role !== 'Staff' && (
           <div className="flex flex-wrap gap-2">
             <button 
+              onClick={() => {
+                setLogBatchId(batches[0]?.id || '');
+                setLogMedicationName('');
+                setLogType('Vaccine');
+                setLogDate(new Date().toISOString().split('T')[0]);
+                setOpenLogHealth(true);
+              }}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+            >
+              <Plus size={18} /> {t("Log Health Event")}
+            </button>
+            <button 
               onClick={() => setOpenApply(true)}
-              className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+              className="bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
             >
               <Calendar size={17} /> {t("Apply Template")}
             </button>
             <button 
               onClick={() => setOpenTemplate(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+              className="bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
             >
-              <Plus size={18} /> {t("Define New Template")}
+              <Settings size={17} /> {t("Define Template")}
             </button>
           </div>
         )}
@@ -319,18 +369,84 @@ export function HealthClient({ role }: { role: string }) {
         </Card>
       </div>
 
-      {/* Apply Template Modal */}
-      <Dialog open={openApply} onClose={() => setOpenApply(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-poppins)', fontWeight: 600 }}>{t("Apply Medication Template")}</DialogTitle>
+      {/* Log Health Event Modal */}
+      <Dialog open={openLogHealth} onClose={() => setOpenLogHealth(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605, color: '#0f172a' }}>
+          {t("Log Health Event")}
+        </DialogTitle>
         <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
           <div className="h-2" />
           <FormControl fullWidth variant="outlined">
-            <InputLabel>{t("Select Batch")}</InputLabel>
+            <InputLabel shrink>{t("Select Batch")}</InputLabel>
+            <Select
+              value={logBatchId}
+              onChange={(e) => setLogBatchId(e.target.value)}
+              label={t("Select Batch")}
+              className="rounded-sm"
+            >
+              {batches.map(b => (
+                <MenuItem key={b.id} value={b.id}>{b.id} ({b.breed} - {b.quantity} birds)</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label={t("Medication / Vaccine Name *")}
+            fullWidth
+            variant="outlined"
+            placeholder={t("e.g. Newcastle / Gumboro / Vitamins")}
+            value={logMedicationName}
+            onChange={(e) => setLogMedicationName(e.target.value)}
+          />
+          <FormControl fullWidth variant="outlined">
+            <InputLabel shrink>{t("Type")}</InputLabel>
+            <Select
+              value={logType}
+              onChange={(e) => setLogType(e.target.value as any)}
+              label={t("Type")}
+              className="rounded-sm"
+            >
+              <MenuItem value="Vaccine">{t("Vaccine")}</MenuItem>
+              <MenuItem value="Medication">{t("Medication")}</MenuItem>
+              <MenuItem value="Supplement">{t("Supplement")}</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label={t("Scheduled Date")}
+            type="date"
+            fullWidth
+            variant="outlined"
+            value={logDate}
+            onChange={(e) => setLogDate(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <MuiButton onClick={() => setOpenLogHealth(false)} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
+          <MuiButton 
+            onClick={handleLogHealth} 
+            variant="contained" 
+            disabled={!logBatchId || !logMedicationName.trim()}
+            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
+          >
+            {t("Save Event")}
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Apply Template Modal */}
+      <Dialog open={openApply} onClose={() => setOpenApply(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605, color: '#0f172a' }}>
+          {t("Apply Medication Template")}
+        </DialogTitle>
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
+          <div className="h-2" />
+          <FormControl fullWidth variant="outlined">
+            <InputLabel shrink>{t("Select Batch")}</InputLabel>
             <Select
               value={selectedBatchId}
               onChange={(e) => setSelectedBatchId(e.target.value)}
               label={t("Select Batch")}
-              className="rounded-lg"
+              className="rounded-sm"
             >
               {batches.map(b => (
                 <MenuItem key={b.id} value={b.id}>{b.id} ({b.breed} - {b.quantity} birds)</MenuItem>
@@ -338,12 +454,12 @@ export function HealthClient({ role }: { role: string }) {
             </Select>
           </FormControl>
           <FormControl fullWidth variant="outlined">
-            <InputLabel>{t("Select Template")}</InputLabel>
+            <InputLabel shrink>{t("Select Template")}</InputLabel>
             <Select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
               label={t("Select Template")}
-              className="rounded-lg"
+              className="rounded-sm"
             >
               {templates.map(t_item => (
                 <MenuItem key={t_item.id} value={t_item.id}>{t_item.name} ({t(t_item.targetType)})</MenuItem>
@@ -357,11 +473,11 @@ export function HealthClient({ role }: { role: string }) {
             variant="outlined"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            slotProps={{ htmlInput: { sx: { borderRadius: 2 } } }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <MuiButton onClick={() => setOpenApply(false)} sx={{ color: '#64748b' }}>{t("Cancel")}</MuiButton>
+          <MuiButton onClick={() => setOpenApply(false)} sx={{ color: '#64748b', borderRadius: 2 }}>{t("Cancel")}</MuiButton>
           <MuiButton 
             onClick={handleApplyTemplate} 
             variant="contained" 
@@ -373,35 +489,28 @@ export function HealthClient({ role }: { role: string }) {
         </DialogActions>
       </Dialog>
 
-      {/* Add Template Modal */}
-      <Dialog open={openTemplate} onClose={() => setOpenTemplate(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden', m: { xs: 1, sm: 2 } } } }}>
-        <div className="bg-slate-900 text-white p-5 sm:p-6 flex items-center justify-between">
-          <div>
-            <h3 className="font-extrabold text-base sm:text-lg tracking-tight uppercase">{t("Define Medication Template")}</h3>
-            <p className="text-xs text-indigo-200 mt-0.5">{t("Create reusable vaccination & medication schedules for flock breeds")}</p>
-          </div>
-          <button onClick={() => setOpenTemplate(false)} className="text-slate-400 hover:text-white cursor-pointer">
-            <X size={20} />
-          </button>
-        </div>
-
-        <DialogContent className="flex flex-col gap-4 p-5 sm:p-6 bg-slate-50">
+      {/* Define Medication Template Modal */}
+      <Dialog open={openTemplate} onClose={() => setOpenTemplate(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-cal-sans)', fontWeight: 605, color: '#0f172a' }}>
+          {t("Define Medication Template")}
+        </DialogTitle>
+        <DialogContent className="flex flex-col gap-5 sm:gap-4 pt-5 pb-3">
+          <div className="h-2" />
           <TextField
             label={t("Template Name *")}
             fullWidth
             variant="outlined"
-            size="small"
             value={templateName}
             onChange={(e) => setTemplateName(e.target.value)}
             placeholder={t("e.g. Standard Broiler 8-Week Program")}
           />
-          <FormControl fullWidth variant="outlined" size="small">
-            <InputLabel>{t("Target Flock Type")}</InputLabel>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel shrink>{t("Target Flock Type")}</InputLabel>
             <Select
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
               label={t("Target Flock Type")}
-              className="rounded-lg"
+              className="rounded-sm"
             >
               <MenuItem value="Broilers">{t("Broilers")}</MenuItem>
               <MenuItem value="Layers">{t("Layers")}</MenuItem>
@@ -409,14 +518,14 @@ export function HealthClient({ role }: { role: string }) {
             </Select>
           </FormControl>
           
-          <div className="mt-2 border-t border-slate-200 pt-4 space-y-3">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("Schedule Stages")}</h4>
-              <span className="text-[11px] text-slate-400">{t("Define day offset & medication name")}</span>
+          <div className="mt-1 border-t border-slate-100 pt-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600">{t("Schedule Stages")}</h4>
+              <span className="text-[11px] text-slate-400">{t("Day offset & medication name")}</span>
             </div>
 
             {stages.map((st, i) => (
-              <div key={i} className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:gap-2 sm:items-center">
+              <div key={i} className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2.5 sm:space-y-0 sm:flex sm:gap-2 sm:items-center">
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 w-full items-center">
                   <div className="sm:col-span-3">
                     <TextField
@@ -447,7 +556,7 @@ export function HealthClient({ role }: { role: string }) {
                         newStages[i].medicationName = e.target.value;
                         setStages(newStages);
                       }}
-                      placeholder={t("e.g. Newcastle / Gumboro")}
+                      placeholder={t("e.g. Newcastle")}
                     />
                   </div>
 
@@ -474,16 +583,17 @@ export function HealthClient({ role }: { role: string }) {
             ))}
 
             <button 
+              type="button"
               onClick={addStageRow}
-              className="mt-2 text-indigo-600 text-xs font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+              className="text-indigo-600 text-xs font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
             >
-              + {t("Add Another Schedule Stage")}
+              + {t("Add Another Stage")}
             </button>
           </div>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2.5, bgcolor: 'white', borderTop: '1px solid #e2e8f0', justifyContent: 'space-between' }}>
-          <MuiButton onClick={() => setOpenTemplate(false)} variant="outlined" sx={{ textTransform: 'none', color: '#64748b', borderColor: '#cbd5e1', fontWeight: 600 }}>
+        <DialogActions sx={{ p: 2 }}>
+          <MuiButton onClick={() => setOpenTemplate(false)} sx={{ color: '#64748b', borderRadius: 2 }}>
             {t("Cancel")}
           </MuiButton>
           <MuiButton 
@@ -499,7 +609,7 @@ export function HealthClient({ role }: { role: string }) {
               handleSaveTemplate();
             }} 
             variant="contained" 
-            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, textTransform: 'none', fontWeight: 700, px: 3, borderRadius: 2 }}
+            sx={{ bgcolor: '#4f46e5', '&:hover': { bgcolor: '#4338ca' }, borderRadius: 2, boxShadow: 'none' }}
           >
             {t("Save Template")}
           </MuiButton>

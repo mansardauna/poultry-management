@@ -420,7 +420,7 @@ export function SetupWizardClient() {
                         type="text"
                         value={supabaseUrl}
                         onChange={(e) => setSupabaseUrl(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="https://your-project.supabase.co"
                       />
                     </div>
@@ -430,7 +430,7 @@ export function SetupWizardClient() {
                         type="password"
                         value={supabaseAnonKey}
                         onChange={(e) => setSupabaseAnonKey(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="eyJhbGciOi... (anon key)"
                       />
                     </div>
@@ -440,7 +440,7 @@ export function SetupWizardClient() {
                         type="password"
                         value={supabaseServiceRoleKey}
                         onChange={(e) => setSupabaseServiceRoleKey(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="eyJhbGciOi... (service role key)"
                       />
                     </div>
@@ -455,7 +455,7 @@ export function SetupWizardClient() {
                         type="text"
                         value={postgresHost}
                         onChange={(e) => setPostgresHost(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="localhost or db.example.com"
                       />
                     </div>
@@ -465,7 +465,7 @@ export function SetupWizardClient() {
                         type="number"
                         value={postgresPort}
                         onChange={(e) => setPostgresPort(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="5432"
                       />
                     </div>
@@ -475,7 +475,7 @@ export function SetupWizardClient() {
                         type="text"
                         value={postgresDb}
                         onChange={(e) => setPostgresDb(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="poultry_db"
                       />
                     </div>
@@ -485,7 +485,7 @@ export function SetupWizardClient() {
                         type="text"
                         value={postgresUser}
                         onChange={(e) => setPostgresUser(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="postgres"
                       />
                     </div>
@@ -495,7 +495,7 @@ export function SetupWizardClient() {
                         type="password"
                         value={postgresPassword}
                         onChange={(e) => setPostgresPassword(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="postgres password"
                       />
                     </div>
@@ -510,7 +510,7 @@ export function SetupWizardClient() {
                         type="text"
                         value={mysqlHost}
                         onChange={(e) => setMysqlHost(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="localhost or 127.0.0.1"
                       />
                     </div>
@@ -520,7 +520,7 @@ export function SetupWizardClient() {
                         type="number"
                         value={mysqlPort}
                         onChange={(e) => setMysqlPort(Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="3306"
                       />
                     </div>
@@ -530,7 +530,7 @@ export function SetupWizardClient() {
                         type="text"
                         value={mysqlDatabase}
                         onChange={(e) => setMysqlDatabase(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="poultry_db"
                       />
                     </div>
@@ -540,7 +540,7 @@ export function SetupWizardClient() {
                         type="text"
                         value={mysqlUser}
                         onChange={(e) => setMysqlUser(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="root"
                       />
                     </div>
@@ -550,7 +550,7 @@ export function SetupWizardClient() {
                         type="password"
                         value={mysqlPassword}
                         onChange={(e) => setMysqlPassword(e.target.value)}
-                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all font-medium"
+                        className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-mono bg-white focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors font-medium"
                         placeholder="mysql password"
                       />
                     </div>
@@ -607,7 +607,7 @@ export function SetupWizardClient() {
                       type="email"
                       value={superAdminEmail}
                       onChange={(e) => setSuperAdminEmail(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors bg-white"
                       placeholder="e.g. owner@poultry.com"
                       required
                     />
@@ -621,7 +621,7 @@ export function SetupWizardClient() {
                       type={showPassword ? "text" : "password"}
                       value={superAdminPassword}
                       onChange={(e) => setSuperAdminPassword(e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-xl p-3 pr-11 text-sm font-mono text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all bg-white"
+                      className="w-full border-2 border-slate-200 rounded-xl p-3 pr-11 text-sm font-mono text-slate-800 focus:outline-none focus:ring-0 shadow-none focus:border-indigo-600 transition-colors bg-white"
                       placeholder="Minimum 6 characters"
                       required
                     />

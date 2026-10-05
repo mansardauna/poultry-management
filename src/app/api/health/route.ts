@@ -42,6 +42,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, template: newTemplate }, { status: 201 });
     }
 
+    if (action === 'addSchedule') {
+      const newSchedule = {
+        id: `SCH-${Date.now()}`,
+        workspaceId,
+        batchId: body.batchId,
+        medicationName: body.medicationName,
+        type: body.type || 'Vaccine',
+        scheduledDate: body.scheduledDate || new Date().toISOString().split('T')[0],
+        status: body.status || 'Pending'
+      };
+      const { error } = await supabase.from('medicationSchedules').insert([newSchedule]);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true, schedule: newSchedule }, { status: 201 });
+    }
+
     if (action === 'completeSchedule') {
       const { id } = body;
       const { error } = await supabase.from('medicationSchedules').update({ status: 'Completed' }).eq('id', id).eq('workspaceId', workspaceId);

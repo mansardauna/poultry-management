@@ -206,10 +206,10 @@ export default function LoginPage() {
                       }}
                       placeholder="000000"
                       maxLength={6}
-                      className={`w-full border-2 rounded-xl p-3.5 text-center text-3xl font-mono font-bold tracking-widest focus:outline-none transition-all ${
+                      className={`w-full border-2 rounded-xl p-3.5 text-center text-3xl font-mono font-bold tracking-widest focus:outline-none focus:ring-0 shadow-none transition-colors ${
                         hasLoginError
-                          ? 'border-red-500 ring-2 ring-red-500/40 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/50 focus:bg-amber-50/20'
-                          : 'border-slate-200 bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/30'
+                          ? 'border-red-500 bg-red-50/20 focus:border-red-600'
+                          : 'border-slate-200 bg-white focus:border-indigo-600'
                       }`}
                       required
                       autoFocus
@@ -251,10 +251,10 @@ export default function LoginPage() {
                           setEmail(e.target.value);
                           if (error) setError('');
                         }}
-                        className={`w-full border-2 rounded-xl p-3.5 text-sm sm:text-base font-medium transition-all focus:outline-none ${
+                        className={`w-full border-2 rounded-xl p-3.5 text-sm sm:text-base font-medium transition-colors focus:outline-none focus:ring-0 shadow-none ${
                           hasLoginError
-                            ? 'border-red-500 ring-2 ring-red-500/40 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/50 focus:bg-amber-50/20'
-                            : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/30'
+                            ? 'border-red-500 bg-red-50/20 focus:border-red-600'
+                            : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600'
                         }`}
                         placeholder="e.g. owner@poultry.com or username"
                         required
@@ -270,10 +270,10 @@ export default function LoginPage() {
                             setPassword(e.target.value);
                             if (error) setError('');
                           }}
-                          className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-all focus:outline-none ${
+                          className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-colors focus:outline-none focus:ring-0 shadow-none ${
                             hasLoginError
-                              ? 'border-red-500 ring-2 ring-red-500/40 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400/50 focus:bg-amber-50/20'
-                              : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/30'
+                              ? 'border-red-500 bg-red-50/20 focus:border-red-600'
+                              : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600'
                           }`}
                           placeholder={t("Enter your password")}
                           required

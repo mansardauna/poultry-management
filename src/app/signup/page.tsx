@@ -160,10 +160,10 @@ function SignupForm() {
                 setEmail(e.target.value);
                 if (error) setError('');
               }}
-              className={`w-full border-2 rounded-xl p-3.5 text-sm sm:text-base font-medium transition-all focus:outline-none ${
+              className={`w-full border-2 rounded-xl p-3.5 text-sm sm:text-base font-medium transition-colors focus:outline-none focus:ring-0 shadow-none ${
                 showEmailError 
-                  ? 'border-red-500 ring-2 ring-red-500/50 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400 focus:bg-amber-50/20' 
-                  : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/30'
+                  ? 'border-red-500 bg-red-50/20 focus:border-red-600' 
+                  : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600'
               }`}
               placeholder={t("Enter your email address")}
               required
@@ -187,10 +187,10 @@ function SignupForm() {
                   setPassword(e.target.value);
                   if (error) setError('');
                 }}
-                className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-colors focus:outline-none focus:ring-0 shadow-none ${
                   password.length > 0 && password.length < 6
-                    ? 'border-red-500 ring-2 ring-red-500/50 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400 focus:bg-amber-50/20'
-                    : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/30'
+                    ? 'border-red-500 bg-red-50/20 focus:border-red-600'
+                    : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600'
                 }`}
                 placeholder={t("Choose a secure password", "Choose a secure password")}
                 required
@@ -222,12 +222,12 @@ function SignupForm() {
                   setConfirmPassword(e.target.value);
                   if (error) setError('');
                 }}
-                className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-all focus:outline-none ${
+                className={`w-full border-2 rounded-xl p-3.5 pr-12 text-sm sm:text-base font-medium transition-colors focus:outline-none focus:ring-0 shadow-none ${
                   showPasswordMismatch
-                    ? 'border-red-500 ring-2 ring-red-500/50 bg-red-50/20 focus:border-amber-500 focus:ring-4 focus:ring-amber-400 focus:bg-amber-50/20'
+                    ? 'border-red-500 bg-red-50/20 focus:border-red-600'
                     : showPasswordMatchSuccess
-                    ? 'border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-50/20 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/40 focus:bg-white'
-                    : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/30'
+                    ? 'border-emerald-500 bg-emerald-50/20 focus:border-emerald-600 focus:bg-white'
+                    : 'border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-600'
                 }`}
                 placeholder={t("Re-enter your password", "Re-enter your password")}
                 required
