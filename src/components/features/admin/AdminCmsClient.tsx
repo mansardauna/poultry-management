@@ -926,7 +926,7 @@ export function AdminCmsClient({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-extrabold text-purple-950">
-                  {formatCurrency(totalRevenue, currencySymbol)}
+                  {formatCurrency(currentMonthlyMrr > 0 ? currentMonthlyMrr : totalRevenue, currencySymbol)}
                 </div>
                 <p className="text-xs text-purple-700 font-medium mt-1">{t("Aggregated merchant subscriptions")}</p>
               </CardContent>
@@ -979,111 +979,78 @@ export function AdminCmsClient({
           {/* SaaS Business Telemetry & Performance Trend Graphs */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Chart 1: Revenue & MRR Growth Trajectory */}
-            <Card className="border border-purple-100 shadow-sm bg-white overflow-hidden">
-              <CardHeader className="border-b border-slate-100 bg-slate-50/60 pb-3 flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <TrendingUp size={17} className="text-purple-600" />
-                    <span>{t("SaaS Revenue & MRR Trajectory")}</span>
-                  </CardTitle>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{t("Recurring revenue and billing history over the last 6 months")}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
-                    {formatCurrency(totalRevenue > 0 ? totalRevenue : currentMonthlyMrr, currencySymbol)} {t("Total")}
-                  </span>
-                </div>
+            <Card className="flex flex-col justify-between border border-slate-200 bg-white rounded-2xl shadow-sm">
+              <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <TrendingUp size={18} className="text-emerald-600" />
+                  {t("SaaS Revenue & MRR Trajectory")}
+                </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4">
-                <div className="grid grid-cols-3 gap-2 mb-4 p-2.5 rounded-xl bg-purple-50/40 border border-purple-100/70 text-center">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block">{t("Est. MRR")}</span>
-                    <span className="text-xs sm:text-sm font-black text-purple-900">{formatCurrency(currentMonthlyMrr, currencySymbol)}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block">{t("Est. ARR")}</span>
-                    <span className="text-xs sm:text-sm font-black text-indigo-900">{formatCurrency(currentMonthlyMrr * 12, currencySymbol)}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block">{t("ARPU")}</span>
-                    <span className="text-xs sm:text-sm font-black text-emerald-900">{formatCurrency(arpu, currencySymbol)}</span>
-                  </div>
-                </div>
-
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={businessPerformanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#9333ea" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#9333ea" stopOpacity={0.0} />
-                        </linearGradient>
-                        <linearGradient id="mrrGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2} />
-                          <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0} />
-                        </linearGradient>
-                      </defs>
+              <CardContent className="pt-6 flex-1">
+                <div className="h-80 w-full">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                    <LineChart data={businessPerformanceData} margin={{ top: 10, right: 15, left: -10, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                      <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                      <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} tickFormatter={(val) => `${currencySymbol}${val >= 1000 ? `${(val/1000).toFixed(0)}k` : val}`} />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
-                        formatter={(val: any) => [formatCurrency(val, currencySymbol), '']}
+                      <XAxis dataKey="month" stroke="#64748b" fontSize={12} tickLine={false} />
+                      <YAxis 
+                        stroke="#64748b" 
+                        fontSize={12} 
+                        tickLine={false} 
+                        tickFormatter={(val) => `${currencySymbol}${val >= 1000 ? `${(val/1000).toFixed(0)}k` : `${val}`}`}
                       />
-                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
-                      <Area type="monotone" dataKey="revenue" name={t("Monthly Revenue")} stroke="#9333ea" strokeWidth={2.5} fillOpacity={1} fill="url(#revenueGrad)" />
-                      <Area type="monotone" dataKey="mrr" name={t("Calculated MRR")} stroke="#4f46e5" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#mrrGrad)" />
-                    </AreaChart>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        labelClassName="text-slate-800 text-xs font-bold"
+                        formatter={(val: any, name?: any) => [formatCurrency(Number(val) || 0, currencySymbol), String(name || '')]}
+                      />
+                      <Legend />
+                      <Line 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="#10b981" 
+                        strokeWidth={3} 
+                        dot={{ r: 3, fill: '#10b981' }} 
+                        activeDot={{ r: 6 }} 
+                        name={t("Total SaaS Revenue")} 
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="mrr" 
+                        stroke="#4f46e5" 
+                        strokeWidth={2.5} 
+                        strokeDasharray="4 4"
+                        dot={{ r: 3, fill: '#4f46e5' }} 
+                        activeDot={{ r: 5 }} 
+                        name={t("Monthly Recurring Revenue (MRR)")} 
+                      />
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
 
             {/* Chart 2: Customer & Farm Workspace Expansion */}
-            <Card className="border border-indigo-100 shadow-sm bg-white overflow-hidden">
-              <CardHeader className="border-b border-slate-100 bg-slate-50/60 pb-3 flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <Building2 size={17} className="text-indigo-600" />
-                    <span>{t("Farm Workspaces & Tenant Cohorts")}</span>
-                  </CardTitle>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{t("Customer acquisition, total farm branches, and tier adoption")}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                    {allOrgs.length > 0 ? `${Math.round(((activeProCount + activeEnterpriseCount) / allOrgs.length) * 100)}%` : '0%'} {t("Paid Ratio")}
-                  </span>
-                </div>
+            <Card className="flex flex-col justify-between border border-slate-200 bg-white rounded-2xl shadow-sm">
+              <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <Building2 size={18} className="text-indigo-600" />
+                  {t("Farm Workspaces & Tenant Cohorts")}
+                </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4">
-                <div className="grid grid-cols-3 gap-2 mb-4 p-2.5 rounded-xl bg-indigo-50/40 border border-indigo-100/70 text-center">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block">{t("Total Farms")}</span>
-                    <span className="text-xs sm:text-sm font-black text-slate-900">{formatNumber(allOrgs.length)}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block">{t("Paid Tier")}</span>
-                    <span className="text-xs sm:text-sm font-black text-emerald-700">{formatNumber(activeProCount + activeEnterpriseCount)}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block">{t("Starter (Free)")}</span>
-                    <span className="text-xs sm:text-sm font-black text-amber-700">{formatNumber(activeFreeCount)}</span>
-                  </div>
-                </div>
-
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+              <CardContent className="pt-6 flex-1">
+                <div className="h-80 w-full">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <BarChart data={businessPerformanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                      <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                      <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
+                      <XAxis dataKey="month" stroke="#64748b" fontSize={12} tickLine={false} />
+                      <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
                       <Tooltip 
-                        contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
+                        contentStyle={{ borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        labelClassName="text-slate-800 text-xs font-bold"
                       />
-                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
-                      <Bar dataKey="freeTenants" stackId="tier" name={t("Free Farms")} fill="#94a3b8" radius={[0, 0, 0, 0]} />
-                      <Bar dataKey="paidTenants" stackId="tier" name={t("Paid Subscribers")} fill="#4f46e5" radius={[4, 4, 0, 0]} />
-                      <Line type="monotone" dataKey="cumulativeTenants" name={t("Total Tenants")} stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
+                      <Legend />
+                      <Bar dataKey="paidTenants" stackId="a" fill="#4f46e5" name={t("Paid Subscribers")} />
+                      <Bar dataKey="freeTenants" stackId="a" fill="#94a3b8" name={t("Starter Farms")} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

@@ -51,6 +51,9 @@ export async function GET() {
     if (!gateways.stripePublicKey) gateways.stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
     if (!gateways.stripeSecretKey) gateways.stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
     if (!gateways.aiApiKey) gateways.aiApiKey = process.env.GEMINI_API_KEY || '';
+    if (!gateways.currencySymbol || gateways.currencySymbol === '?' || gateways.currencySymbol === '₦') {
+      gateways.currencySymbol = '$';
+    }
     if (!gateways.aiModel || gateways.aiModel === 'gemini-2.0-flash' || gateways.aiModel === 'gemini-1.5-flash') {
       gateways.aiModel = 'gemini-3.5-flash';
     }

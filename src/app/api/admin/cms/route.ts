@@ -58,7 +58,11 @@ export async function GET() {
       ...DEFAULT_CMS,
       ...gatewayParsed,
       ...cmsParsed,
-      currencySymbol: cmsParsed.currencySymbol || gatewayParsed.currencySymbol || DEFAULT_CMS.currencySymbol || '$',
+      currencySymbol: (cmsParsed.currencySymbol && cmsParsed.currencySymbol !== '?' && cmsParsed.currencySymbol !== '₦') 
+        ? cmsParsed.currencySymbol 
+        : (gatewayParsed.currencySymbol && gatewayParsed.currencySymbol !== '?' && gatewayParsed.currencySymbol !== '₦')
+        ? gatewayParsed.currencySymbol
+        : '$',
       brandName,
       platformName: brandName,
       logoUrl: logoUrl || '/icon.png'
