@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ status: 'success' }, { status: 200 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Webhook processing failed' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Webhook processing failed' }, { status: 500 });
   }
 }

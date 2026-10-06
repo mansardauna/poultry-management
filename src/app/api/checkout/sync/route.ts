@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     let session: Stripe.Checkout.Session;
     try {
       session = await stripe.checkout.sessions.retrieve(sessionId);
-    } catch (_err: any) {
+    } catch (_err) {
       return NextResponse.json({
         error: 'Invalid or expired payment session ID.'
       }, { status: 400 });
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
     });
 
     return response;
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Internal server error verifying payment' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Internal server error verifying payment' }, { status: 500 });
   }
 }

@@ -5,16 +5,16 @@ import React from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useLanguage } from '@/components/features/LanguageContext';
 
-interface TableSortHeaderProps {
+interface TableSortHeaderProps<K extends string = string> {
   label: React.ReactNode;
-  sortKey: string;
-  currentSort?: { key: any; direction: 'asc' | 'desc' | null } | null;
-  onSort: (key: any) => void;
+  sortKey: K;
+  currentSort?: { key: string; direction: 'asc' | 'desc' | null } | null;
+  onSort: (key: K) => void;
   className?: string;
   align?: 'left' | 'center' | 'right';
 }
 
-export function TableSortHeader({ label, sortKey, currentSort, onSort, className = "", align = 'left' }: TableSortHeaderProps) {
+export function TableSortHeader<K extends string = string>({ label, sortKey, currentSort, onSort, className = "", align = 'left' }: TableSortHeaderProps<K>) {
   const { t } = useLanguage();
   const isSorted = currentSort?.key === sortKey;
   const direction = currentSort?.direction;

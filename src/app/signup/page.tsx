@@ -100,9 +100,9 @@ function SignupForm() {
 
       const displayError = body?.error || `Account creation failed (HTTP ${response.status}).`;
       setError(displayError);
-    } catch (err: any) {
+    } catch (err) {
       setIsSubmitting(false);
-      setError(err?.message || 'Network error while attempting to reach server.');
+      setError((err as { message?: string })?.message || 'Network error while attempting to reach server.');
     }
   };
 

@@ -64,8 +64,8 @@ export async function GET() {
       gateways,
       superAdminEmail: user.email || ''
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to fetch gateway configuration' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to fetch gateway configuration' }, { status: 500 });
   }
 }
 
@@ -156,7 +156,7 @@ export async function POST(request: Request) {
         .eq('id', 'landing_page_cms')
         .maybeSingle();
 
-      let cmsParsed: any = {};
+      let cmsParsed: Record<string, unknown> = {};
       if (cmsRow?.adminName) {
         try {
           cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
@@ -198,7 +198,7 @@ export async function POST(request: Request) {
       success: true,
       message: 'Payment gateways, platform settings, and credentials updated successfully!'
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to update gateways' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to update gateways' }, { status: 500 });
   }
 }

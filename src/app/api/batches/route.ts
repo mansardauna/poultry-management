@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
+import { ChickenBatch } from '@/data/types';
 
 /** Exported function GET */
 export async function GET() {
@@ -10,7 +11,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { data: batchesData } = await applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId);
-  const normalized = (batchesData || []).map((b: any) => ({
+  const normalized = (batchesData || []).map((b: Partial<ChickenBatch>) => ({
     id: String(b.id),
     workspaceId: b.workspaceId || workspaceId,
     breed: b.breed || 'Commercial Layer',
@@ -162,8 +163,8 @@ export async function POST(request: Request) {
     }]);
     
     return NextResponse.json(newBatch, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to manage batch operations' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to manage batch operations' }, { status: 500 });
   }
 }
 
@@ -206,7 +207,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('batches').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete batch: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete batch: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

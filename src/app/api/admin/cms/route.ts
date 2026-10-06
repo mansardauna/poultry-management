@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         .eq('id', 'gateways_config')
         .maybeSingle();
 
-      let gwParsed: any = {};
+      let gwParsed: Record<string, unknown> = {};
       if (gwRow?.adminName) {
         try {
           gwParsed = typeof gwRow.adminName === 'string' ? JSON.parse(gwRow.adminName) : gwRow.adminName;
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       logoUrl: effectiveLogoUrl,
       message: 'Platform Brand Identity & CMS content saved and propagated live!' 
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to save landing page CMS content' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to save landing page CMS content' }, { status: 500 });
   }
 }

@@ -31,35 +31,35 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId)
   ]);
 
-  const normalizedSales = (sales || []).map((s: any) => ({
+  const normalizedSales = (sales || []).map((s: Record<string, unknown>) => ({
     id: String(s.id),
-    date: s.date || new Date().toISOString().split('T')[0],
-    type: s.type || 'Eggs',
+    date: (s.date as string) || new Date().toISOString().split('T')[0],
+    type: (s.type as string) || 'Eggs',
     quantity: Number(s.quantity) || 0,
     totalAmount: Number(s.totalAmount) || 0,
-    customerName: s.customerName || 'Walk-in Customer',
-    paymentMethod: s.paymentMethod || 'Cash',
-    status: s.status || 'Paid'
+    customerName: (s.customerName as string) || 'Walk-in Customer',
+    paymentMethod: (s.paymentMethod as string) || 'Cash',
+    status: (s.status as string) || 'Paid'
   }));
 
-  const normalizedExpenses = (expenses || []).map((ex: any) => ({
+  const normalizedExpenses = (expenses || []).map((ex: Record<string, unknown>) => ({
     id: String(ex.id),
-    date: ex.date || new Date().toISOString().split('T')[0],
-    category: ex.category || 'Feed',
+    date: (ex.date as string) || new Date().toISOString().split('T')[0],
+    category: (ex.category as string) || 'Feed',
     amount: Number(ex.amount) || 0,
-    description: ex.description || ''
+    description: (ex.description as string) || ''
   }));
 
-  const normalizedInvoices = (invoices || []).map((i: any) => ({
+  const normalizedInvoices = (invoices || []).map((i: Record<string, unknown>) => ({
     id: String(i.id),
-    date: i.date || new Date().toISOString().split('T')[0],
+    date: (i.date as string) || new Date().toISOString().split('T')[0],
     saleId: String(i.saleId || ''),
-    customerName: i.customerName || 'Customer Invoice',
-    items: i.items || 'Poultry Products',
+    customerName: (i.customerName as string) || 'Customer Invoice',
+    items: (i.items as string) || 'Poultry Products',
     quantity: Number(i.quantity) || 0,
     unitPrice: Number(i.unitPrice) || 0,
     totalAmount: Number(i.totalAmount) || 0,
-    status: i.status || 'Unpaid'
+    status: (i.status as string) || 'Unpaid'
   }));
 
   return NextResponse.json({
@@ -156,8 +156,8 @@ export async function POST(request: Request) {
     }]);
     
     return NextResponse.json(newExpense, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to record expense' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to record expense' }, { status: 500 });
   }
 }
 
@@ -219,7 +219,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('expenses').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete expense: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete expense: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

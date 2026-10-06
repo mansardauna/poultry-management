@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getWorkspaceId } from '@/lib/workspace';
+import { CctvLog } from '@/data/types';
 
 /** Exported function GET */
 export async function GET() {
@@ -16,7 +17,7 @@ export async function GET() {
 
   // Fallback: If cctv_cameras table is empty, reconstruct paired cameras from audit logs
   if (cameras.length === 0 && cctvLogsData && cctvLogsData.length > 0) {
-    const pairedLogs = cctvLogsData.filter((l: any) => l.event && l.event.includes('Paired new hardware camera'));
+    const pairedLogs = (cctvLogsData as CctvLog[]).filter((l: CctvLog) => l.event && l.event.includes('Paired new hardware camera'));
     const cameraMap = new Map();
     for (const log of pairedLogs) {
       const match = log.event.match(/ID\/URL:\s*([^)]+)/);
@@ -167,7 +168,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('cctv_cameras').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete camera: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete camera: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

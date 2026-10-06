@@ -1,13 +1,13 @@
 'use strict';
 
 import { cookies } from 'next/headers';
-import { getAuthUser } from './auth';
+import { getAuthUser, AuthUser } from './auth';
 import { supabase as serviceRoleClient } from './supabase';
 
 /**
  * Fast, cookie-first workspace ID resolution per organization / user.
  */
-function parseBranches(raw: any): string[] {
+function parseBranches(raw: unknown): string[] {
   if (Array.isArray(raw)) return raw.filter(Boolean);
   if (typeof raw === 'string') {
     try {
@@ -108,30 +108,32 @@ export async function getWorkspaceId(): Promise<string> {
  * Strict tenant isolation helper for query builders (Supabase / DataAdapter).
  * Ensures that every tenant only ever retrieves their own workspace's data.
  */
-export function applyWorkspaceFilter(query: any, workspaceId: string) {
+export function applyWorkspaceFilter<T>(query: T, workspaceId: string): T {
   const cleanId = (workspaceId || '').replace(/"/g, '').trim();
+  const q = query as unknown as { eq: (field: string, val: string) => T };
   if (!cleanId) {
-    return query.eq('workspaceId', '__none__');
+    return q.eq('workspaceId', '__none__');
   }
-  return query.eq('workspaceId', cleanId);
+  return q.eq('workspaceId', cleanId);
 }
 
 /**
  * Staff-aware workspace filter helper.
  * Matches records where workspaceId equals cleanId OR where assignedBranches includes cleanId.
  */
-export function applyStaffWorkspaceFilter(query: any, workspaceId: string) {
+export function applyStaffWorkspaceFilter<T>(query: T, workspaceId: string): T {
   const cleanId = (workspaceId || '').replace(/"/g, '').trim();
+  const q = query as unknown as { eq: (field: string, val: string) => T; or: (filter: string) => T };
   if (!cleanId) {
-    return query.eq('workspaceId', '__none__');
+    return q.eq('workspaceId', '__none__');
   }
-  return query.or(`workspaceId.eq.${cleanId},assignedBranches.like.%${cleanId}%`);
+  return q.or(`workspaceId.eq.${cleanId},assignedBranches.like.%${cleanId}%`);
 }
 
 /**
  * Reusable tenant isolation helper for fetching ONLY the workspaces belonging to the authenticated user/organization.
  */
-export async function getTenantWorkspaces(user?: any) {
+export async function getTenantWorkspaces(user?: AuthUser | null) {
   const authUser = user || (await getAuthUser());
   if (!authUser) {
     return [];
@@ -240,7 +242,7 @@ export async function getTenantWorkspaces(user?: any) {
   }];
 }
 
-export async function getTenantTier(user?: any) {
+export async function getTenantTier(user?: AuthUser | null) {
   const authUser = user || (await getAuthUser());
   if (!authUser) {
     return 'free';

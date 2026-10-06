@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, message: 'SaaS plan configurations & live subscriber feature entitlements updated successfully!' });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to update plans' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to update plans' }, { status: 500 });
   }
 }

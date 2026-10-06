@@ -23,13 +23,13 @@ export async function POST(_request: Request) {
     ]);
 
     const todayEggs = eggsRes.data || [];
-    const totalGoodEggs = todayEggs.reduce((s: number, e: any) => s + (e.goodEggs || 0), 0);
-    const totalBrokenEggs = todayEggs.reduce((s: number, e: any) => s + (e.brokenEggs || 0), 0);
+    const totalGoodEggs = todayEggs.reduce((s: number, e: Record<string, unknown>) => s + (Number(e.goodEggs) || 0), 0);
+    const totalBrokenEggs = todayEggs.reduce((s: number, e: Record<string, unknown>) => s + (Number(e.brokenEggs) || 0), 0);
     const totalCrates = Math.floor(totalGoodEggs / 30);
 
-    const totalFlockSize = (batchesRes.data || []).reduce((s: number, b: any) => s + (b.quantity || 0), 0);
+    const totalFlockSize = (batchesRes.data || []).reduce((s: number, b: Record<string, unknown>) => s + (Number(b.quantity) || 0), 0);
     const unpaidInvoicesCount = (invoicesRes.data || []).length;
-    const unpaidInvoicesAmount = (invoicesRes.data || []).reduce((s: number, i: any) => s + (i.totalAmount || 0), 0);
+    const unpaidInvoicesAmount = (invoicesRes.data || []).reduce((s: number, i: Record<string, unknown>) => s + (Number(i.totalAmount) || 0), 0);
 
     // Build Formatted Daily Digest Payload
     const summaryDigest = {
@@ -65,7 +65,7 @@ export async function POST(_request: Request) {
     }]);
 
     return NextResponse.json({ success: true, digest: summaryDigest }, { status: 200 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to dispatch daily digest' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to dispatch daily digest' }, { status: 500 });
   }
 }

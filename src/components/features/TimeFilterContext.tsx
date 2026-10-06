@@ -15,7 +15,7 @@ export type TimeRange = 'weekly' | 'monthly' | 'yearly' | 'all';
 interface TimeFilterContextType {
   timeRange: TimeRange;
   setTimeRange: (range: TimeRange) => void;
-  filterByTimeRange: <T extends Record<string, any>>(items: T[], dateFieldOverride?: string) => T[];
+  filterByTimeRange: <T extends object>(items: T[], dateFieldOverride?: string) => T[];
 }
 
 const TimeFilterContext = createContext<TimeFilterContextType | undefined>(undefined);
@@ -42,7 +42,7 @@ export function TimeFilterProvider({ children }: { children: React.ReactNode }) 
     Cookies.set('pfms_time_range', range, { path: '/' });
   };
 
-  const filterByTimeRange = <T extends Record<string, any>>(items: T[], dateFieldOverride?: string): T[] => {
+  const filterByTimeRange = <T extends object>(items: T[], dateFieldOverride?: string): T[] => {
     if (timeRange === 'all' || !Array.isArray(items)) return items;
     
     const now = new Date();
@@ -61,17 +61,18 @@ export function TimeFilterProvider({ children }: { children: React.ReactNode }) 
 
     return items.filter((item) => {
       // Find the date field on the object
+      const rec = item as Record<string, unknown>;
       const val = 
-        item[dateFieldOverride || ''] ||
-        item['date'] || 
-        item['purchaseDate'] || 
-        item['lastRestock'] || 
-        item['scheduledDate'] || 
-        item['createdAt'];
+        rec[dateFieldOverride || ''] ||
+        rec['date'] || 
+        rec['purchaseDate'] || 
+        rec['lastRestock'] || 
+        rec['scheduledDate'] || 
+        rec['createdAt'];
 
       if (!val) return true; // If no date field exists, preserve the record
       
-      const itemDate = new Date(val);
+      const itemDate = new Date(val as string | number | Date);
       // If invalid date, preserve
       if (isNaN(itemDate.getTime())) return true;
       

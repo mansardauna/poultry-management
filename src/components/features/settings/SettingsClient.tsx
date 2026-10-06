@@ -23,6 +23,7 @@ import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, Cre
 import { useWorkspace } from '../WorkspaceContext';
 import { useLanguage } from '../LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { SaasPlanConfig } from '@/components/features/admin/AdminCmsClient';
 import { 
   SUPPORTED_CURRENCIES, 
   getDefaultExchangeRate, 
@@ -69,8 +70,8 @@ interface SystemSettings {
 interface SettingsClientProps {
   initialSettings: AlertSettings | undefined;
   systemSettings: SystemSettings | undefined;
-  initialPaymentMethods?: any[];
-  initialSubscriptionHistory?: any[];
+  initialPaymentMethods?: Record<string, unknown>[];
+  initialSubscriptionHistory?: Record<string, unknown>[];
   workspaces: Workspace[];
   workspaceId: string;
   role?: string;
@@ -110,9 +111,9 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [currentTier, setCurrentTier] = useState('free');
   
   // Real Dynamic Payment Methods & Subscription History
-  const [paymentMethods, setPaymentMethods] = useState<any[]>(initialPaymentMethods);
+  const [paymentMethods, setPaymentMethods] = useState<Record<string, unknown>[]>(initialPaymentMethods);
   const { activeWorkspace, updateWorkspace } = useWorkspace();
-  const [_subscriptionHistory] = useState<any[]>(initialSubscriptionHistory);
+  const [_subscriptionHistory] = useState<Record<string, unknown>[]>(initialSubscriptionHistory);
 
   // Add Card Modal State
   const [_openAddCardModal, _setOpenAddCardModal] = useState(false);
@@ -124,7 +125,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
   const isUpgraded = searchParams.get('upgraded') === 'true';
   const _queryTier = searchParams.get('tier');
-  const [saasPlans, setSaasPlans] = useState<any[]>([]);
+  const [saasPlans, setSaasPlans] = useState<SaasPlanConfig[]>([]);
 
   useEffect(() => {
     fetch('/api/plans')

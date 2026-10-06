@@ -25,6 +25,12 @@ import {
   Button as MuiButton 
 } from '@mui/material';
 
+interface MedicationTemplateStage {
+  dayOffset: number;
+  medicationName: string;
+  type: string;
+}
+
 /**
  * HealthClient component for managing flock health and vaccinations.
  * @param props The component props.
@@ -352,7 +358,7 @@ export function HealthClient({ role }: { role: string }) {
                     </div>
                   </div>
                   <div className="space-y-1 mt-3">
-                    {((tmpl.stages as any) || []).map((st: any, i: number) => (
+                    {((tmpl.stages as MedicationTemplateStage[]) || []).map((st, i: number) => (
                       <div key={i} className="flex justify-between text-xs font-mono border-b border-slate-200 last:border-0 py-1">
                         <span className="text-slate-500">{t("Day")} {st.dayOffset}</span>
                         <span className="font-semibold text-slate-700">{st.medicationName} ({t(st.type)})</span>
@@ -401,7 +407,7 @@ export function HealthClient({ role }: { role: string }) {
             <InputLabel shrink>{t("Type")}</InputLabel>
             <Select
               value={logType}
-              onChange={(e) => setLogType(e.target.value as any)}
+              onChange={(e) => setLogType(e.target.value as 'Vaccine' | 'Medication' | 'Supplement')}
               label={t("Type")}
               className="rounded-sm"
             >
@@ -568,7 +574,7 @@ export function HealthClient({ role }: { role: string }) {
                         label={t("Type")}
                         onChange={(e) => {
                           const newStages = [...stages];
-                          newStages[i].type = e.target.value as any;
+                          newStages[i].type = e.target.value;
                           setStages(newStages);
                         }}
                       >

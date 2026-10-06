@@ -171,7 +171,39 @@ export interface SaasPlanConfig {
   aiLoggerEnabled: boolean;
   exportReportsEnabled: boolean;
   enterpriseHubEnabled: boolean;
+  basePriceMonthly?: number;
+  basePriceAnnual?: number;
+  currencySymbol?: string;
   features: string[];
+}
+
+export interface TenantWorkspace {
+  id: string;
+  name: string;
+  type?: string;
+  ownerUsername?: string;
+}
+
+export interface TenantOrg {
+  id: string;
+  name?: string;
+  ownerEmail?: string;
+  ownerUsername?: string;
+  adminEmail?: string;
+  subscriptionTier?: string;
+  subscriptionStatus?: string;
+  tier?: string;
+  plan?: string;
+  billingRegion?: string;
+  currencySymbol?: string;
+  createdAt?: string;
+  workspaces?: TenantWorkspace[];
+  telemetry?: {
+    staffCount?: number;
+    batchesCount?: number;
+    eggsCount?: number;
+  };
+  [key: string]: unknown;
 }
 
 export function AdminCmsClient({ 
@@ -185,9 +217,9 @@ export function AdminCmsClient({
   initialPlans: SaasPlanConfig[]; 
   currentUserEmail: string;
   userRole?: string;
-  allSubscriptions?: any[];
-  allHistory?: any[];
-  allOrgs?: any[];
+  allSubscriptions?: Record<string, unknown>[];
+  allHistory?: Record<string, unknown>[];
+  allOrgs?: TenantOrg[];
 }) {
   const { formatNumber, formatCurrency, t } = useLanguage();
   const { confirm } = useConfirm();
@@ -199,7 +231,7 @@ export function AdminCmsClient({
 
   useEffect(() => {
     if (tabParam === 'setup' || tabParam === 'plans' || tabParam === 'cms' || tabParam === 'orgs' || tabParam === 'settings' || tabParam === 'overview') {
-      setActiveTab(tabParam as any);
+      setActiveTab(tabParam as 'overview' | 'setup' | 'plans' | 'cms' | 'orgs' | 'settings');
     }
   }, [tabParam]);
 
@@ -237,8 +269,8 @@ export function AdminCmsClient({
 
     // Rate conversion from base USD
     setPlans(prev => prev.map(p => {
-      let baseMonthly = (p as any).basePriceMonthly;
-      let baseAnnual = (p as any).basePriceAnnual;
+      let baseMonthly = p.basePriceMonthly;
+      let baseAnnual = p.basePriceAnnual;
 
       if (baseMonthly === undefined || baseMonthly === null) {
         if (p.id === 'pro') baseMonthly = 15;
@@ -269,8 +301,8 @@ export function AdminCmsClient({
     if (newRate <= 0) return;
 
     setPlans(prev => prev.map(p => {
-      const baseMonthly = (p as any).basePriceMonthly ?? (p.id === 'pro' ? 15 : p.id === 'enterprise' ? 45 : 0);
-      const baseAnnual = (p as any).basePriceAnnual ?? (p.id === 'pro' ? 144 : p.id === 'enterprise' ? 432 : 0);
+      const baseMonthly = p.basePriceMonthly ?? (p.id === 'pro' ? 15 : p.id === 'enterprise' ? 45 : 0);
+      const baseAnnual = p.basePriceAnnual ?? (p.id === 'pro' ? 144 : p.id === 'enterprise' ? 432 : 0);
       const convertedMonthly = currencySymbol === '$' ? baseMonthly : convertUsdToCurrency(baseMonthly, currencySymbol, newRate);
       const convertedAnnual = currencySymbol === '$' ? baseAnnual : convertUsdToCurrency(baseAnnual, currencySymbol, newRate);
 
@@ -344,7 +376,7 @@ export function AdminCmsClient({
   };
 
   // Tenant Management & Impersonation State
-  const [orgsList, setOrgsList] = useState<any[]>(allOrgs || []);
+  const [orgsList, setOrgsList] = useState<TenantOrg[]>(allOrgs || []);
   const [isFetchingTenants, setIsFetchingTenants] = useState(false);
 
   const fetchTenants = useCallback(async () => {
@@ -378,8 +410,8 @@ export function AdminCmsClient({
     }
   }, [activeTab, fetchTenants]);
 
-  const [selectedTenant, setSelectedTenant] = useState<any | null>(null);
-  const [tenantDetail, setTenantDetail] = useState<any | null>(null);
+  const [selectedTenant, setSelectedTenant] = useState<TenantOrg | null>(null);
+  const [tenantDetail, setTenantDetail] = useState<TenantOrg | null>(null);
   const [isLoadingTenant, setIsLoadingTenant] = useState(false);
   const [isSavingTenant, setIsSavingTenant] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -565,7 +597,7 @@ export function AdminCmsClient({
   };
 
   // Plan Handlers
-  const handleFieldChange = (planId: string, field: keyof SaasPlanConfig, value: any) => {
+  const handleFieldChange = (planId: string, field: keyof SaasPlanConfig, value: unknown) => {
     setPlans(prev => prev.map(p => p.id === planId ? { ...p, [field]: value } : p));
   };
 
@@ -702,7 +734,7 @@ export function AdminCmsClient({
   };
 
   // Open Tenant Details Drawer/Modal
-  const handleViewTenant = async (org: any) => {
+  const handleViewTenant = async (org: TenantOrg) => {
     setSelectedTenant({ ...org });
     setIsLoadingTenant(true);
     try {
@@ -896,7 +928,7 @@ export function AdminCmsClient({
     // Accumulate from actual billing history if records exist
     (allHistory || []).forEach(h => {
       if (!h.createdAt) return;
-      const hDate = new Date(h.createdAt);
+      const hDate = new Date(String(h.createdAt));
       const hKey = `${hDate.getFullYear()}-${String(hDate.getMonth() + 1).padStart(2, '0')}`;
       const found = months.find(m => m.key === hKey);
       if (found) {
@@ -1056,7 +1088,7 @@ export function AdminCmsClient({
                       <Tooltip 
                         contentStyle={{ borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                         labelClassName="text-slate-800 text-xs font-bold"
-                        formatter={(val: any, name?: any) => [formatCurrency(Number(val) || 0, currencySymbol), String(name || '')]}
+                        formatter={(val: unknown, name?: unknown) => [formatCurrency(Number(val) || 0, currencySymbol), String(name || '')]}
                       />
                       <Legend />
                       <Line 
@@ -1212,7 +1244,7 @@ export function AdminCmsClient({
                         </td>
                         <td className="p-4 text-right">
                           <button
-                            onClick={() => handleImpersonateTenant(org.id, org.name)}
+                            onClick={() => handleImpersonateTenant(org.id, org.name || 'Tenant')}
                             className="text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1"
                           >
                             <LogIn size={13} /> {t("Login as Tenant")}
@@ -1456,7 +1488,7 @@ export function AdminCmsClient({
                 <select
                   value={aiProvider}
                   onChange={(e) => {
-                    const newProvider = e.target.value as any;
+                    const newProvider = e.target.value as keyof typeof AI_PRESETS;
                     setAiProvider(newProvider);
                     if (AI_PRESETS[newProvider]) {
                       setAiModel(AI_PRESETS[newProvider].defaultModel);
@@ -2270,7 +2302,7 @@ export function AdminCmsClient({
                             </button>
 
                             <button
-                              onClick={() => handleImpersonateTenant(org.id, org.name)}
+                              onClick={() => handleImpersonateTenant(org.id, org.name || 'Tenant')}
                               className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-sm"
                               title={t("Login into customer farm account")}
                             >
@@ -2279,7 +2311,7 @@ export function AdminCmsClient({
                             </button>
 
                             <button
-                              onClick={() => handleDeleteTenant(org.id, org.name)}
+                              onClick={() => handleDeleteTenant(org.id, org.name || 'Tenant')}
                               className="bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 border border-red-200"
                               title={t("Delete customer farm account")}
                             >
@@ -2523,8 +2555,8 @@ export function AdminCmsClient({
                   <div className="space-y-2">
                     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">{t("Associated Farm Workspaces")}</h4>
                     <div className="space-y-1.5">
-                      {tenantDetail?.workspaces?.length > 0 ? (
-                        tenantDetail.workspaces.map((ws: any) => (
+                      {Boolean(tenantDetail?.workspaces && tenantDetail.workspaces.length > 0) ? (
+                        tenantDetail!.workspaces!.map((ws: TenantWorkspace) => (
                           <div key={ws.id} className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between text-xs">
                             <span className="font-bold text-slate-800">{ws.name}</span>
                             <span className="font-mono text-[10px] text-slate-400">{ws.type || 'Layer Farm'}</span>
@@ -2539,7 +2571,7 @@ export function AdminCmsClient({
                   {/* Actions Bar */}
                   <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <button
-                      onClick={() => handleDeleteTenant(selectedTenant.id, selectedTenant.name)}
+                      onClick={() => handleDeleteTenant(selectedTenant.id, selectedTenant.name || 'Farm')}
                       className="text-red-600 hover:text-red-700 text-xs font-bold flex items-center gap-1 cursor-pointer self-start sm:self-auto"
                     >
                       <Trash2 size={14} />
@@ -2548,7 +2580,7 @@ export function AdminCmsClient({
 
                     <div className="flex items-center gap-2 self-end sm:self-auto">
                       <button
-                        onClick={() => handleImpersonateTenant(selectedTenant.id, selectedTenant.name)}
+                        onClick={() => handleImpersonateTenant(selectedTenant.id, selectedTenant.name || 'Farm')}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
                       >
                         <LogIn size={14} />

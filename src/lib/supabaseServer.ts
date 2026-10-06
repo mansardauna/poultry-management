@@ -15,7 +15,7 @@ export async function createClient() {
       from: () => {
         throw new Error('Supabase server client not configured');
       },
-    } as any;
+    } as unknown as ReturnType<typeof createServerClient>;
   }
 
   return createServerClient(

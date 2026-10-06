@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { data: equipment } = await applyWorkspaceFilter(supabase.from('equipment').select('*'), workspaceId);
-  const formatted = (equipment || []).map((eq: any) => ({
+  const formatted = (equipment || []).map((eq: Record<string, unknown>) => ({
     ...eq,
     quantity: Number(eq.quantity || 0)
   }));
@@ -95,7 +95,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('equipment').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete equipment: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete equipment: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

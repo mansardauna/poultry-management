@@ -15,35 +15,35 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId)
   ]);
 
-  const normalizedSales = (salesRes.data || []).map((s: any) => ({
+  const normalizedSales = (salesRes.data || []).map((s: Record<string, unknown>) => ({
     id: String(s.id),
-    date: s.date || new Date().toISOString().split('T')[0],
-    type: s.type || 'Eggs',
+    date: (s.date as string) || new Date().toISOString().split('T')[0],
+    type: (s.type as string) || 'Eggs',
     quantity: Number(s.quantity) || 0,
     totalAmount: Number(s.totalAmount) || 0,
-    customerName: s.customerName || 'Walk-in Customer',
-    paymentMethod: s.paymentMethod || 'Cash',
-    status: s.status || 'Paid'
+    customerName: (s.customerName as string) || 'Walk-in Customer',
+    paymentMethod: (s.paymentMethod as string) || 'Cash',
+    status: (s.status as string) || 'Paid'
   }));
 
-  const normalizedInvoices = (invoicesRes.data || []).map((i: any) => ({
+  const normalizedInvoices = (invoicesRes.data || []).map((i: Record<string, unknown>) => ({
     id: String(i.id),
-    date: i.date || new Date().toISOString().split('T')[0],
+    date: (i.date as string) || new Date().toISOString().split('T')[0],
     saleId: String(i.saleId || ''),
-    customerName: i.customerName || 'Customer Invoice',
-    items: i.items || 'Poultry Products',
+    customerName: (i.customerName as string) || 'Customer Invoice',
+    items: (i.items as string) || 'Poultry Products',
     quantity: Number(i.quantity) || 0,
     unitPrice: Number(i.unitPrice) || 0,
     totalAmount: Number(i.totalAmount) || 0,
-    status: i.status || 'Unpaid'
+    status: (i.status as string) || 'Unpaid'
   }));
 
-  const normalizedBatches = (batchesRes.data || []).map((b: any) => ({
+  const normalizedBatches = (batchesRes.data || []).map((b: Record<string, unknown>) => ({
     id: String(b.id),
-    breed: b.breed || 'Commercial Layer',
+    breed: (b.breed as string) || 'Commercial Layer',
     quantity: Number(b.quantity) || 0,
-    farmSection: b.farmSection || 'Section A',
-    type: b.type || 'Layers'
+    farmSection: (b.farmSection as string) || 'Section A',
+    type: (b.type as string) || 'Layers'
   }));
   
   return NextResponse.json({
@@ -277,7 +277,7 @@ export async function DELETE(request: Request) {
     ]);
 
     return NextResponse.json({ success: true, message: 'Sale deleted' });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to delete record' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to delete record' }, { status: 500 });
   }
 }

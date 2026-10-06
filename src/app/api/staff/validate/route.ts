@@ -39,14 +39,14 @@ export async function GET(request: Request) {
       .select('id, username, name, workspaceId')
       .or(`username.eq.${cleanUsername},name.eq.${cleanUsername}`);
 
-    const existingUsers = (userMatches || []).filter((u: any) => {
+    const existingUsers = (userMatches || []).filter((u: Record<string, unknown>) => {
       if (excludeStaffId && (u.id === excludeStaffId || u.id === `usr_${excludeStaffId}`)) {
         return false;
       }
       return true;
     });
 
-    const existingStaff = (staffMatches || []).filter((s: any) => {
+    const existingStaff = (staffMatches || []).filter((s: Record<string, unknown>) => {
       if (excludeStaffId && s.id === excludeStaffId) {
         return false;
       }
@@ -64,10 +64,10 @@ export async function GET(request: Request) {
       available: true,
       message: 'Username is unique and available.'
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json({
       available: true,
-      error: 'Validation bypassed: ' + (err?.message || '')
+      error: 'Validation bypassed: ' + ((err as { message?: string })?.message || '')
     });
   }
 }

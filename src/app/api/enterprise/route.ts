@@ -43,8 +43,8 @@ export async function GET() {
       bulkOrders: bulkOrdersRes.data || [],
       workspaces: workspaces || []
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to fetch enterprise data' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to fetch enterprise data' }, { status: 500 });
   }
 }
 
@@ -222,7 +222,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: 'Invalid enterprise action' }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to process enterprise action' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to process enterprise action' }, { status: 500 });
   }
 }

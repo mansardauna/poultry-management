@@ -199,11 +199,20 @@ export const BASE_USD_PLANS = [
   }
 ];
 
+export interface CurrencyAdaptablePlan {
+  id?: string;
+  priceMonthly?: number;
+  priceAnnual?: number;
+  basePriceMonthly?: number;
+  basePriceAnnual?: number;
+  [key: string]: unknown;
+}
+
 /**
  * Adapt plans to a target currency with rate conversion applied from base USD
  */
 export function adaptPlansToCurrency(
-  plans: any[],
+  plans: CurrencyAdaptablePlan[],
   targetCurrencySymbol: string = '$',
   customRate?: number
 ) {

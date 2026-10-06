@@ -159,9 +159,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     fetchCurrency();
 
     if (typeof window !== 'undefined') {
-      const handleCustom = (e: any) => {
-        if (e?.detail?.currencySymbol) {
-          setCurrencySymbol(e.detail.currencySymbol);
+      const handleCustom = (e: Event) => {
+        const custom = e as CustomEvent<{ currencySymbol?: string }>;
+        if (custom?.detail?.currencySymbol) {
+          setCurrencySymbol(custom.detail.currencySymbol);
         } else {
           fetchCurrency();
         }
@@ -195,14 +196,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
 
     // 3. Lookup in common dictionary
-    if (texts.common && (texts.common as any)[term]) {
-      return (texts.common as any)[term];
+    if (texts.common && (texts.common as Record<string, string>)[term]) {
+      return (texts.common as Record<string, string>)[term];
     }
 
     // 4. Search across all sub-dictionaries in texts
     for (const section of Object.values(texts)) {
       if (typeof section === 'object' && section !== null) {
-        if ((section as any)[term]) return (section as any)[term];
+        if ((section as Record<string, string>)[term]) return (section as Record<string, string>)[term];
       }
     }
 

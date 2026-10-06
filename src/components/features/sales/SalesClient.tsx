@@ -48,7 +48,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   const farmType = activeWorkspace?.type || 'Layer & Broiler Operations';
   const farmEmail = 'billing@poultryfarm.com';
   const farmPhone = '+234 800 000 0000';
-  const currencySymbol = (whiteLabel as any)?.currencySymbol || '$';
+  const currencySymbol = whiteLabel?.currencySymbol || '$';
 
   const canEdit = role === 'Admin';
   const [sales, setSales] = useState<Sale[]>(initialSales);

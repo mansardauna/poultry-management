@@ -123,9 +123,9 @@ export function verifyTwoFactorCode(secret: string, userCode: string): boolean {
 }
 
 // Temporary in-memory token cache for pending 2FA logins
-const pending2FASessions = new Map<string, { userId: string; email: string; userRec: any; expiresAt: number }>();
+const pending2FASessions = new Map<string, { userId: string; email: string; userRec: Record<string, unknown>; expiresAt: number }>();
 
-export function createPending2FAToken(userId: string, email: string, userRec: any): string {
+export function createPending2FAToken(userId: string, email: string, userRec: Record<string, unknown>): string {
   const tempToken = crypto.randomBytes(32).toString('hex');
   pending2FASessions.set(tempToken, {
     userId,

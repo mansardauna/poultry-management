@@ -19,7 +19,7 @@ export default async function EggsPage() {
     applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId)
   ]);
 
-  const eggs = (eggsRaw.data || []).map((e: any) => ({
+  const eggs = (eggsRaw.data || []).map((e: Record<string, unknown>) => ({
     ...e,
     goodEggs: Number(e.goodEggs) || 0,
     brokenEggs: Number(e.brokenEggs) || 0,

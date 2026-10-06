@@ -170,7 +170,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
       expenses: data.expenses || [],
       staff: data.staff || [],
       tasks: data.tasks || [],
-      pens: (data as any).housing || (data as any).pens || []
+      pens: ((data.farmPens || (data as unknown as Record<string, unknown>).housing || (data as unknown as Record<string, unknown>).pens || []) as unknown as Record<string, unknown>[])
     });
   };
 
@@ -683,7 +683,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
                     <Tooltip 
                       contentStyle={{ borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                       labelClassName="text-slate-800 text-xs font-bold"
-                      formatter={(val: any, name?: any) => [formatCurrency(Number(val) || 0), String(name || '')]}
+                      formatter={(val: unknown, name?: unknown) => [formatCurrency(Number(val) || 0), String(name || '')]}
                     />
                     <Legend />
                     <Line 

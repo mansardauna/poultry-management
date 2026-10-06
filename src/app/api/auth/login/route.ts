@@ -46,25 +46,25 @@ function parseBranches(raw: unknown): string[] {
 }
 
 /** Build a signed session from a `users` table record. Role comes ONLY from the DB record. */
-async function createUserSessionResponse(userRec: any, rememberMe: boolean, request: Request) {
-  const role: string = userRec.role || 'Admin';
+async function createUserSessionResponse(userRec: Record<string, unknown>, rememberMe: boolean, request: Request) {
+  const role: string = (userRec.role as string) || 'Admin';
   const isSuperAdmin = role === 'SuperAdmin';
 
   const workspaceId: string = isSuperAdmin
     ? 'org_superadmin'
-    : (userRec.workspaceId || `main-org_${userRec.id}`);
+    : ((userRec.workspaceId as string) || `main-org_${userRec.id}`);
 
-  let orgId: string = isSuperAdmin ? 'org_superadmin' : (userRec.orgId || orgIdFromWorkspace(workspaceId));
+  let orgId: string = isSuperAdmin ? 'org_superadmin' : ((userRec.orgId as string) || orgIdFromWorkspace(workspaceId));
   if (!orgId) orgId = workspaceId.startsWith('main-') ? workspaceId.slice(5) : '';
 
   const payload: SessionPayload = {
     userId: String(userRec.id),
-    email: userRec.email || '',
+    email: (userRec.email as string) || '',
     role,
     orgId,
     workspaceId,
-    name: userRec.name || userRec.username || '',
-    tier: isSuperAdmin ? 'enterprise' : (userRec.subscriptionTier || 'free'),
+    name: (userRec.name as string) || (userRec.username as string) || '',
+    tier: isSuperAdmin ? 'enterprise' : ((userRec.subscriptionTier as string) || 'free'),
   };
 
   const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const isValid = verifyTwoFactorCode(pending.userRec.twoFactorSecret, body.twoFactorCode);
+    const isValid = verifyTwoFactorCode(String(pending.userRec.twoFactorSecret || ''), String(body.twoFactorCode || ''));
     if (!isValid) {
       return NextResponse.json(
         { error: 'Invalid 6-digit authentication code. Please check your authenticator app.' },

@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Palette, Sparkles, Building2, ArrowRightLeft, Award, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useWhiteLabel } from '../WhiteLabelContext';
+import { useWhiteLabel, WhiteLabelSettings } from '../WhiteLabelContext';
 import { useLanguage } from '@/components/features/LanguageContext';
 
 interface WhiteLabelClientProps {
   tier: string;
-  cooperative?: any;
+  cooperative?: Partial<WhiteLabelSettings> | null;
 }
 
 export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
@@ -26,7 +26,7 @@ export function WhiteLabelClient({ tier, cooperative }: WhiteLabelClientProps) {
   const [subdomain, setSubdomain] = useState(cooperative?.subdomain || whiteLabel.subdomain || 'maitama-farm');
   const [logoUrl, setLogoUrl] = useState(cooperative?.logoUrl || whiteLabel.logoUrl || '');
   const [brandColor, setBrandColor] = useState<'indigo' | 'emerald' | 'purple' | 'amber' | 'slate'>(
-    (cooperative?.brandColor || whiteLabel.brandColor || 'indigo') as any
+    cooperative?.brandColor || whiteLabel.brandColor || 'indigo'
   );
   const [customReportHeader, setCustomReportHeader] = useState(
     cooperative?.customReportHeader || whiteLabel.customReportHeader || 'Official Farm Management Analytics Report'

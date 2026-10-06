@@ -4,6 +4,7 @@
  */
 export interface ChickenBatch {
   id: string;
+  workspaceId?: string;
   breed: string;
   quantity: number;
   purchaseDate: string;
@@ -56,6 +57,7 @@ export interface DailyFeedLog {
 export interface Staff {
   id: string;
   name: string;
+  username?: string;
   role: string;
   salary: number;
   attendanceDays: number;
@@ -148,6 +150,7 @@ export interface Invoice {
   unitPrice: number;
   totalAmount: number;
   status: string; // 'Paid' | 'Pending' | 'Overdue'
+  currencySymbol?: string;
 }
 
 /**
@@ -293,6 +296,8 @@ export interface Workspace {
   name: string;
   type: string;
   createdAt: string;
+  ownerUsername?: string;
+  currencySymbol?: string;
 }
 
 /**

@@ -7,7 +7,7 @@ import { getWorkspaceId, applyWorkspaceFilter } from '@/lib/workspace';
 export async function GET() {
   const workspaceId = await getWorkspaceId();
   const { data: contactsData } = await applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId);
-  const formatted = (contactsData || []).map((c: any) => ({
+  const formatted = (contactsData || []).map((c: Record<string, unknown>) => ({
     ...c,
     totalTransactions: Number(c.totalTransactions || 0)
   }));
@@ -71,7 +71,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('contacts').delete().eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete contact: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete contact: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

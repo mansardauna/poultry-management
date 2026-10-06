@@ -95,14 +95,14 @@ export async function POST(request: Request) {
       .eq('id', 'landing_page_cms')
       .maybeSingle();
 
-    let cmsParsed: any = {};
+    let cmsParsed: Record<string, unknown> = {};
     if (cmsRow?.adminName) {
       try {
         cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
       } catch (_e) {}
     }
 
-    const effectiveBrandName = brandNameInput.trim() || cmsParsed.brandName || 'PFMS';
+    const effectiveBrandName = brandNameInput.trim() || (cmsParsed.brandName as string) || 'PFMS';
 
     const updatedCms = {
       ...cmsParsed,
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
         .eq('id', 'gateways_config')
         .maybeSingle();
 
-      let gwParsed: any = {};
+      let gwParsed: Record<string, unknown> = {};
       if (gwRow?.adminName) {
         try {
           gwParsed = typeof gwRow.adminName === 'string' ? JSON.parse(gwRow.adminName) : gwRow.adminName;
@@ -180,9 +180,9 @@ export async function POST(request: Request) {
       brandName: effectiveBrandName,
       message: 'Brand logo uploaded and applied globally across web app and PWA!'
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { error: err?.message || 'Failed to process logo upload' },
+      { error: (err as { message?: string })?.message || 'Failed to process logo upload' },
       { status: 500 }
     );
   }
@@ -206,7 +206,7 @@ export async function DELETE() {
       .eq('id', 'landing_page_cms')
       .maybeSingle();
 
-    let cmsParsed: any = {};
+    let cmsParsed: Record<string, unknown> = {};
     if (cmsRow?.adminName) {
       try {
         cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
@@ -226,7 +226,7 @@ export async function DELETE() {
       logoUrl: '/icon.png',
       message: 'Logo reset to default application icon'
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to reset logo' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to reset logo' }, { status: 500 });
   }
 }

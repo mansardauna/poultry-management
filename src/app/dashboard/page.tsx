@@ -59,11 +59,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const page = parseInt((searchParams?.page as string) || '1');
   const offset = (page - 1) * 50;
 
-  const [
-    batchesRaw, eggsRaw, feedsRaw, feedLogsRaw, staffRaw, salesRaw, expensesRaw, cushionAuditsRaw, maturationLogsRaw,
-    procurePipelineRaw, cctvLogsRaw, invoicesRaw, tasksRaw, alertSettingsRaw, alertLogsRaw, mortalityLogsRaw,
-    medicationTemplatesRaw, medicationSchedulesRaw, payrollLogsRaw, equipmentRaw, contactsRaw, farmPensRaw
-  ] = await Promise.all([
+  const rawResults = (await Promise.all([
     applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId).range(offset, offset + 49),
     applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId).range(offset, offset + 49),
     applyWorkspaceFilter(supabase.from('feeds').select('*'), workspaceId).range(offset, offset + 49),
@@ -86,47 +82,53 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     applyWorkspaceFilter(supabase.from('equipment').select('*'), workspaceId).range(offset, offset + 49),
     applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId).range(offset, offset + 49),
     applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId).range(offset, offset + 49)
-  ]);
+  ])) as unknown as Array<{ data: Record<string, unknown>[] | null }>;
 
-  const batches = (batchesRaw.data || []).map((b: any) => ({
+  const [
+    batchesRaw, eggsRaw, feedsRaw, feedLogsRaw, staffRaw, salesRaw, expensesRaw, cushionAuditsRaw, maturationLogsRaw,
+    procurePipelineRaw, cctvLogsRaw, invoicesRaw, tasksRaw, alertSettingsRaw, alertLogsRaw, mortalityLogsRaw,
+    medicationTemplatesRaw, medicationSchedulesRaw, payrollLogsRaw, equipmentRaw, contactsRaw, farmPensRaw
+  ] = rawResults;
+
+  const batches = (batchesRaw.data || []).map((b: Record<string, unknown>) => ({
     ...b,
     quantity: Number(b.quantity) || 0,
     mortalityCount: Number(b.mortalityCount) || 0,
     unitPurchasePrice: Number(b.unitPurchasePrice) || 0,
     projectedSellingPrice: Number(b.projectedSellingPrice) || 0
-  })) as ChickenBatch[];
+  })) as unknown as ChickenBatch[];
 
-  const eggs = (eggsRaw.data || []).map((e: any) => ({
+  const eggs = (eggsRaw.data || []).map((e: Record<string, unknown>) => ({
     ...e,
     goodEggs: Number(e.goodEggs) || 0,
     brokenEggs: Number(e.brokenEggs) || 0,
     spoiltEggs: Number(e.spoiltEggs) || 0
-  })) as EggRecord[];
+  })) as unknown as EggRecord[];
 
-  const feeds = (feedsRaw.data || []).map((f: any) => ({
+  const feeds = (feedsRaw.data || []).map((f: Record<string, unknown>) => ({
     ...f,
     quantityKg: Number(f.quantityKg) || 0,
     costPerBag: Number(f.costPerBag) || 0
-  })) as FeedInventory[];
+  })) as unknown as FeedInventory[];
 
   const feedLogs = feedLogsRaw.data || [];
 
-  const staff = (staffRaw.data || []).map((s: any) => ({
+  const staff = (staffRaw.data || []).map((s: Record<string, unknown>) => ({
     ...s,
     salary: Number(s.salary) || 0,
     attendanceDays: Number(s.attendanceDays) || 0
-  })) as Staff[];
+  })) as unknown as Staff[];
 
-  const sales = (salesRaw.data || []).map((s: any) => ({
+  const sales = (salesRaw.data || []).map((s: Record<string, unknown>) => ({
     ...s,
     quantity: Number(s.quantity) || 0,
     totalAmount: Number(s.totalAmount) || 0
-  })) as Sale[];
+  })) as unknown as Sale[];
 
-  const expenses = (expensesRaw.data || []).map((e: any) => ({
+  const expenses = (expensesRaw.data || []).map((e: Record<string, unknown>) => ({
     ...e,
     amount: Number(e.amount) || 0
-  })) as Expense[];
+  })) as unknown as Expense[];
 
   const cushionAudits = cushionAuditsRaw.data || [];
   const maturationLogs = maturationLogsRaw.data || [];
@@ -136,10 +138,10 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const tasks = tasksRaw.data || [];
   const alertLogs = alertLogsRaw.data || [];
 
-  const mortalityLogs = (mortalityLogsRaw.data || []).map((m: any) => ({
+  const mortalityLogs = (mortalityLogsRaw.data || []).map((m: Record<string, unknown>) => ({
     ...m,
     count: Number(m.count) || 0
-  })) as MortalityLog[];
+  })) as unknown as MortalityLog[];
 
   const medicationTemplates = medicationTemplatesRaw.data || [];
   const medicationSchedules = medicationSchedulesRaw.data || [];
@@ -148,7 +150,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const contacts = contactsRaw.data || [];
   const farmPens = farmPensRaw.data || [];
 
-  const alertSettings = (alertSettingsRaw.data || [])[0] as AlertSettings | undefined;
+  const alertSettings = (alertSettingsRaw.data || [])[0] as unknown as AlertSettings | undefined;
   const alertSettingsData: AlertSettings = alertSettings ?? {
     feedThresholdKg: 50,
     eggDropPercentage: 15,
@@ -167,25 +169,25 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
         batches,
         eggs,
         feeds,
-        feedLogs: feedLogs as DailyFeedLog[],
+        feedLogs: feedLogs as unknown as DailyFeedLog[],
         staff,
         sales,
         expenses,
-        cushionAudits: cushionAudits as CushionAudit[],
-        maturationLogs: maturationLogs as MaturationLog[],
-        procurePipeline: procurePipeline as ProcurePipeline[],
-        cctvLogs: cctvLogs as CctvLog[],
-        invoices: invoices as Invoice[],
-        tasks: tasks as StaffTask[],
+        cushionAudits: cushionAudits as unknown as CushionAudit[],
+        maturationLogs: maturationLogs as unknown as MaturationLog[],
+        procurePipeline: procurePipeline as unknown as ProcurePipeline[],
+        cctvLogs: cctvLogs as unknown as CctvLog[],
+        invoices: invoices as unknown as Invoice[],
+        tasks: tasks as unknown as StaffTask[],
         alertSettings: alertSettingsData,
-        alertLogs: alertLogs as AlertLog[],
+        alertLogs: alertLogs as unknown as AlertLog[],
         mortalityLogs,
-        medicationTemplates: medicationTemplates as MedicationTemplate[],
-        medicationSchedules: medicationSchedules as MedicationSchedule[],
-        payrollLogs: payrollLogs as PayrollLog[],
-        equipment: equipment as EquipmentInventory[],
-        contacts: contacts as ContactRecord[],
-        farmPens: farmPens as FarmPen[],
+        medicationTemplates: medicationTemplates as unknown as MedicationTemplate[],
+        medicationSchedules: medicationSchedules as unknown as MedicationSchedule[],
+        payrollLogs: payrollLogs as unknown as PayrollLog[],
+        equipment: equipment as unknown as EquipmentInventory[],
+        contacts: contacts as unknown as ContactRecord[],
+        farmPens: farmPens as unknown as FarmPen[],
       } as DatabaseSchema}
     />
   );

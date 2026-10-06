@@ -2,7 +2,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
-import { AdminCmsClient, SaasPlanConfig } from '@/components/features/admin/AdminCmsClient';
+import { AdminCmsClient, SaasPlanConfig, TenantOrg, TenantWorkspace } from '@/components/features/admin/AdminCmsClient';
 import { getPublicPlans } from '@/lib/plans';
 import { AccessDenied } from '@/components/layout/AccessDenied';
 
@@ -32,9 +32,9 @@ export default async function AdminCmsPage() {
 
   const plans = (await getPublicPlans()) as unknown as SaasPlanConfig[];
 
-  let allSubscriptions: any[] = [];
-  let allHistory: any[] = [];
-  let allOrgs: any[] = [];
+  let allSubscriptions: Record<string, unknown>[] = [];
+  let allHistory: Record<string, unknown>[] = [];
+  let allOrgs: TenantOrg[] = [];
 
   try {
     const { data: subData } = await serviceRoleClient.from('subscriptions').select('*');
@@ -51,7 +51,7 @@ export default async function AdminCmsPage() {
       const { data: adminUsers } = await serviceRoleClient.from('users').select('*');
       const { data: workspaces } = await serviceRoleClient.from('workspaces').select('*');
 
-      const existingOrgIds = new Set(allOrgs.map((o: any) => o.id));
+      const existingOrgIds = new Set(allOrgs.map((o: TenantOrg) => o.id));
 
       if (adminUsers && Array.isArray(adminUsers)) {
         for (const u of adminUsers) {
@@ -59,7 +59,7 @@ export default async function AdminCmsPage() {
           if (u.role !== 'Admin') continue;
           const userOrgId = u.orgId || (u.workspaceId ? `org_${u.workspaceId}` : `org_${u.username}`);
           if (!existingOrgIds.has(userOrgId)) {
-            const farmWorkspace = workspaces?.find((w: any) => w.ownerUsername === u.username || w.id === u.workspaceId);
+            const farmWorkspace = workspaces?.find((w: TenantWorkspace) => w.ownerUsername === u.username || w.id === u.workspaceId);
             const orgName = farmWorkspace?.name && farmWorkspace.name !== 'Main Branch'
               ? `${farmWorkspace.name} Farm`
               : `${u.username ? u.username.charAt(0).toUpperCase() + u.username.slice(1) : 'Farm'} Organization`;
@@ -75,7 +75,7 @@ export default async function AdminCmsPage() {
             };
             allOrgs.push(newOrg);
             existingOrgIds.add(userOrgId);
-            await serviceRoleClient.from('organizations').upsert([newOrg]).catch(() => {});
+            await serviceRoleClient.from('organizations').upsert([newOrg]);
           }
         }
       }

@@ -6,13 +6,69 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/features/LanguageContext';
 
+interface SpeechRecognitionEvent {
+  resultIndex: number;
+  results: {
+    length: number;
+    [index: number]: {
+      isFinal: boolean;
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface ISpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: unknown) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+interface WindowWithSpeech extends Window {
+  SpeechRecognition?: { new(): ISpeechRecognition };
+  webkitSpeechRecognition?: { new(): ISpeechRecognition };
+  activeSpeechRecognition?: ISpeechRecognition;
+}
+
+interface AiLogSaleItem {
+  quantity?: number;
+  type?: string;
+  totalAmount?: number;
+  date?: string;
+}
+
+interface AiLogExpenseItem {
+  category?: string;
+  amount?: number;
+  date?: string;
+}
+
+interface AiLogEggItem {
+  goodEggs?: number;
+  crackedEggs?: number;
+  date?: string;
+}
+
+interface AiParseResult {
+  sales?: AiLogSaleItem[];
+  expenses?: AiLogExpenseItem[];
+  eggs?: AiLogEggItem[];
+}
+
 export function AiLogger({ role }: { role?: string }) {
   const { t } = useLanguage();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AiParseResult | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [tier, setTier] = useState('free');
 
@@ -35,7 +91,8 @@ export function AiLogger({ role }: { role?: string }) {
 
   const startListening = () => {
     if (typeof window === 'undefined') return;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const win = window as unknown as WindowWithSpeech;
+    const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
       toast.error(t("Your browser doesn't support speech recognition.", "Your browser doesn't support speech recognition."));
@@ -49,7 +106,7 @@ export function AiLogger({ role }: { role?: string }) {
 
     recognition.onstart = () => setIsListening(true);
     
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
@@ -58,19 +115,20 @@ export function AiLogger({ role }: { role?: string }) {
       }
     };
 
-    recognition.onerror = (_event: any) => {
+    recognition.onerror = (_event: unknown) => {
       setIsListening(false);
     };
 
     recognition.onend = () => setIsListening(false);
     
     recognition.start();
-    (window as any).activeSpeechRecognition = recognition;
+    win.activeSpeechRecognition = recognition;
   };
 
   const stopListening = () => {
-    if ((window as any).activeSpeechRecognition) {
-      (window as any).activeSpeechRecognition.stop();
+    const win = typeof window !== 'undefined' ? (window as unknown as WindowWithSpeech) : null;
+    if (win?.activeSpeechRecognition) {
+      win.activeSpeechRecognition.stop();
       setIsListening(false);
     }
   };
@@ -239,7 +297,7 @@ export function AiLogger({ role }: { role?: string }) {
                       <div>
                         <span className="font-bold text-slate-800 block mb-1">{t("Sales Logged:", "Sales Logged:")}</span>
                         <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
-                          {result.sales.map((s: any, i: number) => (
+                          {result.sales.map((s, i) => (
                             <li key={i}>{s.quantity} {s.type} for ₦{s.totalAmount?.toLocaleString()} on {s.date}</li>
                           ))}
                         </ul>
@@ -250,7 +308,7 @@ export function AiLogger({ role }: { role?: string }) {
                       <div>
                         <span className="font-bold text-slate-800 block mb-1">{t("Expenses Logged:", "Expenses Logged:")}</span>
                         <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
-                          {result.expenses.map((e: any, i: number) => (
+                          {result.expenses.map((e, i) => (
                             <li key={i}>{e.category}: ₦{e.amount?.toLocaleString()} on {e.date}</li>
                           ))}
                         </ul>
@@ -261,7 +319,7 @@ export function AiLogger({ role }: { role?: string }) {
                       <div>
                         <span className="font-bold text-slate-800 block mb-1">{t("Eggs Logged:", "Eggs Logged:")}</span>
                         <ul className="list-disc pl-5 text-slate-600 space-y-0.5">
-                          {result.eggs.map((e: any, i: number) => (
+                          {result.eggs.map((e, i) => (
                             <li key={i}>{e.goodEggs} {t("good", "good")}, {e.crackedEggs || 0} {t("cracked", "cracked")} on {e.date}</li>
                           ))}
                         </ul>

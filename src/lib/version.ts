@@ -29,7 +29,7 @@ export async function getInstalledVersion(): Promise<string> {
 
     if (data?.adminName) {
       if (typeof data.adminName === 'object' && data.adminName !== null) {
-        const obj = data.adminName as any;
+        const obj = data.adminName as Record<string, unknown>;
         if (obj.version) return String(obj.version);
       }
       if (typeof data.adminName === 'string') {

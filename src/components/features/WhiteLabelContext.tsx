@@ -108,7 +108,7 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
               coopName: c.coopName || prev.coopName,
               subdomain: c.subdomain || prev.subdomain,
               logoUrl: c.logoUrl || prev.logoUrl || '/icon.png',
-              brandColor: (c.brandColor || prev.brandColor) as any,
+              brandColor: (c.brandColor || prev.brandColor) as WhiteLabelSettings['brandColor'],
               customReportHeader: c.customReportHeader || prev.customReportHeader,
               customInvoiceFooter: c.customInvoiceFooter || prev.customInvoiceFooter,
               themeMode: c.themeMode || prev.themeMode,
@@ -123,9 +123,9 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
     loadBrandAndSettings();
 
     if (typeof window !== 'undefined') {
-      const handleBrandUpdate = (e: any) => {
-        if (e.detail) {
-          const detail = e.detail;
+      const handleBrandUpdate = (e: Event) => {
+        const detail = (e as CustomEvent).detail;
+        if (detail) {
           setSettings(prev => ({
             ...prev,
             brandName: detail.platformName || detail.brandName || prev.brandName,

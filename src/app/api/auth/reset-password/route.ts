@@ -147,7 +147,7 @@ export async function POST(request: Request) {
       if (await isSupabaseMode()) {
         try {
           const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
-          const authAccount = authUsers?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
+          const authAccount = authUsers?.find((u: { email?: string }) => u.email?.toLowerCase() === cleanEmail);
           if (authAccount?.id) {
             await supabase.auth.admin.updateUserById(authAccount.id, { password: newPassword });
           }
@@ -234,7 +234,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: 'Invalid request parameters' }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to process password reset' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to process password reset' }, { status: 500 });
   }
 }

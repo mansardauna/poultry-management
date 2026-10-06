@@ -59,7 +59,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const payload: any = { rememberMe };
+      const payload: Record<string, unknown> = { rememberMe };
       if (requires2FA) {
         payload.tempToken = tempToken;
         payload.twoFactorCode = twoFactorCode.trim();
@@ -104,9 +104,9 @@ export default function LoginPage() {
 
       const displayError = body?.error || `Authentication failed (HTTP ${response.status}). Check your email/password.`;
       setError(displayError);
-    } catch (err: any) {
+    } catch (err) {
       setIsSubmitting(false);
-      setError(err?.message || 'Network connection failed while attempting to reach backend server.');
+      setError((err as { message?: string })?.message || 'Network connection failed while attempting to reach backend server.');
     }
   };
 

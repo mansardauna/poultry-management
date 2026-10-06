@@ -37,7 +37,7 @@ export async function getPublicPlans(targetCurrency?: string, customRate?: numbe
     }
 
     return adaptPlansToCurrency(rawPlans, activeCurrency, activeRate);
-  } catch (_err: any) {
+  } catch (_err) {
     return adaptPlansToCurrency(BASE_USD_PLANS, '$', 1.0);
   }
 }

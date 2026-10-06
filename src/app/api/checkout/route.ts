@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     }
 
     // Fetch Super Admin edited plans from systemSettings
-    let targetPlan: any = null;
+    let targetPlan: Record<string, unknown> | null = null;
     const { data: plansSetting } = await serviceRoleClient
       .from('systemSettings')
       .select('adminName')
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
       try {
         const parsedPlans = JSON.parse(plansSetting.adminName);
         if (Array.isArray(parsedPlans)) {
-          targetPlan = parsedPlans.find((p: any) => p.id === targetTier || p.id === planId);
+          targetPlan = parsedPlans.find((p: Record<string, unknown>) => p.id === targetTier || p.id === planId) || null;
         }
       } catch (_e) {}
     }
@@ -122,16 +122,18 @@ export async function POST(request: Request) {
     const defaultPriceAnnual = (targetTier === 'enterprise' || targetTier === 'entrepreneur') ? 432000 : 144000;
 
     const planPriceNaira = isAnnual 
-      ? (targetPlan?.priceAnnual ?? defaultPriceAnnual)
-      : (targetPlan?.priceMonthly ?? defaultPriceMonthly);
+      ? (Number(targetPlan?.priceAnnual) || defaultPriceAnnual)
+      : (Number(targetPlan?.priceMonthly) || defaultPriceMonthly);
 
-    const planName = targetPlan?.name || ((targetTier === 'enterprise' || targetTier === 'entrepreneur') ? 'Entrepreneur & Cooperative' : 'Commercial Pro');
-    const planDesc = targetPlan?.description || 'Includes multi-farm telemetry, CCTV monitoring, and AI voice logging.';
+    const planName = (targetPlan?.name as string) || ((targetTier === 'enterprise' || targetTier === 'entrepreneur') ? 'Entrepreneur & Cooperative' : 'Commercial Pro');
+    const planDesc = (targetPlan?.description as string) || 'Includes multi-farm telemetry, CCTV monitoring, and AI voice logging.';
 
     // Convert Naira to USD cents equivalent (approx $1 = ₦1500 exchange rate)
     const unitAmountCents = Math.max(50, Math.round((planPriceNaira / 1500) * 100));
 
-    const stripePriceId = isAnnual ? targetPlan?.stripeAnnualPlanId?.trim() : targetPlan?.stripeMonthlyPlanId?.trim();
+    const stripeAnnualId = typeof targetPlan?.stripeAnnualPlanId === 'string' ? targetPlan.stripeAnnualPlanId.trim() : '';
+    const stripeMonthlyId = typeof targetPlan?.stripeMonthlyPlanId === 'string' ? targetPlan.stripeMonthlyPlanId.trim() : '';
+    const stripePriceId = isAnnual ? stripeAnnualId : stripeMonthlyId;
 
     const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = (stripePriceId && !stripePriceId.includes('placeholder'))
       ? { price: stripePriceId, quantity: 1 }
@@ -164,7 +166,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to initiate checkout' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to initiate checkout' }, { status: 500 });
   }
 }

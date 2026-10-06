@@ -37,27 +37,27 @@ export async function getPublicBranding() {
       .eq('id', 'gateways_config')
       .maybeSingle();
 
-    let cmsParsed: any = {};
+    let cmsParsed: Record<string, string | number | undefined> = {};
     if (cmsRow?.adminName) {
       try {
         cmsParsed = typeof cmsRow.adminName === 'string' ? JSON.parse(cmsRow.adminName) : cmsRow.adminName;
       } catch (_e) {}
     }
 
-    let gatewayParsed: any = {};
+    let gatewayParsed: Record<string, string | number | undefined> = {};
     if (gatewayRow?.adminName) {
       try {
         gatewayParsed = typeof gatewayRow.adminName === 'string' ? JSON.parse(gatewayRow.adminName) : gatewayRow.adminName;
       } catch (_e) {}
     }
 
-    const brandName = cmsParsed.brandName || gatewayParsed.platformName || DEFAULT_CMS.brandName;
-    const logoUrl = cmsParsed.logoUrl || gatewayParsed.logoUrl || DEFAULT_CMS.logoUrl;
+    const brandName = (cmsParsed.brandName as string) || (gatewayParsed.platformName as string) || DEFAULT_CMS.brandName;
+    const logoUrl = (cmsParsed.logoUrl as string) || (gatewayParsed.logoUrl as string) || DEFAULT_CMS.logoUrl;
 
-    const rawCurrencySymbol = cmsParsed.currencySymbol || gatewayParsed.currencySymbol || DEFAULT_CMS.currencySymbol || '$';
+    const rawCurrencySymbol = (cmsParsed.currencySymbol as string) || (gatewayParsed.currencySymbol as string) || DEFAULT_CMS.currencySymbol || '$';
     const currencyInfo = getCurrencyInfo(rawCurrencySymbol);
     const currencySymbol = currencyInfo.symbol;
-    const exchangeRate = cmsParsed.exchangeRate || gatewayParsed.exchangeRate || getDefaultExchangeRate(currencySymbol);
+    const exchangeRate = Number(cmsParsed.exchangeRate || gatewayParsed.exchangeRate) || getDefaultExchangeRate(currencySymbol);
 
     const sanitized = {
       brandName,
@@ -80,7 +80,7 @@ export async function getPublicBranding() {
     };
 
     return sanitized;
-  } catch (_err: any) {
+  } catch (_err) {
     return DEFAULT_CMS;
   }
 }

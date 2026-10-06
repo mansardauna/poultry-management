@@ -7,9 +7,17 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/features/LanguageContext';
 
+export interface VetTicket {
+  id: string;
+  ticketType: string;
+  status?: string;
+  notes?: string;
+  createdAt?: string;
+}
+
 interface VetHotlineClientProps {
   tier: string;
-  consultants?: any[];
+  consultants?: VetTicket[];
 }
 
 export function VetHotlineClient({ tier, consultants: initialConsultants = [] }: VetHotlineClientProps) {
@@ -18,7 +26,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
-  const [consultants, setConsultants] = useState<any[]>(initialConsultants);
+  const [consultants, setConsultants] = useState<VetTicket[]>(initialConsultants);
   const [openVetModal, setOpenVetModal] = useState(false);
   const [ticketType, setTicketType] = useState('Emergency Outbreak Alert');
   const [ticketNotes, setTicketNotes] = useState('');

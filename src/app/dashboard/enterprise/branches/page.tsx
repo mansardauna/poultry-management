@@ -2,13 +2,40 @@
 import { supabase } from "@/lib/supabase";
 import { BranchMatrixClient } from "@/components/features/enterprise/BranchMatrixClient";
 import { getTenantTier, getTenantWorkspaces } from "@/lib/workspace";
+import { Workspace } from "@/data/types";
+
+interface BatchRecord {
+  id: string;
+  quantity?: number;
+  workspaceId?: string;
+}
+
+interface EggRecord {
+  id: string;
+  quantity?: number;
+  workspaceId?: string;
+}
+
+interface FeedRecord {
+  id: string;
+  quantity?: number;
+  quantityKg?: number;
+  workspaceId?: string;
+}
+
+interface SaleRecord {
+  id: string;
+  totalAmount?: number;
+  workspaceId?: string;
+}
 
 export default async function BranchMatrixPage() {
   const tier = await getTenantTier();
-  const workspaces = await getTenantWorkspaces();
+  const rawWorkspaces = await getTenantWorkspaces();
+  const workspaces: Workspace[] = (rawWorkspaces as unknown as Workspace[]) || [];
 
   // Isolate records strictly to the authenticated tenant's workspaces
-  const workspaceIds = (workspaces || []).map((w: any) => w.id).filter(Boolean);
+  const workspaceIds = workspaces.map((w) => w.id).filter(Boolean);
 
   if (workspaceIds.length === 0) {
     return <BranchMatrixClient tier={tier} workspaces={[]} branchMetrics={{}} />;
@@ -22,14 +49,14 @@ export default async function BranchMatrixPage() {
     supabase.from('sales').select('id, totalAmount, workspaceId').in('workspaceId', workspaceIds)
   ]);
 
-  const batches = batchesRes.data || [];
-  const eggs = eggsRes.data || [];
-  const feeds = feedsRes.data || [];
-  const sales = salesRes.data || [];
+  const batches: BatchRecord[] = (batchesRes.data as unknown as BatchRecord[]) || [];
+  const eggs: EggRecord[] = (eggsRes.data as unknown as EggRecord[]) || [];
+  const feeds: FeedRecord[] = (feedsRes.data as unknown as FeedRecord[]) || [];
+  const sales: SaleRecord[] = (salesRes.data as unknown as SaleRecord[]) || [];
 
   const branchMetrics: Record<string, { totalBirds: number; totalEggs: number; feedStockKg: number; revenue: number }> = {};
   
-  workspaces.forEach((ws: any, idx: number) => {
+  workspaces.forEach((ws, idx: number) => {
     // If only 1 workspace exists or if ws.id matches:
     const matchWs = (itemWsId?: string) => {
       if (!itemWsId) return idx === 0;
@@ -37,10 +64,10 @@ export default async function BranchMatrixPage() {
     };
 
     branchMetrics[ws.id] = {
-      totalBirds: batches.filter((b: any) => matchWs(b.workspaceId)).reduce((acc: number, b: any) => acc + Number(b.quantity || 0), 0),
-      totalEggs: eggs.filter((e: any) => matchWs(e.workspaceId)).reduce((acc: number, e: any) => acc + Number(e.quantity || 0), 0),
-      feedStockKg: feeds.filter((f: any) => matchWs(f.workspaceId)).reduce((acc: number, f: any) => acc + Number(f.quantityKg || f.quantity || 0), 0),
-      revenue: sales.filter((s: any) => matchWs(s.workspaceId)).reduce((acc: number, s: any) => acc + Number(s.totalAmount || 0), 0)
+      totalBirds: batches.filter((b) => matchWs(b.workspaceId)).reduce((acc, b) => acc + Number(b.quantity || 0), 0),
+      totalEggs: eggs.filter((e) => matchWs(e.workspaceId)).reduce((acc, e) => acc + Number(e.quantity || 0), 0),
+      feedStockKg: feeds.filter((f) => matchWs(f.workspaceId)).reduce((acc, f) => acc + Number(f.quantityKg || f.quantity || 0), 0),
+      revenue: sales.filter((s) => matchWs(s.workspaceId)).reduce((acc, s) => acc + Number(s.totalAmount || 0), 0)
     };
   });
 

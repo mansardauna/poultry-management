@@ -13,18 +13,19 @@ export interface ExportColumn {
 /**
  * Downloads tabular data as a clean CSV file.
  */
-export function downloadCSV(data: any[], columns: ExportColumn[], filename: string = 'poultry_report.csv') {
+export function downloadCSV<T extends object = Record<string, unknown>>(data: T[], columns: ExportColumn[], filename: string = 'poultry_report.csv') {
   if (!data || data.length === 0) return;
 
+  const rows = data as unknown as Record<string, unknown>[];
   const headers = columns.map(c => `"${c.header.replace(/"/g, '""')}"`).join(',');
-  const rows = data.map(row => 
+  const rowStrings = rows.map(row => 
     columns.map(c => {
       const val = row[c.key] !== undefined && row[c.key] !== null ? String(row[c.key]) : '';
       return `"${val.replace(/"/g, '""')}"`;
     }).join(',')
   );
 
-  const csvContent = [headers, ...rows].join('\n');
+  const csvContent = [headers, ...rowStrings].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -38,9 +39,9 @@ export function downloadCSV(data: any[], columns: ExportColumn[], filename: stri
 /**
  * Triggers a comprehensive, executive printable PDF report window with letterhead header and audit summary.
  */
-export function printBrandedReport(
+export function printBrandedReport<T extends object = Record<string, unknown>>(
   title: string, 
-  data: any[], 
+  data: T[], 
   columns: ExportColumn[], 
   farmName: string = 'Poultry Farm Management System'
 ) {
@@ -55,16 +56,17 @@ export function printBrandedReport(
   let hasNumericCol = false;
   
   const numericKey = columns.find(c => ['totalAmount', 'amount', 'goodEggs', 'quantity', 'cost', 'total'].includes(c.key))?.key;
-  if (numericKey && data && data.length > 0) {
+  const rows = data as unknown as Record<string, unknown>[];
+  if (numericKey && rows && rows.length > 0) {
     hasNumericCol = true;
-    totalNumericSum = data.reduce((sum, item) => sum + (Number(item[numericKey]) || 0), 0);
+    totalNumericSum = rows.reduce((sum, item) => sum + (Number(item[numericKey]) || 0), 0);
   }
 
   const tableHeadersHtml = columns.map(c => 
     `<th style="padding: 12px 14px; background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #334155;">${c.header}</th>`
   ).join('');
 
-  const tableRowsHtml = data.map((row, idx) => `
+  const tableRowsHtml = rows.map((row, idx) => `
     <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'}; border-bottom: 1px solid #e2e8f0;">
       ${columns.map(c => {
         let val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '-';
@@ -197,15 +199,15 @@ export interface ComprehensiveFarmReportData {
   farmName: string;
   workspaceName?: string;
   currencySymbol?: string;
-  batches?: any[];
-  eggs?: any[];
-  feeds?: any[];
-  sales?: any[];
-  invoices?: any[];
-  expenses?: any[];
-  staff?: any[];
-  tasks?: any[];
-  pens?: any[];
+  batches?: object[];
+  eggs?: object[];
+  feeds?: object[];
+  sales?: object[];
+  invoices?: object[];
+  expenses?: object[];
+  staff?: object[];
+  tasks?: object[];
+  pens?: object[];
 }
 
 /**
@@ -229,13 +231,13 @@ export function printComprehensiveFarmReport(data: ComprehensiveFarmReportData) 
   const auditId = `PFMS-AUDIT-${Date.now().toString().slice(-6)}`;
 
   // 1. Calculations & Metrics
-  const batches = data.batches || [];
-  const eggs = data.eggs || [];
-  const feeds = data.feeds || [];
-  const sales = data.sales || [];
-  const invoices = data.invoices || [];
-  const expenses = data.expenses || [];
-  const staff = data.staff || [];
+  const batches = (data.batches || []) as Record<string, unknown>[];
+  const eggs = (data.eggs || []) as Record<string, unknown>[];
+  const feeds = (data.feeds || []) as Record<string, unknown>[];
+  const sales = (data.sales || []) as Record<string, unknown>[];
+  const invoices = (data.invoices || []) as Record<string, unknown>[];
+  const expenses = (data.expenses || []) as Record<string, unknown>[];
+  const staff = (data.staff || []) as Record<string, unknown>[];
 
   const totalBirds = batches.reduce((acc, b) => acc + (Number(b.quantity) || 0), 0);
   const totalMortality = batches.reduce((acc, b) => acc + (Number(b.mortalityCount) || 0), 0);
@@ -627,10 +629,23 @@ export function printComprehensiveFarmReport(data: ComprehensiveFarmReportData) 
   }, 500);
 }
 
+export interface InvoiceReceiptData {
+  id?: string;
+  date?: string;
+  customerName?: string;
+  items?: string;
+  quantity?: number;
+  unitPrice?: number;
+  totalAmount?: number;
+  status?: string;
+  paymentMethod?: string;
+  paymentReference?: string;
+}
+
 /**
  * Prints a clean, official single-invoice receipt in PDF format without screen buttons.
  */
-export function printInvoiceReceipt(invoice: any, farmName: string = 'Poultry Farm Enterprise') {
+export function printInvoiceReceipt(invoice: InvoiceReceiptData, farmName: string = 'Poultry Farm Enterprise') {
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
 

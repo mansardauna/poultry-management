@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       }
 
       const start = new Date(startDate);
-      const newSchedules = (template.stages as any[]).map((stage: any, i: number) => {
+      const newSchedules = ((template.stages || []) as Record<string, unknown>[]).map((stage: Record<string, unknown>, i: number) => {
         const schedDate = new Date(start);
         schedDate.setDate(schedDate.getDate() + (Number(stage.dayOffset) || 0));
         return {
@@ -149,7 +149,7 @@ export async function DELETE(request: Request) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

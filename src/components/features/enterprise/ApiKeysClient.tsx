@@ -20,9 +20,19 @@ import { useRouter } from 'next/navigation';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { useLanguage } from '@/components/features/LanguageContext';
 
+interface ApiKeyItem {
+  id: string;
+  name?: string;
+  secretKey?: string;
+  webhookUrl?: string;
+  scope?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
 interface ApiKeysClientProps {
   tier: string;
-  apiKeys?: any[];
+  apiKeys?: ApiKeyItem[];
 }
 
 export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysClientProps) {
@@ -32,7 +42,7 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
-  const [apiKeys, setApiKeys] = useState<any[]>(initialApiKeys);
+  const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>(initialApiKeys);
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyWebhook, setNewKeyWebhook] = useState('');
   const [keyScope] = useState('read:analytics,write:sales,ai:parse');
@@ -252,7 +262,7 @@ console.log(data);`;
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900 text-xs">{k.name}</span>
                       <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-2 py-0.5 rounded uppercase font-mono">
-                        {k.status ? t(k.status) : t('Active')}
+                        {k.status ? t(String(k.status)) : t('Active')}
                       </span>
                     </div>
                     <p className="font-mono text-xs text-indigo-600 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200 max-w-md truncate">
@@ -265,7 +275,7 @@ console.log(data);`;
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => copyToClipboard(k.secretKey, t('Key Secret'))}
+                      onClick={() => copyToClipboard(k.secretKey || '', t('Key Secret'))}
                       className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
                     >
                       <Copy size={14} /> {t("Copy API Key")}

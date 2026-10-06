@@ -19,26 +19,26 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId)
   ]);
   
-  const normalizedEggs = (eggs || []).map((e: any) => ({
+  const normalizedEggs = (eggs || []).map((e: Record<string, unknown>) => ({
     id: String(e.id),
-    date: e.date || new Date().toISOString().split('T')[0],
+    date: (e.date as string) || new Date().toISOString().split('T')[0],
     goodEggs: Number(e.goodEggs) || 0,
     brokenEggs: Number(e.brokenEggs) || 0,
     spoiltEggs: Number(e.spoiltEggs) || 0,
     batchId: String(e.batchId || 'b1'),
   }));
 
-  const normalizedAudits = (cushionAudits || []).map((a: any) => ({
+  const normalizedAudits = (cushionAudits || []).map((a: Record<string, unknown>) => ({
     id: String(a.id),
-    date: a.date || new Date().toISOString().split('T')[0],
+    date: (a.date as string) || new Date().toISOString().split('T')[0],
     boxName: String(a.boxName || 'Nesting Box 1'),
     status: String(a.status || 'Optimal Cushioning'),
     actionTaken: String(a.actionTaken || 'No action required'),
   }));
 
-  const normalizedMaturation = (maturationLogs || []).map((m: any) => ({
+  const normalizedMaturation = (maturationLogs || []).map((m: Record<string, unknown>) => ({
     id: String(m.id),
-    date: m.date || new Date().toISOString().split('T')[0],
+    date: (m.date as string) || new Date().toISOString().split('T')[0],
     birdId: String(m.birdId || 'BIRD-01'),
     breed: String(m.breed || 'Isa Brown'),
     eggsCount: Number(m.eggsCount) || 0,
@@ -143,8 +143,8 @@ export async function POST(request: Request) {
     await evaluateEggProductionThresholds(workspaceId, newRecord.batchId, newRecord.date);
     
     return NextResponse.json(newRecord, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to record eggs' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to record eggs' }, { status: 500 });
   }
 }
 
@@ -174,9 +174,9 @@ async function evaluateEggProductionThresholds(workspaceId: string, batchId: str
       .eq('batchId', batchId)
       .eq('date', targetDate);
 
-    const dailyGood = (dayRecords || []).reduce((sum: number, r: any) => sum + (Number(r.goodEggs) || 0), 0);
-    const dailyBroken = (dayRecords || []).reduce((sum: number, r: any) => sum + (Number(r.brokenEggs) || 0), 0);
-    const dailySpoilt = (dayRecords || []).reduce((sum: number, r: any) => sum + (Number(r.spoiltEggs) || 0), 0);
+    const dailyGood = (dayRecords || []).reduce((sum: number, r: Record<string, unknown>) => sum + (Number(r.goodEggs) || 0), 0);
+    const dailyBroken = (dayRecords || []).reduce((sum: number, r: Record<string, unknown>) => sum + (Number(r.brokenEggs) || 0), 0);
+    const dailySpoilt = (dayRecords || []).reduce((sum: number, r: Record<string, unknown>) => sum + (Number(r.spoiltEggs) || 0), 0);
     const dailyTotal = dailyGood + dailyBroken + dailySpoilt;
 
     // Optional workspace-wide rollup for context
@@ -185,7 +185,7 @@ async function evaluateEggProductionThresholds(workspaceId: string, batchId: str
       .select('*')
       .eq('workspaceId', workspaceId)
       .eq('date', targetDate);
-    const wsDailyTotal = (wsDayRecords || []).reduce((sum: number, r: any) => 
+    const wsDailyTotal = (wsDayRecords || []).reduce((sum: number, r: Record<string, unknown>) => 
       sum + (Number(r.goodEggs) || 0) + (Number(r.brokenEggs) || 0) + (Number(r.spoiltEggs) || 0), 0);
 
     // 2. Query preceding distinct date for this batch to evaluate drop consistently (handles backdated logs)
@@ -200,10 +200,10 @@ async function evaluateEggProductionThresholds(workspaceId: string, batchId: str
     let prevDayTotal = 0;
     let prevDate = '';
     if (priorRecords && priorRecords.length > 0) {
-      prevDate = priorRecords[0].date;
+      prevDate = (priorRecords[0].date as string) || '';
       prevDayTotal = priorRecords
-        .filter((r: any) => r.date === prevDate)
-        .reduce((sum: number, r: any) => sum + (Number(r.goodEggs) || 0) + (Number(r.brokenEggs) || 0) + (Number(r.spoiltEggs) || 0), 0);
+        .filter((r: Record<string, unknown>) => r.date === prevDate)
+        .reduce((sum: number, r: Record<string, unknown>) => sum + (Number(r.goodEggs) || 0) + (Number(r.brokenEggs) || 0) + (Number(r.spoiltEggs) || 0), 0);
     }
 
     // Prefixes for deterministic de-duplication
@@ -218,7 +218,7 @@ async function evaluateEggProductionThresholds(workspaceId: string, batchId: str
       .eq('date', targetDate);
 
     const findAlert = (prefix: string) => 
-      (existingAlerts || []).find((a: any) => a.message && a.message.includes(prefix));
+      (existingAlerts || []).find((a: Record<string, unknown>) => typeof a.message === 'string' && a.message.includes(prefix));
 
     // A) Cracked/broken cushioning check
     const existingCushionAlert = findAlert(cushionPrefix);
@@ -399,7 +399,7 @@ export async function DELETE(request: Request) {
       await evaluateEggProductionThresholds(workspaceId, existingEgg.batchId, existingEgg.date);
     }
     return NextResponse.json({ success: true, deleted: 'egg' });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete record: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete record: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

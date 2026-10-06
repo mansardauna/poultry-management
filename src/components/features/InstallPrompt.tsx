@@ -3,15 +3,24 @@
 import { useState, useEffect } from 'react';
 import { X, Share, PlusSquare } from 'lucide-react';
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+interface NavigatorStandalone extends Navigator {
+  standalone?: boolean;
+}
+
 export function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
     // Detect if the app is already installed/running in standalone mode
-    const isAppStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    const isAppStandalone = window.matchMedia('(display-mode: standalone)').matches || Boolean((window.navigator as NavigatorStandalone).standalone);
     setIsStandalone(isAppStandalone);
 
     if (isAppStandalone) return;
@@ -33,7 +42,7 @@ export function InstallPrompt() {
     // Android/Chrome beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
       // Show custom prompt after a few seconds so it isn't too aggressive
       setTimeout(() => setShowPrompt(true), 2000);
     };

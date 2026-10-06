@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
+  } catch (err) {
     // If webhook secret is a placeholder or unconfigured in dev/testing, allow parsed body
     if (webhookSecret === 'whsec_placeholder' || !webhookSecret) {
       try {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
       }
     } else {
-      return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+      return NextResponse.json({ error: `Webhook Error: ${(err as Error).message}` }, { status: 400 });
     }
   }
 
@@ -43,14 +43,23 @@ export async function POST(req: Request) {
         const targetTier = (session.metadata?.planId || session.metadata?.planTier || 'pro').toLowerCase();
         const normTier = (targetTier === 'enterprise' || targetTier === 'entrepreneur' || targetTier === 'enterprise_plus') ? 'enterprise' : 'pro';
 
-        const subAny = subscription as any;
+        interface StripeSubscriptionData {
+          id: string;
+          status: string;
+          current_period_end?: number;
+          items?: { data: Array<{ price?: { id?: string } }> };
+        }
+        const sub = subscription as unknown as StripeSubscriptionData;
+        const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : new Date().toISOString();
+        const planId = sub.items?.data?.[0]?.price?.id || normTier;
+
         await serviceRoleClient.from('subscriptions').upsert({
-          id: subAny.id,
+          id: sub.id,
           orgId,
-          stripeSubscriptionId: subAny.id,
-          status: subAny.status,
-          currentPeriodEnd: new Date(subAny.current_period_end * 1000).toISOString(),
-          planId: subAny.items.data[0]?.price?.id || normTier
+          stripeSubscriptionId: sub.id,
+          status: sub.status,
+          currentPeriodEnd: periodEnd,
+          planId
         });
 
         await serviceRoleClient.from('organizations').update({
@@ -76,21 +85,30 @@ export async function POST(req: Request) {
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
-      const subAny = subscription as any;
       
       const { data: dbSub } = await serviceRoleClient
         .from('subscriptions')
         .select('orgId')
-        .eq('stripeSubscriptionId', subAny.id)
+        .eq('stripeSubscriptionId', subscription.id)
         .limit(1)
         .maybeSingle();
         
       if (dbSub?.orgId) {
+        interface StripeSubscriptionData {
+          id: string;
+          status: string;
+          current_period_end?: number;
+          items?: { data: Array<{ price?: { id?: string } }> };
+        }
+        const sub = subscription as unknown as StripeSubscriptionData;
+        const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : new Date().toISOString();
+        const planId = sub.items?.data?.[0]?.price?.id || 'pro';
+
         await serviceRoleClient.from('subscriptions').update({
-          status: subAny.status,
-          currentPeriodEnd: new Date(subAny.current_period_end * 1000).toISOString(),
-          planId: subAny.items.data[0]?.price?.id || 'pro'
-        }).eq('stripeSubscriptionId', subAny.id);
+          status: sub.status,
+          currentPeriodEnd: periodEnd,
+          planId
+        }).eq('stripeSubscriptionId', sub.id);
 
         const newTier = subscription.status === 'active' || subscription.status === 'trialing' ? 'pro' : 'free';
         

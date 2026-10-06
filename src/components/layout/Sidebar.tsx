@@ -200,9 +200,9 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
-          const proPlan = data.find((p: any) => p.id === 'pro');
-          if (proPlan?.priceMonthly !== undefined) setProPrice(proPlan.priceMonthly);
-          if (proPlan?.currencySymbol) setProCurrency(proPlan.currencySymbol);
+          const proPlan = data.find((p: Record<string, unknown>) => p.id === 'pro');
+          if (typeof proPlan?.priceMonthly === 'number') setProPrice(proPlan.priceMonthly);
+          if (typeof proPlan?.currencySymbol === 'string') setProCurrency(proPlan.currencySymbol);
         }
       })
       .catch(() => {});

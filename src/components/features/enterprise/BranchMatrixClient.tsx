@@ -18,10 +18,11 @@ import { useRouter } from 'next/navigation';
 import { useWorkspace } from '../WorkspaceContext';
 import { WorkspaceOnboarding } from '../WorkspaceOnboarding';
 import { useLanguage } from '@/components/features/LanguageContext';
+import { Workspace } from '@/data/types';
 
 interface BranchMatrixClientProps {
   tier: string;
-  workspaces: any[];
+  workspaces: Workspace[];
   branchMetrics?: Record<string, { totalBirds: number; totalEggs: number; feedStockKg: number; revenue: number }>;
 }
 
@@ -32,7 +33,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
   const { setActiveWorkspace, activeWorkspace, deleteWorkspace } = useWorkspace();
-  const [workspaces, setWorkspaces] = useState<any[]>(initialWorkspaces);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>(initialWorkspaces);
   const [showAddModal, setShowAddModal] = useState(false);
 
   // Transfer Stock Modal State
@@ -45,7 +46,7 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
   const [isTransferring, setIsTransferring] = useState(false);
 
   // Delete Branch Modal State
-  const [deletingBranch, setDeletingBranch] = useState<any | null>(null);
+  const [deletingBranch, setDeletingBranch] = useState<Workspace | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Handler: Execute Stock Transfer

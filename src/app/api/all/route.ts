@@ -6,11 +6,7 @@ import { getWorkspaceId, applyWorkspaceFilter, applyStaffWorkspaceFilter } from 
 /** Exported function GET */
 export async function GET() {
   const workspaceId = await getWorkspaceId();
-  const [
-    batches, eggs, feeds, feedLogs, staff, sales, expenses, cushionAudits, maturationLogs,
-    procurePipeline, cctvLogs, invoices, tasks, alertSettingsRecords, alertLogs, mortalityLogs,
-    medicationTemplates, medicationSchedules, payrollLogs, equipment, contacts, farmPens
-  ] = await Promise.all([
+  const rawResults = (await Promise.all([
     applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('feeds').select('*'), workspaceId),
@@ -33,7 +29,13 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('equipment').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId)
-  ]);
+  ])) as unknown as Array<{ data: Record<string, unknown>[] | null }>;
+
+  const [
+    batches, eggs, feeds, feedLogs, staff, sales, expenses, cushionAudits, maturationLogs,
+    procurePipeline, cctvLogs, invoices, tasks, alertSettingsRecords, alertLogs, mortalityLogs,
+    medicationTemplates, medicationSchedules, payrollLogs, equipment, contacts, farmPens
+  ] = rawResults;
 
   const alertSettings = alertSettingsRecords.data?.[0] || {
     feedThresholdKg: 50,
@@ -43,7 +45,7 @@ export async function GET() {
     notifyWhatsapp: true
   };
 
-  const normalizedBatches = (batches.data || []).map((b: any) => ({
+  const normalizedBatches = (batches.data || []).map((b: Record<string, unknown>) => ({
     ...b,
     quantity: Number(b.quantity) || 0,
     mortalityCount: Number(b.mortalityCount) || 0,
@@ -51,37 +53,37 @@ export async function GET() {
     projectedSellingPrice: Number(b.projectedSellingPrice) || 0
   }));
 
-  const normalizedEggs = (eggs.data || []).map((e: any) => ({
+  const normalizedEggs = (eggs.data || []).map((e: Record<string, unknown>) => ({
     ...e,
     goodEggs: Number(e.goodEggs) || 0,
     brokenEggs: Number(e.brokenEggs) || 0,
     spoiltEggs: Number(e.spoiltEggs) || 0
   }));
 
-  const normalizedFeeds = (feeds.data || []).map((f: any) => ({
+  const normalizedFeeds = (feeds.data || []).map((f: Record<string, unknown>) => ({
     ...f,
     quantityKg: Number(f.quantityKg) || 0,
     costPerBag: Number(f.costPerBag) || 0
   }));
 
-  const normalizedStaff = (staff.data || []).map((s: any) => ({
+  const normalizedStaff = (staff.data || []).map((s: Record<string, unknown>) => ({
     ...s,
     salary: Number(s.salary) || 0,
     attendanceDays: Number(s.attendanceDays) || 0
   }));
 
-  const normalizedSales = (sales.data || []).map((s: any) => ({
+  const normalizedSales = (sales.data || []).map((s: Record<string, unknown>) => ({
     ...s,
     quantity: Number(s.quantity) || 0,
     totalAmount: Number(s.totalAmount) || 0
   }));
 
-  const normalizedExpenses = (expenses.data || []).map((e: any) => ({
+  const normalizedExpenses = (expenses.data || []).map((e: Record<string, unknown>) => ({
     ...e,
     amount: Number(e.amount) || 0
   }));
 
-  const normalizedMortality = (mortalityLogs.data || []).map((m: any) => ({
+  const normalizedMortality = (mortalityLogs.data || []).map((m: Record<string, unknown>) => ({
     ...m,
     count: Number(m.count) || 0
   }));

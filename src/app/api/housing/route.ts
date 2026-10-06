@@ -13,7 +13,7 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId)
   ]);
-  const farmPens = (farmPensRes.data || []).map((p: any) => {
+  const farmPens = (farmPensRes.data || []).map((p: Record<string, unknown>) => {
     let temperatureLogs = p.temperatureLogs;
     if (typeof temperatureLogs === 'string') {
       try {
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       }
       const pen = penRows[0];
 
-      let existingLogs: any[] = [];
+      let existingLogs: Record<string, unknown>[] = [];
       if (Array.isArray(pen.temperatureLogs)) {
         existingLogs = [...pen.temperatureLogs];
       } else if (typeof pen.temperatureLogs === 'string') {
@@ -143,7 +143,7 @@ export async function POST(request: Request) {
           .from('staff')
           .select('name, role')
           .eq('workspaceId', workspaceId);
-        const assignedStaff = staffMembers?.find((s: any) => s.role === 'Manager' || s.role === 'Staff')?.name ||
+        const assignedStaff = staffMembers?.find((s: Record<string, unknown>) => s.role === 'Manager' || s.role === 'Staff')?.name ||
           staffMembers?.[0]?.name ||
           'Farm Supervisor';
 
@@ -187,8 +187,8 @@ export async function POST(request: Request) {
     }
     
     return NextResponse.json(newPen, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to process housing request: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to process housing request: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }
 
@@ -229,7 +229,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('farmPens').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete pen: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete pen: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

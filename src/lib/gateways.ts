@@ -14,7 +14,7 @@ export interface GatewaysConfig {
   aiApiKey?: string;
   aiModel?: string;
   aiBaseUrl?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function getGatewaysConfig(): Promise<GatewaysConfig> {

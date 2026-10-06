@@ -106,11 +106,11 @@ export async function createResetToken(
         error: errMsg,
       };
     }
-  } catch (err: any) {
+  } catch (err) {
     return {
       token: '',
       emailSent: false,
-      error: err?.message || 'Network error while attempting to reach email provider.',
+      error: (err as { message?: string })?.message || 'Network error while attempting to reach email provider.',
     };
   }
 

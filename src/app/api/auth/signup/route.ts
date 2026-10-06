@@ -76,16 +76,18 @@ export async function POST(request: Request) {
     }
 
     // 3. ALWAYS insert default organization into `organizations` table
-    await serviceRoleClient.from('organizations').insert([{
-      id: orgId,
-      name: `${userClean.charAt(0).toUpperCase() + userClean.slice(1)} Farm Org`,
-      subscriptionTier: 'free',
-      subscriptionStatus: 'active',
-      ownerId: newUserId,
-      ownerUsername: userClean,
-      ownerEmail: email,
-      createdAt: new Date().toISOString()
-    }]).catch(() => {});
+    try {
+      await serviceRoleClient.from('organizations').insert([{
+        id: orgId,
+        name: `${userClean.charAt(0).toUpperCase() + userClean.slice(1)} Farm Org`,
+        subscriptionTier: 'free',
+        subscriptionStatus: 'active',
+        ownerId: newUserId,
+        ownerUsername: userClean,
+        ownerEmail: email,
+        createdAt: new Date().toISOString()
+      }]);
+    } catch {}
 
     // 4. ALWAYS insert default primary workspace into `workspaces` table
     await serviceRoleClient.from('workspaces').insert([{
@@ -125,9 +127,10 @@ export async function POST(request: Request) {
       },
       { request }
     );
-  } catch (error: any) {
+  } catch (err) {
+    const msg = (err as { message?: string })?.message || String(err);
     return NextResponse.json(
-      { error: `Internal server error: ${error?.message || error}` },
+      { error: `Internal server error: ${msg}` },
       { status: 500 }
     );
   }

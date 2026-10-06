@@ -7,9 +7,17 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/features/LanguageContext';
 
+export interface BulkFeedOrder {
+  id: string;
+  feedType: string;
+  quantityBags: number;
+  discountPrice?: number;
+  status?: string;
+}
+
 interface FeedPoolClientProps {
   tier: string;
-  bulkOrders?: any[];
+  bulkOrders?: BulkFeedOrder[];
 }
 
 export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: FeedPoolClientProps) {
@@ -18,7 +26,7 @@ export function FeedPoolClient({ tier, bulkOrders: initialBulkOrders = [] }: Fee
   const normTier = (tier || '').toLowerCase();
   const isEnterprise = normTier === 'enterprise' || normTier === 'entrepreneur' || normTier === 'enterprise_plus';
 
-  const [bulkOrders, setBulkOrders] = useState<any[]>(initialBulkOrders);
+  const [bulkOrders, setBulkOrders] = useState<BulkFeedOrder[]>(initialBulkOrders);
   const [bulkFeedType, setBulkFeedType] = useState('Layer Mash (Bulk 50kg)');
   const [bulkBags, setBulkBags] = useState('100');
 

@@ -20,16 +20,43 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useWorkspace } from '../WorkspaceContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { useLanguage } from '@/components/features/LanguageContext';
+import { Workspace } from '@/data/types';
+
+interface ApiKeyItem {
+  id: string;
+  name?: string;
+  status?: string;
+  secretKey?: string;
+  webhookUrl?: string;
+}
+
+interface VetTicketItem {
+  id: string;
+  ticketType?: string;
+  status?: string;
+  notes?: string;
+  createdAt?: string;
+}
+
+interface BulkOrderItem {
+  id: string;
+  feedType?: string;
+  quantityBags?: number;
+  discountPrice?: number;
+  status?: string;
+}
 
 interface EnterpriseClientProps {
   tier: string;
-  workspaces: any[];
+  workspaces: Workspace[];
   branchMetrics?: Record<string, { totalBirds: number; totalEggs: number; feedStockKg: number; revenue: number }>;
-  cooperative?: any;
-  apiKeys?: any[];
-  consultants?: any[];
-  bulkOrders?: any[];
+  cooperative?: Record<string, unknown>;
+  apiKeys?: ApiKeyItem[];
+  consultants?: VetTicketItem[];
+  bulkOrders?: BulkOrderItem[];
 }
+
+type EnterpriseTab = 'matrix' | 'whitelabel' | 'apikeys' | 'vet' | 'bulk';
 
 export function EnterpriseClient({ 
   tier, 
@@ -52,35 +79,35 @@ export function EnterpriseClient({
   const { setActiveWorkspace, activeWorkspace } = useWorkspace();
 
   // Active Sub-Tab State
-  const [activeTab, setActiveTab] = useState<'matrix' | 'whitelabel' | 'apikeys' | 'vet' | 'bulk'>(
-    (activeTabParam as any) || 'matrix'
+  const [activeTab, setActiveTab] = useState<EnterpriseTab>(
+    (['matrix', 'whitelabel', 'apikeys', 'vet', 'bulk'].includes(activeTabParam) ? activeTabParam : 'matrix') as EnterpriseTab
   );
 
   // White-label & Theme Customization State
-  const [coopName, setCoopName] = useState(cooperative?.coopName || 'My Enterprise Poultry Farm');
-  const [subdomain, setSubdomain] = useState(cooperative?.subdomain || 'maitama-farm');
-  const [logoUrl, setLogoUrl] = useState(cooperative?.logoUrl || '');
-  const [brandColor, setBrandColor] = useState(cooperative?.brandColor || 'indigo');
-  const [customReportHeader, setCustomReportHeader] = useState(cooperative?.customReportHeader || 'Official Enterprise Farm Analytics Report');
-  const [customInvoiceFooter, setCustomInvoiceFooter] = useState(cooperative?.customInvoiceFooter || 'Thank you for buying from our certified organic poultry farm!');
-  const [themeMode] = useState(cooperative?.themeMode || 'modern');
+  const [coopName, setCoopName] = useState((cooperative?.coopName as string) || 'My Enterprise Poultry Farm');
+  const [subdomain, setSubdomain] = useState((cooperative?.subdomain as string) || 'maitama-farm');
+  const [logoUrl, setLogoUrl] = useState((cooperative?.logoUrl as string) || '');
+  const [brandColor, setBrandColor] = useState((cooperative?.brandColor as string) || 'indigo');
+  const [customReportHeader, setCustomReportHeader] = useState((cooperative?.customReportHeader as string) || 'Official Enterprise Farm Analytics Report');
+  const [customInvoiceFooter, setCustomInvoiceFooter] = useState((cooperative?.customInvoiceFooter as string) || 'Thank you for buying from our certified organic poultry farm!');
+  const [themeMode] = useState((cooperative?.themeMode as string) || 'modern');
   const [isSavingCoop, setIsSavingCoop] = useState(false);
 
   // API Keys & Webhooks State
-  const [apiKeys, setApiKeys] = useState<any[]>(initialApiKeys);
+  const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>(initialApiKeys);
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyWebhook, setNewKeyWebhook] = useState('');
   const [keyScope] = useState('read:analytics,write:sales');
 
   // Vet Tickets State
-  const [consultants, setConsultants] = useState<any[]>(initialConsultants);
+  const [consultants, setConsultants] = useState<VetTicketItem[]>(initialConsultants);
   const [openVetModal, setOpenVetModal] = useState(false);
   const [ticketType, setTicketType] = useState('Emergency Outbreak');
   const [ticketNotes, setTicketNotes] = useState('');
   const [ticketPhone] = useState('+234 800-POULTRY-VET');
 
   // Bulk Feed Order State
-  const [bulkOrders, setBulkOrders] = useState<any[]>(initialBulkOrders);
+  const [bulkOrders, setBulkOrders] = useState<BulkOrderItem[]>(initialBulkOrders);
   const [bulkFeedType, setBulkFeedType] = useState('Layer Mash (Bulk 50kg)');
   const [bulkBags, setBulkBags] = useState('100');
 
@@ -653,7 +680,7 @@ export function EnterpriseClient({
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(k.secretKey);
+                            navigator.clipboard.writeText(k.secretKey || '');
                             toast.success('API Secret Key copied!');
                           }}
                           className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"

@@ -38,8 +38,9 @@ export async function GET() {
       otpauthUrl: setup.otpauthUrl,
       qrCodeUrl: setup.qrCodeUrl,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch 2FA status' }, { status: 500 });
+  } catch (err) {
+    const msg = (err as { message?: string })?.message || 'Failed to fetch 2FA status';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
@@ -121,7 +122,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to update 2FA settings' }, { status: 500 });
+  } catch (err) {
+    const msg = (err as { message?: string })?.message || 'Failed to update 2FA settings';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

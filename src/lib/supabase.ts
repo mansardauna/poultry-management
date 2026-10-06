@@ -1,8 +1,8 @@
 'use strict';
 import fs from 'fs';
 import path from 'path';
-import { createClient } from '@supabase/supabase-js';
-import { createDataChain, runSql, makeAuthStub } from './dataAdapter';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createDataChain, runSql, makeAuthStub, QueryOp } from './dataAdapter';
 
 export function isValidSupabaseUrl(url?: string): boolean {
   if (!url) return false;
@@ -44,8 +44,9 @@ function fastFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Respon
   const timeoutMs = Number(process.env.SUPABASE_FETCH_TIMEOUT_MS) || 15000;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const anySignalHelper = AbortSignal as unknown as { any?: (signals: (AbortSignal | null | undefined)[]) => AbortSignal };
   const signal = init?.signal
-    ? (AbortSignal as any).any([init.signal, controller.signal])
+    ? (anySignalHelper.any ? anySignalHelper.any([init.signal, controller.signal]) : controller.signal)
     : controller.signal;
 
   return fetch(input, { ...init, signal }).finally(() => clearTimeout(timeoutId));
@@ -62,15 +63,15 @@ export const realSupabase = isSupabaseConfigured
     })
   : null;
 
-async function localExecutor(ops: any[], table: string) {
+async function localExecutor(ops: QueryOp[], table: string) {
   try {
     return await runSql(ops, table);
-  } catch (err: any) {
+  } catch (err) {
     return { data: null, error: err || new Error('Database operation failed') };
   }
 }
 
-export const supabase: any = {
+export const supabase: SupabaseClient = {
   from: (table: string) => {
     const engine = getLocalEngine();
     if (engine === 'supabase' && realSupabase) {
@@ -79,11 +80,11 @@ export const supabase: any = {
     return createDataChain(table, localExecutor);
   },
   auth: (getLocalEngine() === 'supabase' && realSupabase) ? realSupabase.auth : makeAuthStub(),
-  rpc: (...args: any[]) => {
+  rpc: (...args: unknown[]) => {
     const engine = getLocalEngine();
     if (engine === 'supabase' && realSupabase) {
-      return (realSupabase.rpc as any)(...args);
+      return (realSupabase.rpc as unknown as (...a: unknown[]) => Promise<{ data: unknown; error: unknown }>)(...args);
     }
     return Promise.resolve({ data: null, error: null });
   },
-};
+} as unknown as SupabaseClient;

@@ -23,29 +23,29 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('procurePipeline').select('*'), workspaceId)
   ]);
 
-  const normalizedFeeds = (feeds || []).map((f: any) => ({
+  const normalizedFeeds = (feeds || []).map((f: Record<string, unknown>) => ({
     id: String(f.id),
-    type: f.type || 'Layer mash',
+    type: (f.type as string) || 'Layer mash',
     quantityKg: Number(f.quantityKg) || 0,
-    supplier: f.supplier || 'Generic Supplier',
-    lastRestock: f.lastRestock || new Date().toISOString().split('T')[0]
+    supplier: (f.supplier as string) || 'Generic Supplier',
+    lastRestock: (f.lastRestock as string) || new Date().toISOString().split('T')[0]
   }));
 
-  const normalizedLogs = (feedLogs || []).map((fl: any) => ({
+  const normalizedLogs = (feedLogs || []).map((fl: Record<string, unknown>) => ({
     id: String(fl.id),
-    date: fl.date || new Date().toISOString().split('T')[0],
+    date: (fl.date as string) || new Date().toISOString().split('T')[0],
     feedId: String(fl.feedId || 'f1'),
     quantityConsumedKg: Number(fl.quantityConsumedKg) || 0,
     batchId: String(fl.batchId || 'b1')
   }));
 
-  const normalizedPipeline = (procurePipeline || []).map((p: any) => ({
+  const normalizedPipeline = (procurePipeline || []).map((p: Record<string, unknown>) => ({
     id: String(p.id),
-    date: p.date || new Date().toISOString().split('T')[0],
-    milestone: p.milestone || '',
-    supplier: p.supplier || 'Generic Supplier',
-    status: p.status || 'Under Negotiations',
-    eta: p.eta || 'Pending'
+    date: (p.date as string) || new Date().toISOString().split('T')[0],
+    milestone: (p.milestone as string) || '',
+    supplier: (p.supplier as string) || 'Generic Supplier',
+    status: (p.status as string) || 'Under Negotiations',
+    eta: (p.eta as string) || 'Pending'
   }));
 
   return NextResponse.json({ feeds: normalizedFeeds, feedLogs: normalizedLogs, procurePipeline: normalizedPipeline });
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       const quantityKg = Number(body.quantityKg) || 0;
       let feedType: string;
       let newQuantityKg: number;
-      let restockObj: any;
+      let restockObj: Record<string, unknown>;
 
       if (feedResult && feedResult.length > 0) {
         const feed = feedResult[0];
@@ -187,7 +187,7 @@ export async function POST(request: Request) {
             .select('name, role')
             .eq('workspaceId', workspaceId);
             
-          const assignedStaff = staffMembers?.find((s: any) => s.role === 'Manager' || s.role === 'Staff')?.name || 
+          const assignedStaff = staffMembers?.find((s: Record<string, unknown>) => s.role === 'Manager' || s.role === 'Staff')?.name || 
             staffMembers?.[0]?.name || 
             'Inventory & Feed Team';
 
@@ -227,8 +227,8 @@ export async function POST(request: Request) {
       }
       return NextResponse.json(newLog, { status: 201 });
     }
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to update feeds' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as { message?: string })?.message || 'Failed to update feeds' }, { status: 500 });
   }
 }
 
@@ -298,7 +298,7 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('feedLogs').delete().eq('id', id).eq('workspaceId', workspaceId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, deleted: 'feed' });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete record: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete record: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

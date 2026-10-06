@@ -154,7 +154,7 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }

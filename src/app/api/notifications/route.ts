@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const workspaceId = await getWorkspaceId();
     const { data: notifications } = await applyWorkspaceFilter(supabase.from('alertLogs').select('*'), workspaceId).order('date', { ascending: false });
-    const formatted = (notifications || []).map((log: any) => ({
+    const formatted = (notifications || []).map((log: Record<string, unknown>) => ({
       ...log,
       read: log.read ?? false,
     }));

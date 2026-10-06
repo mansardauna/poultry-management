@@ -20,21 +20,21 @@ export async function GET(request: Request) {
 
     if (!orgId) {
       // List all tenants
-      let orgs: any[] = [];
+      let orgs: Record<string, unknown>[] = [];
       const { data: orgData } = await serviceRoleClient.from('organizations').select('*');
       if (orgData && Array.isArray(orgData)) orgs = [...orgData];
 
       try {
         const { data: adminUsers } = await serviceRoleClient.from('users').select('*');
         const { data: workspaces } = await serviceRoleClient.from('workspaces').select('*');
-        const existingOrgIds = new Set(orgs.map((o: any) => o.id));
+        const existingOrgIds = new Set(orgs.map((o: Record<string, unknown>) => o.id));
 
         if (adminUsers && Array.isArray(adminUsers)) {
           for (const u of adminUsers) {
             if (u.role !== 'Admin') continue;
             const userOrgId = u.orgId || (u.workspaceId ? `org_${u.workspaceId}` : `org_${u.username}`);
             if (!existingOrgIds.has(userOrgId)) {
-              const farmWorkspace = workspaces?.find((w: any) => w.ownerUsername === u.username || w.id === u.workspaceId);
+              const farmWorkspace = workspaces?.find((w: Record<string, unknown>) => w.ownerUsername === u.username || w.id === u.workspaceId);
               const orgName = farmWorkspace?.name && farmWorkspace.name !== 'Main Branch'
                 ? `${farmWorkspace.name} Farm`
                 : `${u.username ? u.username.charAt(0).toUpperCase() + u.username.slice(1) : 'Farm'} Organization`;
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
               };
               orgs.push(newOrg);
               existingOrgIds.add(userOrgId);
-              await serviceRoleClient.from('organizations').upsert([newOrg]).catch(() => {});
+              await serviceRoleClient.from('organizations').upsert([newOrg]);
             }
           }
         }
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       .maybeSingle();
 
     // Staff count
-    const workspaceIds = (workspaces || []).map((w: any) => w.id);
+    const workspaceIds = (workspaces || []).map((w: Record<string, unknown>) => w.id);
     let staffCount = 0;
     let batchesCount = 0;
     let eggsCount = 0;
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
         .select('goodEggs')
         .in('workspaceId', workspaceIds);
       if (eggData) {
-        eggsCount = eggData.reduce((sum: number, e: any) => sum + Number(e.goodEggs || 0), 0);
+        eggsCount = eggData.reduce((sum: number, e: Record<string, unknown>) => sum + Number(e.goodEggs || 0), 0);
       }
     }
 
@@ -131,8 +131,8 @@ export async function GET(request: Request) {
       },
       history: history || []
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to fetch tenant' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message || 'Failed to fetch tenant' }, { status: 500 });
   }
 }
 
@@ -276,7 +276,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
       }
 
-      const updates: any = {
+      const updates: Record<string, unknown> = {
         updatedAt: new Date().toISOString()
       };
       if (name) updates.name = name.trim();
@@ -351,7 +351,7 @@ export async function POST(request: Request) {
 
       // 5. Update / Upsert systemSettings for the tenant's workspace
       try {
-        const featureSettings: any = {
+        const featureSettings: Record<string, unknown> = {
           updatedAt: new Date().toISOString()
         };
         if (name) featureSettings.farmName = name.trim();
@@ -486,8 +486,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Operation failed' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message || 'Operation failed' }, { status: 500 });
   }
 }
 
@@ -533,7 +533,7 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ success: true, message: 'Tenant deleted successfully' });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to delete tenant' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message || 'Failed to delete tenant' }, { status: 500 });
   }
 }

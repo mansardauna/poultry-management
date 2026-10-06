@@ -7,12 +7,24 @@ import { getWorkspaceId } from '@/lib/workspace';
 import { getAuthUser } from '@/lib/auth';
 import crypto from 'crypto';
 
+interface ParsedAiResult {
+  eggs: Array<{ date?: string; goodEggs?: number; crackedEggs?: number; brokenEggs?: number; spoiltEggs?: number; spoiledEggs?: number; notes?: string }>;
+  expenses: Array<{ date?: string; category?: string; amount?: number; description?: string }>;
+  sales: Array<{ date?: string; type?: string; quantity?: number; totalAmount?: number; customerName?: string }>;
+  feedUsedKg: number;
+  mortalityCount: number;
+  staffChanges: {
+    add: Array<{ name: string; role?: string; contactInfo?: string; salary?: number }>;
+    removeAll: boolean;
+  };
+}
+
 /**
  * Smart Poultry Natural Language Parser
  */
-function smartParsePoultryText(text: string, today: string) {
+function smartParsePoultryText(text: string, today: string): ParsedAiResult {
   const textLower = text.toLowerCase();
-  const result: any = {
+  const result: ParsedAiResult = {
     eggs: [],
     expenses: [],
     sales: [],
@@ -177,7 +189,7 @@ export async function POST(request: Request) {
     }
 
     const today = new Date().toISOString().split('T')[0];
-    let parsed: any = null;
+    let parsed: ParsedAiResult | null = null;
 
     // 1. Fetch AI Configuration from systemSettings or environment
     let aiProvider = 'gemini';
@@ -394,7 +406,7 @@ Return a JSON object with this exact structure:
       await serviceRoleClient.from('staff').delete().eq('workspaceId', workspaceId);
     }
     if (parsed.staffChanges?.add?.length > 0) {
-      const staffInsert = parsed.staffChanges.add.map((s: any) => ({
+      const staffInsert = parsed.staffChanges.add.map((s) => ({
         id: crypto.randomUUID(),
         workspaceId,
         name: s.name,
@@ -432,7 +444,7 @@ Return a JSON object with this exact structure:
          });
       }
 
-      const eggInsert = parsed.eggs.map((e: any) => ({
+      const eggInsert = parsed.eggs.map((e) => ({
         id: crypto.randomUUID(),
         workspaceId,
         batchId,
@@ -446,7 +458,7 @@ Return a JSON object with this exact structure:
 
     // 3. Handle Expenses
     if (parsed.expenses?.length > 0) {
-      const expenseInsert = parsed.expenses.map((ex: any) => ({
+      const expenseInsert = parsed.expenses.map((ex) => ({
         id: crypto.randomUUID(),
         workspaceId,
         date: ex.date || today,
@@ -459,7 +471,7 @@ Return a JSON object with this exact structure:
 
     // 4. Handle Sales
     if (parsed.sales?.length > 0) {
-      const salesInsert = parsed.sales.map((s: any) => ({
+      const salesInsert = parsed.sales.map((s) => ({
         id: crypto.randomUUID(),
         workspaceId,
         date: s.date || today,
@@ -504,7 +516,8 @@ Return a JSON object with this exact structure:
     }
 
     return NextResponse.json({ success: true, parsed, extracted: parsed });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to process AI parsing' }, { status: 500 });
+  } catch (err) {
+    const msg = (err as { message?: string })?.message || 'Failed to process AI parsing';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

@@ -65,7 +65,7 @@ export async function proxy(request: NextRequest) {
   const verifiedSession = sessionToken ? await verifySession(sessionToken) : null;
 
   // 2. Secondary Supabase Auth lookup if session token is missing
-  let supabaseUser: any = null;
+  let supabaseUser: { id: string; email?: string } | null = null;
   const supabaseResponse = NextResponse.next({ request });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';

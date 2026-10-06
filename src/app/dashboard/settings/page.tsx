@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { SettingsClient } from "@/components/features/settings/SettingsClient";
 import { getWorkspaceId, getTenantWorkspaces } from "@/lib/workspace";
 import { getAuthUser } from "@/lib/auth";
+import { Staff } from "@/data/types";
 
 /** Exported function default */
 export default async function SettingsPage() {
@@ -50,7 +51,7 @@ export default async function SettingsPage() {
   const { data: rawHist } = await supabase.from('subscription_history').select('*').eq('workspaceId', workspaceId).order('createdAt', { ascending: false });
   const subscriptionHistory = rawHist || [];
 
-  let staffRecord: any = null;
+  let staffRecord: Staff | null = null;
   if (role === 'Staff') {
     const cleanUser = (user?.username || user?.email?.split('@')[0] || '').toLowerCase();
     const { data: staffList } = await supabase

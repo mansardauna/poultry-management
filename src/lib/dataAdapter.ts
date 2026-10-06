@@ -28,7 +28,7 @@ export type QueryOp =
   | { t: 'update'; obj: Record<string, unknown> }
   | { t: 'delete' };
 
-export type Executor = (ops: QueryOp[], table: string) => Promise<{ data: any; error: any }>;
+export type Executor = (ops: QueryOp[], table: string) => Promise<{ data: unknown; error: unknown }>;
 
 type Row = Record<string, unknown>;
 type QueryResult = { data: Row[] | Row | null; error: unknown };
@@ -160,11 +160,11 @@ export function createDataChain(table: string, executor: Executor) {
       ops.push({ t: 'delete' });
       return chain;
     },
-    then(resolve: (v: any) => any, reject: (e?: any) => any) {
-      return executor(ops, table).then(resolve, reject);
+    then(resolve?: ((v: { data: unknown; error: unknown }) => unknown) | null, reject?: ((e?: unknown) => unknown) | null) {
+      return executor(ops, table).then(resolve as ((v: { data: unknown; error: unknown }) => unknown), reject as ((e?: unknown) => unknown));
     },
-    catch(reject: (e?: any) => any) {
-      return executor(ops, table).then(undefined, reject);
+    catch(reject?: ((e?: unknown) => unknown) | null) {
+      return executor(ops, table).then(undefined, reject as ((e?: unknown) => unknown));
     },
   };
 
@@ -453,7 +453,7 @@ async function ensureShapes(
       engine === 'mysql'
         ? `CREATE TABLE IF NOT EXISTS \`${table}\` (\`id\` VARCHAR(64) PRIMARY KEY)`
         : `CREATE TABLE IF NOT EXISTS "${table}" (id TEXT PRIMARY KEY)`;
-    await (pool as any).query(createSql);
+    await (pool as { query: (sql: string) => Promise<unknown> }).query(createSql);
     seenTables.add(table);
   }
 
@@ -481,7 +481,7 @@ async function ensureShapes(
         ? `ALTER TABLE \`${table}\` ADD COLUMN \`${c}\` TEXT`
         : `ALTER TABLE "${table}" ADD COLUMN "${c}" TEXT`;
     try {
-      await (pool as any).query(alter);
+      await (pool as { query: (sql: string) => Promise<unknown> }).query(alter);
     } catch {}
     existing.add(c);
   }

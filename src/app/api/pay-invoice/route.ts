@@ -38,7 +38,8 @@ export async function POST(request: Request) {
     }
 
     let isVerified = false;
-    let verifyData: any = null;
+    interface PaystackVerifyRes { status?: boolean; data?: { status?: string }; }
+    let verifyData: PaystackVerifyRes | null = null;
 
     // Check for payment reference replay if a reference was supplied
     if (finalRef) {
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
         const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(finalRef)}`, {
           headers: { Authorization: `Bearer ${secretKey}` }
         });
-        verifyData = await verifyRes.json();
+        verifyData = (await verifyRes.json()) as PaystackVerifyRes;
         if (verifyData?.status === true && verifyData?.data?.status === 'success') {
           isVerified = true;
         }
@@ -118,12 +119,13 @@ export async function POST(request: Request) {
     }
 
     // 4. Verify total amount paid matches invoice amount if gateway returned payload
-    if (verifyData?.data?.amount && verifyData.data.amount < invoice.totalAmount * 100) {
+    const verifyObj = verifyData?.data as { amount?: number } | undefined;
+    if (verifyObj?.amount && verifyObj.amount < invoice.totalAmount * 100) {
       return NextResponse.json({ error: 'Insufficient payment amount detected' }, { status: 400 });
     }
 
     // 5. Update invoice status and store paymentReference
-    const updatePayload: Record<string, any> = { status: targetStatus };
+    const updatePayload: Record<string, unknown> = { status: targetStatus };
     if (finalRef) {
       updatePayload.paymentReference = finalRef;
     }

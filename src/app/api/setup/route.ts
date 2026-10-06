@@ -334,7 +334,7 @@ export async function POST(request: Request) {
 
     try {
       const { data: usersData } = await serviceRoleClient.auth.admin.listUsers();
-      const existingUser = usersData?.users.find((u: any) => u.email?.toLowerCase() === cleanEmail);
+      const existingUser = usersData?.users.find((u: { email?: string }) => u.email?.toLowerCase() === cleanEmail);
 
       if (existingUser) {
         userId = existingUser.id;
@@ -356,7 +356,7 @@ export async function POST(request: Request) {
         }
         userId = createdAuth.user.id;
       }
-    } catch (_authErr: any) {
+    } catch (_err) {
       // Graceful fallback
     }
 

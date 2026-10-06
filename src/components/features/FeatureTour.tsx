@@ -9,7 +9,7 @@ interface TourStep {
   title: string;
   subtitle: string;
   description: string;
-  highlightIcon: any;
+  highlightIcon: React.ElementType;
   targetQuery: string;
   position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
   isSidebarItem?: boolean;

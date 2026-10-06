@@ -56,7 +56,7 @@ export function PayInvoiceClient({
 
   const hasBankDetails = Boolean(bankName && accountNumber);
   const fallbackKey = paystackPublicKey || process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_3793f0a514d7924ef937e0e47089eeaa1a15f019';
-  const currencySymbol = (invoice as any).currencySymbol || '$';
+  const currencySymbol = invoice.currencySymbol || '$';
 
   // Dynamically load Paystack inline script
   useEffect(() => {
@@ -75,15 +75,19 @@ export function PayInvoiceClient({
     toast.loading('Initializing secure payment session...', { id: 'pay-toast' });
 
     try {
-      if (typeof window !== 'undefined' && (window as any).PaystackPop) {
-        const handler = (window as any).PaystackPop.setup({
+      const win = typeof window !== 'undefined' ? (window as unknown as { PaystackPop?: { setup: (opts: Record<string, unknown>) => { openIframe: () => void } } }) : {};
+      if (win.PaystackPop) {
+        const handler = win.PaystackPop.setup({
           key: fallbackKey,
           email: farmEmail || 'customer@example.com',
           amount: invoice.totalAmount * 100, // Kobo
           currency: 'NGN',
           ref: `PAY-${Date.now()}-${invoice.id.slice(-4)}`,
-          callback: async (response: any) => {
-            await verifyInvoicePayment(response.reference || response.trxref || `PAY-${Date.now()}`);
+          callback: async (response: Record<string, unknown>) => {
+            const ref = (typeof response.reference === 'string' ? response.reference : '') || 
+                        (typeof response.trxref === 'string' ? response.trxref : '') || 
+                        `PAY-${Date.now()}`;
+            await verifyInvoicePayment(ref);
           },
           onClose: () => {
             toast.dismiss('pay-toast');

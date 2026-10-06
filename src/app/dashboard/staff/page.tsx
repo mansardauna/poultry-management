@@ -27,7 +27,7 @@ export default async function StaffPage() {
     applyStaffWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId)
   ]);
-  const staff = ((staffRaw.data || []) as any[]).map((s: any) => {
+  const staff = ((staffRaw.data || []) as Record<string, unknown>[]).map((s: Record<string, unknown>) => {
     let branches: string[] = [];
     if (Array.isArray(s.assignedBranches)) {
       branches = s.assignedBranches;

@@ -25,6 +25,19 @@ interface AiLogModalProps {
   onSuccess?: () => void;
 }
 
+interface ExtractedAiData {
+  staffChanges?: {
+    removeAll?: boolean;
+    add?: Array<{ name: string; role: string; salary: number }>;
+  };
+  eggs?: Array<{ goodEggs?: number; date?: string; notes?: string }>;
+  expenses?: Array<{ amount: number; description?: string; category?: string; date?: string }>;
+  medications?: Array<{ name?: string; date?: string }>;
+  feedUsedKg?: number;
+  mortalityCount?: number;
+  salesAmount?: number;
+}
+
 /**
  * Modal dialog that accepts a free-text daily farm report and uses
  * a pattern-matching parser to extract key metrics (eggs, feed, mortality,
@@ -36,7 +49,7 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
   const [reportText, setReportText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [extractedData, setExtractedData] = useState<unknown>(null);
+  const [extractedData, setExtractedData] = useState<ExtractedAiData | null>(null);
 
   /** Opens the modal dialog. */
   const handleOpen = () => setOpen(true);
@@ -130,30 +143,30 @@ export function AiLogModal({ onSuccess }: AiLogModalProps) {
               {!!extractedData && (
                 <Box sx={{ mt: 2, p: 2, bgcolor: "#f8fafc", border: "1px solid #e2e8f0", textAlign: "left", maxHeight: "300px", overflowY: "auto" }} className="font-mono text-xs text-slate-700 space-y-2">
                   {/* Staff Updates */}
-                  {(extractedData as any).staffChanges?.removeAll && <div className="text-red-600">{t("Removed all previous staff records.", "Removed all previous staff records.")}</div>}
-                  {(extractedData as any).staffChanges?.add?.map((s: any, i: number) => (
+                  {extractedData.staffChanges?.removeAll && <div className="text-red-600">{t("Removed all previous staff records.", "Removed all previous staff records.")}</div>}
+                  {extractedData.staffChanges?.add?.map((s, i) => (
                     <div key={'s'+i}>{t("Added Staff:", "Added Staff:")} {s.name} ({s.role}) - ₦{s.salary.toLocaleString()}</div>
                   ))}
                   
                   {/* Eggs */}
-                  {(extractedData as any).eggs?.map((e: any, i: number) => (
+                  {extractedData.eggs?.map((e, i) => (
                     <div key={'e'+i}>{t("Collected", "Collected")} {e.goodEggs} {t("eggs on", "eggs on")} {e.date} {e.notes ? `(${e.notes})` : ''}</div>
                   ))}
 
                   {/* Expenses */}
-                  {(extractedData as any).expenses?.map((ex: any, i: number) => (
+                  {extractedData.expenses?.map((ex, i) => (
                     <div key={'ex'+i}>{t("Logged Expense:", "Logged Expense:")} ₦{ex.amount.toLocaleString()} for {ex.description} ({ex.category}) on {ex.date}</div>
                   ))}
 
                   {/* Medications */}
-                  {(extractedData as any).medications?.map((m: any, i: number) => (
+                  {extractedData.medications?.map((m, i) => (
                     <div key={'m'+i}>{t("Scheduled:", "Scheduled:")} {m.name} on {m.date}</div>
                   ))}
 
                   {/* Basic Metrics */}
-                  {(extractedData as any).feedUsedKg > 0 && <div>{t("Feed Used:", "Feed Used:")} {(extractedData as any).feedUsedKg} kg</div>}
-                  {(extractedData as any).mortalityCount > 0 && <div>{t("Mortality:", "Mortality:")} {(extractedData as any).mortalityCount} birds</div>}
-                  {(extractedData as any).salesAmount > 0 && <div>{t("Sales Recorded:", "Sales Recorded:")} ₦{(extractedData as any).salesAmount.toLocaleString()}</div>}
+                  {Boolean(extractedData.feedUsedKg && extractedData.feedUsedKg > 0) && <div>{t("Feed Used:", "Feed Used:")} {extractedData.feedUsedKg} kg</div>}
+                  {Boolean(extractedData.mortalityCount && extractedData.mortalityCount > 0) && <div>{t("Mortality:", "Mortality:")} {extractedData.mortalityCount} birds</div>}
+                  {Boolean(extractedData.salesAmount && extractedData.salesAmount > 0) && <div>{t("Sales Recorded:", "Sales Recorded:")} ₦{(extractedData.salesAmount || 0).toLocaleString()}</div>}
                 </Box>
               )}
             </Box>

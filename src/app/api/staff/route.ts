@@ -19,10 +19,10 @@ export async function GET() {
     applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId)
   ]);
 
-  const normalizedStaff = (staffRes.data || []).map((s: any) => {
+  const normalizedStaff = (staffRes.data || []).map((s: Record<string, unknown>) => {
     let branches: string[] = [];
     if (Array.isArray(s.assignedBranches)) {
-      branches = s.assignedBranches;
+      branches = s.assignedBranches as string[];
     } else if (typeof s.assignedBranches === 'string') {
       try {
         const parsed = JSON.parse(s.assignedBranches);
@@ -34,29 +34,29 @@ export async function GET() {
     }
     return {
       id: String(s.id),
-      name: s.name || 'Staff Member',
-      role: s.role || 'Attendant',
+      name: (s.name as string) || 'Staff Member',
+      role: (s.role as string) || 'Attendant',
       salary: Number(s.salary) || 0,
       attendanceDays: Number(s.attendanceDays) || 0,
-      contact: s.contact || '',
+      contact: (s.contact as string) || '',
       assignedBranches: branches
     };
   });
 
-  const normalizedTasks = (tasksRes.data || []).map((t: any) => ({
+  const normalizedTasks = (tasksRes.data || []).map((t: Record<string, unknown>) => ({
     id: String(t.id),
-    assignedTo: t.assignedTo || 'Staff',
-    taskName: t.taskName || 'Assigned Task',
-    status: t.status || 'Pending',
-    date: t.date || new Date().toISOString().split('T')[0]
+    assignedTo: (t.assignedTo as string) || 'Staff',
+    taskName: (t.taskName as string) || 'Assigned Task',
+    status: (t.status as string) || 'Pending',
+    date: (t.date as string) || new Date().toISOString().split('T')[0]
   }));
 
-  const normalizedPayroll = (payrollLogsRes.data || []).map((p: any) => ({
+  const normalizedPayroll = (payrollLogsRes.data || []).map((p: Record<string, unknown>) => ({
     id: String(p.id),
-    date: p.date || new Date().toISOString().split('T')[0],
+    date: (p.date as string) || new Date().toISOString().split('T')[0],
     staffId: String(p.staffId || ''),
     amount: Number(p.amount) || 0,
-    period: p.period || ''
+    period: (p.period as string) || ''
   }));
   
   return NextResponse.json({
@@ -170,8 +170,8 @@ export async function POST(request: Request) {
       supabase.from('staff').select('id, username, name').or(`username.eq.${cleanUser},name.eq.${cleanUser}`)
     ]);
 
-    const conflictingUser = (userMatches || []).find((u: any) => !currentStaffId || (u.id !== `usr_${currentStaffId}` && u.id !== currentStaffId));
-    const conflictingStaff = (staffMatches || []).find((s: any) => !currentStaffId || s.id !== currentStaffId);
+    const conflictingUser = (userMatches || []).find((u: Record<string, unknown>) => !currentStaffId || (u.id !== `usr_${currentStaffId}` && u.id !== currentStaffId));
+    const conflictingStaff = (staffMatches || []).find((s: Record<string, unknown>) => !currentStaffId || s.id !== currentStaffId);
 
     if (conflictingUser || conflictingStaff) {
       return NextResponse.json({
@@ -258,8 +258,8 @@ export async function POST(request: Request) {
     }]);
 
     return NextResponse.json(newStaff, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to manage staff operations: ' + err.message }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to manage staff operations: ' + (err as Error).message }, { status: 500 });
   }
 }
 
@@ -341,7 +341,7 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ success: true, deleted: 'staff' });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Failed to delete staff: ' + (err?.message || String(err)) }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete staff: ' + ((err as { message?: string })?.message || String(err)) }, { status: 500 });
   }
 }
