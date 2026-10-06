@@ -16,6 +16,9 @@ import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { StatCard } from '@/components/ui/StatCard';
+import { BadgeStatus } from '@/components/ui/BadgeStatus';
 import { 
   Dialog, 
   DialogTitle, 
@@ -535,44 +538,44 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
   return (
     <div className="space-y-6">
       {/* Header and Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{texts.eggs.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{texts.eggs.subtitle}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button 
-            onClick={() => handleExportReports('csv')}
-            className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <Download size={15} /> {t("Export CSV")}
-          </button>
-          <button 
-            onClick={() => handleExportReports('pdf')}
-            className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
-          >
-            <Printer size={15} /> {texts.common.printReport || t("Print Report")}
-          </button>
-          <button 
-            onClick={handleOpenAudit}
-            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
-          >
-            {texts.eggs.auditCushioning || t("Audit Cushioning")}
-          </button>
-          <button 
-            onClick={handleOpenMaturation}
-            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
-          >
-            {texts.eggs.logMaturation || t("Log Maturation")}
-          </button>
-          <button 
-            onClick={handleOpenCollect}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95"
-          >
-            <Plus size={16} /> {texts.eggs.logCollection}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={texts.eggs.title}
+        subtitle={texts.eggs.subtitle}
+        actions={
+          <>
+            <button 
+              onClick={() => handleExportReports('csv')}
+              className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <Download size={15} /> {t("Export CSV")}
+            </button>
+            <button 
+              onClick={() => handleExportReports('pdf')}
+              className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+            >
+              <Printer size={15} /> {texts.common.printReport || t("Print Report")}
+            </button>
+            <button 
+              onClick={handleOpenAudit}
+              className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              {texts.eggs.auditCushioning || t("Audit Cushioning")}
+            </button>
+            <button 
+              onClick={handleOpenMaturation}
+              className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              {texts.eggs.logMaturation || t("Log Maturation")}
+            </button>
+            <button 
+              onClick={handleOpenCollect}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95"
+            >
+              <Plus size={16} /> {texts.eggs.logCollection}
+            </button>
+          </>
+        }
+      />
 
       {/* Quality Loss Warning Alerts Banner - Compact & Responsive */}
       {totalBrokenEggs > 0 && (
@@ -595,101 +598,51 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
 
       {/* Stats Cards Grid - 5 Cards including Laying Rate */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Total Collected */}
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.totalCollected}</p>
-                <p className="text-3xl font-semibold text-slate-900 mt-2">{formatNumber(totalCollected)}</p>
-              </div>
-              <div className="text-indigo-650">
-                <BarChart2 size={30} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={texts.eggs.totalCollected}
+          value={formatNumber(totalCollected)}
+          icon={BarChart2}
+          color="indigo"
+        />
 
-        {/* Estimated Hen-Day Rate */}
-        <Card className="hover:border-indigo-300 transition-colors">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-1.5" title={t("Hen-Day Laying Rate Formula: (Total Eggs Produced / (Active Layer Hens × Days Logged)) × 100. Unlogged days are treated as missing observations to prevent distortion.")}>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t("Estimated Hen-Day Rate")}</p>
-                  <span className="text-[10px] text-slate-400 cursor-help" title={t("Hen-Day Laying Rate Formula: (Total Eggs Produced / (Active Layer Hens × Days Logged)) × 100. Unlogged days are treated as missing observations to prevent distortion.")}>ℹ️</span>
-                </div>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <p className="text-3xl font-semibold text-indigo-600">
-                    {hasLayerBatches && activeLayers > 0 && uniqueLoggedDays > 0 ? `${henDayRate.toFixed(1)}%` : t("N/A")}
-                  </p>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    !hasLayerBatches || activeLayers === 0 ? 'bg-slate-100 text-slate-600' :
-                    henDayRate >= 85 ? 'bg-emerald-100 text-emerald-800' :
-                    henDayRate >= 70 ? 'bg-indigo-100 text-indigo-800' :
-                    henDayRate > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {!hasLayerBatches || activeLayers === 0 ? t("N/A") :
-                     henDayRate >= 85 ? t("Optimal") :
-                     henDayRate >= 70 ? t("Good") :
-                     henDayRate > 0 ? t("Sub-optimal") : t("N/A")}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-1 font-medium truncate" title={sampleSizeLabel}>
-                  {sampleSizeLabel} &bull; {formatNumber(activeLayers)} {t("hens")}
-                </p>
-              </div>
-              <div className="text-indigo-600 shrink-0">
-                <TrendingUp size={30} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={t("Estimated Hen-Day Rate")}
+          value={hasLayerBatches && activeLayers > 0 && uniqueLoggedDays > 0 ? `${henDayRate.toFixed(1)}%` : t("N/A")}
+          badge={
+            <BadgeStatus
+              status={
+                !hasLayerBatches || activeLayers === 0 ? "N/A" :
+                henDayRate >= 85 ? "Optimal" :
+                henDayRate >= 70 ? "Good" :
+                henDayRate > 0 ? "Warning" : "N/A"
+              }
+            />
+          }
+          subtext={`${sampleSizeLabel} • ${formatNumber(activeLayers)} ${t("hens")}`}
+          icon={TrendingUp}
+          color="indigo"
+        />
 
-        {/* Good Eggs */}
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.goodEggs}</p>
-                <p className="text-3xl font-semibold text-emerald-650 mt-2">{formatNumber(totalGoodEggs)}</p>
-              </div>
-              <div className="text-emerald-600">
-                <BarChart2 size={30} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={texts.eggs.goodEggs}
+          value={formatNumber(totalGoodEggs)}
+          icon={BarChart2}
+          color="emerald"
+        />
 
-        {/* Broken Eggs */}
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.brokenEggs}</p>
-                <p className="text-3xl font-semibold text-red-650 mt-2">{formatNumber(totalBrokenEggs)}</p>
-              </div>
-              <div className="text-red-600">
-                <AlertTriangle size={30} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={texts.eggs.brokenEggs}
+          value={formatNumber(totalBrokenEggs)}
+          icon={AlertTriangle}
+          color="rose"
+        />
 
-        {/* Spoilt Eggs */}
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.eggs.spoiltEggs}</p>
-                <p className="text-3xl font-semibold text-amber-600 mt-2">{formatNumber(totalSpoiltEggs)}</p>
-              </div>
-              <div className="text-amber-500">
-                <AlertTriangle size={30} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={texts.eggs.spoiltEggs}
+          value={formatNumber(totalSpoiltEggs)}
+          icon={AlertTriangle}
+          color="amber"
+        />
       </div>
 
       {/* Grid: Cushioning Audits vs Maturation logs */}
@@ -698,7 +651,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <Card>
             <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <CheckSquare size={18} className="text-indigo-650" /> {texts.eggs.cushionAudits}
+              <CheckSquare size={18} className="text-indigo-600" /> {texts.eggs.cushionAudits}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -727,7 +680,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                           log.status.includes('Optimal') ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800 animate-pulse'
                         }`}>{log.status}</span>
                       </td>
-                      <td className="px-4 py-3 text-slate-650 font-medium">{log.actionTaken}</td>
+                      <td className="px-4 py-3 text-slate-600 font-medium">{log.actionTaken}</td>
                       {canEdit && (
                         <td className="px-4 py-3 flex gap-2">
                           <button
@@ -766,7 +719,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold uppercase text-slate-700 tracking-wider flex items-center gap-2">
-              <BarChart2 size={18} className="text-indigo-650" /> {texts.eggs.maturationLogs}
+              <BarChart2 size={18} className="text-indigo-600" /> {texts.eggs.maturationLogs}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -792,7 +745,7 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
                       <td className="px-4 py-3 text-slate-400">{log.date}</td>
                       <td className="px-4 py-3 font-semibold text-slate-900">{log.birdId}</td>
                       <td className="px-4 py-3 font-semibold text-indigo-600">{log.eggsCount} egg</td>
-                      <td className="px-4 py-3 text-amber-605 font-semibold">{log.avgWeightGrams} g</td>
+                      <td className="px-4 py-3 text-amber-600 font-semibold">{log.avgWeightGrams} g</td>
                       <td className="px-4 py-3 text-slate-500 font-medium">{log.notes}</td>
                       {canEdit && (
                         <td className="px-4 py-3 flex gap-2">

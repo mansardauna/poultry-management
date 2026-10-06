@@ -17,6 +17,8 @@ export interface StatCardProps {
   icon?: LucideIcon;
   /** Accent color variant */
   color?: 'indigo' | 'emerald' | 'amber' | 'purple' | 'rose' | 'blue' | 'slate';
+  /** Optional badge or chip component placed next to the metric value */
+  badge?: React.ReactNode;
   /** Optional data-tour spotlight attribute */
   dataTour?: string;
   /** Optional click handler */
@@ -94,6 +96,7 @@ export function StatCard({
   subtext,
   icon: Icon,
   color = 'indigo',
+  badge,
   dataTour,
   onClick,
   className = '',
@@ -124,7 +127,10 @@ export function StatCard({
                   <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                 )}
               </div>
-              <p className={`text-2xl sm:text-3xl font-normal ${styles.valueText}`}>{value}</p>
+              <div className="flex items-baseline gap-2">
+                <p className={`text-2xl sm:text-3xl font-semibold tracking-tight ${styles.valueText}`}>{value}</p>
+                {badge}
+              </div>
               {subtext && (
                 <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1`}>
                   {t(subtext)}

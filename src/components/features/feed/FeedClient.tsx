@@ -17,6 +17,9 @@ import { Modal } from '@/components/ui/Modal';
 import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { StatCard } from '@/components/ui/StatCard';
+import { BadgeStatus } from '@/components/ui/BadgeStatus';
 
 /**
  * Props for the FeedClient component.
@@ -403,44 +406,44 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
   return (
     <div className="space-y-6">
       {/* Header and Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{texts.feed.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{texts.feed.subtitle}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button 
-            onClick={() => handleExportReports('csv')}
-            className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-          >
-            <Download size={15} /> {t("Export CSV")}
-          </button>
-          <button 
-            onClick={() => handleExportReports('pdf')}
-            className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-          >
-            <Printer size={15} /> {t("Print Report")}
-          </button>
-          <button 
-            onClick={handleOpenLogistics}
-            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
-          >
-            <Truck size={15} /> {t("Logistics Pipeline")}
-          </button>
-          <button 
-            onClick={handleOpenUsage}
-            className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer shadow-sm active:scale-95"
-          >
-            {t("Log Usage")}
-          </button>
-          <button 
-            onClick={handleOpenRestock}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
-          >
-            <Plus size={16} /> {texts.feed?.receiveStock || t("Receive Stock")}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={texts.feed.title}
+        subtitle={texts.feed.subtitle}
+        actions={
+          <>
+            <button 
+              onClick={() => handleExportReports('csv')}
+              className="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+            >
+              <Download size={15} /> {t("Export CSV")}
+            </button>
+            <button 
+              onClick={() => handleExportReports('pdf')}
+              className="bg-slate-900 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+            >
+              <Printer size={15} /> {t("Print Report")}
+            </button>
+            <button 
+              onClick={handleOpenLogistics}
+              className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+            >
+              <Truck size={15} /> {t("Logistics Pipeline")}
+            </button>
+            <button 
+              onClick={handleOpenUsage}
+              className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer shadow-sm active:scale-95"
+            >
+              {t("Log Usage")}
+            </button>
+            <button 
+              onClick={handleOpenRestock}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+            >
+              <Plus size={16} /> {texts.feed?.receiveStock || t("Receive Stock")}
+            </button>
+          </>
+        }
+      />
 
       {/* Critical Shortfall Alert Banner - Compact & Responsive */}
       {isLayerMashCritical && (
@@ -464,67 +467,46 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
       {/* Summary Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Stock */}
-        <Card className="hover:border-indigo-300 transition-colors">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500">{t("Total Stock")}</p>
-                <p className="text-3xl font-semibold text-slate-900 mt-1">{totalFeedKg.toLocaleString()} kg</p>
-              </div>
-              <div className="text-amber-500"><BarChart2 size={30} /></div>
-            </div>
-            <div className="mt-3 flex items-center text-xs">
-              <span className={`font-semibold px-2 py-0.5 ${daysOfSupply !== null && daysOfSupply <= 7 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                {daysOfSupply !== null ? `~${daysOfSupply} ${t("days left")}` : t("No logs yet")}
-              </span>
-              <span className="text-slate-400 ml-2">{t("at current rate")}</span>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={t("Total Stock")}
+          value={`${totalFeedKg.toLocaleString()} kg`}
+          subtext={daysOfSupply !== null ? `~${daysOfSupply} ${t("days left at current rate")}` : t("No logs yet")}
+          badge={
+            <BadgeStatus
+              status={daysOfSupply !== null && daysOfSupply <= 7 ? "Warning" : "Active"}
+            />
+          }
+          icon={BarChart2}
+          color="amber"
+        />
 
         {/* Weekly Consumed */}
-        <Card className="hover:border-indigo-300 transition-colors">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500">{t("This week used")}</p>
-                <p className="text-3xl font-semibold text-indigo-600 mt-1">{weeklyKgTotal.toFixed(1)} kg</p>
-              </div>
-              <div className="text-indigo-500"><BarChart2 size={30} /></div>
-            </div>
-            <div className="mt-3 flex items-center text-xs">
-              <span className="bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5">
-                {dailyAvgConsumption.toFixed(1)} kg/{t("day")}
-              </span>
-              <span className="text-slate-400 ml-2">{t("daily average")}</span>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={t("This week used")}
+          value={`${weeklyKgTotal.toFixed(1)} kg`}
+          subtext={`${dailyAvgConsumption.toFixed(1)} kg/${t("day")} ${t("daily average")}`}
+          icon={BarChart2}
+          color="indigo"
+        />
 
         {/* Per-type cards for first 2 feed types */}
         {feeds.slice(0, 2).map(feed => {
           const consumed = weeklyByType[feed.type] || 0;
           const isCritical = feed.quantityKg <= 50;
           return (
-            <Card key={feed.id} className={`hover:border-indigo-300 transition-colors ${isCritical ? 'border-red-300' : ''}`}>
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500">{t(feed.type)}</p>
-                    <p className={`text-3xl font-semibold mt-1 ${isCritical ? 'text-red-600' : 'text-slate-900'}`}>
-                      {feed.quantityKg.toLocaleString()} kg
-                    </p>
-                  </div>
-                  <div className={isCritical ? 'text-red-400' : 'text-emerald-500'}><BarChart2 size={30} /></div>
-                </div>
-                <div className="mt-3 flex items-center text-xs gap-2">
-                  <span className={`font-semibold px-2 py-0.5 ${isCritical ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-600'}`}>
-                    {isCritical ? t('Critical') : t('Safe')}
-                  </span>
-                  <span className="text-slate-400">{consumed.toFixed(1)} {t("kg used this week")}</span>
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              key={feed.id}
+              title={t(feed.type)}
+              value={`${feed.quantityKg.toLocaleString()} kg`}
+              subtext={`${consumed.toFixed(1)} ${t("kg used this week")}`}
+              badge={
+                <BadgeStatus
+                  status={isCritical ? "Critical" : "Good"}
+                />
+              }
+              icon={BarChart2}
+              color={isCritical ? "rose" : "emerald"}
+            />
           );
         })}
       </div>
@@ -590,14 +572,14 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                     return (
                       <tr key={feed.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 font-semibold text-slate-900">{feed.type}</td>
-                        <td className={`px-4 py-3 font-semibold ${isCritical ? 'text-red-650' : 'text-indigo-600'}`}>
+                        <td className={`px-4 py-3 font-semibold ${isCritical ? 'text-red-600' : 'text-indigo-600'}`}>
                           {feed.quantityKg.toLocaleString()} kg
                         </td>
-                        <td className="px-4 py-3 text-slate-655 font-medium">{feed.supplier}</td>
+                        <td className="px-4 py-3 text-slate-600 font-medium">{feed.supplier}</td>
                         <td className="px-4 py-3 text-slate-400 font-mono">{feed.lastRestock}</td>
                         <td className="px-4 py-3">
                           <span className={`px-2.5 py-0.5 text-[9px] font-semibold ${
-                            isCritical ? 'bg-red-100 text-red-800 animate-pulse' : 'bg-indigo-105 text-indigo-800'
+                            isCritical ? 'bg-red-100 text-red-800 animate-pulse' : 'bg-indigo-100 text-indigo-800'
                           }`}>
                             {isCritical ? t('Critical Stock') : t('Safe stock')}
                           </span>
@@ -625,7 +607,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-700 tracking-wider flex items-center gap-2">
-              <Truck size="18" className="text-indigo-655" /> {t("Restructured Logistics Procurement Pipeline (DB Roster)")}
+              <Truck size="18" className="text-indigo-600" /> {t("Restructured Logistics Procurement Pipeline (DB Roster)")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -724,7 +706,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
                   return (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-semibold text-slate-950">{log.date}</td>
-                      <td className="px-4 py-3 font-medium text-slate-650">{feed?.type ? t(feed.type) : t('Unknown')}</td>
+                      <td className="px-4 py-3 font-medium text-slate-600">{feed?.type ? t(feed.type) : t('Unknown')}</td>
                       <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{log.batchId}</td>
                       <td className="px-4 py-3 font-semibold text-amber-600">{log.quantityConsumedKg} kg</td>
                       {canEdit && (

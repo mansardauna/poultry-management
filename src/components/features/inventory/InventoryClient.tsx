@@ -12,6 +12,8 @@ import toast from 'react-hot-toast';
 import { EquipmentInventory } from "@/data/types";
 import { useLanguage } from '../LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { BadgeStatus } from '@/components/ui/BadgeStatus';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -101,20 +103,20 @@ export function InventoryClient({ role }: { role: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{t("Equipment Inventory")}</h1>
-          <p className="text-sm text-slate-500 mt-1">{t("Manage farm equipment, feeders, drinkers, and maintenance logs.")}</p>
-        </div>
-        {role !== 'Staff' && (
-          <button 
-            onClick={() => setOpen(true)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
-          >
-            <Plus size={18} /> {t("Add Equipment")}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Equipment Inventory"
+        subtitle="Manage farm equipment, feeders, drinkers, and maintenance logs."
+        actions={
+          role !== 'Staff' ? (
+            <button 
+              onClick={() => setOpen(true)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+            >
+              <Plus size={18} /> {t("Add Equipment")}
+            </button>
+          ) : undefined
+        }
+      />
 
       <Card>
         <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">
@@ -143,9 +145,7 @@ export function InventoryClient({ role }: { role: string }) {
                     <td className="px-4 py-3 text-slate-600">{t(eq.type)}</td>
                     <td className="px-4 py-3 text-slate-600">{formatNumber(eq.quantity)}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-semibold ${eq.status === 'Good' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
-                        {t(eq.status)}
-                      </span>
+                      <BadgeStatus status={eq.status} />
                     </td>
                     <td className="px-4 py-3 text-slate-600">{eq.lastMaintenance}</td>
                     {canEdit && (

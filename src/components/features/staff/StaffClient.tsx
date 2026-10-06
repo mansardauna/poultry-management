@@ -428,7 +428,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                 <p className="text-xs font-semibold text-slate-500 tracking-wider">{t("Active Staff Tasks")}</p>
                 <p className="text-3xl font-semibold text-indigo-600 mt-2">{formatNumber(pendingTasksCount)}</p>
               </div>
-              <div className="text-indigo-650">
+              <div className="text-indigo-600">
                 <CheckSquare size={32} />
               </div>
             </div>
@@ -470,7 +470,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                           : t('All')}
                       </td>
                       <td className="px-4 py-3 text-slate-500">{employee.contact}</td>
-                      <td className="px-4 py-3 text-center font-semibold text-indigo-650">{employee.attendanceDays} {t("days")}</td>
+                      <td className="px-4 py-3 text-center font-semibold text-indigo-600">{employee.attendanceDays} {t("days")}</td>
                       <td className="px-4 py-3 font-semibold">{formatCurrency(employee.salary)}</td>
                       <td className="px-4 py-3 text-right">
                           <button 
@@ -532,7 +532,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
                     {task.status === 'Pending' && (
                         <button 
                         onClick={() => handleCompleteTask(task.id)}
-                        className="w-full bg-indigo-650 hover:bg-indigo-700 text-white text-[10px] font-semibold py-1 mt-1 text-center flex items-center justify-center gap-1"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold py-1 mt-1 text-center flex items-center justify-center gap-1"
                       >
                         <CheckCircle size={12} /> {t("Mark Completed")}
                       </button>

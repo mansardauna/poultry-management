@@ -14,6 +14,8 @@ import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { BadgeStatus } from '@/components/ui/BadgeStatus';
 import { 
   Dialog, 
   DialogTitle, 
@@ -319,38 +321,38 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
   return (
     <div className="space-y-6">
       {/* Page Title & Commands */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{texts.chickens.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{texts.chickens.subtitle}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button 
-            onClick={handleOpenMortality}
-            className="bg-white border border-red-200 text-red-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
-          >
-            <AlertTriangle size={17} /> {t("Log Mortality")}
-          </button>
-          <button 
-            onClick={handleOpenVaccine}
-            className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
-          >
-            <Shield size={17} /> {t("Log Vaccination")}
-          </button>
-          <button 
-            onClick={handleOpenTransfer}
-            className="bg-white border border-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
-          >
-            <MapPin size={17} /> {t("Transfer Birds")}
-          </button>
-          <button 
-            onClick={handleOpen}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
-          >
-            <Plus size={18} /> {texts.chickens.addBatch}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={texts.chickens.title}
+        subtitle={texts.chickens.subtitle}
+        actions={
+          <>
+            <button 
+              onClick={handleOpenMortality}
+              className="bg-white border border-red-200 text-red-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+            >
+              <AlertTriangle size={17} /> {t("Log Mortality")}
+            </button>
+            <button 
+              onClick={handleOpenVaccine}
+              className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+            >
+              <Shield size={17} /> {t("Log Vaccination")}
+            </button>
+            <button 
+              onClick={handleOpenTransfer}
+              className="bg-white border border-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+            >
+              <MapPin size={17} /> {t("Transfer Birds")}
+            </button>
+            <button 
+              onClick={handleOpen}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+            >
+              <Plus size={18} /> {texts.chickens.addBatch}
+            </button>
+          </>
+        }
+      />
 
       {/* Batches Table Card */}
       <Card>
@@ -379,25 +381,15 @@ export function ChickensClient({ initialData, role }: ChickensClientProps) {
                   <tr key={batch.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-900">{batch.id}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-md ${
-                        batch.type === 'Layers' ? 'bg-amber-100 text-amber-800' :
-                        batch.type === 'Broilers' ? 'bg-blue-100 text-blue-800' :
-                        'bg-indigo-100 text-indigo-800'
-                      }`}>
-                        {batch.type}
-                      </span>
+                      <BadgeStatus status={batch.type} />
                     </td>
                     <td className="px-4 py-3">{batch.breed}</td>
                     <td className="px-4 py-3 font-semibold text-slate-900">{formatNumber(batch.quantity)}</td>
                     <td className="px-4 py-3">{formatNumber(batch.ageInWeeks)}</td>
-                    <td className="px-4 py-3 text-red-650 font-semibold">{formatNumber(batch.mortalityCount)}</td>
+                    <td className="px-4 py-3 text-red-600 font-semibold">{formatNumber(batch.mortalityCount)}</td>
                     <td className="px-4 py-3 font-mono text-xs">{batch.farmSection}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-md ${
-                        batch.vaccinationStatus === 'Up to Date' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-105 text-red-800 animate-pulse'
-                      }`}>
-                        {batch.vaccinationStatus}
-                      </span>
+                      <BadgeStatus status={batch.vaccinationStatus} />
                     </td>
                     {canEdit && (
                       <td className="px-4 py-3 flex gap-2">

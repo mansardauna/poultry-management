@@ -12,6 +12,7 @@ import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useLanguage } from '../LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { 
   Dialog, 
   DialogTitle, 
@@ -223,40 +224,40 @@ export function HealthClient({ role }: { role: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{texts.health?.title || t("Health & Medication")}</h1>
-          <p className="text-sm text-slate-500 mt-1">{texts.health?.subtitle || t("Vaccination schedules, medication logs, and flock wellness.")}</p>
-        </div>
-        {role !== 'Staff' && (
-          <div className="flex flex-wrap gap-2">
-            <button 
-              onClick={() => {
-                setLogBatchId(batches[0]?.id || '');
-                setLogMedicationName('');
-                setLogType('Vaccine');
-                setLogDate(new Date().toISOString().split('T')[0]);
-                setOpenLogHealth(true);
-              }}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
-            >
-              <Plus size={18} /> {t("Log Health Event")}
-            </button>
-            <button 
-              onClick={() => setOpenApply(true)}
-              className="bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
-            >
-              <Calendar size={17} /> {t("Apply Template")}
-            </button>
-            <button 
-              onClick={() => setOpenTemplate(true)}
-              className="bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
-            >
-              <Settings size={17} /> {t("Define Template")}
-            </button>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title={texts.health?.title || t("Health & Medication")}
+        subtitle={texts.health?.subtitle || t("Vaccination schedules, medication logs, and flock wellness.")}
+        actions={
+          role !== 'Staff' ? (
+            <>
+              <button 
+                onClick={() => {
+                  setLogBatchId(batches[0]?.id || '');
+                  setLogMedicationName('');
+                  setLogType('Vaccine');
+                  setLogDate(new Date().toISOString().split('T')[0]);
+                  setOpenLogHealth(true);
+                }}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+              >
+                <Plus size={18} /> {t("Log Health Event")}
+              </button>
+              <button 
+                onClick={() => setOpenApply(true)}
+                className="bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+              >
+                <Calendar size={17} /> {t("Apply Template")}
+              </button>
+              <button 
+                onClick={() => setOpenTemplate(true)}
+                className="bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+              >
+                <Settings size={17} /> {t("Define Template")}
+              </button>
+            </>
+          ) : undefined
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Active Schedules */}

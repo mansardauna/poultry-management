@@ -13,6 +13,8 @@ import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { StatCard } from '@/components/ui/StatCard';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { 
@@ -205,94 +207,63 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{texts.finance.title}</h1>
-          <p className="text-sm text-slate-500 mt-1">{texts.finance.subtitle}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button 
-            onClick={handleExportPDF}
-            className="bg-white border border-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
-          >
-            {t("Export PDF")}
-          </button>
-          <button 
-            onClick={handleProcessPayroll}
-            className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
-          >
-            <User size={17} /> {t("Process Payroll")}
-          </button>
-          <button 
-            onClick={handleOpen}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
-          >
-            <Plus size={18} /> {texts.finance?.logExpense || t("Log Expense")}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={texts.finance.title}
+        subtitle={texts.finance.subtitle}
+        actions={
+          <>
+            <button 
+              onClick={handleExportPDF}
+              className="bg-white border border-slate-300 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+            >
+              {t("Export PDF")}
+            </button>
+            <button 
+              onClick={handleProcessPayroll}
+              className="bg-white border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm active:scale-95"
+            >
+              <User size={17} /> {t("Process Payroll")}
+            </button>
+            <button 
+              onClick={handleOpen}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+            >
+              <Plus size={18} /> {texts.finance?.logExpense || t("Log Expense")}
+            </button>
+          </>
+        }
+      />
 
       {/* Main KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance?.totalRevenue || t("Total Revenue")}</p>
-                <p className="text-2xl font-semibold text-slate-900 mt-2">₦{totalRevenue.toLocaleString()}</p>
-              </div>
-              <div className="text-indigo-600">
-                <ArrowUp size={32} />
-              </div>
-            </div>
-            <div className="text-[10px] text-slate-400 mt-3">{t("From Wednesday wholesale sales")}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{texts.finance?.totalExpenses || t("Total Expenses")}</p>
-                <p className="text-2xl font-semibold text-red-650 mt-2">₦{totalExpenses.toLocaleString()}</p>
-              </div>
-              <div className="text-red-500">
-                <ArrowDown size={32} />
-              </div>
-            </div>
-            <div className="text-[10px] text-slate-400 mt-3">{t("Feed, fuel and sanitation tools")}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t("Remaining Asset Balance")}</p>
-                <p className="text-2xl font-semibold text-indigo-600 mt-2">₦{netBalance.toLocaleString()}</p>
-              </div>
-              <div className="text-blue-500">
-                <Wallet size={32} />
-              </div>
-            </div>
-            <div className="text-[10px] text-emerald-600 font-semibold mt-3">{t("Reconciled & Audited")}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-indigo-950 text-white border-0 rounded-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-indigo-200 uppercase tracking-wider">{t("Return Efficiency Rate")}</p>
-                <p className="text-2xl font-semibold text-white mt-2">{returnEfficiency}%</p>
-              </div>
-              <div className="text-blue-400">
-                <Percent size={32} />
-              </div>
-            </div>
-            <div className="text-[10px] text-indigo-300 mt-3 font-semibold">{t("Net Profit")}: ₦{netProfit.toLocaleString()}</div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title={texts.finance?.totalRevenue || "Total Revenue"}
+          value={`₦${totalRevenue.toLocaleString()}`}
+          subtext="From Wednesday wholesale sales"
+          icon={ArrowUp}
+          color="indigo"
+        />
+        <StatCard
+          title={texts.finance?.totalExpenses || "Total Expenses"}
+          value={`₦${totalExpenses.toLocaleString()}`}
+          subtext="Feed, fuel and sanitation tools"
+          icon={ArrowDown}
+          color="rose"
+        />
+        <StatCard
+          title="Remaining Asset Balance"
+          value={`₦${netBalance.toLocaleString()}`}
+          subtext="Reconciled & Audited"
+          icon={Wallet}
+          color="emerald"
+        />
+        <StatCard
+          title="Return Efficiency Rate"
+          value={`${returnEfficiency}%`}
+          subtext={`Net Profit: ₦${netProfit.toLocaleString()}`}
+          icon={Percent}
+          color="blue"
+        />
       </div>
 
       {/* Cash Flow Reconciliation Sheet */}
@@ -353,7 +324,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
 
                 <div className="flex justify-between font-semibold text-slate-900 border-t border-slate-200 pt-2 mt-2">
                   <span>Total Operational Disbursements:</span>
-                  <span className="text-red-605">-{formatCurrency(totalExpenses)}</span>
+                  <span className="text-red-600">-{formatCurrency(totalExpenses)}</span>
                 </div>
 
                 <div className="flex justify-between font-semibold text-indigo-900 bg-indigo-50 border-2 border-indigo-200 p-3 mt-4 text-sm">
@@ -395,7 +366,7 @@ export function FinanceClient({ initialSales, initialExpenses, role }: FinanceCl
                     <td className="px-4 py-3">
                       <span className={`text-[9px] font-semibold px-2 py-0.5 uppercase ${
                         expense.category === 'Salaries' ? 'bg-amber-100 text-amber-800' :
-                        expense.category === 'Feed' ? 'bg-indigo-100 text-indigo-850' :
+                        expense.category === 'Feed' ? 'bg-indigo-100 text-indigo-800' :
                         'bg-slate-100 text-slate-800'
                       }`}>
                         {expense.category}

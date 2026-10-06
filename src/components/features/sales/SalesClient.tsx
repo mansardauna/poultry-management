@@ -8,6 +8,8 @@ import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { PageHeader } from '@/components/ui/PageHeader';
+import { BadgeStatus } from '@/components/ui/BadgeStatus';
 import { 
   Plus, 
   Coins, 
@@ -359,43 +361,43 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   return (
     <div className="space-y-6 font-sans">
       {/* Header & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">{texts.sales?.title || t("Sales & Invoices")}</h1>
-          <p className="text-sm text-slate-500 mt-1">{texts.sales?.subtitle || t("Track all farm sales and generate invoices.")}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button 
-            onClick={() => {
-              const columns = [
-                { header: 'ID', key: 'id' },
-                { header: 'Date', key: 'date' },
-                { header: 'Customer', key: 'customerName' },
-                { header: 'Items / Description', key: 'items' },
-                { header: 'Quantity', key: 'quantity' },
-                { header: 'Total Amount', key: 'totalAmount' },
-                { header: 'Status', key: 'status' }
-              ];
-              printBrandedReport('Customer Invoices & Billing Audit', invoices, columns);
-            }}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
-          >
-            <Printer size={16} /> {t("Print Audit Report")}
-          </button>
-          <button 
-            onClick={() => setOpenInvoiceModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95"
-          >
-            <FileText size={16} /> + {t("Generate New Invoice")}
-          </button>
-          <button 
-            onClick={handleOpen}
-            className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
-          >
-            <Plus size={18} /> {texts.sales?.newSale || t("New Sale")}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={texts.sales?.title || t("Sales & Invoices")}
+        subtitle={texts.sales?.subtitle || t("Track all farm sales and generate invoices.")}
+        actions={
+          <>
+            <button 
+              onClick={() => {
+                const columns = [
+                  { header: 'ID', key: 'id' },
+                  { header: 'Date', key: 'date' },
+                  { header: 'Customer', key: 'customerName' },
+                  { header: 'Items / Description', key: 'items' },
+                  { header: 'Quantity', key: 'quantity' },
+                  { header: 'Total Amount', key: 'totalAmount' },
+                  { header: 'Status', key: 'status' }
+                ];
+                printBrandedReport('Customer Invoices & Billing Audit', invoices, columns);
+              }}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+            >
+              <Printer size={16} /> {t("Print Audit Report")}
+            </button>
+            <button 
+              onClick={() => setOpenInvoiceModal(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95"
+            >
+              <FileText size={16} /> + {t("Generate New Invoice")}
+            </button>
+            <button 
+              onClick={handleOpen}
+              className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+            >
+              <Plus size={18} /> {texts.sales?.newSale || t("New Sale")}
+            </button>
+          </>
+        }
+      />
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200 overflow-x-auto">
@@ -484,13 +486,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
                         <td className="px-4 py-3.5 text-slate-600 font-mono">{inv.quantity}</td>
                         <td className="px-4 py-3.5 font-extrabold text-slate-900 font-mono">{currencySymbol}{inv.totalAmount.toLocaleString()}</td>
                         <td className="px-4 py-3.5">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                            inv.status === 'Paid'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-amber-100 text-amber-800'
-                          }`}>
-                            ● {t(inv.status)}
-                          </span>
+                          <BadgeStatus status={inv.status} />
                         </td>
                         <td className="px-4 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">

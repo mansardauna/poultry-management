@@ -729,7 +729,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
               <span className="text-xs font-medium text-slate-500">{texts.dashboard.currentWeekYield}</span>
-              <span className="text-xs font-bold text-indigo-650">{formatNumber(currentYield)}</span>
+              <span className="text-xs font-bold text-indigo-600">{formatNumber(currentYield)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
               <span className="text-xs font-medium text-slate-500">{texts.dashboard.absoluteNetGrowth}</span>
@@ -762,7 +762,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-500 font-medium">{texts.dashboard.projectedFlockValue}</span>
-              <span className="text-indigo-650 font-bold">{formatCurrency(projectedRevenue)}</span>
+              <span className="text-indigo-600 font-bold">{formatCurrency(projectedRevenue)}</span>
             </div>
             
             <div className="pt-2">
@@ -935,7 +935,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
           <Card>
             <CardHeader className="border-b border-slate-100">
               <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <CheckSquare size={18} className="text-indigo-650" /> {texts.dashboard.shiftChecklistQueue}
+                <CheckSquare size={18} className="text-indigo-600" /> {texts.dashboard.shiftChecklistQueue}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -972,7 +972,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
               <CardHeader className={`border-b ${isPayday ? 'bg-amber-50 border-amber-100' : 'border-slate-100'}`}>
                 <CardTitle className={`text-sm font-semibold flex items-center justify-between ${isPayday ? 'text-amber-700' : 'text-slate-700'}`}>
                   <span className="flex items-center gap-2">
-                    <Coins size={18} className={isPayday ? "text-amber-600" : "text-indigo-650"} /> {texts.dashboard.salaryPayroll}
+                    <Coins size={18} className={isPayday ? "text-amber-600" : "text-indigo-600"} /> {texts.dashboard.salaryPayroll}
                   </span>
                   {isPayday && (
                     <span className="bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full animate-pulse uppercase font-bold">

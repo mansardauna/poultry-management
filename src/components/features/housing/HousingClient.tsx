@@ -12,6 +12,7 @@ import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useLanguage } from '../LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -223,28 +224,28 @@ export function HousingClient({ role }: { role: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{t("Housing & Pens")}</h1>
-          <p className="text-sm text-slate-500 mt-1">{t("Manage farm housing, capacities, environmental conditions, and batch assignments.")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => handleOpenTempModal()}
-            className="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-amber-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-amber-600/20 active:scale-95"
-          >
-            <Thermometer size={18} /> {t("Log Temperature")}
-          </button>
-          {role !== 'Staff' && (
+      <PageHeader
+        title="Housing & Pens"
+        subtitle="Manage farm housing, capacities, environmental conditions, and batch assignments."
+        actions={
+          <>
             <button 
-              onClick={() => setOpen(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+              onClick={() => handleOpenTempModal()}
+              className="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-amber-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-amber-600/20 active:scale-95"
             >
-              <Plus size={18} /> {t("Add Pen")}
+              <Thermometer size={18} /> {t("Log Temperature")}
             </button>
-          )}
-        </div>
-      </div>
+            {role !== 'Staff' && (
+              <button 
+                onClick={() => setOpen(true)}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+              >
+                <Plus size={18} /> {t("Add Pen")}
+              </button>
+            )}
+          </>
+        }
+      />
 
       <Card>
         <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">

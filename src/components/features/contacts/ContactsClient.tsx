@@ -12,6 +12,7 @@ import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import { useLanguage } from '../LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   TextField, Select, MenuItem, FormControl, InputLabel, Button as MuiButton 
@@ -100,20 +101,20 @@ export function ContactsClient({ role }: { role: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{t("CRM & Contacts")}</h1>
-          <p className="text-sm text-slate-500 mt-1">{t("Manage regular customers and suppliers.")}</p>
-        </div>
-        {role !== 'Staff' && (
-          <button 
-            onClick={() => setOpen(true)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
-          >
-            <Plus size={18} /> {t("Add Contact")}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="CRM & Contacts"
+        subtitle="Manage regular customers and suppliers."
+        actions={
+          role !== 'Staff' ? (
+            <button 
+              onClick={() => setOpen(true)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-sm shadow-indigo-600/20 active:scale-95"
+            >
+              <Plus size={18} /> {t("Add Contact")}
+            </button>
+          ) : undefined
+        }
+      />
 
       <Card>
         <CardHeader className="border-b border-slate-100 flex justify-between items-center flex-row">
