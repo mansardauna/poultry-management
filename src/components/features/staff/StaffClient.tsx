@@ -8,7 +8,7 @@ import { TablePagination } from '@/components/ui/TablePagination';
 import { TableSortHeader } from '@/components/ui/TableSortHeader';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, User, CheckSquare, Fingerprint, CheckCircle, Trash2 } from 'lucide-react';
+import { Plus, User, CheckSquare, Fingerprint, CheckCircle, Trash2, Zap } from 'lucide-react';
 import { useLanguage } from '@/components/features/LanguageContext';
 import { Staff, StaffTask, PayrollLog } from "@/data/types";
 import { 
@@ -390,7 +390,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
       {tier === 'free' && (
         <div className="border border-amber-300 bg-amber-50/90 px-3.5 py-2.5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-sm">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="text-base shrink-0">⚡</span>
+            <Zap size={16} className="text-amber-600 shrink-0" />
             <div className="min-w-0">
               <span className="font-bold text-amber-950">{t("Free Starter Plan:")} </span>
               <span className="text-amber-800 font-medium">({staff.length}/2 {t("staff registered")}). {t("Upgrade to Commercial Pro for unlimited workers.")}</span>
@@ -671,7 +671,7 @@ export function StaffClient({ initialStaff, initialTasks, role = 'Staff', tier =
               usernameChecking
                 ? t("Checking global platform availability...")
                 : usernameError
-                ? `⚠️ ${usernameError}`
+                ? usernameError
                 : usernameAvailable
                 ? t("✓ Username is available across all platform farms")
                 : t("Staff member will log in with this username")

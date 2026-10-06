@@ -125,7 +125,7 @@ export function printBrandedReport<T extends object = Record<string, unknown>>(
         <!-- Official Letterhead -->
         <div class="letterhead">
           <div>
-            <h1 class="brand-title">🐓 ${farmName}</h1>
+            <h1 class="brand-title">${farmName}</h1>
             <div class="brand-sub">Comprehensive Operational & Executive Audit Report</div>
           </div>
           <div class="audit-meta">
@@ -471,7 +471,7 @@ export function printComprehensiveFarmReport(data: ComprehensiveFarmReportData) 
         <!-- Header & Letterhead -->
         <div class="header-box">
           <div>
-            <h1 class="brand-title">🐓 ${farmName}</h1>
+            <h1 class="brand-title">${farmName}</h1>
             <div class="brand-sub">Comprehensive Farm Operations & Financial Audit Dossier</div>
             <div class="farm-workspace">Branch / Workspace: <strong>${workspace}</strong></div>
           </div>
@@ -703,7 +703,7 @@ export function printInvoiceReceipt(invoice: InvoiceReceiptData, farmName: strin
       <body>
         <div class="header">
           <div>
-            <h1 class="farm-title">🐓 ${farmName}</h1>
+            <h1 class="farm-title">${farmName}</h1>
             <div class="farm-sub">Official Commercial Merchant Invoice & Receipt</div>
           </div>
           <div class="receipt-meta">

@@ -31,56 +31,49 @@ const COLOR_MAPS = {
   indigo: {
     bg: 'bg-indigo-50',
     border: 'border-indigo-100',
-    iconBg: 'bg-indigo-600',
-    iconText: 'text-white',
+    iconText: 'text-indigo-600',
     valueText: 'text-slate-900',
     subtext: 'text-indigo-600',
   },
   emerald: {
     bg: 'bg-emerald-50',
     border: 'border-emerald-100',
-    iconBg: 'bg-emerald-600',
-    iconText: 'text-white',
+    iconText: 'text-emerald-600',
     valueText: 'text-slate-900',
     subtext: 'text-emerald-600',
   },
   amber: {
     bg: 'bg-amber-50',
     border: 'border-amber-100',
-    iconBg: 'bg-amber-600',
-    iconText: 'text-white',
+    iconText: 'text-amber-500',
     valueText: 'text-slate-900',
     subtext: 'text-amber-600',
   },
   purple: {
     bg: 'bg-purple-50',
     border: 'border-purple-100',
-    iconBg: 'bg-purple-600',
-    iconText: 'text-white',
+    iconText: 'text-purple-600',
     valueText: 'text-slate-900',
     subtext: 'text-purple-600',
   },
   rose: {
     bg: 'bg-rose-50',
     border: 'border-rose-100',
-    iconBg: 'bg-rose-600',
-    iconText: 'text-white',
+    iconText: 'text-rose-500',
     valueText: 'text-slate-900',
     subtext: 'text-rose-600',
   },
   blue: {
     bg: 'bg-blue-50',
     border: 'border-blue-100',
-    iconBg: 'bg-blue-600',
-    iconText: 'text-white',
+    iconText: 'text-blue-600',
     valueText: 'text-slate-900',
     subtext: 'text-blue-600',
   },
   slate: {
     bg: 'bg-slate-50',
     border: 'border-slate-200',
-    iconBg: 'bg-slate-600',
-    iconText: 'text-white',
+    iconText: 'text-slate-400',
     valueText: 'text-slate-900',
     subtext: 'text-slate-500',
   },
@@ -139,9 +132,7 @@ export function StatCard({
             </div>
 
             {Icon && (
-              <div className={`w-12 h-12 rounded-2xl ${styles.iconBg} ${styles.iconText} flex items-center justify-center shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
-                <Icon size={24} />
-              </div>
+              <Icon size={28} className={`${styles.iconText} shrink-0`} />
             )}
           </div>
         </CardContent>

@@ -11,25 +11,23 @@ import {
   Calendar, 
   BookOpen,
   SlidersHorizontal,
-  BarChart3,
   Settings,
   CreditCard,
   Mail,
   Package,
   Sparkles,
   Building2,
-  Shield,
   Users,
   ShoppingCart,
-  Bird,
   Egg,
   Wheat,
-  DollarSign,
-  Pill,
-  Video,
   Home,
   Wrench,
-  Contact,
+  Activity,
+  Layers,
+  Server,
+  CircleDollarSign,
+  UserSquare2,
   LucideIcon
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
@@ -109,14 +107,14 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     category: string;
     icon: LucideIcon;
   }> = [
-    { name: 'Platform Overview', desc: 'Real-time telemetry, revenue & tenant count', href: '/dashboard/admin?tab=overview', category: 'Platform Telemetry', icon: BarChart3 },
+    { name: 'Platform Overview', desc: 'Real-time telemetry, revenue & tenant count', href: '/dashboard/admin?tab=overview', category: 'Platform Telemetry', icon: Activity },
     { name: 'Payment & API Gateways', desc: 'Paystack, Stripe, and Resend API configurations', href: '/dashboard/admin?tab=setup', category: 'Infrastructure & APIs', icon: Settings },
     { name: 'Payment Gateways', desc: 'Paystack & Stripe API keys, webhooks, currency', href: '/dashboard/admin?tab=setup', category: 'Payment Gateways', icon: CreditCard },
     { name: 'Transactional Email (Resend)', desc: 'Resend API key and outbound sender email', href: '/dashboard/admin?tab=setup', category: 'Email Gateway', icon: Mail },
-    { name: 'SaaS Plans', desc: 'Pricing packages, Stripe plan IDs, and features', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: Package },
+    { name: 'SaaS Plans', desc: 'Pricing packages, Stripe plan IDs, and features', href: '/dashboard/admin?tab=plans', category: 'Plans & Pricing', icon: Layers },
     { name: 'Landing Page CMS', desc: 'Hero headlines, announcement banner, support contacts', href: '/dashboard/admin?tab=cms', category: 'CMS & Content', icon: Sparkles },
     { name: 'Farm Workspaces', desc: 'Directory of registered farm workspaces', href: '/dashboard/admin?tab=orgs', category: 'Farms & Workspaces', icon: Building2 },
-    { name: 'Platform Settings & Governance', desc: 'System versioning, diagnostics and maintenance', href: '/dashboard/admin?tab=settings', category: 'System Governance', icon: Shield },
+    { name: 'Platform Settings & Governance', desc: 'System versioning, diagnostics and maintenance', href: '/dashboard/admin?tab=settings', category: 'System Governance', icon: Server },
     { name: 'Super Admin Documentation', desc: 'Setup guide, installation docs and deployment', href: '/documentation/superadmin-setup-guide.html', category: 'Documentation', icon: BookOpen },
   ];
 
@@ -128,16 +126,15 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
     icon: LucideIcon;
   }> = [
     { name: 'Staff Management', desc: 'Add staff, set access roles, view team roster', href: '/dashboard/staff', category: 'Team & Staff', icon: Users },
-    { name: 'Sales & Merchant Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: ShoppingCart },
-    { name: 'Chicken Batches & Flocks', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: Bird },
-    { name: 'Egg Production & Collections', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: Egg },
-    { name: 'Feed Stock & Consumption', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: Wheat },
-    { name: 'Finance & Expense Tracker', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: DollarSign },
-    { name: 'Flock Health & Medication', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: Pill },
-    { name: 'CCTV Surveillance (Roadmap)', desc: 'Upcoming hardware camera streaming & AI predator detection', href: '/dashboard/cctv', category: 'Roadmap & Future', icon: Video },
-    { name: 'Housing & Pen Facilities', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: Home },
-    { name: 'Equipment & Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: Wrench },
-    { name: 'Farm Contacts Directory', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: Contact },
+    { name: 'Batches', desc: 'Manage layers, broilers, mortality & transfers', href: '/dashboard/chickens', category: 'Livestock', icon: Package },
+    { name: 'Housing', desc: 'Manage pen houses, bird capacity & ventilation', href: '/dashboard/housing', category: 'Facilities', icon: Home },
+    { name: 'Eggs', desc: 'Daily egg yield, cushioning audits & maturation', href: '/dashboard/eggs', category: 'Production', icon: Egg },
+    { name: 'Feed', desc: 'Track feed usage, restock pipeline & threshold alerts', href: '/dashboard/feed', category: 'Inventory & Feed', icon: Wheat },
+    { name: 'Health', desc: 'Vaccination schedules, medication templates & health logs', href: '/dashboard/health', category: 'Health & Vet', icon: Activity },
+    { name: 'Sales & Invoices', desc: 'Record sales, generate Paystack invoice links', href: '/dashboard/sales', category: 'Revenue & Sales', icon: ShoppingCart },
+    { name: 'Finance', desc: 'Log expenses, review profit & loss, cashflow', href: '/dashboard/finance', category: 'Accounting', icon: CircleDollarSign },
+    { name: 'Inventory', desc: 'Tool stock, farm equipment, maintenance logs', href: '/dashboard/inventory', category: 'Equipment', icon: Wrench },
+    { name: 'Contacts', desc: 'Customers, feed suppliers, buyers & vet contacts', href: '/dashboard/contacts', category: 'Directory', icon: UserSquare2 },
     { name: 'Enterprise Hub', desc: 'Cooperative management & multi-farm reports', href: '/dashboard/enterprise', category: 'Enterprise', icon: Building2 },
     { name: 'Account Settings & Plans', desc: 'Billing, user account, multi-branch setup', href: '/dashboard/settings', category: 'Account Settings', icon: Settings },
   ];
@@ -200,7 +197,6 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
         else if (query.includes('staff') || query.includes('user')) router.push('/dashboard/staff');
         else if (query.includes('health') || query.includes('sick')) router.push('/dashboard/health');
         else if (query.includes('inventor') || query.includes('equip')) router.push('/dashboard/inventory');
-        else if (query.includes('cctv') || query.includes('camera')) router.push('/dashboard/cctv');
         else if (query.includes('hous') || query.includes('pen')) router.push('/dashboard/housing');
         else if (query.includes('batch') || query.includes('chicken')) router.push('/dashboard/chickens');
         else router.push('/dashboard');
@@ -322,8 +318,8 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
             }`}
             placeholder={
               isSuperAdmin
-                ? t('Search tenants, gateways, database, SaaS plans, CMS...', 'Search tenants, gateways, database, SaaS plans, CMS...')
-                : t('Search farm records, staff, batches, invoices...', 'Search farm records, staff, batches, invoices...')
+                ? t('Search platform...', 'Search platform...')
+                : t('Search farm...', 'Search farm...')
             }
             type="search"
             value={searchQuery}
@@ -388,9 +384,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                     className="w-full text-left p-3 rounded-xl hover:bg-indigo-50/70 transition-all flex items-center justify-between group border border-transparent hover:border-indigo-100 cursor-pointer"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="p-2 rounded-lg bg-slate-100 group-hover:bg-indigo-100 text-slate-700 group-hover:text-indigo-600 transition-colors shrink-0">
-                        <Icon size={18} />
-                      </span>
+                      <Icon size={20} className="text-slate-500 group-hover:text-indigo-600 transition-colors shrink-0" />
                       <div className="truncate">
                         <div className="flex items-center gap-2">
                           <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
@@ -404,7 +398,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
                       </div>
                     </div>
                     <span className="text-xs text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
-                      {t("Jump →", "Jump →")}
+                      {t("View", "View")}
                     </span>
                   </button>
                 );
@@ -644,9 +638,7 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
               {/* Header */}
               <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg">
-                    <SlidersHorizontal size={18} />
-                  </div>
+                  <SlidersHorizontal size={20} className="text-indigo-600 shrink-0" />
                   <div>
                     <h3 className="text-sm font-bold text-slate-900">{t("Filters & Controls")}</h3>
                     <p className="text-[11px] text-slate-500 font-medium">{t("Quick configuration drawer")}</p>

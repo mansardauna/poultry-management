@@ -641,7 +641,7 @@ export function OnboardingWizard({ onClose, initialStep }: OnboardingWizardProps
                     )}
                     {!isCheckingUsername && usernameError && (
                       <p className="text-[11px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                        ⚠️ {t(usernameError, usernameError)}
+                        {t(usernameError, usernameError)}
                       </p>
                     )}
                     {!isCheckingUsername && isUsernameAvailable && (

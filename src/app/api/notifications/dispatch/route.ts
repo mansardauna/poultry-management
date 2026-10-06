@@ -46,7 +46,7 @@ export async function POST(_request: Request) {
         count: unpaidInvoicesCount,
         totalAmount: unpaidInvoicesAmount
       },
-      messageText: `🐓 DAILY POULTRY FARM DIGEST (${today})\n\n` +
+      messageText: `DAILY POULTRY FARM DIGEST (${today})\n\n` +
         `• Total Flock Size: ${totalFlockSize.toLocaleString()} birds\n` +
         `• Egg Yield Today: ${totalGoodEggs.toLocaleString()} eggs (${totalCrates} Crates)\n` +
         `• Broken Eggs: ${totalBrokenEggs} eggs\n` +

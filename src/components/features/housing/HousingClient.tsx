@@ -195,8 +195,7 @@ export function HousingClient({ role }: { role: string }) {
         if (tempNum > 30 || tempNum < 18) {
           toast(tempNum > 30 
             ? t('High temperature (>30°C): Heat stress alert and regulation task created.') 
-            : t('Low temperature (<18°C): Chilling risk alert and regulation task created.'), 
-            { icon: '⚠️' }
+            : t('Low temperature (<18°C): Chilling risk alert and regulation task created.')
           );
         }
         setTempModalOpen(false);

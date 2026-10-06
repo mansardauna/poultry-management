@@ -11,7 +11,8 @@ import {
   Sparkles, 
   AlertTriangle,
   Layers,
-  Award
+  Award,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -324,7 +325,9 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                 <ArrowRightLeft size={18} className="text-indigo-600 shrink-0" />
                 <h3 className="font-bold text-slate-900 text-sm">{t("Transfer Stock Between Branches")}</h3>
               </div>
-              <button onClick={() => setOpenTransferModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
+              <button onClick={() => setOpenTransferModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1">
+                <X size={18} />
+              </button>
             </div>
 
             <div className="p-5 space-y-4 text-xs">
@@ -407,7 +410,9 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
                 <AlertTriangle size={18} className="text-red-600 shrink-0" />
                 <h3 className="font-bold text-slate-900 text-sm">{t("Delete Farm Branch")}</h3>
               </div>
-              <button onClick={() => setDeletingBranch(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
+              <button onClick={() => setDeletingBranch(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1">
+                <X size={18} />
+              </button>
             </div>
 
             <div className="p-5 space-y-4 text-xs">

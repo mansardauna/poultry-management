@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { PhoneCall, Plus, Building2, Palette, ArrowRightLeft, Layers } from 'lucide-react';
+import { PhoneCall, Plus, Building2, Palette, ArrowRightLeft, Layers, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -205,7 +205,9 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
                 <PhoneCall size={18} className="text-emerald-600 shrink-0" />
                 <h3 className="font-bold text-slate-900 text-sm">{t("Dispatch Emergency Vet Ticket")}</h3>
               </div>
-              <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 text-sm">✕</button>
+              <button onClick={() => setOpenVetModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1">
+                <X size={18} />
+              </button>
             </div>
             <div className="p-5 space-y-4 text-xs">
               <div>
@@ -213,7 +215,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
                 <select
                   value={ticketType}
                   onChange={(e) => setTicketType(e.target.value)}
-                  className="w-full p-3 border border-slate-200 rounded-xl font-semibold outline-none"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                 >
                   <option value="Emergency Outbreak Alert">{t("Emergency Outbreak Alert")}</option>
                   <option value="Feed Quality Audit Request">{t("Feed Quality Audit Request")}</option>
@@ -228,13 +230,13 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
                   placeholder={t("Symptoms / Notes *")}
                   value={ticketNotes}
                   onChange={(e) => setTicketNotes(e.target.value)}
-                  className="w-full p-3 border border-slate-200 rounded-xl font-semibold outline-none"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all resize-none"
                 />
               </div>
 
               <button
                 onClick={handleCreateVetTicket}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow cursor-pointer transition-colors"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow cursor-pointer transition-all active:scale-[0.99]"
               >
                 {t("Dispatch Vet Ticket")}
               </button>

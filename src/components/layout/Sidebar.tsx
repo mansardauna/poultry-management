@@ -29,8 +29,7 @@ import {
   Layers,
   Sparkles,
   Server,
-  BookOpen,
-  Video
+  BookOpen
 } from 'lucide-react';
 import clsx from 'clsx';
 import Cookies from 'js-cookie';
@@ -70,7 +69,6 @@ const menuItems = [
   { name: 'Finance', href: '/dashboard/finance', icon: CircleDollarSign, roles: ['Admin'] },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Wrench, roles: ['Admin', 'Manager'] },
   { name: 'Contacts', href: '/dashboard/contacts', icon: UserSquare2, roles: ['Admin', 'Manager'] },
-  { name: 'CCTV Live', href: '/dashboard/cctv', icon: Video, roles: ['Admin', 'Manager'] },
   { name: 'Enterprise Hub', href: '/dashboard/enterprise', icon: Building2, roles: ['Admin', 'Manager'] },
 ];
 

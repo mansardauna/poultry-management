@@ -7,13 +7,10 @@ import toast from 'react-hot-toast';
 import { 
   Save, 
   RefreshCw, 
-  Layers, 
   Building2, 
   Lock,
   CreditCard,
   Mail,
-  Settings,
-  Server,
   Eye,
   EyeOff,
   DollarSign,
@@ -46,6 +43,9 @@ import {
   CartesianGrid 
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { StatCard } from '@/components/ui/StatCard';
+import { BadgeStatus } from '@/components/ui/BadgeStatus';
 import { useLanguage } from '@/components/features/LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
@@ -1003,64 +1003,40 @@ export function AdminCmsClient({
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-in fade-in duration-300">
+          <PageHeader
+            title={t("Platform Overview")}
+            subtitle={t("Real-time SaaS telemetry, recurring revenue metrics, and workspace cohorts.")}
+          />
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border border-purple-200 bg-purple-50/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-bold text-purple-900 flex items-center justify-between">
-                  <span>{t("Monthly Recurring Revenue")}</span>
-                  <DollarSign size={18} className="text-purple-600" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-extrabold text-purple-950">
-                  {formatCurrency(currentMonthlyMrr > 0 ? currentMonthlyMrr : totalRevenue, currencySymbol)}
-                </div>
-                <p className="text-xs text-purple-700 font-medium mt-1">{t("Aggregated merchant subscriptions")}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-indigo-200 bg-indigo-50/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-bold text-indigo-900 flex items-center justify-between">
-                  <span>{t("Farm Workspaces")}</span>
-                  <Building2 size={18} className="text-indigo-600" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-extrabold text-indigo-950">{formatNumber(allOrgs.length)}</div>
-                <p className="text-xs text-indigo-700 font-medium mt-1">
-                  {t("Pro:")} {formatNumber(activeProCount)} | {t("Enterprise:")} {formatNumber(activeEnterpriseCount)}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-emerald-200 bg-emerald-50/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-bold text-emerald-900 flex items-center justify-between">
-                  <span>{t("Active Subscriptions")}</span>
-                  <CheckCircle2 size={18} className="text-emerald-600" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-extrabold text-emerald-950">
-                  {formatNumber(activePaidSubsCount)}
-                </div>
-                <p className="text-xs text-emerald-700 font-medium mt-1">{t("Paid accounts on live billing")}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-amber-200 bg-amber-50/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-bold text-amber-900 flex items-center justify-between">
-                  <span>{t("Platform Brand Title")}</span>
-                  <ShieldCheck size={18} className="text-amber-600" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-extrabold text-amber-950 truncate">{platformName}</div>
-                <p className="text-xs text-amber-700 font-medium mt-1">{t("Currency:")} {currencySymbol}</p>
-              </CardContent>
-            </Card>
+            <StatCard
+              title={t("Monthly Recurring Revenue")}
+              value={formatCurrency(currentMonthlyMrr > 0 ? currentMonthlyMrr : totalRevenue, currencySymbol)}
+              subtext={t("Aggregated merchant subscriptions")}
+              icon={DollarSign}
+              color="purple"
+            />
+            <StatCard
+              title={t("Farm Workspaces")}
+              value={formatNumber(allOrgs.length)}
+              subtext={`${t("Pro:")} ${formatNumber(activeProCount)} | ${t("Enterprise:")} ${formatNumber(activeEnterpriseCount)}`}
+              icon={Building2}
+              color="indigo"
+            />
+            <StatCard
+              title={t("Active Subscriptions")}
+              value={formatNumber(activePaidSubsCount)}
+              subtext={t("Paid accounts on live billing")}
+              icon={CheckCircle2}
+              color="emerald"
+            />
+            <StatCard
+              title={t("Platform Brand Title")}
+              value={platformName}
+              subtext={`${t("Currency:")} ${currencySymbol}`}
+              icon={ShieldCheck}
+              color="amber"
+            />
           </div>
 
           {/* SaaS Business Telemetry & Performance Trend Graphs */}
@@ -1263,25 +1239,20 @@ export function AdminCmsClient({
       {/* TAB 2: PAYMENT & API GATEWAYS (Setup) */}
       {activeTab === 'setup' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Settings size={20} className="text-purple-600" /> {t("Payment & API Gateways")}
-              </h2>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                {t("Configure merchant keys, billing webhooks, email delivery, and platform currency. Database parameters are locked to ensure security.")}
-              </p>
-            </div>
-
-            <button
-              onClick={handleSaveGateways}
-              disabled={isSaving}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
-            >
-              {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
-              <span>{t("Save Gateway Settings")}</span>
-            </button>
-          </div>
+          <PageHeader
+            title={t("Payment & API Gateways")}
+            subtitle={t("Configure merchant keys, billing webhooks, email delivery, AI providers, and platform currency.")}
+            actions={
+              <button
+                onClick={handleSaveGateways}
+                disabled={isSaving}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              >
+                {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
+                <span>{t("Save Gateway Settings")}</span>
+              </button>
+            }
+          />
 
           {/* Master Super Admin Credentials */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm w-full">
@@ -1296,7 +1267,7 @@ export function AdminCmsClient({
                   type="email"
                   value={superAdminEmailState}
                   onChange={(e) => setSuperAdminEmailState(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                 />
               </div>
 
@@ -1308,7 +1279,7 @@ export function AdminCmsClient({
                   type={showPassword ? 'text' : 'password'}
                   value={superAdminPassword}
                   onChange={(e) => setSuperAdminPassword(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 pr-10 text-xs font-mono text-slate-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 pr-10 text-xs sm:text-sm font-mono text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder={t("Leave blank to keep current")}
                 />
                 <button
@@ -1346,7 +1317,7 @@ export function AdminCmsClient({
                   type="text"
                   value={paystackPublicKey}
                   onChange={(e) => setPaystackPublicKey(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-emerald-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-emerald-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder="pk_live_..."
                 />
               </div>
@@ -1357,7 +1328,7 @@ export function AdminCmsClient({
                   type={showPaystackSecret ? 'text' : 'password'}
                   value={paystackSecretKey}
                   onChange={(e) => setPaystackSecretKey(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-emerald-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-emerald-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder="sk_live_..."
                 />
               </div>
@@ -1385,7 +1356,7 @@ export function AdminCmsClient({
                   type="text"
                   value={stripePublicKey}
                   onChange={(e) => setStripePublicKey(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-indigo-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder="pk_live_..."
                 />
               </div>
@@ -1396,7 +1367,7 @@ export function AdminCmsClient({
                   type={showStripeSecret ? 'text' : 'password'}
                   value={stripeSecretKey}
                   onChange={(e) => setStripeSecretKey(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-indigo-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder="sk_live_..."
                 />
               </div>
@@ -1407,7 +1378,7 @@ export function AdminCmsClient({
                   type={showStripeSecret ? 'text' : 'password'}
                   value={stripeWebhookSecret}
                   onChange={(e) => setStripeWebhookSecret(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-indigo-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder="whsec_..."
                 />
               </div>
@@ -1437,7 +1408,7 @@ export function AdminCmsClient({
                   type={showResendKey ? 'text' : 'password'}
                   value={resendApiKey}
                   onChange={(e) => setResendApiKey(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-purple-900 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder="re_..."
                 />
               </div>
@@ -1447,7 +1418,7 @@ export function AdminCmsClient({
                   type="email"
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                 />
               </div>
             </div>
@@ -1497,7 +1468,7 @@ export function AdminCmsClient({
                       }
                     }
                   }}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all cursor-pointer"
                 >
                   <option value="gemini">Google Gemini (Recommended / Ultra-Fast)</option>
                   <option value="openai">OpenAI (ChatGPT / GPT-4o / GPT-4o-mini)</option>
@@ -1524,7 +1495,7 @@ export function AdminCmsClient({
                     value={aiModel || (AI_PRESETS[aiProvider]?.defaultModel || '')}
                     onChange={(e) => setAiModel(e.target.value)}
                     list="ai-model-options"
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono font-medium text-slate-800 bg-slate-50 focus:bg-white"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-medium text-slate-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                     placeholder={AI_PRESETS[aiProvider]?.defaultModel || 'Model identifier'}
                   />
                   <datalist id="ai-model-options">
@@ -1554,7 +1525,7 @@ export function AdminCmsClient({
                   type={showAiSecret ? 'text' : 'password'}
                   value={aiApiKey}
                   onChange={(e) => setAiApiKey(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-mono text-purple-900 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   placeholder={AI_PRESETS[aiProvider]?.keyPlaceholder || t('Enter API Key...')}
                 />
               </div>
@@ -1593,7 +1564,7 @@ export function AdminCmsClient({
             <button
               onClick={handleSaveGateways}
               disabled={isSaving}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95"
             >
               {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
               <span>{t("Save & Apply Gateway Configuration")}</span>
@@ -1605,43 +1576,36 @@ export function AdminCmsClient({
       {/* TAB 3: SAAS PLANS (Dynamic Packages & Entitlements) */}
       {activeTab === 'plans' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Layers size={20} className="text-purple-600" /> {t("SaaS Plans")}
-              </h2>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                {t("Create, rename, configure, and delete subscription tiers. Link Stripe Plan IDs & Paystack Plan Codes for automated recurring merchant billing.")}
-              </p>
-            </div>
+          <PageHeader
+            title={t("SaaS Plans & Pricing")}
+            subtitle={t("Create, rename, configure subscription tiers, and link automated recurring merchant billing.")}
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={handleAddPlan}
+                  className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Plus size={16} />
+                  <span>{t("Add New Package")}</span>
+                </button>
 
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <button
-                type="button"
-                onClick={handleAddPlan}
-                className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-              >
-                <Plus size={16} />
-                <span>{t("Add New Package")}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSaveAllPlans}
-                disabled={isSaving}
-                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-              >
-                {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
-                <span>{t("Save All SaaS Plans")}</span>
-              </button>
-            </div>
-          </div>
+                <button
+                  type="button"
+                  onClick={handleSaveAllPlans}
+                  disabled={isSaving}
+                  className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
+                  <span>{t("Save All SaaS Plans")}</span>
+                </button>
+              </>
+            }
+          />
 
           <div className="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-600 text-white rounded-xl shrink-0 shadow-sm">
-                <DollarSign size={20} />
-              </div>
+              <DollarSign size={22} className="text-indigo-600 shrink-0" />
               <div>
                 <h3 className="text-xs font-bold text-indigo-950 uppercase tracking-wider">{t("Active Plan Currency & USD Conversion")}</h3>
                 <p className="text-xs text-indigo-700">
@@ -1656,7 +1620,7 @@ export function AdminCmsClient({
                 <select
                   value={currencySymbol}
                   onChange={(e) => handleCurrencyChange(e.target.value)}
-                  className="border-2 border-indigo-300 rounded-xl px-3 py-1.5 text-xs font-bold text-indigo-900 bg-white outline-none cursor-pointer"
+                  className="border border-indigo-300 rounded-xl px-3 py-2 text-xs font-bold text-indigo-900 bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm cursor-pointer"
                 >
                   {SUPPORTED_CURRENCIES.map(c => (
                     <option key={c.code} value={c.symbol}>{c.symbol} - {c.name} ({c.code})</option>
@@ -1675,7 +1639,7 @@ export function AdminCmsClient({
                     min="0.0001"
                     value={exchangeRate}
                     onChange={(e) => handleExchangeRateChange(Number(e.target.value))}
-                    className="w-24 border-2 border-indigo-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-indigo-900 bg-white outline-none"
+                    className="w-24 border border-indigo-300 rounded-xl px-3 py-2 text-xs font-bold text-indigo-900 bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
                   />
                   <span className="text-xs font-bold text-indigo-800">{currencySymbol}</span>
                 </div>
@@ -1685,10 +1649,10 @@ export function AdminCmsClient({
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <Card key={plan.id} className="border-2 border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
-                <CardHeader className="bg-slate-50/80 border-b border-slate-200 pb-4">
+              <Card key={plan.id} className="border border-slate-200 rounded-2xl shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all">
+                <CardHeader className="bg-slate-50/80 border-b border-slate-100 pb-4">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-extrabold">
+                    <span className="text-[11px] uppercase tracking-wider bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full font-bold">
                       ID: {plan.id}
                     </span>
                     {plan.id !== 'free' && (
@@ -1711,7 +1675,7 @@ export function AdminCmsClient({
                       type="text"
                       value={plan.name}
                       onChange={(e) => handleFieldChange(plan.id, 'name', e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-lg p-2 text-sm font-bold text-slate-900 bg-white focus:border-indigo-500"
+                      className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       placeholder="e.g. Commercial Pro"
                     />
                   </div>
@@ -1724,7 +1688,7 @@ export function AdminCmsClient({
                       rows={2}
                       value={plan.description}
                       onChange={(e) => handleFieldChange(plan.id, 'description', e.target.value)}
-                      className="w-full border-2 border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-700 bg-white focus:border-indigo-500"
+                      className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                     />
                   </div>
                 </CardHeader>
@@ -1738,7 +1702,7 @@ export function AdminCmsClient({
                         type="number"
                         value={plan.priceMonthly}
                         onChange={(e) => handleFieldChange(plan.id, 'priceMonthly', Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-lg p-2 text-xs text-slate-900 font-extrabold bg-white"
+                        className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 font-bold bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       />
                     </div>
                     <div>
@@ -1747,7 +1711,7 @@ export function AdminCmsClient({
                         type="number"
                         value={plan.priceAnnual}
                         onChange={(e) => handleFieldChange(plan.id, 'priceAnnual', Number(e.target.value))}
-                        className="w-full border-2 border-slate-200 rounded-lg p-2 text-xs text-slate-900 font-extrabold bg-white"
+                        className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 font-bold bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       />
                     </div>
                   </div>
@@ -1763,14 +1727,14 @@ export function AdminCmsClient({
                         value={plan.stripeMonthlyPlanId || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'stripeMonthlyPlanId', e.target.value)}
                         placeholder={t("Monthly Price ID (price_1N...)")}
-                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
+                        className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-500 shadow-sm"
                       />
                       <input
                         type="text"
                         value={plan.stripeAnnualPlanId || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'stripeAnnualPlanId', e.target.value)}
                         placeholder={t("Annual Price ID (price_1N...)")}
-                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
+                        className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-500 shadow-sm"
                       />
                     </div>
                   </div>
@@ -1786,14 +1750,14 @@ export function AdminCmsClient({
                         value={plan.paystackMonthlyPlanCode || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'paystackMonthlyPlanCode', e.target.value)}
                         placeholder={t("Monthly Plan Code (PLN_...)")}
-                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
+                        className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-500 shadow-sm"
                       />
                       <input
                         type="text"
                         value={plan.paystackAnnualPlanCode || ''}
                         onChange={(e) => handleFieldChange(plan.id, 'paystackAnnualPlanCode', e.target.value)}
                         placeholder={t("Annual Plan Code (PLN_...)")}
-                        className="w-full border border-slate-200 rounded-lg p-2 text-[11px] font-mono bg-white"
+                        className="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[11px] font-mono text-slate-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-500 shadow-sm"
                       />
                     </div>
                   </div>
@@ -1806,7 +1770,7 @@ export function AdminCmsClient({
                         type="number"
                         value={plan.maxBranches}
                         onChange={(e) => handleFieldChange(plan.id, 'maxBranches', Number(e.target.value))}
-                        className="w-20 border-2 border-slate-200 rounded-lg p-1.5 text-xs text-center font-bold bg-white"
+                        className="w-24 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs text-center font-bold text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm"
                       />
                     </div>
 
@@ -1816,7 +1780,7 @@ export function AdminCmsClient({
                           type="checkbox"
                           checked={Boolean(plan.chartsEnabled)}
                           onChange={(e) => handleFieldChange(plan.id, 'chartsEnabled', e.target.checked)}
-                          className="rounded text-purple-600 w-4 h-4"
+                          className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                         />
                         <span>{t("Production Analytics Graphs & Charts")}</span>
                       </label>
@@ -1826,7 +1790,7 @@ export function AdminCmsClient({
                           type="checkbox"
                           checked={plan.cctvEnabled}
                           onChange={(e) => handleFieldChange(plan.id, 'cctvEnabled', e.target.checked)}
-                          className="rounded text-purple-600 w-4 h-4"
+                          className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                         />
                         <span>{t("CCTV Live Surveillance")}</span>
                       </label>
@@ -1836,7 +1800,7 @@ export function AdminCmsClient({
                           type="checkbox"
                           checked={plan.aiLoggerEnabled}
                           onChange={(e) => handleFieldChange(plan.id, 'aiLoggerEnabled', e.target.checked)}
-                          className="rounded text-purple-600 w-4 h-4"
+                          className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                         />
                         <span>{t("AI Voice Auto-Logger")}</span>
                       </label>
@@ -1846,7 +1810,7 @@ export function AdminCmsClient({
                           type="checkbox"
                           checked={plan.exportReportsEnabled}
                           onChange={(e) => handleFieldChange(plan.id, 'exportReportsEnabled', e.target.checked)}
-                          className="rounded text-purple-600 w-4 h-4"
+                          className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                         />
                         <span>{t("PDF & Excel Report Exports")}</span>
                       </label>
@@ -1856,7 +1820,7 @@ export function AdminCmsClient({
                           type="checkbox"
                           checked={plan.enterpriseHubEnabled}
                           onChange={(e) => handleFieldChange(plan.id, 'enterpriseHubEnabled', e.target.checked)}
-                          className="rounded text-purple-600 w-4 h-4"
+                          className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                         />
                         <span>{t("Multi-Branch Enterprise Hub")}</span>
                       </label>
@@ -1910,25 +1874,20 @@ export function AdminCmsClient({
       {/* TAB 4: LANDING PAGE CMS */}
       {activeTab === 'cms' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Sparkles size={20} className="text-purple-600" /> {t("Public Landing Page Content Editor")}
-              </h2>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                {t("Edit public hero headlines, announcement banners, and support contact details live on your homepage.")}
-              </p>
-            </div>
-
-            <button
-              onClick={handleSaveCms}
-              disabled={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95"
-            >
-              {isSaving ? <RefreshCw className="animate-spin" size={15} /> : <Save size={15} />}
-              <span>{t("Publish Landing CMS & Brand")}</span>
-            </button>
-          </div>
+          <PageHeader
+            title={t("Public Landing Page Content Editor")}
+            subtitle={t("Edit public hero headlines, announcement banners, and support contact details live on your homepage.")}
+            actions={
+              <button
+                onClick={handleSaveCms}
+                disabled={isSaving}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              >
+                {isSaving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
+                <span>{t("Publish Landing CMS & Brand")}</span>
+              </button>
+            }
+          />
 
           {/* BRAND IDENTITY & WHITE-LABEL CARD */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
@@ -1955,7 +1914,7 @@ export function AdminCmsClient({
                   value={platformName}
                   onChange={(e) => setPlatformName(e.target.value.slice(0, 30))}
                   placeholder="e.g. PFMS, PoultryOS"
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-bold text-indigo-700 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-indigo-700 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                   title={platformName}
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
@@ -1968,7 +1927,7 @@ export function AdminCmsClient({
                 <select
                   value={currencySymbol}
                   onChange={(e) => handleCurrencyChange(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-extrabold text-emerald-700 bg-slate-50 focus:bg-white focus:border-emerald-500 outline-none cursor-pointer"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-emerald-700 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all cursor-pointer"
                 >
                   {SUPPORTED_CURRENCIES.map(c => (
                     <option key={c.code} value={c.symbol}>{c.symbol} - {c.name} ({c.code})</option>
@@ -1984,7 +1943,7 @@ export function AdminCmsClient({
                     min="0.0001"
                     value={exchangeRate}
                     onChange={(e) => handleExchangeRateChange(Number(e.target.value))}
-                    className="w-28 border border-slate-200 rounded-lg p-1.5 text-xs font-bold text-slate-900 bg-white focus:border-indigo-500 outline-none"
+                    className="w-28 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm"
                   />
                   <span className="text-[11px] font-bold text-slate-600">
                     {currencySymbol}
@@ -2001,7 +1960,7 @@ export function AdminCmsClient({
                   value={brandTagline}
                   onChange={(e) => setBrandTagline(e.target.value)}
                   placeholder="e.g. Smart Poultry Operating System"
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                 />
               </div>
 
@@ -2012,7 +1971,7 @@ export function AdminCmsClient({
                   value={footerText}
                   onChange={(e) => setFooterText(e.target.value)}
                   placeholder="e.g. PFMS Inc. All rights reserved."
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                 />
               </div>
             </div>
@@ -2153,7 +2112,7 @@ export function AdminCmsClient({
                 type="text"
                 value={heroHeading}
                 onChange={(e) => setHeroHeading(e.target.value)}
-                className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white"
+                className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
               />
             </div>
 
@@ -2163,7 +2122,7 @@ export function AdminCmsClient({
                 rows={3}
                 value={heroSubtitle}
                 onChange={(e) => setHeroSubtitle(e.target.value)}
-                className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
+                className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
               />
             </div>
 
@@ -2173,7 +2132,7 @@ export function AdminCmsClient({
                 type="text"
                 value={announcementBanner}
                 onChange={(e) => setAnnouncementBanner(e.target.value)}
-                className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-900 bg-slate-50 focus:bg-white"
+                className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
               />
             </div>
 
@@ -2184,7 +2143,7 @@ export function AdminCmsClient({
                   type="text"
                   value={supportPhone}
                   onChange={(e) => setSupportPhone(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                 />
               </div>
 
@@ -2194,7 +2153,7 @@ export function AdminCmsClient({
                   type="email"
                   value={supportEmail}
                   onChange={(e) => setSupportEmail(e.target.value)}
-                  className="w-full border-2 border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-900 bg-slate-50 focus:bg-white"
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                 />
               </div>
             </div>
@@ -2205,36 +2164,31 @@ export function AdminCmsClient({
       {/* TAB 5: TENANT ORGANIZATIONS */}
       {activeTab === 'orgs' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Building2 size={20} className="text-purple-600" /> {t("Registered Farm Tenant Accounts")} ({formatNumber(orgsList.length)})
-              </h2>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed mt-1">
-                {t("Directory of all customer and internal farm organizations. Manage subscriptions, view deep telemetry, or log in to manage/subscribe on their behalf.")}
-              </p>
-            </div>
+          <PageHeader
+            title={`${t("Farm Workspaces")} (${formatNumber(orgsList.length)})`}
+            subtitle={t("Directory of all customer and internal farm organizations across the platform. Manage subscriptions, view deep telemetry, or log in to manage/subscribe on their behalf.")}
+            actions={
+              <>
+                <button
+                  onClick={() => fetchTenants()}
+                  disabled={isFetchingTenants}
+                  className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
+                  title={t("Refresh tenant list")}
+                >
+                  <RefreshCw size={15} className={isFetchingTenants ? "animate-spin text-indigo-600" : ""} />
+                  <span>{t("Refresh")}</span>
+                </button>
 
-            <div className="flex items-center gap-2.5 self-start sm:self-auto">
-              <button
-                onClick={() => fetchTenants()}
-                disabled={isFetchingTenants}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                title={t("Refresh tenant list")}
-              >
-                <RefreshCw size={14} className={isFetchingTenants ? "animate-spin text-purple-600" : ""} />
-                <span>{t("Refresh")}</span>
-              </button>
-
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-              >
-                <UserPlus size={16} />
-                <span>{t("Create Farm Account")}</span>
-              </button>
-            </div>
-          </div>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <UserPlus size={16} />
+                  <span>{t("Create Farm Account")}</span>
+                </button>
+              </>
+            }
+          />
 
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
@@ -2276,26 +2230,16 @@ export function AdminCmsClient({
                           )}
                         </td>
                         <td className="p-4">
-                          <span className="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded capitalize">
-                            {org.subscriptionTier || t('Free Starter')}
-                          </span>
+                          <BadgeStatus status={org.subscriptionTier || 'Free Starter'} />
                         </td>
                         <td className="p-4">
-                          <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded capitalize ${
-                            org.subscriptionStatus === 'active' 
-                              ? 'bg-emerald-100 text-emerald-800' 
-                              : org.subscriptionStatus === 'suspended'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-slate-100 text-slate-700'
-                          }`}>
-                            {org.subscriptionStatus || t('Active')}
-                          </span>
+                          <BadgeStatus status={org.subscriptionStatus || 'Active'} />
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleViewTenant(org)}
-                              className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                              className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
                             >
                               <Activity size={13} className="text-indigo-600" />
                               <span>{t("Manage")}</span>
@@ -2303,7 +2247,7 @@ export function AdminCmsClient({
 
                             <button
                               onClick={() => handleImpersonateTenant(org.id, org.name || 'Tenant')}
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-sm"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
                               title={t("Login into customer farm account")}
                             >
                               <LogIn size={13} />
@@ -2312,7 +2256,7 @@ export function AdminCmsClient({
 
                             <button
                               onClick={() => handleDeleteTenant(org.id, org.name || 'Tenant')}
-                              className="bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 border border-red-200"
+                              className="bg-white border border-red-200 text-red-600 hover:bg-red-50 px-2.5 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
                               title={t("Delete customer farm account")}
                             >
                               <Trash2 size={13} />
@@ -2333,10 +2277,8 @@ export function AdminCmsClient({
             <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
               <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-200">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
-                      <UserPlus size={18} />
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <UserPlus size={22} className="text-indigo-600 shrink-0" />
                     <div>
                       <h3 className="font-extrabold text-sm text-slate-900">{t("Provision New Farm Tenant Account")}</h3>
                       <p className="text-xs text-slate-500">{t("Create a farm account for yourself or a customer.")}</p>
@@ -2359,7 +2301,7 @@ export function AdminCmsClient({
                       placeholder="e.g. Sunrise Agro Farms"
                       value={newTenantForm.name}
                       onChange={(e) => setNewTenantForm({ ...newTenantForm, name: e.target.value })}
-                      className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-semibold bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                      className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                     />
                   </div>
 
@@ -2371,7 +2313,7 @@ export function AdminCmsClient({
                         placeholder="e.g. Alex Green"
                         value={newTenantForm.adminName}
                         onChange={(e) => setNewTenantForm({ ...newTenantForm, adminName: e.target.value })}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-medium bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                        className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       />
                     </div>
 
@@ -2383,7 +2325,7 @@ export function AdminCmsClient({
                         placeholder="alex@sunrise.com"
                         value={newTenantForm.adminEmail}
                         onChange={(e) => setNewTenantForm({ ...newTenantForm, adminEmail: e.target.value })}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-medium bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                        className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       />
                     </div>
                   </div>
@@ -2396,7 +2338,7 @@ export function AdminCmsClient({
                         placeholder="FarmAdmin123!"
                         value={newTenantForm.password}
                         onChange={(e) => setNewTenantForm({ ...newTenantForm, password: e.target.value })}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-mono bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                        className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       />
                     </div>
 
@@ -2407,7 +2349,7 @@ export function AdminCmsClient({
                         placeholder="Main Branch"
                         value={newTenantForm.branchName}
                         onChange={(e) => setNewTenantForm({ ...newTenantForm, branchName: e.target.value })}
-                        className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-medium bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none"
+                        className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       />
                     </div>
                   </div>
@@ -2417,7 +2359,7 @@ export function AdminCmsClient({
                     <select
                       value={newTenantForm.packageId}
                       onChange={(e) => setNewTenantForm({ ...newTenantForm, packageId: e.target.value })}
-                      className="w-full border-2 border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none cursor-pointer"
+                      className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all cursor-pointer"
                     >
                       {plans.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -2434,14 +2376,14 @@ export function AdminCmsClient({
                     <button
                       type="button"
                       onClick={() => setShowCreateModal(false)}
-                      className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
+                      className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl shadow-sm transition-all cursor-pointer"
                     >
                       {t("Cancel")}
                     </button>
                     <button
                       type="submit"
                       disabled={isCreatingTenant}
-                      className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5"
+                      className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm cursor-pointer transition-all flex items-center gap-2 active:scale-95"
                     >
                       {isCreatingTenant ? <RefreshCw size={14} className="animate-spin" /> : <UserPlus size={14} />}
                       <span>{t("Provision Farm Account")}</span>
@@ -2457,10 +2399,8 @@ export function AdminCmsClient({
             <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
               <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 font-sans">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
-                      <Building2 size={20} />
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <Building2 size={24} className="text-indigo-600 shrink-0" />
                     <div>
                       <h3 className="font-extrabold text-base text-slate-900">{selectedTenant.name}</h3>
                       <p className="text-[11px] text-slate-400 font-mono">{t("Org ID:")} {selectedTenant.id}</p>
@@ -2516,7 +2456,7 @@ export function AdminCmsClient({
                         type="text"
                         value={selectedTenant.name}
                         onChange={(e) => setSelectedTenant({ ...selectedTenant, name: e.target.value })}
-                        className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-900 bg-white"
+                        className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold bg-white text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all"
                       />
                     </div>
 
@@ -2526,7 +2466,7 @@ export function AdminCmsClient({
                         <select
                           value={selectedTenant.subscriptionTier || 'free'}
                           onChange={(e) => setSelectedTenant({ ...selectedTenant, subscriptionTier: e.target.value })}
-                          className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-purple-900 bg-white cursor-pointer capitalize"
+                          className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-indigo-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all cursor-pointer capitalize"
                         >
                           {plans.map((p) => (
                             <option key={p.id} value={p.id}>
@@ -2541,7 +2481,7 @@ export function AdminCmsClient({
                         <select
                           value={selectedTenant.subscriptionStatus || 'active'}
                           onChange={(e) => setSelectedTenant({ ...selectedTenant, subscriptionStatus: e.target.value })}
-                          className="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-emerald-900 bg-white cursor-pointer capitalize"
+                          className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-emerald-900 bg-white focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 shadow-sm transition-all cursor-pointer capitalize"
                         >
                           <option value="active">{t("Active")}</option>
                           <option value="suspended">{t("Suspended")}</option>
@@ -2572,7 +2512,7 @@ export function AdminCmsClient({
                   <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <button
                       onClick={() => handleDeleteTenant(selectedTenant.id, selectedTenant.name || 'Farm')}
-                      className="text-red-600 hover:text-red-700 text-xs font-bold flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                      className="bg-white border border-red-200 text-red-600 hover:bg-red-50 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
                     >
                       <Trash2 size={14} />
                       <span>{t("Delete Farm Organization")}</span>
@@ -2581,7 +2521,7 @@ export function AdminCmsClient({
                     <div className="flex items-center gap-2 self-end sm:self-auto">
                       <button
                         onClick={() => handleImpersonateTenant(selectedTenant.id, selectedTenant.name || 'Farm')}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                        className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
                       >
                         <LogIn size={14} />
                         <span>{t("Login as Tenant")}</span>
@@ -2590,7 +2530,7 @@ export function AdminCmsClient({
                       <button
                         onClick={handleUpdateTenant}
                         disabled={isSavingTenant}
-                        className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm cursor-pointer transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
                       >
                         {isSavingTenant ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
                         <span>{t("Save Changes")}</span>
@@ -2607,15 +2547,13 @@ export function AdminCmsClient({
       {/* TAB 6: SYSTEM GOVERNANCE & BRAND IDENTITY */}
       {activeTab === 'settings' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <Server size={20} className="text-purple-600" /> {t("Platform Maintenance & System Governance")}
-            </h2>
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              {t("Global system diagnostics, database schema integrity, brand identity overview, and maintenance shortcuts.")}
-            </p>
+          <PageHeader
+            title={t("Platform Settings & System Governance")}
+            subtitle={t("Global system diagnostics, database schema integrity, brand identity overview, and maintenance shortcuts.")}
+          />
 
-            <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                 <div className="flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

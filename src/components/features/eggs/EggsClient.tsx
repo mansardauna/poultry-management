@@ -531,10 +531,6 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
     ? Math.min(100, Math.round(((totalCollected / (activeLayers * effectiveLoggedDays)) * 100) * 10) / 10)
     : 0;
 
-  const sampleSizeLabel = hasLayerBatches && activeLayers > 0
-    ? (uniqueLoggedDays > 0 ? `${uniqueLoggedDays} of ${periodCalendarDays} days logged` : t('0 days logged in period'))
-    : t('No layer batches registered');
-
   return (
     <div className="space-y-6">
       {/* Header and Controls */}
@@ -618,7 +614,6 @@ export function EggsClient({ initialEggs, batches, initialCushionAudits, initial
               }
             />
           }
-          subtext={`${sampleSizeLabel} • ${formatNumber(activeLayers)} ${t("hens")}`}
           icon={TrendingUp}
           color="indigo"
         />
