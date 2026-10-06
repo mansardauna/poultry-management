@@ -53,6 +53,54 @@ export async function GET() {
   });
 }
 
+async function updateInvoiceStatusHandler(workspaceId: string, id: string, status: string) {
+  const { error: updateErr } = await supabase.from('invoices').update({ status }).eq('id', id).eq('workspaceId', workspaceId);
+  if (updateErr) {
+    return NextResponse.json({ error: updateErr.message }, { status: 500 });
+  }
+
+  const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).eq('workspaceId', workspaceId).limit(1).maybeSingle();
+
+  if (status === 'Paid') {
+    if (invData) {
+      const targetSaleId = invData.saleId || ('sa' + Date.now().toString().slice(-8));
+      if (!invData.saleId) {
+        await supabase.from('invoices').update({ saleId: targetSaleId }).eq('id', id).eq('workspaceId', workspaceId);
+      }
+      const { data: existingSale } = await supabase.from('sales').select('id').eq('id', targetSaleId).limit(1).maybeSingle();
+      
+      if (!existingSale) {
+        await supabase.from('sales').insert([{
+          id: targetSaleId,
+          workspaceId: invData.workspaceId || workspaceId,
+          date: invData.date || new Date().toISOString().split('T')[0],
+          type: (invData.items || '').toLowerCase().includes('chicken') ? 'Chickens' : 'Eggs',
+          quantity: Number(invData.quantity) || 1,
+          totalAmount: Number(invData.totalAmount) || 0,
+          customerName: invData.customerName || 'Customer Invoice',
+          paymentMethod: 'Paystack / Online Gateway',
+          status: 'Paid'
+        }]);
+      } else {
+        await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId).eq('workspaceId', workspaceId);
+      }
+
+      await supabase.from('alertLogs').insert([{
+        id: 'al' + Date.now().toString().slice(-8),
+        workspaceId: invData.workspaceId || workspaceId,
+        date: invData.date || new Date().toISOString().split('T')[0],
+        message: `INVOICE SETTLED: Invoice #${invData.id} for ${invData.customerName} (₦${Number(invData.totalAmount || 0).toLocaleString()}) marked as Paid and added to Completed Sales.`,
+        severity: 'Info',
+        read: false
+      }]);
+    }
+  } else if (invData?.saleId) {
+    await supabase.from('sales').update({ status }).eq('id', invData.saleId).eq('workspaceId', workspaceId);
+  }
+
+  return NextResponse.json({ success: true, message: `Invoice status updated to ${status}` });
+}
+
 /** Exported function POST */
 export async function POST(request: Request) {
   try {
@@ -61,6 +109,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const body = await request.json();
+
+    if (body.action === 'updateInvoiceStatus' || body.action === 'updateStatus') {
+      const { id, status } = body;
+      if (!id || !status) return NextResponse.json({ error: 'Invoice ID and status required' }, { status: 400 });
+      return await updateInvoiceStatusHandler(workspaceId, id, status);
+    }
     
     if (body.action === 'createInvoice') {
       const invId = 'inv' + Date.now().toString().slice(-8);
@@ -93,14 +147,17 @@ export async function POST(request: Request) {
 
     const newSaleId = 'sa' + Date.now().toString().slice(-8);
     const date = body.date || new Date().toISOString().split('T')[0];
+    const quantity = Number(body.quantity) || 0;
+    const totalAmount = Number(body.totalAmount) || 0;
+    const unitPrice = quantity > 0 ? Math.round(totalAmount / quantity) : totalAmount;
     
     const newSale = {
       id: newSaleId,
       workspaceId,
       date,
       type: body.type || 'Eggs',
-      quantity: Number(body.quantity) || 0,
-      totalAmount: Number(body.totalAmount) || 0,
+      quantity,
+      totalAmount,
       customerName: body.customerName || 'Walk-in Customer',
       paymentMethod: body.paymentMethod || 'Cash',
       status: body.status || 'Paid'
@@ -149,7 +206,7 @@ export async function POST(request: Request) {
       customerName: newSale.customerName,
       items: `${newSale.type} Crate / Batch Sale`,
       quantity: newSale.quantity,
-      unitPrice: Math.round(newSale.totalAmount / newSale.quantity),
+      unitPrice,
       totalAmount: newSale.totalAmount,
       status: newSale.status === 'Paid' ? 'Paid' : 'Pending'
     };
@@ -164,14 +221,15 @@ export async function POST(request: Request) {
         customerName: newSale.customerName,
         items: `${newSale.type} Crate / Batch Sale`,
         quantity: newSale.quantity,
-        unitPrice: Math.round(newSale.totalAmount / newSale.quantity),
+        unitPrice,
         totalAmount: newSale.totalAmount,
         status: newSale.status === 'Paid' ? 'Paid' : 'Pending'
     };
 
     return NextResponse.json({ sale: newSale, invoice: invoiceRecord }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to record sale' }, { status: 500 });
+  } catch (err) {
+    const msg = (err as { message?: string })?.message || 'Failed to record sale';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
@@ -187,59 +245,16 @@ export async function PUT(request: Request) {
     if (body.action === 'updateInvoiceStatus' || body.type === 'invoice') {
       const { id, status } = body;
       if (!id || !status) return NextResponse.json({ error: 'Invoice ID and status required' }, { status: 400 });
-
-      const { error: updateErr } = await supabase.from('invoices').update({ status }).eq('id', id).eq('workspaceId', workspaceId);
-      if (updateErr) {
-        return NextResponse.json({ error: updateErr.message }, { status: 500 });
-      }
-
-      const { data: invData } = await supabase.from('invoices').select('*').eq('id', id).eq('workspaceId', workspaceId).limit(1).maybeSingle();
-
-      if (status === 'Paid') {
-        if (invData) {
-          const targetSaleId = invData.saleId || ('sa' + Date.now().toString().slice(-8));
-          const { data: existingSale } = await supabase.from('sales').select('id').eq('id', targetSaleId).limit(1).maybeSingle();
-          
-          if (!existingSale) {
-            await supabase.from('sales').insert([{
-              id: targetSaleId,
-              workspaceId: invData.workspaceId || workspaceId,
-              date: invData.date || new Date().toISOString().split('T')[0],
-              type: (invData.items || '').toLowerCase().includes('chicken') ? 'Chickens' : 'Eggs',
-              quantity: invData.quantity || 1,
-              totalAmount: invData.totalAmount || 0,
-              customerName: invData.customerName || 'Customer Invoice',
-              paymentMethod: 'Paystack / Online Gateway',
-              status: 'Paid'
-            }]);
-          } else {
-            await supabase.from('sales').update({ status: 'Paid' }).eq('id', targetSaleId);
-          }
-
-          // Log alert
-          await supabase.from('alertLogs').insert([{
-            id: 'al' + Date.now().toString().slice(-8),
-            workspaceId: invData.workspaceId || workspaceId,
-            date: invData.date || new Date().toISOString().split('T')[0],
-            message: `INVOICE SETTLED: Invoice #${invData.id} for ${invData.customerName} (₦${Number(invData.totalAmount).toLocaleString()}) marked as Paid and added to Completed Sales.`,
-            severity: 'Info',
-            read: false
-          }]);
-        }
-      } else if (invData?.saleId) {
-        // If status changed from Paid to Unpaid/Pending/Cancelled, update the associated sale
-        await supabase.from('sales').update({ status }).eq('id', invData.saleId);
-      }
-
-      return NextResponse.json({ success: true, message: `Invoice status updated to ${status}` });
+      return await updateInvoiceStatusHandler(workspaceId, id, status);
     }
 
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
     await supabase.from('sales').update(fields).eq('id', id).eq('workspaceId', workspaceId);
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Failed to update sale' }, { status: 500 });
+  } catch (err) {
+    const msg = (err as { message?: string })?.message || 'Failed to update sale';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 

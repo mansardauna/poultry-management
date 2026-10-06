@@ -151,7 +151,10 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
       });
 
       if (res.ok) {
-        const created = await res.json();
+        const resData = await res.json();
+        const created = resData.sale || resData;
+        const createdInv = resData.invoice;
+
         if (created && created.id) {
           const normSale: Sale = {
             id: String(created.id),
@@ -165,6 +168,22 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
           };
           setSales((prev) => [normSale, ...prev.filter((s) => s.id !== normSale.id)]);
         }
+
+        if (createdInv && createdInv.id) {
+          const normInv: Invoice = {
+            id: String(createdInv.id),
+            date: createdInv.date || saleDate,
+            saleId: String(createdInv.saleId || (created?.id || '')),
+            customerName: String(createdInv.customerName || customerName),
+            items: String(createdInv.items || `${type} Crate / Batch Sale`),
+            quantity: Number(createdInv.quantity) || Number(quantity) || 0,
+            unitPrice: Number(createdInv.unitPrice) || 0,
+            totalAmount: Number(createdInv.totalAmount) || Number(totalAmount) || 0,
+            status: String(createdInv.status || 'Paid')
+          };
+          setInvoices((prev) => [normInv, ...prev.filter((i) => i.id !== normInv.id)]);
+        }
+
         toast.success('Sale recorded successfully');
         handleClose();
         refreshData();
@@ -334,7 +353,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
     }
   };
 
-  const totalSales = sales.reduce((sum, s) => sum + s.totalAmount, 0);
+  const totalSales = sales.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
   const _avgSale = sales.length > 0 ? Math.round(totalSales / sales.length) : 0;
 
   return (
