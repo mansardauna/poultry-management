@@ -3,9 +3,20 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 import { getGatewaysConfig } from '@/lib/gateways';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
   try {
+    // 0. Rate limiting: 30 requests per 15 minutes per IP
+    const clientIp = getClientIp(request);
+    const rateCheck = rateLimit(`pay_invoice:${clientIp}`, { windowMs: 15 * 60 * 1000, max: 30 });
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { error: `Too many payment requests. Please try again in ${rateCheck.retryAfterSeconds} seconds.` },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
+      );
+    }
+
     const { invoiceId, reference, action, paymentMethod, newStatus } = await request.json();
 
     if (!invoiceId) {
@@ -30,7 +41,7 @@ export async function POST(request: Request) {
       paymentMethod === 'Cash' || 
       paymentMethod === 'POS'
     );
-    const targetStatus = newStatus || 'Paid';
+    let targetStatus = newStatus || 'Paid';
     const methodUsed = paymentMethod || (isOffline ? 'Bank Transfer (Offline)' : 'Paystack / Online Gateway');
     const finalRef = (reference || '').trim();
 
@@ -69,7 +80,9 @@ export async function POST(request: Request) {
             { status: 401 }
           );
         }
-        // Public customer submitting offline payment proof/ref
+        // Public customer submitting offline payment proof:
+        // Strictly transition to 'Pending Verification'. Public callers can NEVER self-settle as Paid!
+        targetStatus = 'Pending Verification';
         isVerified = true;
       } else {
         // Authenticated user: verify workspace permissions
@@ -84,6 +97,7 @@ export async function POST(request: Request) {
           );
         }
 
+        targetStatus = newStatus || 'Paid';
         isVerified = true;
       }
     } else {
@@ -92,13 +106,18 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing transaction reference for online payment verification' }, { status: 400 });
       }
 
-      // Allow simulated and direct test references
-      if (
-        finalRef.startsWith('PAY-SIM-') || 
-        finalRef.startsWith('PAY-DIRECT-') || 
-        finalRef.startsWith('DEMO-') || 
-        process.env.NODE_ENV === 'test'
-      ) {
+      // Check simulated test references (strictly prohibited in production)
+      const isSimulatedRef = finalRef.startsWith('PAY-SIM-') || 
+                             finalRef.startsWith('PAY-DIRECT-') || 
+                             finalRef.startsWith('DEMO-');
+
+      if (isSimulatedRef) {
+        if (process.env.NODE_ENV === 'production') {
+          return NextResponse.json(
+            { error: 'Simulated payment references are prohibited in production.' },
+            { status: 400 }
+          );
+        }
         isVerified = true;
       } else {
         // Fetch the farm's secret key or fallback to platform key
@@ -113,7 +132,7 @@ export async function POST(request: Request) {
         const secretKey = systemSettings?.paystackSecretKey || gwConfig.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY;
 
         if (!secretKey || secretKey.includes('placeholder')) {
-          if (process.env.NODE_ENV === 'development') {
+          if (process.env.NODE_ENV !== 'production') {
             isVerified = true;
           } else {
             return NextResponse.json({ error: 'Payment gateway configuration is missing or inactive for this farm.' }, { status: 500 });
@@ -158,7 +177,7 @@ export async function POST(request: Request) {
       .update(updatePayload)
       .eq('id', invoiceId);
       
-    // 6. Ensure completed sale record exists in sales table if paid
+    // 6. If Paid, ensure completed sale record exists in sales table
     if (targetStatus === 'Paid') {
       const { data: existingSales } = await supabase.from('sales').select('id').eq('id', targetSaleId).eq('workspaceId', invoice.workspaceId);
 
@@ -187,9 +206,23 @@ export async function POST(request: Request) {
         severity: 'Info',
         read: false
       }]);
+    } else if (targetStatus === 'Pending Verification') {
+      // Log notification for farm administration to verify bank transfer
+      await supabase.from('alertLogs').insert([{
+        id: 'al' + Date.now().toString().slice(-8),
+        workspaceId: invoice.workspaceId,
+        date: invoice.date || new Date().toISOString().split('T')[0],
+        message: `OFFLINE PAYMENT PENDING VERIFICATION: Customer ${invoice.customerName} submitted offline transfer details (${methodUsed}, Ref: ${finalRef || 'Direct'}) for Invoice #${invoice.id}. Awaiting staff confirmation.`,
+        severity: 'Warning',
+        read: false
+      }]);
     }
 
-    return NextResponse.json({ success: true, status: targetStatus, paymentMethod: methodUsed });
+    const resMessage = targetStatus === 'Paid'
+      ? 'Payment verified and recorded successfully.'
+      : 'Payment details submitted. Awaiting verification by farm management.';
+
+    return NextResponse.json({ success: true, status: targetStatus, paymentMethod: methodUsed, message: resMessage });
   } catch (_error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

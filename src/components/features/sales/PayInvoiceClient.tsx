@@ -15,7 +15,8 @@ import {
   ShieldCheck, 
   Printer, 
   Wallet, 
-  Settings2
+  Settings2,
+  Clock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { printInvoiceReceipt } from '@/lib/exportReports';
@@ -97,17 +98,27 @@ export function PayInvoiceClient({
         });
         handler.openIframe();
       } else {
-        // Fallback simulated instant processing if script is blocked by browser
-        toast.dismiss('pay-toast');
-        toast.loading('Processing direct transaction...', { id: 'pay-toast' });
-        setTimeout(async () => {
-          await verifyInvoicePayment(`PAY-SIM-${Date.now().toString().slice(-6)}`);
-        }, 800);
+        if (process.env.NODE_ENV !== 'production') {
+          // Dev/Testing fallback simulated instant processing
+          toast.dismiss('pay-toast');
+          toast.loading('Processing direct transaction...', { id: 'pay-toast' });
+          setTimeout(async () => {
+            await verifyInvoicePayment(`PAY-SIM-${Date.now().toString().slice(-6)}`);
+          }, 800);
+        } else {
+          toast.dismiss('pay-toast');
+          toast.error('Payment gateway script failed to load. Please check your internet connection or disable ad-blockers.');
+          setIsProcessing(false);
+        }
       }
     } catch (_err) {
       toast.dismiss('pay-toast');
-      // If error launching popup, verify transaction directly
-      await verifyInvoicePayment(`PAY-DIRECT-${Date.now().toString().slice(-6)}`);
+      if (process.env.NODE_ENV !== 'production') {
+        await verifyInvoicePayment(`PAY-DIRECT-${Date.now().toString().slice(-6)}`);
+      } else {
+        toast.error('Failed to initialize payment window. Please try again.');
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -160,8 +171,10 @@ export function PayInvoiceClient({
 
       toast.dismiss('offline-toast');
       if (res.ok) {
-        setStatus('Paid');
-        toast.success('Offline payment recorded! Invoice marked as Paid.');
+        const data = await res.json();
+        const nextStatus = data?.status || 'Pending Verification';
+        setStatus(nextStatus);
+        toast.success(data?.message || (nextStatus === 'Paid' ? 'Offline payment recorded! Invoice marked as Paid.' : 'Payment proof submitted! Awaiting farm confirmation.'));
       } else {
         const data = await res.json();
         toast.error(data?.error || 'Failed to record offline payment');
@@ -230,6 +243,7 @@ export function PayInvoiceClient({
   };
 
   const isPaid = status === 'Paid';
+  const isPendingVerification = status === 'Pending Verification';
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6 font-sans">
@@ -253,10 +267,14 @@ export function PayInvoiceClient({
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${
                 isPaid
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/20'
-                  : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : isPendingVerification
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : 'bg-slate-500/20 text-slate-300 border border-slate-500/40'
               }`}>
-                <span className={`w-2 h-2 rounded-full ${isPaid ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-                {isPaid ? 'Payment Received' : 'Payment Awaiting'}
+                <span className={`w-2 h-2 rounded-full ${
+                  isPaid ? 'bg-emerald-400 animate-pulse' : isPendingVerification ? 'bg-amber-400 animate-pulse' : 'bg-slate-400'
+                }`} />
+                {isPaid ? 'Payment Received' : isPendingVerification ? 'Pending Verification' : 'Payment Awaiting'}
               </span>
               <p className="text-[11px] text-slate-400 font-mono mt-1">Invoice #{invoice.id}</p>
             </div>
@@ -368,6 +386,18 @@ export function PayInvoiceClient({
           ) : (
             /* Unpaid / Pending Payment Modes */
             <div className="space-y-5">
+              {isPendingVerification && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-amber-900 text-xs">
+                  <Clock size={20} className="text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-amber-950">Payment Proof Submitted — Pending Verification</h4>
+                    <p className="text-amber-800 text-[11px] mt-0.5 leading-relaxed">
+                      Your offline transfer details have been submitted to <strong>{farmName}</strong>. Once farm management verifies and confirms receipt, this invoice will be marked as Paid and your official receipt will become available.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Payment Mode Segmented Selector */}
               <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
                 <button

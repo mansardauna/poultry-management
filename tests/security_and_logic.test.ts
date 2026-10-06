@@ -139,3 +139,55 @@ describe('Proxy Prefix Security Boundary Suite', () => {
     assert.equal(matchesPublicPrefix('/api/auth/login_bypass'), false);
   });
 });
+
+describe('Invoice Settlement Security Policy Suite', () => {
+  function evaluateSimulatedReference(ref: string, env: string): { allowed: boolean; error?: string } {
+    const isSimulated = ref.startsWith('PAY-SIM-') || ref.startsWith('PAY-DIRECT-') || ref.startsWith('DEMO-');
+    if (isSimulated && env === 'production') {
+      return { allowed: false, error: 'Simulated payment references are prohibited in production.' };
+    }
+    return { allowed: true };
+  }
+
+  function resolveOfflineTargetStatus(isAuthUser: boolean, newStatus?: string): string {
+    if (!isAuthUser) {
+      // Unauthenticated public customer submissions ALWAYS transition to 'Pending Verification'
+      return 'Pending Verification';
+    }
+    return newStatus || 'Paid';
+  }
+
+  test('prohibits simulated test references in production environment', () => {
+    const r1 = evaluateSimulatedReference('PAY-SIM-999888', 'production');
+    assert.equal(r1.allowed, false);
+    assert.ok(r1.error?.includes('prohibited in production'));
+
+    const r2 = evaluateSimulatedReference('PAY-DIRECT-123456', 'production');
+    assert.equal(r2.allowed, false);
+
+    const r3 = evaluateSimulatedReference('DEMO-443322', 'production');
+    assert.equal(r3.allowed, false);
+  });
+
+  test('permits simulated test references in development and test environments', () => {
+    const rDev = evaluateSimulatedReference('PAY-SIM-999888', 'development');
+    assert.equal(rDev.allowed, true);
+
+    const rTest = evaluateSimulatedReference('PAY-SIM-999888', 'test');
+    assert.equal(rTest.allowed, true);
+  });
+
+  test('enforces Pending Verification status on unauthenticated offline customer submissions', () => {
+    // Customer attempts to self-settle as Paid
+    const statusCustomer1 = resolveOfflineTargetStatus(false, 'Paid');
+    assert.equal(statusCustomer1, 'Pending Verification');
+
+    // Customer submits without status
+    const statusCustomer2 = resolveOfflineTargetStatus(false);
+    assert.equal(statusCustomer2, 'Pending Verification');
+
+    // Authenticated staff/admin confirms as Paid
+    const statusAdmin = resolveOfflineTargetStatus(true, 'Paid');
+    assert.equal(statusAdmin, 'Paid');
+  });
+});

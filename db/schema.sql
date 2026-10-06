@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   `paymentReference` VARCHAR(255) DEFAULT NULL,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_invoices_workspaceId` (`workspaceId`),
-  INDEX `idx_invoices_paymentReference` (`paymentReference`)
+  UNIQUE KEY `uq_invoices_paymentReference` (`paymentReference`)
 );
 
 CREATE TABLE IF NOT EXISTS `expenses` (
