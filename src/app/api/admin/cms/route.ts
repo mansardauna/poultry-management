@@ -6,7 +6,7 @@ import { supabase as serviceRoleClient } from '@/lib/supabase';
 import fs from 'fs';
 import path from 'path';
 
-import { getPublicBranding, DEFAULT_CMS } from '@/lib/branding';
+import { getPublicBranding } from '@/lib/branding';
 
 export async function GET() {
   const data = await getPublicBranding();

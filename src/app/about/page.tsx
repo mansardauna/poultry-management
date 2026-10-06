@@ -1,8 +1,7 @@
 'use strict';
 'use client';
 
-import Link from 'next/link';
-import { ArrowLeft, Shield, Cpu, Users, Building2, CheckCircle2, Award } from 'lucide-react';
+import { Shield, Cpu, Building2 } from 'lucide-react';
 
 import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';

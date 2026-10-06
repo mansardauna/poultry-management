@@ -23,7 +23,7 @@ import {
  * @param props.role The user role.
  */
 export function InventoryClient({ role }: { role: string }) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { t, formatNumber } = useLanguage();
   const { confirm } = useConfirm();
   const [equipment, setEquipment] = useState<EquipmentInventory[]>([]);
   const [open, setOpen] = useState(false);

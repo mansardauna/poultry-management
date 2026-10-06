@@ -8,13 +8,13 @@ import { getWorkspaceId } from '@/lib/workspace';
  * Automated Evening Notification Dispatcher
  * Compiles 6:00 PM daily farm summaries (egg yield, feed stock, mortality, unpaid invoices) for WhatsApp & SMS.
  */
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const workspaceId = await getWorkspaceId();
     const today = new Date().toISOString().split('T')[0];
 
     // Fetch Today's Logs
-    const [eggsRes, feedsRes, salesRes, invoicesRes, batchesRes] = await Promise.all([
+    const [eggsRes, _feedsRes, _salesRes, invoicesRes, batchesRes] = await Promise.all([
       serviceRoleClient.from('eggs').select('*').eq('workspaceId', workspaceId).eq('date', today),
       serviceRoleClient.from('feeds').select('*').eq('workspaceId', workspaceId),
       serviceRoleClient.from('sales').select('*').eq('workspaceId', workspaceId).eq('date', today),

@@ -28,9 +28,7 @@ export default async function DashboardLayout({
   const currentPath = headersList.get('x-current-path') || headersList.get('x-middleware-request-x-current-path') || '';
   const isSuperAdminPath = currentPath.startsWith('/dashboard/admin');
   const roleCookie = cookieStore.get('pfms_role')?.value;
-  const emailCookie = cookieStore.get('pfms_email')?.value;
   const headerRole = headersList.get('x-user-role');
-  const headerEmail = headersList.get('x-user-email');
 
   const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';
   const impersonatedOrgName = cookieStore.get('pfms_impersonate_org_name')?.value;

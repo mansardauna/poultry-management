@@ -22,7 +22,7 @@ export function TablePagination({
   onPageChange,
   onPageSizeChange
 }: TablePaginationProps) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { texts, formatNumber } = useLanguage();
   const startIndex = (currentPage - 1) * pageSize + 1;
   const endIndex = Math.min(currentPage * pageSize, totalItems);
 

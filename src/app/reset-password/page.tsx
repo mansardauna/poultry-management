@@ -3,7 +3,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { KeyRound, Eye, EyeOff, CheckCircle2, AlertCircle, ArrowLeft, Mail, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, AlertCircle, ArrowLeft, Mail, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/components/features/LanguageContext';

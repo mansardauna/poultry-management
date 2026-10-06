@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/Card";
-import { Sparkles, ArrowLeft, CheckCircle2, Clock, Radio, Video, Calendar, Shield } from 'lucide-react';
+import { Sparkles, ArrowLeft, CheckCircle2, Clock, Radio, Video, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/features/LanguageContext';
 

@@ -19,13 +19,12 @@ import {
   MenuItem
 } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, Download, X, Sparkles, Star, Plus, Zap, Crown, ShieldCheck, QrCode, Copy, Check } from 'lucide-react';
+import { Settings, BellRing, User, DollarSign, Trash2, CheckCircle2, Shield, CreditCard, X, Sparkles, Crown, ShieldCheck, Copy, Check } from 'lucide-react';
 import { useWorkspace } from '../WorkspaceContext';
 import { useLanguage } from '../LanguageContext';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { 
   SUPPORTED_CURRENCIES, 
-  getCurrencyInfo, 
   getDefaultExchangeRate, 
   convertBetweenCurrencies 
 } from '@/lib/currency';
@@ -91,7 +90,7 @@ interface SettingsClientProps {
  * @param props - Component properties.
  */
 export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin', currentUser }: SettingsClientProps) {
-  const { texts, t, formatNumber, formatCurrency } = useLanguage();
+  const { t, formatCurrency } = useLanguage();
   const { confirm } = useConfirm();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -113,18 +112,18 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   // Real Dynamic Payment Methods & Subscription History
   const [paymentMethods, setPaymentMethods] = useState<any[]>(initialPaymentMethods);
   const { activeWorkspace, updateWorkspace } = useWorkspace();
-  const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>(initialSubscriptionHistory);
+  const [_subscriptionHistory] = useState<any[]>(initialSubscriptionHistory);
 
   // Add Card Modal State
-  const [openAddCardModal, setOpenAddCardModal] = useState(false);
-  const [cardBrand, setCardBrand] = useState('Visa');
+  const [_openAddCardModal, _setOpenAddCardModal] = useState(false);
+  const [_cardBrand] = useState('Visa');
   const [cardLast4, setCardLast4] = useState('');
-  const [cardExpMonth, setCardExpMonth] = useState('12');
-  const [cardExpYear, setCardExpYear] = useState('2028');
-  const [cardIsDefault, setCardIsDefault] = useState(true);
+  const [_cardExpMonth] = useState('12');
+  const [_cardExpYear] = useState('2028');
+  const [_cardIsDefault] = useState(true);
 
   const isUpgraded = searchParams.get('upgraded') === 'true';
-  const queryTier = searchParams.get('tier');
+  const _queryTier = searchParams.get('tier');
   const [saasPlans, setSaasPlans] = useState<any[]>([]);
 
   useEffect(() => {
@@ -184,7 +183,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [adminName, setAdminName] = useState(systemSettings?.adminName || '');
   const [adminEmail, setAdminEmail] = useState(systemSettings?.adminEmail || '');
   const [adminPhone, setAdminPhone] = useState(systemSettings?.adminPhone || '');
-  const [billingRegion, setBillingRegion] = useState(systemSettings?.billingRegion || 'Nigeria & West Africa (NGN)');
+  const [billingRegion] = useState(systemSettings?.billingRegion || 'Nigeria & West Africa (NGN)');
   const [farmCurrency, setFarmCurrency] = useState(systemSettings?.currencySymbol || '$');
   const [farmExchangeRate, setFarmExchangeRate] = useState(String(systemSettings?.exchangeRate || '1.0'));
 
@@ -219,11 +218,11 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
   const [paystackSecretKey, setPaystackSecretKey] = useState(systemSettings?.paystackSecretKey || '');
   const [stripePublicKey, setStripePublicKey] = useState(systemSettings?.stripePublicKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
   const [stripeSecretKey, setStripeSecretKey] = useState(systemSettings?.stripeSecretKey || '');
-  const [flutterwavePublicKey, setFlutterwavePublicKey] = useState(systemSettings?.flutterwavePublicKey || '');
-  const [flutterwaveSecretKey, setFlutterwaveSecretKey] = useState(systemSettings?.flutterwaveSecretKey || '');
-  const [bankName, setBankName] = useState(systemSettings?.bankName || '');
-  const [accountNumber, setAccountNumber] = useState(systemSettings?.accountNumber || '');
-  const [accountName, setAccountName] = useState(systemSettings?.accountName || '');
+  const [flutterwavePublicKey] = useState(systemSettings?.flutterwavePublicKey || '');
+  const [flutterwaveSecretKey] = useState(systemSettings?.flutterwaveSecretKey || '');
+  const [bankName] = useState(systemSettings?.bankName || '');
+  const [accountNumber] = useState(systemSettings?.accountNumber || '');
+  const [accountName] = useState(systemSettings?.accountName || '');
 
   // Change Password State
   const [currentPassword, setCurrentPassword] = useState('');
@@ -458,13 +457,13 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
     }
   };
 
-  const handleAddPaymentMethod = async () => {
+  const _handleAddPaymentMethod = async () => {
     if (paymentMethods.length >= 3) {
       toast.error('Maximum 3 saved payment methods limit reached. Please remove an existing card to add a new one.');
       return;
     }
-    const isDigitalWallet = cardBrand === 'Apple Pay' || cardBrand === 'Google Pay';
-    const finalLast4 = isDigitalWallet && !cardLast4 ? (cardBrand === 'Apple Pay' ? 'APAY' : 'GPAY') : cardLast4;
+    const isDigitalWallet = _cardBrand === 'Apple Pay' || _cardBrand === 'Google Pay';
+    const finalLast4 = isDigitalWallet && !cardLast4 ? (_cardBrand === 'Apple Pay' ? 'APAY' : 'GPAY') : cardLast4;
 
     if (!finalLast4 || finalLast4.length < 4) {
       toast.error('Please enter card digits or select Apple/Google Pay');
@@ -476,18 +475,18 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'addPaymentMethod',
-          brand: cardBrand,
+          brand: _cardBrand,
           last4: finalLast4,
-          expMonth: Number(cardExpMonth) || 12,
-          expYear: Number(cardExpYear) || 2028,
-          isDefault: cardIsDefault || paymentMethods.length === 0
+          expMonth: Number(_cardExpMonth) || 12,
+          expYear: Number(_cardExpYear) || 2028,
+          isDefault: _cardIsDefault || paymentMethods.length === 0
         })
       });
       const data = await res.json();
       if (res.ok && data.paymentMethod) {
-        toast.success(`${cardBrand} saved as active payment method!`);
-        setPaymentMethods(prev => cardIsDefault || prev.length === 0 ? [data.paymentMethod, ...prev.map(p => ({ ...p, isDefault: false }))] : [...prev, data.paymentMethod]);
-        setOpenAddCardModal(false);
+        toast.success(`${_cardBrand} saved as active payment method!`);
+        setPaymentMethods(prev => _cardIsDefault || prev.length === 0 ? [data.paymentMethod, ...prev.map(p => ({ ...p, isDefault: false }))] : [...prev, data.paymentMethod]);
+        _setOpenAddCardModal(false);
         setCardLast4('');
       } else {
         toast.error(data.error || 'Failed to save payment method');
@@ -497,7 +496,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
     }
   };
 
-  const handleDeletePaymentMethod = async (id: string) => {
+  const _handleDeletePaymentMethod = async (id: string) => {
     if (!await confirm(t('Remove this payment method?', 'Remove this payment method?'))) return;
     try {
       const res = await fetch(`/api/settings?id=${id}&type=paymentMethod`, { method: 'DELETE' });

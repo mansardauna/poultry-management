@@ -3,9 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, X, ArrowLeft } from 'lucide-react';
+import { Check } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Link from 'next/link';
 
 export interface SaasPlan {
   id: string;
@@ -67,7 +66,7 @@ export default function PricingPage() {
       } else {
         toast.error(data.error || 'Failed to start checkout');
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error('An error occurred during checkout');
     } finally {
       setIsLoading(false);

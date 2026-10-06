@@ -4,7 +4,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Globe, ChevronDown, Check } from 'lucide-react';
 import { useLanguage } from '../features/LanguageContext';
-import { Language, SUPPORTED_LANGUAGES } from '@/lib/i18n/types';
+import { SUPPORTED_LANGUAGES } from '@/lib/i18n/types';
 
 interface LanguageSelectorProps {
   className?: string;

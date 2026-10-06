@@ -1,7 +1,6 @@
 'use strict';
 
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { supabase as envServiceRoleClient } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
@@ -24,7 +23,7 @@ export async function GET() {
     }
 
     // 1. Verify database connection
-    const { data: dbCheck, error: dbError } = await envServiceRoleClient
+    const { error: dbError } = await envServiceRoleClient
       .from('systemSettings')
       .select('id')
       .limit(1);

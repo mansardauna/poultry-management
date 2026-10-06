@@ -24,9 +24,8 @@ export function useTableLogic<T>({ data, searchFields = [], initialPageSize = 20
     });
   };
 
-  const safeData = Array.isArray(data) ? data : [];
-
   const filteredData = useMemo(() => {
+    const safeData = Array.isArray(data) ? data : [];
     if (!searchTerm || searchFields.length === 0) return safeData;
     const lowerSearch = searchTerm.toLowerCase();
     
@@ -37,7 +36,7 @@ export function useTableLogic<T>({ data, searchFields = [], initialPageSize = 20
         return String(val).toLowerCase().includes(lowerSearch);
       });
     });
-  }, [safeData, searchTerm, searchFields]);
+  }, [data, searchTerm, searchFields]);
 
   const sortedData = useMemo(() => {
     if (!sortConfig) return filteredData;

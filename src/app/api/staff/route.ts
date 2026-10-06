@@ -280,7 +280,7 @@ export async function PUT(request: Request) {
 /** Exported function DELETE */
 export async function DELETE(request: Request) {
   try {
-    const workspaceId = await getWorkspaceId();
+    const _workspaceId = await getWorkspaceId();
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
     let type = searchParams.get('type');

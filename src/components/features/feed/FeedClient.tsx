@@ -4,8 +4,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { SelectWithAdd } from "@/components/ui/SelectWithAdd";
-import { Plus, BarChart2, AlertTriangle, MapPin, Truck, Edit2, Trash2, Download, Printer } from 'lucide-react';
+import { Plus, BarChart2, AlertTriangle, Truck, Edit2, Trash2, Download, Printer } from 'lucide-react';
 import { downloadCSV, printBrandedReport } from '@/lib/exportReports';
 import { useLanguage } from "../LanguageContext";
 import { useTimeFilter } from "../TimeFilterContext";
@@ -36,7 +35,7 @@ interface FeedClientProps {
  */
 export function FeedClient({ initialFeeds, initialLogs, batches, initialProcurePipeline, role }: FeedClientProps) {
   const [feeds, setFeeds] = useState<FeedInventory[]>(initialFeeds);
-  const { texts, t, formatNumber } = useLanguage();
+  const { texts, t } = useLanguage();
   const { filterByTimeRange, timeRange } = useTimeFilter();
   const { confirm } = useConfirm();
   const canEdit = role === 'Admin' || role === 'Manager';
@@ -423,7 +422,7 @@ export function FeedClient({ initialFeeds, initialLogs, batches, initialProcureP
             <Printer size={15} /> {t("Print Report")}
           </button>
           <button 
-            onClick={() => setOpenLogistics(true)}
+            onClick={handleOpenLogistics}
             className="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
           >
             <Truck size={15} /> {t("Logistics Pipeline")}

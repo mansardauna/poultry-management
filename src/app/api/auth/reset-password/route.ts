@@ -215,7 +215,7 @@ export async function POST(request: Request) {
         }
       }
 
-      const { error: authUpdateErr } = await supabase.auth.admin.updateUserById(authUser.id, { password: newPassword });
+      const { error: _authUpdateErr } = await supabase.auth.admin.updateUserById(authUser.id, { password: newPassword });
 
       const passwordHash = await bcrypt.hash(newPassword, 10);
       const { error: updateErr } = await supabase

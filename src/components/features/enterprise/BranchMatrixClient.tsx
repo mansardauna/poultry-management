@@ -3,15 +3,12 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { BadgeStatus } from "@/components/ui/BadgeStatus";
 import { 
   Building2, 
   Trash2, 
   ArrowRightLeft, 
   Plus, 
-  TrendingUp, 
   Sparkles, 
-  CheckCircle2,
   AlertTriangle,
   Layers,
   Award
@@ -157,8 +154,8 @@ export function BranchMatrixClient({ tier, workspaces: initialWorkspaces, branch
   }
 
   // Compute real totals
-  const totalBirdsAll = Object.values(branchMetrics).reduce((acc, curr) => acc + curr.totalBirds, 0);
-  const totalEggsAll = Object.values(branchMetrics).reduce((acc, curr) => acc + curr.totalEggs, 0);
+  const _totalBirdsAll = Object.values(branchMetrics).reduce((acc, curr) => acc + curr.totalBirds, 0);
+  const _totalEggsAll = Object.values(branchMetrics).reduce((acc, curr) => acc + curr.totalEggs, 0);
 
   return (
     <div className="space-y-8 max-w-6xl pb-16 font-sans">

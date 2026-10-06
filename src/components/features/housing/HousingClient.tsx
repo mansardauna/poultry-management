@@ -1,9 +1,9 @@
 'use strict';
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, Home, Edit2, Trash2, Thermometer, History, Droplets, Calendar, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Plus, Home, Edit2, Trash2, Thermometer, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FarmPen, ChickenBatch, TemperatureLog } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
@@ -23,7 +23,7 @@ import {
  * @param props.role The user role.
  */
 export function HousingClient({ role }: { role: string }) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { t, formatNumber } = useLanguage();
   const { confirm } = useConfirm();
   const [pens, setPens] = useState<FarmPen[]>([]);
   const [batches, setBatches] = useState<ChickenBatch[]>([]);
@@ -58,7 +58,7 @@ export function HousingClient({ role }: { role: string }) {
     initialPageSize: 20
   });
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     try {
       const res = await fetch('/api/housing');
       if (res.ok) {
@@ -68,18 +68,14 @@ export function HousingClient({ role }: { role: string }) {
         setBatches(data.batches || []);
 
         // Also update selectedPenForHistory if opened
-        if (selectedPenForHistory) {
-          const fresh = loadedPens.find(p => p.id === selectedPenForHistory.id);
-          if (fresh) setSelectedPenForHistory(fresh);
-        }
+        setSelectedPenForHistory(prev => (prev ? loadedPens.find(p => p.id === prev.id) || prev : null));
       }
     } catch {}
-  };
+  }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshData();
-  }, []);
+  }, [refreshData]);
 
   const handleDelete = async (id: string) => {
     if (!await confirm(t('Delete this pen?'))) return;
@@ -561,7 +557,7 @@ export function HousingClient({ role }: { role: string }) {
         </DialogTitle>
         <DialogContent className="pt-2">
           {/* Quick Metrics */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
               <span className="text-[11px] font-medium text-slate-500 uppercase">{t("Latest Temp")}</span>
               <p className="text-lg font-bold text-slate-900 mt-0.5 font-mono">
@@ -572,6 +568,12 @@ export function HousingClient({ role }: { role: string }) {
               <span className="text-[11px] font-medium text-slate-500 uppercase">{t("Average Temp")}</span>
               <p className="text-lg font-bold text-slate-900 mt-0.5 font-mono">
                 {avgTemp ? `${avgTemp}°C` : '—'}
+              </p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+              <span className="text-[11px] font-medium text-slate-500 uppercase">{t("Min / Max Range")}</span>
+              <p className="text-lg font-bold text-slate-900 mt-0.5 font-mono">
+                {minTemp && maxTemp ? `${minTemp}°C - ${maxTemp}°C` : '—'}
               </p>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">

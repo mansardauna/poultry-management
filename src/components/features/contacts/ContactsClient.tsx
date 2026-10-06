@@ -23,7 +23,7 @@ import {
  * @param props - Component properties containing user role.
  */
 export function ContactsClient({ role }: { role: string }) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { t } = useLanguage();
   const { confirm } = useConfirm();
   const [contacts, setContacts] = useState<ContactRecord[]>([]);
   const contactsLogic = useTableLogic({

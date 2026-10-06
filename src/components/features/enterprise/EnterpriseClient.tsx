@@ -5,8 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { 
   Building2, 
-  Globe, 
-  Shield, 
   PhoneCall, 
   Key, 
   Plus, 
@@ -14,15 +12,8 @@ import {
   CheckCircle2, 
   Copy, 
   Trash2, 
-  Upload, 
   Palette, 
-  FileText, 
-  Wheat, 
-  TrendingUp, 
-  RefreshCw, 
-  ExternalLink,
-  Zap,
-  Activity
+  Wheat
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -72,21 +63,21 @@ export function EnterpriseClient({
   const [brandColor, setBrandColor] = useState(cooperative?.brandColor || 'indigo');
   const [customReportHeader, setCustomReportHeader] = useState(cooperative?.customReportHeader || 'Official Enterprise Farm Analytics Report');
   const [customInvoiceFooter, setCustomInvoiceFooter] = useState(cooperative?.customInvoiceFooter || 'Thank you for buying from our certified organic poultry farm!');
-  const [themeMode, setThemeMode] = useState(cooperative?.themeMode || 'modern');
+  const [themeMode] = useState(cooperative?.themeMode || 'modern');
   const [isSavingCoop, setIsSavingCoop] = useState(false);
 
   // API Keys & Webhooks State
   const [apiKeys, setApiKeys] = useState<any[]>(initialApiKeys);
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyWebhook, setNewKeyWebhook] = useState('');
-  const [keyScope, setKeyScope] = useState('read:analytics,write:sales');
+  const [keyScope] = useState('read:analytics,write:sales');
 
   // Vet Tickets State
   const [consultants, setConsultants] = useState<any[]>(initialConsultants);
   const [openVetModal, setOpenVetModal] = useState(false);
   const [ticketType, setTicketType] = useState('Emergency Outbreak');
   const [ticketNotes, setTicketNotes] = useState('');
-  const [ticketPhone, setTicketPhone] = useState('+234 800-POULTRY-VET');
+  const [ticketPhone] = useState('+234 800-POULTRY-VET');
 
   // Bulk Feed Order State
   const [bulkOrders, setBulkOrders] = useState<any[]>(initialBulkOrders);
@@ -125,7 +116,7 @@ export function EnterpriseClient({
         })
       });
       if (res.ok) {
-        const data = await res.json();
+        await res.json();
         toast.success('White-Label Branding & Theme Saved!');
         // Save to local storage for instant live theme reflection
         localStorage.setItem('pfms_white_label', JSON.stringify({ coopName, logoUrl, brandColor, customReportHeader, customInvoiceFooter }));

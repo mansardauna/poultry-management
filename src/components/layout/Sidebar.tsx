@@ -3,13 +3,11 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useSidebar } from './SidebarContext';
 import {
-  Box,
   ShoppingCart,
   Settings,
-  Video,
   Menu,
   Home,
   Activity,
@@ -28,7 +26,6 @@ import {
   Trash2,
   Building2,
   ShieldCheck,
-  Layout,
   Layers,
   Sparkles,
   Server,
@@ -37,7 +34,6 @@ import {
 import clsx from 'clsx';
 import Cookies from 'js-cookie';
 import { useWorkspace, Workspace } from '../features/WorkspaceContext';
-import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { WorkspaceOnboarding } from '../features/WorkspaceOnboarding';
 import { useLanguage } from '../features/LanguageContext';
 import { useWhiteLabel } from '../features/WhiteLabelContext';
@@ -176,7 +172,6 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { isMobileOpen, setIsMobileOpen } = useSidebar();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showNewBranchModal, setShowNewBranchModal] = useState(false);
   const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -194,7 +189,6 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const visibleItems = menuItems.filter(item => item.roles.includes(role));
 
   const searchParams = useSearchParams();
-  const isOnboarding = searchParams.get('onboarding') === 'true';
   const planParam = searchParams.get('plan');
   const isUpgraded = searchParams.get('upgraded') === 'true';
   const [currentTier, setCurrentTier] = useState(tier);
@@ -213,21 +207,6 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
       })
       .catch(() => {});
   }, []);
-
-  const [tenantsCount, setTenantsCount] = useState<number>(0);
-
-  useEffect(() => {
-    if (isSuperAdmin) {
-      fetch('/api/setup')
-        .then(res => res.json())
-        .then(data => {
-          if (typeof data.tenantsCount === 'number') {
-            setTenantsCount(data.tenantsCount);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [isSuperAdmin]);
 
   useEffect(() => {
     setCurrentTier(tier);
@@ -267,7 +246,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
           } else {
             toast.error(data.error || 'Failed to redirect to checkout');
           }
-        } catch (e) {
+        } catch (_e) {
           toast.error('Failed to redirect to checkout');
         }
       };

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Plus, Calendar, Settings, CheckCircle, Clock, Trash2, X } from 'lucide-react';
+import { Plus, Calendar, Settings, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DatabaseSchema, MedicationTemplate, MedicationSchedule, ChickenBatch } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
@@ -31,7 +31,7 @@ import {
  * @param props.role The user role.
  */
 export function HealthClient({ role }: { role: string }) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { texts, t } = useLanguage();
   const { confirm } = useConfirm();
   const [templates, setTemplates] = useState<MedicationTemplate[]>([]);
   const [schedules, setSchedules] = useState<MedicationSchedule[]>([]);

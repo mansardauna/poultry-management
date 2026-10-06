@@ -13,7 +13,6 @@ import {
   Users,
   ChevronRight
 } from 'lucide-react';
-import Image from 'next/image';
 import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 

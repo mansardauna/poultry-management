@@ -7,18 +7,13 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
-  AlertTriangle,
-  BarChart2,
-  ArrowUp,
   CheckCircle,
-  Activity,
   Coins,
   CheckSquare,
   Bell,
   MapPin,
   Calendar,
   Sparkles,
-  Lock,
   Printer,
   Plus,
   Egg,
@@ -27,7 +22,7 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { Input, Select } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { DatabaseSchema, StaffTask, AlertLog } from "@/data/types";
+import { DatabaseSchema } from "@/data/types";
 import { useTableLogic } from '@/hooks/useTableLogic';
 import { TableControls } from '@/components/ui/TableControls';
 import { TablePagination } from '@/components/ui/TablePagination';
@@ -373,9 +368,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
 
   // Finances - 100% derived from actual recorded database records
   const totalRevenue = filteredSalesForKPIs.reduce((sum, s) => sum + s.totalAmount, 0);
-  const netBalance = totalRevenue - totalExpenses;
   const netProfit = totalRevenue - totalExpenses;
-  const returnEfficiency = totalExpenses > 0 ? ((netProfit / totalExpenses) * 100).toFixed(1) : '0';
   const totalFeedStockKg = (normalizedFeeds || []).reduce((sum, f) => sum + (f.quantityKg || 0), 0);
   const activeTasks = filterByTimeRange(data.tasks || []).filter(t => t.status === 'Pending');
   const pendingTasksCount = activeTasks.length;

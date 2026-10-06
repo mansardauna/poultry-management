@@ -16,7 +16,6 @@ import {
   DollarSign, 
   Video, 
   FileText, 
-  ArrowRight,
   CheckCircle2,
   Sparkles
 } from 'lucide-react';
@@ -26,7 +25,7 @@ import { useLanguage } from '@/components/features/LanguageContext';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 export default function DocumentationPage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<'all' | 'staff' | 'admin' | 'superadmin'>('all');
 

@@ -12,7 +12,15 @@ const eslintConfig = defineConfig([
     rules: {
       "react-hooks/rules-of-hooks": "error",
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_",
+          "destructuredArrayIgnorePattern": "^_"
+        }
+      ],
       "prefer-const": "warn",
       "react/no-unescaped-entities": "off",
       "@next/next/no-img-element": "off",

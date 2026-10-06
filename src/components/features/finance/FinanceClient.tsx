@@ -44,7 +44,7 @@ interface FinanceClientProps {
 export function FinanceClient({ initialSales, initialExpenses, role }: FinanceClientProps) {
   const [sales, setSales] = useState<Sale[]>(initialSales);
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
-  const { texts, t, formatNumber, formatCurrency, currencySymbol } = useLanguage();
+  const { texts, t, formatCurrency, currencySymbol } = useLanguage();
   const { filterByTimeRange } = useTimeFilter();
   const { confirm } = useConfirm();
   const [open, setOpen] = useState(false);

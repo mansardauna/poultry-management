@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
 
-import { DEFAULT_PLANS, getPublicPlans } from '@/lib/plans';
+import { getPublicPlans } from '@/lib/plans';
 
 export async function GET() {
   const plans = await getPublicPlans();

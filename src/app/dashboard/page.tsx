@@ -36,9 +36,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const headersList = await headers().catch(() => null);
   const cookieStore = await cookies();
   const headerRole = headersList?.get('x-user-role');
-  const headerEmail = headersList?.get('x-user-email');
   const cookieRole = cookieStore.get('pfms_role')?.value;
-  const cookieEmail = cookieStore.get('pfms_email')?.value;
   const user = await getAuthUser();
 
   const isImpersonating = cookieStore.get('pfms_impersonate_by')?.value === 'superadmin';

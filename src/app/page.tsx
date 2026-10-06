@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ChevronDown, Shield, BarChart3, Zap, MessageSquare, PlayCircle, CheckCircle2, Star, Plus, Egg, Wheat, TrendingUp } from 'lucide-react';
+import { ArrowRight, Shield, BarChart3, Zap, Star, Egg, Wheat, TrendingUp } from 'lucide-react';
 import { PricingSection } from '@/components/features/marketing/PricingSection';
 import { FAQSection } from '@/components/features/marketing/FAQSection';
 import { LandingNav } from '@/components/layout/LandingNav';

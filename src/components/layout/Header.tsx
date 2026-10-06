@@ -4,7 +4,6 @@
 import { 
   Bell, 
   Search, 
-  User, 
   X, 
   CheckCheck, 
   Menu, 
@@ -14,7 +13,6 @@ import {
   SlidersHorizontal,
   BarChart3,
   Settings,
-  Database,
   CreditCard,
   Mail,
   Package,
@@ -38,7 +36,7 @@ import { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useSidebar } from './SidebarContext';
-import { useLanguage, Language } from '@/components/features/LanguageContext';
+import { useLanguage } from '@/components/features/LanguageContext';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { SUPPORTED_LANGUAGES } from '@/lib/i18n/types';
 import { useTimeFilter, TimeRange } from '@/components/features/TimeFilterContext';
@@ -70,7 +68,6 @@ export function Header({ role = 'Admin', tier = 'free' }: { role?: string; tier?
   const router = useRouter();
   const searchParams = useSearchParams();
   const isUpgraded = searchParams.get('upgraded') === 'true';
-  const queryTier = searchParams.get('tier');
   const [currentTier, setCurrentTier] = useState(tier);
 
   useEffect(() => {

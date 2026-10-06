@@ -65,7 +65,7 @@ export function SetupWizardClient() {
   const [paystackSecretKey, setPaystackSecretKey] = useState('');
   const [stripePublicKey, setStripePublicKey] = useState('');
   const [stripeSecretKey, setStripeSecretKey] = useState('');
-  const [stripeWebhookSecret, setStripeWebhookSecret] = useState('');
+  const stripeWebhookSecret = '';
   const [resendApiKey, setResendApiKey] = useState('');
 
   // Pricing Tiers State

@@ -121,7 +121,6 @@ export async function POST(request: Request) {
         }
 
         const subId = `sub_${Date.now()}`;
-        const isEnt = targetTier === 'enterprise' || targetTier === 'entrepreneur';
         const displayTitle = targetTier === 'entrepreneur' ? 'Entrepreneur Plan' : targetTier === 'enterprise' ? 'Enterprise & Coop' : 'Commercial Pro';
         const planName = `${displayTitle} (${isAnnual ? 'Annual' : 'Monthly'})`;
 

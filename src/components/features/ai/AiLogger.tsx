@@ -31,7 +31,6 @@ export function AiLogger({ role }: { role?: string }) {
     return null;
   }
 
-  const isSuperAdmin = role === 'SuperAdmin' || tier === 'enterprise';
   const hasFullAccess = tier !== 'free' || role === 'Admin' || role === 'Manager' || role === 'SuperAdmin';
 
   const startListening = () => {
@@ -51,7 +50,6 @@ export function AiLogger({ role }: { role?: string }) {
     recognition.onstart = () => setIsListening(true);
     
     recognition.onresult = (event: any) => {
-      let currentTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
@@ -111,7 +109,7 @@ export function AiLogger({ role }: { role?: string }) {
       } else {
         toast.error(t(data.error || 'Failed to parse data', data.error || 'Failed to parse data'));
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error(t('An error occurred while logging record.', 'An error occurred while logging record.'));
     } finally {
       setIsSubmitting(false);

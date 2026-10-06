@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     let session: Stripe.Checkout.Session;
     try {
       session = await stripe.checkout.sessions.retrieve(sessionId);
-    } catch (err: any) {
+    } catch (_err: any) {
       return NextResponse.json({
         error: 'Invalid or expired payment session ID.'
       }, { status: 400 });

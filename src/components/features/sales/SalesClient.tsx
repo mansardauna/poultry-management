@@ -15,23 +15,16 @@ import {
   MessageSquare, 
   Printer, 
   Trash2, 
-  X, 
   Link as LinkIcon, 
   Copy, 
   CheckCircle2, 
   ShieldCheck,
   Building2,
-  Calendar,
-  CreditCard,
-  Clock,
-  Sparkles,
-  Phone,
-  Mail,
-  Receipt
+  Clock
 } from 'lucide-react';
 import { useLanguage } from '@/components/features/LanguageContext';
 import { Sale, Invoice, ChickenBatch } from "@/data/types";
-import { downloadCSV, printBrandedReport, printInvoiceReceipt } from '@/lib/exportReports';
+import { printBrandedReport, printInvoiceReceipt } from '@/lib/exportReports';
 import { Modal } from '@/components/ui/Modal';
 import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -47,7 +40,7 @@ interface SalesClientProps {
 }
 
 export function SalesClient({ initialSales, initialInvoices, batches, role = 'Staff' }: SalesClientProps) {
-  const { texts, t, formatNumber } = useLanguage();
+  const { texts, t } = useLanguage();
   const { confirm } = useConfirm();
   const { activeWorkspace } = useWorkspace();
   const whiteLabel = useWhiteLabel();
@@ -342,7 +335,7 @@ export function SalesClient({ initialSales, initialInvoices, batches, role = 'St
   };
 
   const totalSales = sales.reduce((sum, s) => sum + s.totalAmount, 0);
-  const avgSale = sales.length > 0 ? Math.round(totalSales / sales.length) : 0;
+  const _avgSale = sales.length > 0 ? Math.round(totalSales / sales.length) : 0;
 
   return (
     <div className="space-y-6 font-sans">

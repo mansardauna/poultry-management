@@ -12,9 +12,6 @@ import {
   Building2, 
   Bot, 
   Code2, 
-  Check, 
-  Cpu, 
-  Terminal, 
   FileJson,
   Zap
 } from 'lucide-react';
@@ -38,9 +35,8 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
   const [apiKeys, setApiKeys] = useState<any[]>(initialApiKeys);
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyWebhook, setNewKeyWebhook] = useState('');
-  const [keyScope, setKeyScope] = useState('read:analytics,write:sales,ai:parse');
+  const [keyScope] = useState('read:analytics,write:sales,ai:parse');
   const [activeCodeTab, setActiveCodeTab] = useState<'curl' | 'python' | 'js'>('curl');
-  const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null);
 
   const activeKeySample = apiKeys.length > 0 ? apiKeys[0].secretKey : 'pfms_live_sk_example_key_77a9b';
 
@@ -94,8 +90,6 @@ export function ApiKeysClient({ tier, apiKeys: initialApiKeys = [] }: ApiKeysCli
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label} ${t('Copied to clipboard')}!`);
-    setCopiedEndpoint(label);
-    setTimeout(() => setCopiedEndpoint(null), 2000);
   };
 
   if (!isEnterprise) {

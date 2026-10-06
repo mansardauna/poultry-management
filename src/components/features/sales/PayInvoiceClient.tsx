@@ -11,13 +11,10 @@ import {
   CreditCard, 
   Building2, 
   Copy, 
-  ArrowRight, 
   Banknote, 
   ShieldCheck, 
   Printer, 
-  Clock, 
-  RefreshCw,
-  Wallet,
+  Wallet, 
   Settings2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -43,7 +40,7 @@ export function PayInvoiceClient({
   accountName, 
   farmName, 
   farmEmail,
-  isPaidPlan = true
+  isPaidPlan: _isPaidPlan = true
 }: PayInvoiceClientProps) {
   const [status, setStatus] = useState(invoice.status || 'Unpaid');
   const [isProcessing, setIsProcessing] = useState(false);

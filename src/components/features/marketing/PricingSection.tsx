@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Zap, X } from 'lucide-react';
+import { CheckCircle2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '../LanguageContext';
 

@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface FeatureGuardProps {

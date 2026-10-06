@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Wheat, Sparkles, Building2, Palette, ArrowRightLeft, Award } from 'lucide-react';
+import { Wheat, Building2, Palette, ArrowRightLeft, Award } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/features/LanguageContext';

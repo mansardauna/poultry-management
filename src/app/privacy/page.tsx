@@ -1,7 +1,5 @@
 'use strict';
 
-import Link from 'next/link';
-
 import { LandingNav } from '@/components/layout/LandingNav';
 import { LandingFooter } from '@/components/layout/LandingFooter';
 

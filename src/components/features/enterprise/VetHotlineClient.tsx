@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { PhoneCall, Plus, Sparkles, Building2, Palette, ArrowRightLeft, Layers } from 'lucide-react';
+import { PhoneCall, Plus, Building2, Palette, ArrowRightLeft, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/features/LanguageContext';
@@ -22,7 +22,7 @@ export function VetHotlineClient({ tier, consultants: initialConsultants = [] }:
   const [openVetModal, setOpenVetModal] = useState(false);
   const [ticketType, setTicketType] = useState('Emergency Outbreak Alert');
   const [ticketNotes, setTicketNotes] = useState('');
-  const [ticketPhone, setTicketPhone] = useState('+234 800-POULTRY-VET');
+  const [ticketPhone] = useState('+234 800-POULTRY-VET');
 
   const handleCreateVetTicket = async () => {
     try {

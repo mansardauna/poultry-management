@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Palette, Sparkles, Building2, CheckCircle2, Globe, FileText, Upload, ArrowRightLeft, Award, Layers } from 'lucide-react';
+import { Palette, Sparkles, Building2, ArrowRightLeft, Award, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useWhiteLabel } from '../WhiteLabelContext';

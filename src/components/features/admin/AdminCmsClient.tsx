@@ -9,8 +9,6 @@ import {
   RefreshCw, 
   Layers, 
   Building2, 
-  BarChart3, 
-  HelpCircle,
   Lock,
   CreditCard,
   Mail,
@@ -22,29 +20,21 @@ import {
   ShieldCheck,
   Plus,
   Trash2,
-  Mic,
   CheckCircle2,
-  Video,
   Sparkles,
-  FileSpreadsheet,
   UserPlus,
   LogIn,
   ExternalLink,
   X,
   ChevronRight,
   Activity,
-  Users,
   Upload,
   Bot,
   Cpu,
-  TrendingUp,
-  UserCheck,
-  ArrowUpRight
+  TrendingUp
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
-  AreaChart, 
-  Area, 
   BarChart, 
   Bar, 
   LineChart, 
@@ -187,7 +177,7 @@ export interface SaasPlanConfig {
 export function AdminCmsClient({ 
   initialPlans, 
   currentUserEmail,
-  userRole = 'SuperAdmin',
+  userRole: _userRole = 'SuperAdmin',
   allSubscriptions = [],
   allHistory = [],
   allOrgs = []
@@ -338,7 +328,7 @@ export function AdminCmsClient({
   const handleResetLogo = async () => {
     try {
       const res = await fetch('/api/admin/upload-logo', { method: 'DELETE' });
-      const data = await res.json();
+      await res.json();
       if (res.ok) {
         setLogoUrl('/icon.png');
         toast.success(t('Brand logo reset to default icon'));
@@ -867,13 +857,13 @@ export function AdminCmsClient({
   const totalRevenue = allHistory.reduce((sum, h) => sum + Number(h.amount || 0), 0);
   const activeProCount = allOrgs.filter(o => o.subscriptionTier === 'pro').length;
   const activeEnterpriseCount = allOrgs.filter(o => o.subscriptionTier === 'enterprise' || o.subscriptionTier === 'entrepreneur').length;
-  const activeFreeCount = Math.max(0, allOrgs.length - activeProCount - activeEnterpriseCount);
+  const _activeFreeCount = Math.max(0, allOrgs.length - activeProCount - activeEnterpriseCount);
   const activePaidSubsCount = allSubscriptions.filter(s => s.status === 'active' || s.status === 'trialing').length || (activeProCount + activeEnterpriseCount);
 
   const proPlan = plans.find(p => p.id === 'pro');
   const enterprisePlan = plans.find(p => p.id === 'enterprise');
   const currentMonthlyMrr = (activeProCount * (proPlan?.priceMonthly || 15000)) + (activeEnterpriseCount * (enterprisePlan?.priceMonthly || 45000));
-  const arpu = allOrgs.length > 0 ? Math.round((totalRevenue > 0 ? totalRevenue : currentMonthlyMrr) / allOrgs.length) : 0;
+  const _arpu = allOrgs.length > 0 ? Math.round((totalRevenue > 0 ? totalRevenue : currentMonthlyMrr) / allOrgs.length) : 0;
 
   const businessPerformanceData = useMemo(() => {
     const months: { 

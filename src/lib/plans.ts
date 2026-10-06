@@ -4,8 +4,7 @@ import { supabase as serviceRoleClient } from '@/lib/supabase';
 import { getPublicBranding } from '@/lib/branding';
 import { 
   BASE_USD_PLANS, 
-  adaptPlansToCurrency, 
-  getCurrencyInfo 
+  adaptPlansToCurrency 
 } from '@/lib/currency';
 
 export const DEFAULT_PLANS = BASE_USD_PLANS;

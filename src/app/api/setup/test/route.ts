@@ -1,7 +1,6 @@
 'use strict';
 
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { Client } from 'pg';
 import mysql from 'mysql2/promise';
