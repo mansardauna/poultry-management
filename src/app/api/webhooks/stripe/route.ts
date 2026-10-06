@@ -10,23 +10,21 @@ export async function POST(req: Request) {
 
   const stripe = new Stripe(stripeSecretKey);
   const body = await req.text();
-  const signature = req.headers.get('stripe-signature') as string;
+  const signature = req.headers.get('stripe-signature');
+  if (!signature) {
+    return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 });
+  }
+
+  if (!webhookSecret || webhookSecret === 'whsec_placeholder' || webhookSecret.includes('placeholder')) {
+    return NextResponse.json({ error: 'Stripe webhook secret is not configured' }, { status: 500 });
+  }
 
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
-    // If webhook secret is a placeholder or unconfigured in dev/testing, allow parsed body
-    if (webhookSecret === 'whsec_placeholder' || !webhookSecret) {
-      try {
-        event = JSON.parse(body);
-      } catch {
-        return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
-      }
-    } else {
-      return NextResponse.json({ error: `Webhook Error: ${(err as Error).message}` }, { status: 400 });
-    }
+    return NextResponse.json({ error: `Webhook Error: ${(err as Error).message}` }, { status: 400 });
   }
 
   // Handle the event

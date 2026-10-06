@@ -3,6 +3,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabase as serviceRoleClient } from '@/lib/supabase';
+import { getGatewaysConfig } from '@/lib/gateways';
 
 /**
  * Paystack Webhook Handler
@@ -13,14 +14,23 @@ export async function POST(request: Request) {
     const bodyText = await request.text();
     const signature = request.headers.get('x-paystack-signature');
 
-    const secretKey = process.env.PAYSTACK_SECRET_KEY || 'sk_test_placeholder';
+    if (!signature) {
+      return NextResponse.json({ error: 'Missing x-paystack-signature header' }, { status: 400 });
+    }
 
-    // Verify HMAC SHA512 signature if Paystack secret is configured
-    if (secretKey && !secretKey.includes('placeholder')) {
-      const hash = crypto.createHmac('sha512', secretKey).update(bodyText).digest('hex');
-      if (hash !== signature) {
-        return NextResponse.json({ error: 'Invalid Paystack signature' }, { status: 400 });
-      }
+    const gateways = await getGatewaysConfig();
+    const secretKey = gateways.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY;
+
+    if (!secretKey || secretKey.includes('placeholder')) {
+      return NextResponse.json({ error: 'Paystack secret key is not configured' }, { status: 500 });
+    }
+
+    const expectedHash = crypto.createHmac('sha512', secretKey).update(bodyText).digest('hex');
+    const sigBuf = Buffer.from(signature);
+    const hashBuf = Buffer.from(expectedHash);
+
+    if (sigBuf.length !== hashBuf.length || !crypto.timingSafeEqual(sigBuf, hashBuf)) {
+      return NextResponse.json({ error: 'Invalid Paystack signature' }, { status: 401 });
     }
 
     const event = JSON.parse(bodyText);
