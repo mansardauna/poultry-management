@@ -221,7 +221,7 @@ export function AdminCmsClient({
   allHistory?: Record<string, unknown>[];
   allOrgs?: TenantOrg[];
 }) {
-  const { formatNumber, formatCurrency, t } = useLanguage();
+  const { formatNumber, formatCurrency, formatCompactCurrency, t } = useLanguage();
   const { confirm } = useConfirm();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1697,7 +1697,14 @@ export function AdminCmsClient({
                   {/* Pricing Inputs */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">{t("Monthly")} ({currencySymbol})</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[11px] font-bold text-slate-600">{t("Monthly")} ({currencySymbol})</label>
+                        {plan.priceMonthly >= 1000 && (
+                          <span className="text-[10px] font-bold font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                            ≈ {formatCompactCurrency(plan.priceMonthly, currencySymbol)}
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="number"
                         value={plan.priceMonthly}
@@ -1706,7 +1713,14 @@ export function AdminCmsClient({
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">{t("Annual")} ({currencySymbol})</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[11px] font-bold text-slate-600">{t("Annual")} ({currencySymbol})</label>
+                        {plan.priceAnnual >= 1000 && (
+                          <span className="text-[10px] font-bold font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                            ≈ {formatCompactCurrency(plan.priceAnnual, currencySymbol)}
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="number"
                         value={plan.priceAnnual}
@@ -2363,7 +2377,7 @@ export function AdminCmsClient({
                     >
                       {plans.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name} — {p.priceMonthly === 0 ? t('Free') : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`}
+                          {p.name} — {p.priceMonthly === 0 ? t('Free') : `${formatCompactCurrency(p.priceMonthly, currencySymbol)}/mo`}
                         </option>
                       ))}
                     </select>
@@ -2470,7 +2484,7 @@ export function AdminCmsClient({
                         >
                           {plans.map((p) => (
                             <option key={p.id} value={p.id}>
-                              {p.name} ({p.priceMonthly === 0 ? t('Free') : `${formatCurrency(p.priceMonthly, currencySymbol)}/mo`})
+                              {p.name} ({p.priceMonthly === 0 ? t('Free') : `${formatCompactCurrency(p.priceMonthly, currencySymbol)}/mo`})
                             </option>
                           ))}
                         </select>

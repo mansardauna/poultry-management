@@ -262,3 +262,42 @@ export function adaptPlansToCurrency(
     };
   });
 }
+
+/**
+ * Formats a number with compact notation (e.g. 1.5K, 2.3M, 4.1B) to prevent overflow in UI.
+ */
+export function formatCompactNumber(value: number | string, maxDecimals: number = 1): string {
+  const num = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]+/g, ''));
+  if (isNaN(num) || !Number.isFinite(num)) return String(value ?? '');
+
+  const abs = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+
+  if (abs >= 1_000_000_000) {
+    const formatted = (abs / 1_000_000_000).toFixed(maxDecimals).replace(/\.0+$/, '');
+    return `${sign}${formatted}B`;
+  }
+  if (abs >= 1_000_000) {
+    const formatted = (abs / 1_000_000).toFixed(maxDecimals).replace(/\.0+$/, '');
+    return `${sign}${formatted}M`;
+  }
+  if (abs >= 1_000) {
+    const formatted = (abs / 1_000).toFixed(maxDecimals).replace(/\.0+$/, '');
+    return `${sign}${formatted}K`;
+  }
+
+  // Small values: keep up to maxDecimals if fractional, else whole
+  return Number.isInteger(num) ? num.toString() : num.toFixed(maxDecimals).replace(/\.?0+$/, '');
+}
+
+/**
+ * Formats a currency amount using compact notation (e.g. $15K, ₦1.5M, $2.4B).
+ */
+export function formatCompactCurrency(
+  amount: number | string,
+  symbol: string = '$',
+  maxDecimals: number = 1
+): string {
+  const compact = formatCompactNumber(amount, maxDecimals);
+  return `${symbol}${compact}`;
+}

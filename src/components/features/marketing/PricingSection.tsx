@@ -89,7 +89,7 @@ const DEFAULT_PLANS: SaasPlan[] = [
 export function PricingSection() {
   const router = useRouter();
   const [plans, setPlans] = useState<SaasPlan[]>(DEFAULT_PLANS);
-  const { t, formatCurrency } = useLanguage();
+  const { t, formatCompactCurrency } = useLanguage();
 
   useEffect(() => {
     fetch('/api/plans', { cache: 'no-store' })
@@ -144,8 +144,11 @@ export function PricingSection() {
                   </p>
 
                   <div className="mb-6">
-                    <span className={`text-4xl md:text-5xl font-extrabold ${isFeatured ? 'text-white' : 'text-slate-900'}`}>
-                      {formatCurrency(plan.priceMonthly, plan.currencySymbol)}
+                    <span 
+                      className={`text-4xl md:text-5xl font-extrabold ${isFeatured ? 'text-white' : 'text-slate-900'}`}
+                      title={plan.priceMonthly ? `${plan.currencySymbol || '$'}${plan.priceMonthly.toLocaleString()}` : undefined}
+                    >
+                      {formatCompactCurrency(plan.priceMonthly, plan.currencySymbol)}
                     </span>
                     <span className={isFeatured ? 'text-slate-400 text-sm' : 'text-slate-500 text-sm'}>/{t("mo", "mo")}</span>
                   </div>

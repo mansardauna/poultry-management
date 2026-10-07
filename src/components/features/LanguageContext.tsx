@@ -16,6 +16,7 @@ import { yoDict } from '@/lib/i18n/locales/yo';
 import { igDict } from '@/lib/i18n/locales/ig';
 import { haDict } from '@/lib/i18n/locales/ha';
 import { GLOBAL_PHRASES } from '@/lib/i18n/phrases';
+import { formatCompactNumber as libFormatCompactNumber, formatCompactCurrency as libFormatCompactCurrency } from '@/lib/currency';
 
 export type { Language, TranslationDict, SupportedLanguageInfo };
 export { SUPPORTED_LANGUAGES };
@@ -46,6 +47,8 @@ export interface LanguageContextType {
   formatNumber: (value: number | string, options?: Intl.NumberFormatOptions) => string;
   formatDate: (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => string;
   formatCurrency: (amount: number | string, currencySymbol?: string) => string;
+  formatCompactNumber: (value: number | string, maxDecimals?: number) => string;
+  formatCompactCurrency: (amount: number | string, currencySymbol?: string, maxDecimals?: number) => string;
   t: (term: string, fallback?: string) => string;
   supportedLanguages: SupportedLanguageInfo[];
 }
@@ -182,6 +185,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return `${sym}${formattedNum}`;
   }, [currencySymbol, formatNumber]);
 
+  const formatCompactNumber = useCallback((value: number | string, maxDecimals?: number) => {
+    return libFormatCompactNumber(value, maxDecimals);
+  }, []);
+
+  const formatCompactCurrency = useCallback((amount: number | string, customSymbol?: string, maxDecimals?: number) => {
+    const sym = (customSymbol !== undefined && customSymbol !== null && customSymbol !== '') ? customSymbol : currencySymbol;
+    return libFormatCompactCurrency(amount, sym, maxDecimals);
+  }, [currencySymbol]);
+
   const t = useCallback((term: string, fallback?: string): string => {
     if (!term) return fallback || '';
     
@@ -221,6 +233,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       formatNumber,
       formatDate,
       formatCurrency,
+      formatCompactNumber,
+      formatCompactCurrency,
       t,
       supportedLanguages: SUPPORTED_LANGUAGES
     }}>

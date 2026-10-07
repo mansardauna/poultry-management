@@ -1,7 +1,8 @@
-﻿import test, { describe } from 'node:test';
+import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { rateLimit, getClientIp } from '../src/lib/rateLimit';
 import { isSimulatedReference, simulatedPaymentsAllowed, resolveOfflineDecision, canModifyWorkspaceInvoice, validatePaystackVerification, storedReferenceFor, isDuplicateKeyError } from '../src/lib/invoicePaymentPolicy';
+import { formatCompactNumber, formatCompactCurrency } from '../src/lib/currency';
 
 describe('Security & Rate Limiting Suite', () => {
   test('rateLimit permits requests within threshold', () => {
@@ -209,3 +210,26 @@ describe('Invoice Settlement Security Policy Suite', () => {
     assert.equal(isDuplicateKeyError(new Error('boom')), false);
   });
 });
+
+describe('Compact Number and Currency Formatting Suite', () => {
+  test('formats numbers with K, M, B abbreviations', () => {
+    assert.equal(formatCompactNumber(0), '0');
+    assert.equal(formatCompactNumber(500), '500');
+    assert.equal(formatCompactNumber(1000), '1K');
+    assert.equal(formatCompactNumber(1500), '1.5K');
+    assert.equal(formatCompactNumber(15000), '15K');
+    assert.equal(formatCompactNumber(150000), '150K');
+    assert.equal(formatCompactNumber(1000000), '1M');
+    assert.equal(formatCompactNumber(2500000), '2.5M');
+    assert.equal(formatCompactNumber(1000000000), '1B');
+    assert.equal(formatCompactNumber(3200000000), '3.2B');
+  });
+
+  test('formats currency amounts with symbols and compact notation', () => {
+    assert.equal(formatCompactCurrency(15000, '$'), '$15K');
+    assert.equal(formatCompactCurrency(1500000, '₦'), '₦1.5M');
+    assert.equal(formatCompactCurrency(5000000000, '€'), '€5B');
+    assert.equal(formatCompactCurrency(45, '$'), '$45');
+  });
+});
+

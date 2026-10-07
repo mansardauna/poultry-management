@@ -5,6 +5,7 @@ import React from 'react';
 import { Card, CardContent } from './Card';
 import { LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/components/features/LanguageContext';
+import { formatCompactNumber } from '@/lib/currency';
 
 export interface StatCardProps {
   /** Title label for the KPI card (e.g. "Active Flock", "Egg Yield") */
@@ -80,8 +81,38 @@ const COLOR_MAPS = {
 };
 
 /**
+ * Helper to compact large numbers inside StatCard values, including values with currency symbols (e.g. "₦1,500,000", "$250,000", 12500, "15,000 Birds").
+ */
+function formatStatCardValue(val: string | number): string {
+  if (typeof val === 'number') {
+    return formatCompactNumber(val, 1);
+  }
+  if (typeof val !== 'string') return String(val ?? '');
+
+  const str = val.trim();
+  // Match prefix symbol (e.g. $, ₦, €, £, CA$, etc.) followed by numbers/commas/decimals and optional suffix unit
+  const match = str.match(/^([^0-9.-]*?)([-+]?[0-9,]+(?:\.[0-9]+)?)(.*)$/);
+  if (!match) return str;
+
+  const prefix = match[1];
+  const numRaw = match[2].replace(/,/g, '');
+  const suffix = match[3];
+
+  const parsed = Number(numRaw);
+  if (isNaN(parsed) || !Number.isFinite(parsed)) return str;
+
+  // Only compact if >= 1000 or <= -1000
+  if (Math.abs(parsed) >= 1000) {
+    const compacted = formatCompactNumber(parsed, 1);
+    return `${prefix}${compacted}${suffix}`;
+  }
+
+  return str;
+}
+
+/**
  * Reusable Telemetry KPI StatCard component for displaying farm analytics and operational metrics.
- * Automatically translates card titles and subtexts.
+ * Automatically translates card titles and subtexts, and formats large numbers with K, M, B to prevent overflow.
  */
 export function StatCard({
   title,
@@ -96,6 +127,9 @@ export function StatCard({
 }: StatCardProps) {
   const { t } = useLanguage();
   const styles = COLOR_MAPS[color] || COLOR_MAPS.indigo;
+
+  const displayValue = formatStatCardValue(value);
+  const fullValueString = String(value);
 
   return (
     <div 
@@ -113,19 +147,24 @@ export function StatCard({
       } ${className}`}>
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0 flex-1 pr-2">
               <div className="flex items-center gap-1.5">
-                <p className="text-xs font-semibold text-slate-500 group-hover:text-indigo-600 transition-colors">{t(title)}</p>
+                <p className="text-xs font-semibold text-slate-500 group-hover:text-indigo-600 transition-colors truncate">{t(title)}</p>
                 {onClick && (
                   <span className="text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                 )}
               </div>
               <div className="flex items-baseline gap-2">
-                <p className={`text-2xl sm:text-3xl font-semibold tracking-tight ${styles.valueText}`}>{value}</p>
+                <p 
+                  className={`text-2xl sm:text-3xl font-semibold tracking-tight ${styles.valueText} truncate`}
+                  title={fullValueString !== displayValue ? fullValueString : undefined}
+                >
+                  {displayValue}
+                </p>
                 {badge}
               </div>
               {subtext && (
-                <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1`}>
+                <p className={`text-xs font-medium ${styles.subtext} flex items-center gap-1 mt-1 truncate`}>
                   {t(subtext)}
                 </p>
               )}

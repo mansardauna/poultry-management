@@ -26,7 +26,7 @@ import { LandingFooter } from '@/components/layout/LandingFooter';
 import { useLanguage } from '@/components/features/LanguageContext';
 
 export default function PricingPage() {
-  const { t, formatCurrency } = useLanguage();
+  const { t, formatCompactCurrency } = useLanguage();
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [plans, setPlans] = useState<SaasPlan[]>([]);
@@ -135,8 +135,11 @@ export default function PricingPage() {
                   <p className={`text-xs min-h-[36px] ${isFeatured ? 'text-indigo-200' : 'text-slate-500'}`}>{t(plan.description, plan.description)}</p>
                   
                   <div className="my-6">
-                    <span className={`text-4xl font-extrabold ${isFeatured ? 'text-white' : 'text-slate-900'}`}>
-                      {formatCurrency(price, plan.currencySymbol)}
+                    <span 
+                      className={`text-4xl font-extrabold ${isFeatured ? 'text-white' : 'text-slate-900'}`}
+                      title={price ? `${plan.currencySymbol || '$'}${price.toLocaleString()}` : undefined}
+                    >
+                      {formatCompactCurrency(price, plan.currencySymbol)}
                     </span>
                     <span className={`text-xs font-medium ${isFeatured ? 'text-indigo-300' : 'text-slate-500'}`}>/{t("mo", "month")}</span>
                   </div>

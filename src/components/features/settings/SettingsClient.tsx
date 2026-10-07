@@ -91,7 +91,7 @@ interface SettingsClientProps {
  * @param props - Component properties.
  */
 export function SettingsClient({ initialSettings, systemSettings, initialPaymentMethods = [], initialSubscriptionHistory = [], workspaceId, role = 'Admin', currentUser }: SettingsClientProps) {
-  const { t, formatCurrency } = useLanguage();
+  const { t, formatCurrency, formatCompactCurrency } = useLanguage();
   const { confirm } = useConfirm();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -666,7 +666,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-extrabold text-slate-900">
-                      {formatCurrency(
+                      {formatCompactCurrency(
                         activePlan 
                           ? (isAnnual ? Math.round(activePlan.priceAnnual / 12) : activePlan.priceMonthly) 
                           : (currentTier === 'enterprise' ? (enterprisePlan?.priceMonthly || 45) : currentTier === 'pro' ? (proPlan?.priceMonthly || 15) : 0),
@@ -1232,7 +1232,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
                 <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 mb-6">
                   <div className="text-3xl font-extrabold text-white">
-                    {formatCurrency(isAnnual ? (proPlan?.priceAnnual || 144) : (proPlan?.priceMonthly || 15), planCurrency)}
+                    {formatCompactCurrency(isAnnual ? (proPlan?.priceAnnual || 144) : (proPlan?.priceMonthly || 15), planCurrency)}
                   </div>
                   <div className="text-[10px] text-indigo-300 font-bold mt-0.5">
                     {isAnnual ? t('Billed Annually') : t('Billed Monthly')}
@@ -1287,7 +1287,7 @@ export function SettingsClient({ initialSettings, systemSettings, initialPayment
 
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
                   <div className="text-3xl font-extrabold text-slate-900">
-                    {formatCurrency(isAnnual ? (enterprisePlan?.priceAnnual || 432) : (enterprisePlan?.priceMonthly || 45), planCurrency)}
+                    {formatCompactCurrency(isAnnual ? (enterprisePlan?.priceAnnual || 432) : (enterprisePlan?.priceMonthly || 45), planCurrency)}
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold mt-0.5">
                     {isAnnual ? t('Billed Annually') : t('Billed Monthly')}

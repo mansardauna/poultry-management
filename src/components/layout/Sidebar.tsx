@@ -177,7 +177,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { workspaces, activeWorkspace, isLoading, setActiveWorkspace, updateWorkspace, deleteWorkspace } = useWorkspace();
-  const { texts, t, formatCurrency } = useLanguage();
+  const { texts, t, formatCompactCurrency } = useLanguage();
   const { confirm } = useConfirm();
   const whiteLabel = useWhiteLabel();
 
@@ -667,7 +667,7 @@ export function Sidebar({ role = 'Admin', tier = 'free' }: SidebarProps) {
               }}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 rounded-md transition-colors shadow-sm cursor-pointer"
             >
-              {t("Upgrade to Pro")} ({formatCurrency(proPrice, proCurrency)}/{t("mo")})
+              {t("Upgrade to Pro")} ({formatCompactCurrency(proPrice, proCurrency)}/{t("mo")})
             </button>
           </div>
         )}
