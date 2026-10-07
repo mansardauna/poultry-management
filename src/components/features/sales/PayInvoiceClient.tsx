@@ -84,10 +84,16 @@ export function PayInvoiceClient({
           amount: invoice.totalAmount * 100, // Kobo
           currency: 'NGN',
           ref: `PAY-${Date.now()}-${invoice.id.slice(-4)}`,
+          metadata: { invoiceId: invoice.id },
           callback: async (response: Record<string, unknown>) => {
             const ref = (typeof response.reference === 'string' ? response.reference : '') || 
-                        (typeof response.trxref === 'string' ? response.trxref : '') || 
-                        `PAY-${Date.now()}`;
+                        (typeof response.trxref === 'string' ? response.trxref : '');
+            if (!ref) {
+              toast.dismiss('pay-toast');
+              toast.error('Payment gateway did not return a transaction reference.');
+              setIsProcessing(false);
+              return;
+            }
             await verifyInvoicePayment(ref);
           },
           onClose: () => {
@@ -137,7 +143,8 @@ export function PayInvoiceClient({
 
       toast.dismiss('pay-toast');
       if (res.ok) {
-        setStatus('Paid');
+        const data = await res.json().catch(() => null);
+        setStatus(data?.status || 'Paid');
         toast.success('Payment verified successfully! Invoice updated to Paid.');
       } else {
         const data = await res.json();
@@ -165,7 +172,7 @@ export function PayInvoiceClient({
           invoiceId: invoice.id,
           action: 'offlinePayment',
           paymentMethod: `${offlineMethod} (Offline)`,
-          reference: offlineRef || `OFFLINE-${Date.now().toString().slice(-6)}`
+          reference: offlineRef.trim()
         })
       });
 
@@ -209,7 +216,8 @@ export function PayInvoiceClient({
         setStatus(selectedStatusOverride);
         toast.success(`Invoice status updated to ${selectedStatusOverride}!`);
       } else {
-        toast.error('Failed to update status');
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || 'Failed to update status');
       }
     } catch {
       toast.dismiss('status-toast');
@@ -544,7 +552,7 @@ export function PayInvoiceClient({
                       fullWidth
                       icon={<CheckCircle2 size={17} />}
                     >
-                      {isSubmittingOffline ? 'Recording Settlement...' : 'I Have Paid Offline — Mark as Paid'}
+                      {isSubmittingOffline ? 'Submitting...' : 'I Have Paid Offline — Submit for Verification'}
                     </Button>
                   </form>
                 </div>

@@ -4,10 +4,22 @@ import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 import { getGatewaysConfig } from '@/lib/gateways';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import {
+  isSimulatedReference,
+  simulatedPaymentsAllowed,
+  resolveOfflineDecision,
+  canModifyWorkspaceInvoice,
+  validatePaystackVerification,
+  storedReferenceFor,
+  isDuplicateKeyError,
+  type PaystackVerifyPayload,
+} from '@/lib/invoicePaymentPolicy';
+
+const OFFLINE_METHODS = ['Bank Transfer', 'Cash', 'POS'];
 
 export async function POST(request: Request) {
   try {
-    // 0. Rate limiting: 30 requests per 15 minutes per IP
+    // 0. Rate limiting: per IP, plus per invoice (IP headers can be spoofed/rotated)
     const clientIp = getClientIp(request);
     const rateCheck = rateLimit(`pay_invoice:${clientIp}`, { windowMs: 15 * 60 * 1000, max: 30 });
     if (!rateCheck.success) {
@@ -17,10 +29,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const { invoiceId, reference, action, paymentMethod, newStatus } = await request.json();
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    const invoiceId = typeof body.invoiceId === 'string' ? body.invoiceId.trim() : '';
+    const reference = typeof body.reference === 'string' ? body.reference : '';
+    const action = typeof body.action === 'string' ? body.action : undefined;
+    const paymentMethod = typeof body.paymentMethod === 'string' ? body.paymentMethod.slice(0, 100) : undefined;
+    const newStatus = body.newStatus;
 
     if (!invoiceId) {
       return NextResponse.json({ error: 'Missing invoiceId' }, { status: 400 });
+    }
+
+    const invoiceRate = rateLimit(`pay_invoice_id:${invoiceId}`, { windowMs: 15 * 60 * 1000, max: 20 });
+    if (!invoiceRate.success) {
+      return NextResponse.json(
+        { error: `Too many payment attempts for this invoice. Please try again in ${invoiceRate.retryAfterSeconds} seconds.` },
+        { status: 429, headers: { 'Retry-After': String(invoiceRate.retryAfterSeconds) } }
+      );
     }
 
     // 1. Fetch the invoice
@@ -35,90 +65,64 @@ export async function POST(request: Request) {
     }
 
     // Determine if updating status directly or recording offline payment
-    const isOffline = action === 'offlinePayment' || Boolean(
-      (paymentMethod && paymentMethod.includes('Offline')) || 
-      paymentMethod === 'Bank Transfer' || 
-      paymentMethod === 'Cash' || 
-      paymentMethod === 'POS'
+    const isOffline = action === 'offlinePayment' || action === 'updateStatus' || Boolean(
+      paymentMethod && (paymentMethod.includes('Offline') || OFFLINE_METHODS.includes(paymentMethod))
     );
-    let targetStatus = newStatus || 'Paid';
     const methodUsed = paymentMethod || (isOffline ? 'Bank Transfer (Offline)' : 'Paystack / Online Gateway');
-    const finalRef = (reference || '').trim();
-
-    if (invoice.status === 'Paid' && targetStatus === 'Paid') {
-      return NextResponse.json({ success: true, message: 'Already marked as paid', status: 'Paid' });
-    }
-
-    let isVerified = false;
-    interface PaystackVerifyRes { status?: boolean; data?: { status?: string }; }
-    let verifyData: PaystackVerifyRes | null = null;
-
-    // Check for payment reference replay if a reference was supplied
-    if (finalRef) {
-      const { data: existingRef } = await supabase
-        .from('invoices')
-        .select('id, customerName, totalAmount')
-        .eq('paymentReference', finalRef)
-        .neq('id', invoiceId)
-        .maybeSingle();
-
-      if (existingRef) {
-        return NextResponse.json(
-          { error: `Payment reference '${finalRef}' has already been consumed by another invoice (#${existingRef.id}). Reused references are rejected.` },
-          { status: 409 }
-        );
-      }
-    }
+    const finalRef = reference.trim().slice(0, 200);
+    let targetStatus = 'Paid';
 
     if (isOffline) {
       // Offline payments and manual status reconciliation
       const authUser = await getAuthUser();
-      if (!authUser) {
-        if (action === 'updateStatus') {
-          return NextResponse.json(
-            { error: 'Unauthorized: Manual status changes require staff or admin authentication.' },
-            { status: 401 }
-          );
-        }
-        // Public customer submitting offline payment proof:
-        // Strictly transition to 'Pending Verification'. Public callers can NEVER self-settle as Paid!
-        targetStatus = 'Pending Verification';
-        isVerified = true;
-      } else {
-        // Authenticated user: verify workspace permissions
-        const isSuper = authUser.role === 'SuperAdmin';
-        const userWs = authUser.workspaceId?.replace(/"/g, '').trim();
-        const invWs = (invoice.workspaceId || '').replace(/"/g, '').trim();
-
-        if (!isSuper && userWs && invWs && userWs !== invWs && !userWs.includes(invWs) && !invWs.includes(userWs)) {
-          return NextResponse.json(
-            { error: 'Forbidden: You do not have permissions to modify invoices for this workspace.' },
-            { status: 403 }
-          );
-        }
-
-        targetStatus = newStatus || 'Paid';
-        isVerified = true;
+      if (authUser && !canModifyWorkspaceInvoice(authUser, invoice.workspaceId)) {
+        return NextResponse.json(
+          { error: 'Forbidden: You do not have permissions to modify invoices for this workspace.' },
+          { status: 403 }
+        );
       }
+      // Public customers can NEVER self-settle: they only move the invoice to 'Pending Verification'.
+      const decision = resolveOfflineDecision({
+        isAuthenticated: Boolean(authUser),
+        action,
+        requestedStatus: newStatus,
+        currentStatus: invoice.status,
+      });
+      if (!decision.ok) {
+        return NextResponse.json({ error: decision.error }, { status: decision.status });
+      }
+      targetStatus = decision.targetStatus;
     } else {
+      if (invoice.status === 'Paid') {
+        return NextResponse.json({ success: true, message: 'Already marked as paid', status: 'Paid' });
+      }
+
       // Online payment MUST supply a valid transaction reference
       if (!finalRef) {
         return NextResponse.json({ error: 'Missing transaction reference for online payment verification' }, { status: 400 });
       }
 
-      // Check simulated test references (strictly prohibited in production)
-      const isSimulatedRef = finalRef.startsWith('PAY-SIM-') || 
-                             finalRef.startsWith('PAY-DIRECT-') || 
-                             finalRef.startsWith('DEMO-');
+      // Reject reuse of a gateway reference already consumed by another invoice
+      const { data: existingRef } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('paymentReference', finalRef)
+        .neq('id', invoiceId)
+        .maybeSingle();
+      if (existingRef) {
+        return NextResponse.json(
+          { error: 'This payment reference has already been used. Reused references are rejected.' },
+          { status: 409 }
+        );
+      }
 
-      if (isSimulatedRef) {
-        if (process.env.NODE_ENV === 'production') {
-          return NextResponse.json(
-            { error: 'Simulated payment references are prohibited in production.' },
-            { status: 400 }
-          );
+      const devBypass = simulatedPaymentsAllowed();
+
+      if (isSimulatedReference(finalRef)) {
+        // Server-owned gate: requires non-production NODE_ENV AND ALLOW_SIMULATED_PAYMENTS=true
+        if (!devBypass) {
+          return NextResponse.json({ error: 'Simulated payment references are not accepted.' }, { status: 400 });
         }
-        isVerified = true;
       } else {
         // Fetch the farm's secret key or fallback to platform key
         const { data: systemSettings } = await supabase
@@ -132,51 +136,78 @@ export async function POST(request: Request) {
         const secretKey = systemSettings?.paystackSecretKey || gwConfig.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY;
 
         if (!secretKey || secretKey.includes('placeholder')) {
-          if (process.env.NODE_ENV !== 'production') {
-            isVerified = true;
-          } else {
+          if (!devBypass) {
             return NextResponse.json({ error: 'Payment gateway configuration is missing or inactive for this farm.' }, { status: 500 });
           }
         } else {
+          let verifyData: PaystackVerifyPayload | null = null;
           try {
             const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(finalRef)}`, {
-              headers: { Authorization: `Bearer ${secretKey}` }
+              headers: { Authorization: `Bearer ${secretKey}` },
+              cache: 'no-store',
             });
-            verifyData = (await verifyRes.json()) as PaystackVerifyRes;
-            if (verifyData?.status === true && verifyData?.data?.status === 'success') {
-              isVerified = true;
-            }
+            verifyData = (await verifyRes.json()) as PaystackVerifyPayload;
           } catch (_err) {
             return NextResponse.json({ error: 'Failed to communicate with payment gateway' }, { status: 502 });
+          }
+          const check = validatePaystackVerification(verifyData, {
+            reference: finalRef,
+            invoiceId: String(invoice.id),
+            totalAmount: Number(invoice.totalAmount || 0),
+          });
+          if (!check.ok) {
+            return NextResponse.json({ error: check.error }, { status: 400 });
           }
         }
       }
     }
 
-    if (!isVerified) {
-      return NextResponse.json({ error: 'Payment verification failed with gateway. Transaction was not confirmed.' }, { status: 400 });
+    if (invoice.status === 'Paid' && targetStatus === 'Paid') {
+      return NextResponse.json({ success: true, message: 'Already marked as paid', status: 'Paid' });
     }
 
-    // 4. Verify total amount paid matches invoice amount if gateway returned payload
-    const verifyObj = verifyData?.data as { amount?: number } | undefined;
-    if (verifyObj?.amount && verifyObj.amount < Number(invoice.totalAmount || 0) * 100) {
-      return NextResponse.json({ error: 'Insufficient payment amount detected' }, { status: 400 });
-    }
-
-    // 5. Update invoice status and store paymentReference
+    // 5. Update invoice status and store paymentReference (UNIQUE index enforces single use)
+    const storedRef = storedReferenceFor(isOffline, String(invoice.id), finalRef);
     const targetSaleId = invoice.saleId || ('sa' + Date.now().toString().slice(-8));
     const updatePayload: Record<string, unknown> = { status: targetStatus };
-    if (finalRef) {
-      updatePayload.paymentReference = finalRef;
+    if (storedRef) {
+      updatePayload.paymentReference = storedRef;
     }
     if (!invoice.saleId) {
       updatePayload.saleId = targetSaleId;
     }
-    await supabase
-      .from('invoices')
-      .update(updatePayload)
-      .eq('id', invoiceId);
-      
+    let updateError: unknown = null;
+    try {
+      const res = await supabase.from('invoices').update(updatePayload).eq('id', invoiceId);
+      updateError = res?.error ?? null;
+    } catch (err) {
+      updateError = err;
+    }
+    if (updateError) {
+      if (isDuplicateKeyError(updateError)) {
+        return NextResponse.json(
+          { error: 'This payment reference has already been used. Reused references are rejected.' },
+          { status: 409 }
+        );
+      }
+      return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 });
+    }
+
+    // Defence in depth for databases that predate the UNIQUE index: detect a concurrent winner.
+    if (storedRef && !isOffline) {
+      const { data: refOwners } = await supabase.from('invoices').select('id').eq('paymentReference', storedRef);
+      if (Array.isArray(refOwners) && refOwners.length > 1) {
+        await supabase
+          .from('invoices')
+          .update({ status: invoice.status || 'Unpaid', paymentReference: invoice.paymentReference ?? null })
+          .eq('id', invoiceId);
+        return NextResponse.json(
+          { error: 'This payment reference has already been used. Reused references are rejected.' },
+          { status: 409 }
+        );
+      }
+    }
+
     // 6. If Paid, ensure completed sale record exists in sales table
     if (targetStatus === 'Paid') {
       const { data: existingSales } = await supabase.from('sales').select('id').eq('id', targetSaleId).eq('workspaceId', invoice.workspaceId);
@@ -220,7 +251,9 @@ export async function POST(request: Request) {
 
     const resMessage = targetStatus === 'Paid'
       ? 'Payment verified and recorded successfully.'
-      : 'Payment details submitted. Awaiting verification by farm management.';
+      : targetStatus === 'Pending Verification'
+        ? 'Payment details submitted. Awaiting verification by farm management.'
+        : `Invoice status updated to ${targetStatus}.`;
 
     return NextResponse.json({ success: true, status: targetStatus, paymentMethod: methodUsed, message: resMessage });
   } catch (_error) {

@@ -1,6 +1,7 @@
-import test, { describe } from 'node:test';
+﻿import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { rateLimit, getClientIp } from '../src/lib/rateLimit';
+import { isSimulatedReference, simulatedPaymentsAllowed, resolveOfflineDecision, canModifyWorkspaceInvoice, validatePaystackVerification, storedReferenceFor, isDuplicateKeyError } from '../src/lib/invoicePaymentPolicy';
 
 describe('Security & Rate Limiting Suite', () => {
   test('rateLimit permits requests within threshold', () => {
@@ -141,53 +142,70 @@ describe('Proxy Prefix Security Boundary Suite', () => {
 });
 
 describe('Invoice Settlement Security Policy Suite', () => {
-  function evaluateSimulatedReference(ref: string, env: string): { allowed: boolean; error?: string } {
-    const isSimulated = ref.startsWith('PAY-SIM-') || ref.startsWith('PAY-DIRECT-') || ref.startsWith('DEMO-');
-    if (isSimulated && env === 'production') {
-      return { allowed: false, error: 'Simulated payment references are prohibited in production.' };
-    }
-    return { allowed: true };
-  }
+  test('simulated payments require non-production NODE_ENV AND explicit opt-in', () => {
+    assert.equal(isSimulatedReference('PAY-SIM-999888'), true);
+    assert.equal(isSimulatedReference('PAY-DIRECT-1'), true);
+    assert.equal(isSimulatedReference('DEMO-1'), true);
+    assert.equal(isSimulatedReference('PAY-1700000000-ab12'), false);
 
-  function resolveOfflineTargetStatus(isAuthUser: boolean, newStatus?: string): string {
-    if (!isAuthUser) {
-      // Unauthenticated public customer submissions ALWAYS transition to 'Pending Verification'
-      return 'Pending Verification';
-    }
-    return newStatus || 'Paid';
-  }
-
-  test('prohibits simulated test references in production environment', () => {
-    const r1 = evaluateSimulatedReference('PAY-SIM-999888', 'production');
-    assert.equal(r1.allowed, false);
-    assert.ok(r1.error?.includes('prohibited in production'));
-
-    const r2 = evaluateSimulatedReference('PAY-DIRECT-123456', 'production');
-    assert.equal(r2.allowed, false);
-
-    const r3 = evaluateSimulatedReference('DEMO-443322', 'production');
-    assert.equal(r3.allowed, false);
+    assert.equal(simulatedPaymentsAllowed({ NODE_ENV: 'production', ALLOW_SIMULATED_PAYMENTS: 'true' }), false);
+    assert.equal(simulatedPaymentsAllowed({ ALLOW_SIMULATED_PAYMENTS: 'true' }), false); // unset NODE_ENV => prod
+    assert.equal(simulatedPaymentsAllowed({ NODE_ENV: 'development' }), false); // no opt-in
+    assert.equal(simulatedPaymentsAllowed({ NODE_ENV: 'development', ALLOW_SIMULATED_PAYMENTS: 'true' }), true);
+    assert.equal(simulatedPaymentsAllowed({ NODE_ENV: 'test', ALLOW_SIMULATED_PAYMENTS: 'true' }), true);
   });
 
-  test('permits simulated test references in development and test environments', () => {
-    const rDev = evaluateSimulatedReference('PAY-SIM-999888', 'development');
-    assert.equal(rDev.allowed, true);
+  test('public offline submissions can never settle an invoice', () => {
+    const d1 = resolveOfflineDecision({ isAuthenticated: false, action: 'offlinePayment', requestedStatus: 'Paid' });
+    assert.deepEqual(d1, { ok: true, targetStatus: 'Pending Verification' });
 
-    const rTest = evaluateSimulatedReference('PAY-SIM-999888', 'test');
-    assert.equal(rTest.allowed, true);
+    const d2 = resolveOfflineDecision({ isAuthenticated: false, action: 'offlinePayment' });
+    assert.deepEqual(d2, { ok: true, targetStatus: 'Pending Verification' });
+
+    const d3 = resolveOfflineDecision({ isAuthenticated: false, action: 'updateStatus', requestedStatus: 'Paid' });
+    assert.equal(d3.ok, false);
+    if (!d3.ok) assert.equal(d3.status, 401);
+
+    // Cannot downgrade an already-paid invoice
+    const d4 = resolveOfflineDecision({ isAuthenticated: false, action: 'offlinePayment', currentStatus: 'Paid' });
+    assert.equal(d4.ok, false);
   });
 
-  test('enforces Pending Verification status on unauthenticated offline customer submissions', () => {
-    // Customer attempts to self-settle as Paid
-    const statusCustomer1 = resolveOfflineTargetStatus(false, 'Paid');
-    assert.equal(statusCustomer1, 'Pending Verification');
+  test('authenticated staff may only set whitelisted statuses', () => {
+    assert.deepEqual(resolveOfflineDecision({ isAuthenticated: true }), { ok: true, targetStatus: 'Paid' });
+    assert.deepEqual(resolveOfflineDecision({ isAuthenticated: true, requestedStatus: 'Unpaid' }), { ok: true, targetStatus: 'Unpaid' });
+    assert.equal(resolveOfflineDecision({ isAuthenticated: true, requestedStatus: 'Hacked' }).ok, false);
+    assert.equal(resolveOfflineDecision({ isAuthenticated: true, requestedStatus: { $ne: 1 } }).ok, false);
+  });
 
-    // Customer submits without status
-    const statusCustomer2 = resolveOfflineTargetStatus(false);
-    assert.equal(statusCustomer2, 'Pending Verification');
+  test('workspace ownership check is strict', () => {
+    assert.equal(canModifyWorkspaceInvoice({ role: 'Admin', workspaceId: 'ws1' }, 'ws1'), true);
+    assert.equal(canModifyWorkspaceInvoice({ role: 'Admin', workspaceId: 'ws1' }, 'ws12'), false);
+    assert.equal(canModifyWorkspaceInvoice({ role: 'Admin' }, 'ws1'), false);
+    assert.equal(canModifyWorkspaceInvoice({ role: 'Staff', workspaceId: '' }, ''), false);
+    assert.equal(canModifyWorkspaceInvoice({ role: 'SuperAdmin' }, 'ws1'), true);
+  });
 
-    // Authenticated staff/admin confirms as Paid
-    const statusAdmin = resolveOfflineTargetStatus(true, 'Paid');
-    assert.equal(statusAdmin, 'Paid');
+  test('Paystack verification is bound to invoice, reference and amount', () => {
+    const expected = { reference: 'PAY-1', invoiceId: 'inv1', totalAmount: 1000 };
+    const good = { status: true, data: { status: 'success', reference: 'PAY-1', amount: 100000, metadata: { invoiceId: 'inv1' } } };
+    assert.equal(validatePaystackVerification(good, expected).ok, true);
+    assert.equal(validatePaystackVerification({ ...good, data: { ...good.data, metadata: '{"invoiceId":"inv1"}' } }, expected).ok, true);
+    assert.equal(validatePaystackVerification({ ...good, data: { ...good.data, status: 'failed' } }, expected).ok, false);
+    assert.equal(validatePaystackVerification({ ...good, data: { ...good.data, amount: 99999 } }, expected).ok, false);
+    assert.equal(validatePaystackVerification({ ...good, data: { ...good.data, amount: undefined } }, expected).ok, false);
+    assert.equal(validatePaystackVerification({ ...good, data: { ...good.data, metadata: { invoiceId: 'other' } } }, expected).ok, false);
+    assert.equal(validatePaystackVerification({ ...good, data: { ...good.data, metadata: '' } }, expected).ok, false);
+    assert.equal(validatePaystackVerification({ ...good, data: { ...good.data, reference: 'PAY-2' } }, expected).ok, false);
+    assert.equal(validatePaystackVerification(null, expected).ok, false);
+  });
+
+  test('offline notes are namespaced per invoice; duplicate-key errors detected', () => {
+    assert.equal(storedReferenceFor(true, 'inv1', 'Cash with driver'), 'OFFLINE:inv1:Cash with driver');
+    assert.equal(storedReferenceFor(false, 'inv1', 'PAY-1'), 'PAY-1');
+    assert.equal(storedReferenceFor(true, 'inv1', ''), null);
+    assert.equal(isDuplicateKeyError({ code: 'ER_DUP_ENTRY' }), true);
+    assert.equal(isDuplicateKeyError({ code: '23505' }), true);
+    assert.equal(isDuplicateKeyError(new Error('boom')), false);
   });
 });
