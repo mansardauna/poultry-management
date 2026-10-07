@@ -272,66 +272,62 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
   };
   const currentLocale = localeMap[language] || 'en-US';
 
-  // Sub-period options derived dynamically from records and current date
-  const availableYears = useMemo(() => {
-    const yearsSet = new Set<number>([currentYear]);
-    [...normalizedEggs, ...normalizedSales].forEach((item) => {
-      if (item.date) {
-        const y = new Date(item.date).getFullYear();
-        if (!isNaN(y) && y > 2000) yearsSet.add(y);
-      }
-    });
-    return Array.from(yearsSet).sort((a, b) => b - a);
-  }, [currentYear, normalizedEggs, normalizedSales]);
+  // Sub-period options derived dynamically from records and current date.
+  // Plain computations: inputs are rebuilt every render, so useMemo would never hit its cache.
+  const recordsWithDates = [...normalizedEggs, ...normalizedSales];
 
-  const monthOptions = useMemo(() => {
-    const monthsMap = new Map<string, string>();
-    for (let m = 0; m < 12; m++) {
-      const d = new Date(currentYear, m, 1);
-      const key = `${currentYear}-${String(m + 1).padStart(2, '0')}`;
-      monthsMap.set(key, d.toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' }));
+  const availableYearsSet = new Set<number>([currentYear]);
+  recordsWithDates.forEach((item) => {
+    if (item.date) {
+      const y = new Date(item.date).getFullYear();
+      if (!isNaN(y) && y > 2000) availableYearsSet.add(y);
     }
-    [...normalizedEggs, ...normalizedSales].forEach((item) => {
-      if (item.date) {
-        const parts = item.date.split('-');
-        if (parts.length >= 2) {
-          const y = parts[0];
-          const m = parts[1];
-          const key = `${y}-${m.padStart(2, '0')}`;
-          if (!monthsMap.has(key)) {
-            const d = new Date(Number(y), Number(m) - 1, 1);
-            if (!isNaN(d.getTime())) {
-              monthsMap.set(key, d.toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' }));
-            }
+  });
+  const availableYears = Array.from(availableYearsSet).sort((a, b) => b - a);
+
+  const monthsMap = new Map<string, string>();
+  for (let m = 0; m < 12; m++) {
+    const d = new Date(currentYear, m, 1);
+    const key = `${currentYear}-${String(m + 1).padStart(2, '0')}`;
+    monthsMap.set(key, d.toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' }));
+  }
+  recordsWithDates.forEach((item) => {
+    if (item.date) {
+      const parts = item.date.split('-');
+      if (parts.length >= 2) {
+        const y = parts[0];
+        const m = parts[1];
+        const key = `${y}-${m.padStart(2, '0')}`;
+        if (!monthsMap.has(key)) {
+          const d = new Date(Number(y), Number(m) - 1, 1);
+          if (!isNaN(d.getTime())) {
+            monthsMap.set(key, d.toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' }));
           }
         }
       }
-    });
-    return Array.from(monthsMap.entries())
-      .map(([value, label]) => ({ value, label }))
-      .sort((a, b) => b.value.localeCompare(a.value));
-  }, [currentYear, currentLocale, normalizedEggs, normalizedSales]);
-
-  const weekOptions = useMemo(() => {
-    const list = [];
-    for (let offset = 0; offset < 8; offset++) {
-      const endD = new Date(today);
-      endD.setDate(today.getDate() - offset * 7);
-      const startD = new Date(endD);
-      startD.setDate(endD.getDate() - 6);
-      
-      const startStr = startD.toLocaleDateString(currentLocale, { month: 'short', day: 'numeric' });
-      const endStr = endD.toLocaleDateString(currentLocale, { month: 'short', day: 'numeric' });
-      
-      let label = `${startStr} – ${endStr}`;
-      if (offset === 0) label = `${t("Current Week")} (${startStr} – ${endStr})`;
-      else if (offset === 1) label = `${t("Last Week")} (${startStr} – ${endStr})`;
-      else label = `${offset} ${t("wks ago")} (${startStr} – ${endStr})`;
-      
-      list.push({ offset, label });
     }
-    return list;
-  }, [today, currentLocale, t]);
+  });
+  const monthOptions = Array.from(monthsMap.entries())
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => b.value.localeCompare(a.value));
+
+  const weekOptions: { offset: number; label: string }[] = [];
+  for (let offset = 0; offset < 8; offset++) {
+    const endD = new Date(today);
+    endD.setDate(today.getDate() - offset * 7);
+    const startD = new Date(endD);
+    startD.setDate(endD.getDate() - 6);
+    
+    const startStr = startD.toLocaleDateString(currentLocale, { month: 'short', day: 'numeric' });
+    const endStr = endD.toLocaleDateString(currentLocale, { month: 'short', day: 'numeric' });
+    
+    let label = `${startStr} – ${endStr}`;
+    if (offset === 0) label = `${t("Current Week")} (${startStr} – ${endStr})`;
+    else if (offset === 1) label = `${t("Last Week")} (${startStr} – ${endStr})`;
+    else label = `${offset} ${t("wks ago")} (${startStr} – ${endStr})`;
+    
+    weekOptions.push({ offset, label });
+  }
 
   const renderChartPeriodSelector = () => {
     if (!isChartsUnlocked) return null;

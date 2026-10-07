@@ -173,7 +173,38 @@ CREATE POLICY "Allow authenticated read/write on farmPens" ON public."farmPens" 
 
 ---
 
-## 9. Idempotent Migration Script for Existing Installations
+## 9. Create `invoices` Table (Payment Replay Protection)
+Stores customer invoices and the gateway/offline reference used to settle them. The **UNIQUE** index on `"paymentReference"` guarantees a payment reference can settle at most one invoice — this closes the replay/race window on the public `/api/pay-invoice` endpoint (the API returns `409` on a duplicate). PostgreSQL allows multiple `NULL`s in a unique index, so unpaid invoices are unaffected.
+
+```sql
+CREATE TABLE IF NOT EXISTS public.invoices (
+    id VARCHAR(64) PRIMARY KEY,
+    "workspaceId" VARCHAR(64) NOT NULL,
+    date VARCHAR(64),
+    "saleId" VARCHAR(64),
+    "customerName" VARCHAR(255),
+    items TEXT,
+    quantity INTEGER DEFAULT 1,
+    "unitPrice" NUMERIC(12, 2) DEFAULT 0,
+    "totalAmount" NUMERIC(12, 2) DEFAULT 0,
+    status VARCHAR(64) DEFAULT 'Unpaid',
+    "paymentReference" VARCHAR(255) DEFAULT NULL,
+    "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_workspaceId ON public.invoices ("workspaceId");
+CREATE UNIQUE INDEX IF NOT EXISTS uq_invoices_paymentReference ON public.invoices ("paymentReference");
+
+-- Enable RLS and permissions (Server-side service-role client enforces tenant isolation)
+ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read/write on invoices" ON public.invoices FOR ALL USING (true);
+```
+
+> **Important:** Set `SUPABASE_SERVICE_ROLE_KEY` in production. Invoice settlement relies on server-side checks; never expose this table to direct browser queries.
+
+---
+
+## 10. Idempotent Migration Script for Existing Installations
 Run these queries if you have an existing Supabase or PostgreSQL database to safely add new columns without dropping data:
 
 ```sql
@@ -190,15 +221,45 @@ ALTER TABLE public."alertSettings" ADD COLUMN IF NOT EXISTS "notifyWhatsapp" BOO
 ALTER TABLE public."farmPens" ADD COLUMN IF NOT EXISTS "temperatureLogs" JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE public."farmPens" ADD COLUMN IF NOT EXISTS "tempMin" NUMERIC(5, 2) DEFAULT NULL;
 ALTER TABLE public."farmPens" ADD COLUMN IF NOT EXISTS "tempMax" NUMERIC(5, 2) DEFAULT NULL;
+
+-- Invoice payment replay protection (see section 9):
+ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS "paymentReference" VARCHAR(255) DEFAULT NULL;
 ```
+
+**Unique `paymentReference` index on existing data** — creating the index fails if duplicates already exist, so check first:
+
+```sql
+-- 1) Must return zero rows before continuing:
+SELECT "paymentReference", COUNT(*)
+FROM public.invoices
+WHERE "paymentReference" IS NOT NULL
+GROUP BY "paymentReference"
+HAVING COUNT(*) > 1;
+
+-- 2) If any rows are returned, clear the reference on the duplicates you have verified
+--    were NOT the genuine settlement, e.g.:
+-- UPDATE public.invoices SET "paymentReference" = NULL WHERE id IN ('<duplicate-invoice-id>');
+
+-- 3) Create the unique index:
+CREATE UNIQUE INDEX IF NOT EXISTS uq_invoices_paymentReference ON public.invoices ("paymentReference");
+```
+
+> **Note:** In the Supabase SQL editor, run step 3 as shown (it runs in a transaction). On large self-hosted tables you may instead use `CREATE UNIQUE INDEX CONCURRENTLY ...` outside a transaction to avoid locking writes. MySQL installs should use `db/migrations/2026-10-07_invoices_payment_reference_unique.sql`.
 
 ---
 
-## 10. Workspace Isolation & Security Architecture Note
+## 11. Workspace Isolation & Security Architecture Note
 All database access in the application is executed via the server-side Supabase client (`serviceRoleClient` / server database adapter). Direct frontend/browser queries to Supabase are never permitted. Multi-tenant workspace isolation is strictly enforced at the API route and server proxy layer via `getWorkspaceId()` and `applyWorkspaceFilter(query, workspaceId)`. If you wish to enable end-user direct Supabase client queries in the future, replace the permissive RLS policies with JWT-based claim policies (e.g. `USING (auth.jwt() ->> 'workspace_id' = "workspaceId")`).
 
 ---
 
-## 11. Verify Setup
-After running the SQL queries above in Supabase, your settings, multi-payment gateways, saved card methods, subscription history, housing pens, and Enterprise multi-farm tables will be fully active!
+## 12. Verify Setup
+After running the SQL queries above in Supabase, your settings, multi-payment gateways, saved card methods, subscription history, housing pens, invoices (with payment replay protection), and Enterprise multi-farm tables will be fully active!
+
+Quick check that replay protection is in place:
+
+```sql
+SELECT indexname, indexdef FROM pg_indexes
+WHERE tablename = 'invoices' AND indexname = 'uq_invoices_paymentreference';
+```
 
