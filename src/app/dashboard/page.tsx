@@ -32,7 +32,7 @@ import type {
 } from "@/data/types";
 
 /** Exported function default */
-export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
+export default async function Home(_props: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const headersList = await headers().catch(() => null);
   const cookieStore = await cookies();
   const headerRole = headersList?.get('x-user-role');
@@ -55,33 +55,29 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const featureSwitches = await getFeatureSwitchesForTier(tier);
 
   const workspaceId = await getWorkspaceId();
-  const searchParams = await props.searchParams;
-  const page = parseInt((searchParams?.page as string) || '1');
-  const offset = (page - 1) * 50;
-
   const rawResults = (await Promise.all([
-    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('feeds').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('feedLogs').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('cushionAudits').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('procurePipeline').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('cctvLogs').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId).range(offset, offset + 49),
+    applyWorkspaceFilter(supabase.from('batches').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('eggs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('feeds').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('feedLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('staff').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('sales').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('expenses').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('cushionAudits').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('maturationLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('procurePipeline').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('cctvLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('invoices').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('tasks').select('*'), workspaceId),
     applyWorkspaceFilter(supabase.from('alertSettings').select('*'), workspaceId).limit(1),
-    applyWorkspaceFilter(supabase.from('alertLogs').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('mortalityLogs').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('medicationTemplates').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('medicationSchedules').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('equipment').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId).range(offset, offset + 49),
-    applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId).range(offset, offset + 49)
+    applyWorkspaceFilter(supabase.from('alertLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('mortalityLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('medicationTemplates').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('medicationSchedules').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('payrollLogs').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('equipment').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('contacts').select('*'), workspaceId),
+    applyWorkspaceFilter(supabase.from('farmPens').select('*'), workspaceId)
   ])) as unknown as Array<{ data: Record<string, unknown>[] | null }>;
 
   const [

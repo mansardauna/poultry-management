@@ -1,7 +1,7 @@
 'use strict';
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -124,6 +124,16 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
   const [quickSpoiltEggs, setQuickSpoiltEggs] = useState('0');
   const [isSubmittingEgg, setIsSubmittingEgg] = useState(false);
 
+  // Dynamic Chart Sub-Period State (replacing "Live Data" badge)
+  const currentYear = today.getFullYear();
+  const currentMonthIdx = today.getMonth();
+  const defaultMonthStr = `${currentYear}-${String(currentMonthIdx + 1).padStart(2, '0')}`;
+
+  const [selectedChartMonth, setSelectedChartMonth] = useState<string>(defaultMonthStr);
+  const [selectedChartYear, setSelectedChartYear] = useState<number>(currentYear);
+  const [selectedChartWeekOffset, setSelectedChartWeekOffset] = useState<number>(0);
+  const [selectedAllSpan, setSelectedAllSpan] = useState<string>('all');
+
   const handleQuickLogEgg = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickGoodEggs) return;
@@ -197,6 +207,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
 
   const normalizedEggs = (data.eggs || []).map((e) => ({
     ...e,
+    date: String(e.date || '').split('T')[0].trim(),
     goodEggs: Number(e.goodEggs) || 0,
     brokenEggs: Number(e.brokenEggs) || 0,
     spoiltEggs: Number(e.spoiltEggs) || 0,
@@ -204,12 +215,14 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
 
   const normalizedSales = (data.sales || []).map((s) => ({
     ...s,
+    date: String(s.date || '').split('T')[0].trim(),
     quantity: Number(s.quantity) || 0,
     totalAmount: Number(s.totalAmount) || 0,
   }));
 
   const normalizedExpenses = (data.expenses || []).map((e) => ({
     ...e,
+    date: String(e.date || '').split('T')[0].trim(),
     amount: Number(e.amount) || 0,
   }));
 
@@ -226,15 +239,29 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
 
   const normalizedMortality = (data.mortalityLogs || []).map((m) => ({
     ...m,
+    date: String(m.date || '').split('T')[0].trim(),
     count: Number(m.count) || 0,
   }));
 
   const totalChickens = normalizedBatches.reduce((sum, batch) => sum + batch.quantity - batch.mortalityCount, 0);
 
-  // Dynamic Egg Metrics
-  const chartData = [];
-  let currentYield = 0;
-  let previousYield = 0;
+  // Filtered subsets for KPIs according to active timeRange
+  const filteredExpensesForKPIs = timeRange === 'all' ? normalizedExpenses : normalizedExpenses.filter(e => new Date(e.date) >= cutoffCurrent);
+  const filteredSalesForKPIs = timeRange === 'all' ? normalizedSales : normalizedSales.filter(s => new Date(s.date) >= cutoffCurrent);
+  const filteredBatchesForKPIs = timeRange === 'all' ? normalizedBatches : normalizedBatches.filter(b => new Date(b.purchaseDate) >= cutoffCurrent);
+  const filteredEggsForKPIs = timeRange === 'all' ? normalizedEggs : normalizedEggs.filter(e => new Date(e.date) >= cutoffCurrent);
+
+  const currentYield = filteredEggsForKPIs.reduce((sum, e) => sum + e.goodEggs, 0);
+  const previousYield = timeRange === 'all'
+    ? 0
+    : normalizedEggs
+        .filter(e => new Date(e.date) >= cutoffPrevious && new Date(e.date) < cutoffCurrent)
+        .reduce((sum, e) => sum + e.goodEggs, 0);
+
+  const netGrowth = currentYield - previousYield;
+  const netGrowthPercent = previousYield > 0 
+    ? ((netGrowth / previousYield) * 100).toFixed(1) 
+    : (currentYield > 0 ? '100.0' : '0.0');
 
   const localeMap: Record<string, string> = {
     en: 'en-US',
@@ -245,10 +272,144 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
   };
   const currentLocale = localeMap[language] || 'en-US';
 
-  if (timeRange === 'weekly' || timeRange === 'all') {
+  // Sub-period options derived dynamically from records and current date
+  const availableYears = useMemo(() => {
+    const yearsSet = new Set<number>([currentYear]);
+    [...normalizedEggs, ...normalizedSales].forEach((item) => {
+      if (item.date) {
+        const y = new Date(item.date).getFullYear();
+        if (!isNaN(y) && y > 2000) yearsSet.add(y);
+      }
+    });
+    return Array.from(yearsSet).sort((a, b) => b - a);
+  }, [currentYear, normalizedEggs, normalizedSales]);
+
+  const monthOptions = useMemo(() => {
+    const monthsMap = new Map<string, string>();
+    for (let m = 0; m < 12; m++) {
+      const d = new Date(currentYear, m, 1);
+      const key = `${currentYear}-${String(m + 1).padStart(2, '0')}`;
+      monthsMap.set(key, d.toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' }));
+    }
+    [...normalizedEggs, ...normalizedSales].forEach((item) => {
+      if (item.date) {
+        const parts = item.date.split('-');
+        if (parts.length >= 2) {
+          const y = parts[0];
+          const m = parts[1];
+          const key = `${y}-${m.padStart(2, '0')}`;
+          if (!monthsMap.has(key)) {
+            const d = new Date(Number(y), Number(m) - 1, 1);
+            if (!isNaN(d.getTime())) {
+              monthsMap.set(key, d.toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' }));
+            }
+          }
+        }
+      }
+    });
+    return Array.from(monthsMap.entries())
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => b.value.localeCompare(a.value));
+  }, [currentYear, currentLocale, normalizedEggs, normalizedSales]);
+
+  const weekOptions = useMemo(() => {
+    const list = [];
+    for (let offset = 0; offset < 8; offset++) {
+      const endD = new Date(today);
+      endD.setDate(today.getDate() - offset * 7);
+      const startD = new Date(endD);
+      startD.setDate(endD.getDate() - 6);
+      
+      const startStr = startD.toLocaleDateString(currentLocale, { month: 'short', day: 'numeric' });
+      const endStr = endD.toLocaleDateString(currentLocale, { month: 'short', day: 'numeric' });
+      
+      let label = `${startStr} – ${endStr}`;
+      if (offset === 0) label = `${t("Current Week")} (${startStr} – ${endStr})`;
+      else if (offset === 1) label = `${t("Last Week")} (${startStr} – ${endStr})`;
+      else label = `${offset} ${t("wks ago")} (${startStr} – ${endStr})`;
+      
+      list.push({ offset, label });
+    }
+    return list;
+  }, [today, currentLocale, t]);
+
+  const renderChartPeriodSelector = () => {
+    if (!isChartsUnlocked) return null;
+
+    if (timeRange === 'monthly') {
+      return (
+        <select
+          value={selectedChartMonth}
+          onChange={(e) => setSelectedChartMonth(e.target.value)}
+          aria-label={t("Select Month")}
+          className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-[11px] font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-600/15 focus:border-indigo-600 shadow-sm cursor-pointer transition-all"
+        >
+          {monthOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    if (timeRange === 'yearly') {
+      return (
+        <select
+          value={selectedChartYear}
+          onChange={(e) => setSelectedChartYear(Number(e.target.value))}
+          aria-label={t("Select Year")}
+          className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-[11px] font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-600/15 focus:border-indigo-600 shadow-sm cursor-pointer transition-all"
+        >
+          {availableYears.map((yr) => (
+            <option key={yr} value={yr}>
+              {yr}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    if (timeRange === 'weekly') {
+      return (
+        <select
+          value={selectedChartWeekOffset}
+          onChange={(e) => setSelectedChartWeekOffset(Number(e.target.value))}
+          aria-label={t("Select Week")}
+          className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-[11px] font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-600/15 focus:border-indigo-600 shadow-sm cursor-pointer transition-all"
+        >
+          {weekOptions.map((w) => (
+            <option key={w.offset} value={w.offset}>
+              {w.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    return (
+      <select
+        value={selectedAllSpan}
+        onChange={(e) => setSelectedAllSpan(e.target.value)}
+        aria-label={t("Select Time Span")}
+        className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-[11px] font-bold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-600/15 focus:border-indigo-600 shadow-sm cursor-pointer transition-all"
+      >
+        <option value="all">{t("All Recorded History")}</option>
+        <option value="30">{t("Past 30 Days")}</option>
+        <option value="14">{t("Past 14 Days")}</option>
+        <option value="7">{t("Past 7 Days")}</option>
+      </select>
+    );
+  };
+
+  // Dynamic Chart Telemetry
+  const chartData = [];
+
+  if (timeRange === 'weekly') {
+    const startOffsetDays = selectedChartWeekOffset * 7;
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
-      d.setDate(d.getDate() - i);
+      d.setDate(today.getDate() - (startOffsetDays + i));
       const dateStr = d.toISOString().split('T')[0];
       const eggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
       const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
@@ -256,24 +417,85 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
       const revenueThatDay = salesThatDay.reduce((sum, s) => sum + s.totalAmount, 0);
       const eggSalesThatDay = salesThatDay.filter(s => s.type === 'Eggs').reduce((sum, s) => sum + s.totalAmount, 0);
       chartData.push({
-        name: d.toLocaleDateString(currentLocale, { weekday: 'short' }),
+        name: d.toLocaleDateString(currentLocale, { weekday: 'short', day: 'numeric' }),
         Eggs: eggsThatDay,
         CrackedSpoilt: badEggsThatDay,
         Revenue: revenueThatDay,
         EggSales: eggSalesThatDay,
         Label: texts.dashboard.observed
       });
-      currentYield += eggsThatDay;
-    }
-    
-    for (let i = 13; i >= 7; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      previousYield += normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
     }
   } else if (timeRange === 'monthly') {
-    for (let i = 29; i >= 0; i--) {
+    const parts = selectedChartMonth.split('-');
+    const targetYear = parseInt(parts[0]) || currentYear;
+    const targetMonth = (parseInt(parts[1]) || (currentMonthIdx + 1)) - 1;
+    const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const d = new Date(targetYear, targetMonth, day);
+      const eggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
+      const badEggsThatDay = normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
+      const salesThatDay = normalizedSales.filter(s => s.date === dateStr);
+      const revenueThatDay = salesThatDay.reduce((sum, s) => sum + s.totalAmount, 0);
+      const eggSalesThatDay = salesThatDay.filter(s => s.type === 'Eggs').reduce((sum, s) => sum + s.totalAmount, 0);
+      chartData.push({
+        name: d.toLocaleDateString(currentLocale, { day: 'numeric', month: 'short' }),
+        Eggs: eggsThatDay,
+        CrackedSpoilt: badEggsThatDay,
+        Revenue: revenueThatDay,
+        EggSales: eggSalesThatDay,
+        Label: texts.dashboard.observed
+      });
+    }
+  } else if (timeRange === 'yearly') {
+    const targetYear = selectedChartYear || currentYear;
+    for (let month = 0; month < 12; month++) {
+      const d = new Date(targetYear, month, 1);
+      const eggsInMonth = normalizedEggs.filter(e => {
+        const ed = new Date(e.date);
+        return ed.getFullYear() === targetYear && ed.getMonth() === month;
+      }).reduce((sum, e) => sum + e.goodEggs, 0);
+
+      const badEggsInMonth = normalizedEggs.filter(e => {
+         const ed = new Date(e.date);
+         return ed.getFullYear() === targetYear && ed.getMonth() === month;
+      }).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
+
+      const salesInMonth = normalizedSales.filter(s => {
+         const sd = new Date(s.date);
+         return sd.getFullYear() === targetYear && sd.getMonth() === month;
+      });
+      const revenueInMonth = salesInMonth.reduce((sum, s) => sum + s.totalAmount, 0);
+      const eggSalesInMonth = salesInMonth.filter(s => s.type === 'Eggs').reduce((sum, s) => sum + s.totalAmount, 0);
+
+      chartData.push({
+        name: d.toLocaleDateString(currentLocale, { month: 'short' }),
+        Eggs: eggsInMonth,
+        CrackedSpoilt: badEggsInMonth,
+        Revenue: revenueInMonth,
+        EggSales: eggSalesInMonth,
+        Label: texts.dashboard.observed
+      });
+    }
+  } else {
+    // timeRange === 'all'
+    let daysSpan = 14;
+    if (selectedAllSpan === '7') {
+      daysSpan = 7;
+    } else if (selectedAllSpan === '14') {
+      daysSpan = 14;
+    } else if (selectedAllSpan === '30') {
+      daysSpan = 30;
+    } else {
+      const allRecordTimestamps = [...normalizedEggs, ...normalizedSales]
+        .map(x => new Date(x.date).getTime())
+        .filter(t => !isNaN(t));
+      const earliestTimestamp = allRecordTimestamps.length > 0 ? Math.min(...allRecordTimestamps) : today.getTime() - 13 * 86400000;
+      daysSpan = Math.min(30, Math.max(14, Math.ceil((today.getTime() - earliestTimestamp) / 86400000) + 1));
+    }
+
+    for (let i = daysSpan - 1; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
@@ -290,70 +512,8 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
         EggSales: eggSalesThatDay,
         Label: texts.dashboard.observed
       });
-      currentYield += eggsThatDay;
-    }
-    
-    for (let i = 59; i >= 30; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      previousYield += normalizedEggs.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.goodEggs, 0);
-    }
-  } else if (timeRange === 'yearly') {
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(today);
-      d.setMonth(d.getMonth() - i);
-      const year = d.getFullYear();
-      const month = d.getMonth();
-      const eggsInMonth = normalizedEggs.filter(e => {
-        const ed = new Date(e.date);
-        return ed.getFullYear() === year && ed.getMonth() === month;
-      }).reduce((sum, e) => sum + e.goodEggs, 0);
-
-      const badEggsInMonth = normalizedEggs.filter(e => {
-         const ed = new Date(e.date);
-         return ed.getFullYear() === year && ed.getMonth() === month;
-      }).reduce((sum, e) => sum + e.brokenEggs + e.spoiltEggs, 0);
-
-      const salesInMonth = normalizedSales.filter(s => {
-         const sd = new Date(s.date);
-         return sd.getFullYear() === year && sd.getMonth() === month;
-      });
-      const revenueInMonth = salesInMonth.reduce((sum, s) => sum + s.totalAmount, 0);
-      const eggSalesInMonth = salesInMonth.filter(s => s.type === 'Eggs').reduce((sum, s) => sum + s.totalAmount, 0);
-
-      chartData.push({
-        name: d.toLocaleDateString(currentLocale, { month: 'short' }),
-        Eggs: eggsInMonth,
-        CrackedSpoilt: badEggsInMonth,
-        Revenue: revenueInMonth,
-        EggSales: eggSalesInMonth,
-        Label: texts.dashboard.observed
-      });
-      currentYield += eggsInMonth;
-    }
-
-    for (let i = 23; i >= 12; i--) {
-      const d = new Date(today);
-      d.setMonth(d.getMonth() - i);
-      const year = d.getFullYear();
-      const month = d.getMonth();
-      previousYield += normalizedEggs.filter(e => {
-        const ed = new Date(e.date);
-        return ed.getFullYear() === year && ed.getMonth() === month;
-      }).reduce((sum, e) => sum + e.goodEggs, 0);
     }
   }
-
-  const netGrowth = currentYield - previousYield;
-  const netGrowthPercent = previousYield > 0 
-    ? ((netGrowth / previousYield) * 100).toFixed(1) 
-    : (currentYield > 0 ? '100.0' : '0.0');
-
-  // Break-Even Calculation (using filtered subsets)
-  const filteredExpensesForKPIs = timeRange === 'all' ? normalizedExpenses : normalizedExpenses.filter(e => new Date(e.date) >= cutoffCurrent);
-  const filteredSalesForKPIs = timeRange === 'all' ? normalizedSales : normalizedSales.filter(s => new Date(s.date) >= cutoffCurrent);
-  const filteredBatchesForKPIs = timeRange === 'all' ? normalizedBatches : normalizedBatches.filter(b => new Date(b.purchaseDate) >= cutoffCurrent);
 
   const totalExpenses = filteredExpensesForKPIs.reduce((sum, e) => sum + e.amount, 0);
   const costOfBirds = filteredBatchesForKPIs.reduce((sum, b) => sum + (b.quantity * (b.unitPurchasePrice || 0)), 0);
@@ -527,7 +687,11 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
         <StatCard
           title={timeRange === 'weekly' ? texts.dashboard.weeklyEggOutput : timeRange === 'monthly' ? texts.dashboard.monthlyEggOutput : timeRange === 'yearly' ? texts.dashboard.yearlyEggOutput : texts.dashboard.eggOutput}
           value={formatNumber(currentYield)}
-          subtext={`${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`}
+          subtext={
+            timeRange === 'all'
+              ? `${formatNumber(Math.round(currentYield / 30))} ${t("crates total across all flocks")}`
+              : `${netGrowth >= 0 ? '+' : ''}${netGrowthPercent}% vs prev period`
+          }
           color="amber"
           onClick={() => router.push('/dashboard/eggs')}
         />
@@ -578,11 +742,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
               <Egg size={18} className="text-amber-500" />
               {texts.dashboard.eggProductionVolumeChart}
             </CardTitle>
-            {isChartsUnlocked && (
-              <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
-                {t("Live Data")}
-              </span>
-            )}
+            {isChartsUnlocked && renderChartPeriodSelector()}
           </CardHeader>
           <CardContent className="pt-6 flex-1">
             {isFree ? (
@@ -639,11 +799,7 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
               <span className="text-[11px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded border border-emerald-200">
                 {formatCurrency(totalRevenue)}
               </span>
-              {isChartsUnlocked && (
-                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded font-mono">
-                  {t("Live Data")}
-                </span>
-              )}
+              {isChartsUnlocked && renderChartPeriodSelector()}
             </div>
           </CardHeader>
 
@@ -719,16 +875,20 @@ export function DashboardClient({ initialData, userRole = 'Admin', chartsEnabled
         <Card>
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-sm font-semibold text-slate-700">
-              {texts.dashboard.weeklyComparativeAnalytics}
+              {timeRange === 'monthly' ? t("Monthly Comparative Analytics") : timeRange === 'yearly' ? t("Yearly Comparative Analytics") : timeRange === 'all' ? t("All-Time Performance Analytics") : texts.dashboard.weeklyComparativeAnalytics}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-xs font-medium text-slate-500">{texts.dashboard.lastWeekYield}</span>
+              <span className="text-xs font-medium text-slate-500">
+                {timeRange === 'all' ? t("Historical Baseline Yield") : timeRange === 'monthly' ? t("Last Month Yield") : timeRange === 'yearly' ? t("Last Year Yield") : texts.dashboard.lastWeekYield}
+              </span>
               <span className="text-xs font-bold text-slate-900">{formatNumber(previousYield)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
-              <span className="text-xs font-medium text-slate-500">{texts.dashboard.currentWeekYield}</span>
+              <span className="text-xs font-medium text-slate-500">
+                {timeRange === 'all' ? t("Total Egg Output") : timeRange === 'monthly' ? t("Current Month Yield") : timeRange === 'yearly' ? t("Current Year Yield") : texts.dashboard.currentWeekYield}
+              </span>
               <span className="text-xs font-bold text-indigo-600">{formatNumber(currentYield)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-slate-100">
