@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/documentation/index.html',
+        destination: '/documentation',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withPWA(nextConfig);

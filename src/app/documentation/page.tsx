@@ -14,7 +14,6 @@ import {
   Egg, 
   Wheat, 
   DollarSign, 
-  Video, 
   FileText, 
   CheckCircle2,
   Sparkles
@@ -33,52 +32,58 @@ export default function DocumentationPage() {
     {
       id: 'staff',
       role: 'staff',
-      title: t("Staff Usage Guide"),
+      title: t("Staff Field Operations Guide"),
       badge: "Role Manual 01",
       badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
-      description: t("Step-by-step visual button click instructions for flock attendants, egg collectors, and feed loggers.", "Step-by-step visual instructions for flock attendants, egg collectors, and feed loggers."),
+      description: t("Step-by-step visual instructions for flock attendants, egg grading, feed distribution, mortality reporting, coop environmental inspection, and daily shift checklists.", "Step-by-step visual instructions for flock attendants, egg grading, feed distribution, mortality reporting, coop environmental inspection, and daily shift checklists."),
       htmlHref: "/documentation/usage-guide.html",
       icon: Users,
       iconColor: "text-amber-600 bg-amber-50",
       topics: [
-        { name: t("Egg Collection Logging", "Egg Collection Logging"), icon: Egg },
-        { name: t("Feed Stock Usage & Restock", "Feed Stock Usage & Restock"), icon: Wheat },
-        { name: t("Shift Checklist & Daily Tasks", "Shift Checklist & Daily Tasks"), icon: CheckCircle2 },
-        { name: t("Mortality & Health Incident Logs", "Mortality & Health Incident Logs"), icon: FileText }
+        { name: t("Daily Egg Collection & Grading", "Daily Egg Collection & Grading"), icon: Egg },
+        { name: t("Feed Distribution & Restock Logs", "Feed Distribution & Restock Logs"), icon: Wheat },
+        { name: t("Mortality & Health Incident Logs", "Mortality & Health Incident Logs"), icon: FileText },
+        { name: t("Coop Pen Climate & Hygiene Check", "Coop Pen Climate & Hygiene Check"), icon: CheckCircle2 },
+        { name: t("Morning & Evening Shift Checklist", "Morning & Evening Shift Checklist"), icon: CheckCircle2 },
+        { name: t("Instant Native Language Switcher", "Instant Native Language Switcher"), icon: Sparkles }
       ]
     },
     {
       id: 'admin',
       role: 'admin',
-      title: t("Admin Governance Guide"),
+      title: t("Farm Admin Governance Guide"),
       badge: "Role Manual 02",
       badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
-      description: t("Operational and commercial management manual covering flock batches, pen houses, sales invoicing, and financial accounting.", "Operational and commercial management manual covering flock batches, pen houses, sales invoicing, and financial accounting."),
+      description: t("Comprehensive operational and commercial manual covering flock batches, egg yields with sub-period selectors, low-stock feed alerts, public invoice links (/pay-invoice), financial accounting, and multi-branch enterprise fleet.", "Comprehensive operational and commercial manual covering flock batches, egg yields with sub-period selectors, low-stock feed alerts, public invoice links (/pay-invoice), financial accounting, and multi-branch enterprise fleet."),
       htmlHref: "/documentation/administration-guide.html",
       icon: ShieldCheck,
       iconColor: "text-indigo-600 bg-indigo-50",
       topics: [
         { name: t("Flock Batches & Pen Allocation", "Flock Batches & Pen Allocation"), icon: Layers },
-        { name: t("Sales Ledger & Paystack / Stripe Invoices", "Sales Ledger & Paystack / Stripe Invoices"), icon: DollarSign },
-        { name: t("Expense Categorization & Profit Analysis", "Expense Categorization & Profit Analysis"), icon: FileText },
-        { name: t("Staff Access Control & Attendance Roster", "Staff Access Control & Attendance Roster"), icon: Users }
+        { name: t("Egg Yields & Sub-Period Selectors", "Egg Yields & Sub-Period Selectors"), icon: Egg },
+        { name: t("Feed Inventory & Low-Stock Alerts", "Feed Inventory & Low-Stock Alerts"), icon: Wheat },
+        { name: t("Sales Ledger & Public Invoices (/pay-invoice)", "Sales Ledger & Public Invoices (/pay-invoice)"), icon: DollarSign },
+        { name: t("Financial Accounting & Net Profits", "Financial Accounting & Net Profits"), icon: FileText },
+        { name: t("Multi-Branch Enterprise Fleet", "Multi-Branch Enterprise Fleet"), icon: Layers }
       ]
     },
     {
       id: 'superadmin',
       role: 'superadmin',
-      title: t("Superadmin Setup Guide"),
+      title: t("Super Admin Platform Master Guide"),
       badge: "Master Manual 03",
       badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
-      description: t("Platform architecture, multi-tenant workspace isolation, payment gateway credentials, and SaaS subscription tiers.", "Platform architecture, multi-tenant workspace isolation, payment gateway credentials, and SaaS subscription tiers."),
+      description: t("Exhaustive master manual covering the /setup wizard, multi-tenant fleet administration, one-click tenant impersonation, payment gateways, multi-provider AI, SaaS pricing plans, and landing page CMS.", "Exhaustive master manual covering the /setup wizard, multi-tenant fleet administration, one-click tenant impersonation, payment gateways, multi-provider AI, SaaS pricing plans, and landing page CMS."),
       htmlHref: "/documentation/superadmin-setup-guide.html",
       icon: Server,
       iconColor: "text-purple-600 bg-purple-50",
       topics: [
-        { name: t("Multi-Tenant Isolation Architecture", "Multi-Tenant Isolation Architecture"), icon: Server },
-        { name: t("Paystack & Stripe API Gateway Setup", "Paystack & Stripe API Gateway Setup"), icon: DollarSign },
-        { name: t("Landing Page CMS & Announcements", "Landing Page CMS & Announcements"), icon: Sparkles },
-        { name: t("CCTV RTSP & AI Surveillance", "CCTV RTSP & AI Surveillance"), icon: Video }
+        { name: t("Setup Wizard & Database Ping Guard", "Setup Wizard & Database Ping Guard"), icon: Server },
+        { name: t("Tenant Organizations & Impersonation", "Tenant Organizations & Impersonation"), icon: Users },
+        { name: t("Paystack & Stripe API Gateways", "Paystack & Stripe API Gateways"), icon: DollarSign },
+        { name: t("Multi-Provider Global AI Assistant", "Multi-Provider Global AI Assistant"), icon: Sparkles },
+        { name: t("SaaS Plans & Dynamic Multi-Currency", "SaaS Plans & Dynamic Multi-Currency"), icon: DollarSign },
+        { name: t("Landing CMS, Whitelabel & Maintenance Mode", "Landing CMS, Whitelabel & Maintenance Mode"), icon: ShieldCheck }
       ]
     }
   ];
@@ -256,12 +261,12 @@ export default function DocumentationPage() {
               {t("Contact")}
             </Link>
             <a 
-              href="/documentation/index.html"
+              href="/documentation/superadmin-setup-guide.html"
               target="_blank"
               rel="noreferrer"
               className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-6 py-3 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5"
             >
-              <span>{t("Browse Visual Index", "Browse Visual Index")}</span>
+              <span>{t("Super Admin Master Guide", "Super Admin Master Guide")}</span>
               <ExternalLink size={13} />
             </a>
           </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMS Guide - Staff Role Usage Manual</title>
+    <title>PMS Master Guide - Staff & Attendant Operational Manual</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,24 +18,25 @@
             font-family: 'JetBrains Mono', monospace;
         }
         .nav-active {
-            background-color: #e0e7ff;
-            color: #4338ca;
+            background-color: #fef3c7;
+            color: #92400e;
             font-weight: 700;
         }
-        .click-badge {
+        .click-badge-amber {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 24px;
             height: 24px;
             border-radius: 9999px;
-            background-color: #ef4444;
+            background-color: #d97706;
             color: #ffffff;
             font-weight: 800;
             font-size: 12px;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25);
             line-height: 1;
             margin-right: 6px;
+            flex-shrink: 0;
         }
         .step-box {
             background-color: #ffffff;
@@ -51,7 +52,7 @@
             background: #f1f5f9;
         }
         .scrollbar-custom::-webkit-scrollbar-thumb {
-            background-color: #6366f1;
+            background-color: #d97706;
             border-radius: 10px;
         }
     </style>
@@ -61,219 +62,315 @@
     <div class="flex flex-col md:flex-row min-h-screen">
         
         <!-- Left Sidebar Navigation -->
-        <aside class="w-full md:w-64 bg-white border-r border-slate-200/80 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block shrink-0">
+        <aside class="w-full md:w-72 bg-white border-r border-slate-200/80 h-screen sticky top-0 overflow-y-auto p-6 scrollbar-custom hidden md:block shrink-0">
             <!-- Brand Header -->
             <div class="flex items-center gap-2.5 mb-8">
-                <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">P</div>
-                <span class="font-extrabold text-lg tracking-tight text-indigo-700">PMS Guide</span>
+                <div class="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">P</div>
+                <div>
+                    <span class="font-extrabold text-lg tracking-tight text-amber-950 block leading-tight">PFMS Master Guide</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Staff Operational Manual</span>
+                </div>
             </div>
             
             <!-- Navigation Links -->
-            <nav class="space-y-1.5 text-xs font-semibold text-slate-600">
-                <a href="#staff-overview" class="flex items-center px-3 py-2.5 rounded-lg nav-active transition-all">
-                    Staff Role Overview
+            <nav class="space-y-1 text-xs font-semibold text-slate-600">
+                <a href="#staff-overview" class="flex items-center px-3 py-2 rounded-lg hover:bg-amber-50 hover:text-amber-900 transition-all">
+                    Staff Workflow Overview
                 </a>
-                <a href="#egg-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    1. Logging Daily Eggs
+                <a href="#egg-collection" class="flex items-center px-3 py-2 rounded-lg hover:bg-amber-50 hover:text-amber-900 transition-all">
+                    1. Daily Egg Collection Logging
                 </a>
-                <a href="#flock-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    2. Logging Dead Birds
+                <a href="#feed-logging" class="flex items-center px-3 py-2 rounded-lg hover:bg-amber-50 hover:text-amber-900 transition-all">
+                    2. Feeding & Stock Logs
                 </a>
-                <a href="#feed-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    3. Feeding & Stock Logs
+                <a href="#mortality-logging" class="flex items-center px-3 py-2 rounded-lg hover:bg-amber-50 hover:text-amber-900 transition-all">
+                    3. Mortality & Health Incidents
                 </a>
-                <a href="#housing-guide" class="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    4. Coop Pen Inspection
+                <a href="#pen-inspection" class="flex items-center px-3 py-2 rounded-lg hover:bg-amber-50 hover:text-amber-900 transition-all">
+                    4. Coop Pen Inspection & Climate
+                </a>
+                <a href="#shift-checklist" class="flex items-center px-3 py-2 rounded-lg hover:bg-amber-50 hover:text-amber-900 transition-all">
+                    5. Daily Shift Checklist
+                </a>
+                <a href="#language-support" class="flex items-center px-3 py-2 rounded-lg hover:bg-amber-50 hover:text-amber-900 transition-all">
+                    6. Multi-Language Switcher
                 </a>
             </nav>
 
             <div class="mt-8 pt-6 border-t border-slate-100 space-y-2">
-                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Directory</span>
-                <a href="/documentation/index.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">← Back to Directory</a>
-                <a href="/documentation/administration-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-indigo-600">Admin & Superadmin Guide →</a>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-3">Documentation Hub</span>
+                <a href="/documentation" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-amber-600">← Back to Documentation Portal</a>
+                <a href="/documentation/administration-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-amber-600">Admin Governance Guide →</a>
+                <a href="/documentation/superadmin-setup-guide.html" class="block px-3 py-2 text-xs font-semibold text-slate-600 hover:text-purple-600">Super Admin Setup Guide →</a>
             </div>
         </aside>
 
         <!-- Main Content Area -->
-        <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-8">
+        <main class="flex-1 p-6 md:p-10 lg:p-12 max-w-5xl space-y-10">
             
+            <!-- Top Utility Bar -->
+            <div class="flex items-center justify-between pb-2">
+                <a href="/documentation" class="text-xs font-bold text-amber-700 hover:text-amber-900 flex items-center gap-1 transition-colors">
+                    ← Back to Documentation Portal
+                </a>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold">Role: Staff Attendant</span>
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">Version: 2.0.0-Production</span>
+                </div>
+            </div>
+
             <!-- Hero Banner Box -->
-            <div class="bg-gradient-to-r from-amber-600 via-amber-600 to-indigo-600 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-3">
+            <div class="bg-gradient-to-r from-amber-700 via-amber-600 to-orange-700 text-white p-8 md:p-12 rounded-2xl shadow-sm space-y-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-widest">
-                    Staff Role Operational Manual
+                    Operational Field Manual
                 </div>
                 <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Everyday Attendant & Worker Operations Guide
+                    Everyday Attendant & Field Worker Operations Manual
                 </h1>
-                <p class="text-sm md:text-base text-amber-100 font-medium">
-                    Simple Visual Button Click Guide with Real App Screenshots (No URL Editing Required)
+                <p class="text-sm md:text-base text-amber-100 font-medium max-w-3xl leading-relaxed">
+                    Simple, visual, step-by-step button click instructions for flock attendants, egg collectors, and coop managers. Complete routine duties quickly on mobile or desktop without seeing complex financial ledgers.
                 </p>
             </div>
 
-            <!-- STAFF ROLE OVERVIEW -->
+            <!-- OVERVIEW -->
             <div id="staff-overview" class="step-box space-y-4">
                 <div class="border-b border-slate-100 pb-3">
-                    <span class="text-xs font-extrabold text-amber-700 uppercase tracking-widest bg-amber-100 px-2.5 py-1 rounded">Staff Access Scope</span>
-                    <h2 class="text-xl font-extrabold text-slate-900 mt-2">What a Staff Member Does</h2>
+                    <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-1 rounded">Daily Routine</span>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">What Staff Members Do in PFMS</h2>
                 </div>
                 <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
-                    As a <strong>Staff Attendant</strong>, your daily job is to log physical farm activities. You can record daily egg collections, log bird mortality, record feed usage, and check coop housing capacity. You do <strong>not</strong> need to worry about accounting, setting prices, or adding new workers — your Admin handles that!
+                    Staff attendants are the operational heartbeat of the poultry farm. Your role focuses on logging physical daily activities: morning egg collections, feed distribution per pen, health observations, and room temperature checks. The simplified staff interface prevents accidental edits to billing or accounting.
                 </p>
             </div>
 
-            <!-- TASK 1: LOGGING EGGS -->
-            <div id="egg-guide" class="step-box space-y-6 scroll-mt-6">
+            <!-- SECTION 1: EGG COLLECTION -->
+            <div id="egg-collection" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Staff Task 1</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Record Daily Egg Collections</h2>
+                    <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest bg-amber-50 px-2.5 py-1 rounded">Duty 1</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mt-2">Logging Daily Egg Collection & Quality Grading</h3>
                 </div>
 
-                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
-                        <span class="click-badge">1</span>
+                <div class="space-y-4 text-xs md:text-sm text-slate-700">
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">1</span>
                         <div>
-                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Egg Production' on your Left Menu</strong>
-                            Look at the left side of your screen and click on <strong>Egg Production</strong>.
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Step 1: Open Egg Production Page</strong>
+                            Click <strong>Eggs</strong> on your left sidebar menu (or tap <strong>Eggs</strong> on mobile).
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
-                        <span class="click-badge">2</span>
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">2</span>
                         <div>
-                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click the purple '+ Log Daily Lay' Button</strong>
-                            At the top right of your screen, click the button marked <strong>+ Log Daily Lay</strong>.
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Step 2: Click the '+ Log Production' Button</strong>
+                            Click the primary button marked <strong>+ Log Production</strong> at the top right of the table.
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
-                        <span class="click-badge">3</span>
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">3</span>
                         <div>
-                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Type Egg Count & Click 'Save Log'</strong>
-                            Enter total Good Eggs and Cracked Eggs. The system automatically converts them into 30-egg crates! Click <strong>Save Log</strong>.
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Step 3: Fill Collection Quantities</strong>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600 mt-1 pl-1">
+                                <li><strong>Date</strong>: Defaults to today's date.</li>
+                                <li><strong>Flock Batch & Pen</strong>: Select the flock batch you collected from (e.g. <em>Layers Pen A</em>).</li>
+                                <li><strong>Good Eggs</strong>: Total count of clean, marketable eggs (e.g. <code>900</code> eggs = 30 full crates).</li>
+                                <li><strong>Damaged / Spoilt Eggs</strong>: Total count of cracked, broken, or deformed eggs (e.g. <code>6</code> eggs).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">4</span>
+                        <div>
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Step 4: Click 'Save Production Record'</strong>
+                            Click the green <strong>Save</strong> button. The total egg inventory updates immediately across the farm.
                         </div>
                     </div>
                 </div>
 
-                <!-- REAL SCREENSHOT -->
                 <div class="pt-2">
                     <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/screen_eggs.png" alt="Egg Production Screen" class="w-full h-auto object-cover" />
-                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
-                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
-                            Click + Log Daily Lay
-                        </div>
-                        <div class="absolute top-24 left-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
-                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
-                            Egg Production Menu
+                        <img src="/docs/screen_eggs.png" alt="Eggs Log Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-amber-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            Daily Egg Collection
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Live Egg Production screen with target click buttons circled.</p>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 1.1: Staff Egg Collection Logging dialog.</p>
                 </div>
             </div>
 
-            <!-- TASK 2: LOGGING MORTALITY -->
-            <div id="flock-guide" class="step-box space-y-6 scroll-mt-6">
+            <!-- SECTION 2: FEED LOGGING -->
+            <div id="feed-logging" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Staff Task 2</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Record Dead Birds (Mortality)</h2>
+                    <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest bg-amber-50 px-2.5 py-1 rounded">Duty 2</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mt-2">Feeding Distribution & Stock Usage Logs</h3>
                 </div>
 
-                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
-                        <span class="click-badge">1</span>
+                <div class="space-y-4 text-xs md:text-sm text-slate-700">
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">1</span>
                         <div>
-                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Flock Management' on Left Menu</strong>
-                            Click <strong>Flock Management</strong> on the left side of your screen.
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Recording Feed Provided to Birds</strong>
+                            Click <strong>Feed</strong> in the sidebar. Click <strong>+ Log Feed Consumption</strong>. Choose feed type (<em>Layers Mash</em>, <em>Broiler Finisher</em>), enter bags or kilograms distributed to the troughs, and select the pen coop.
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
-                        <span class="click-badge">2</span>
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">2</span>
                         <div>
-                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Log Mortality' Button</strong>
-                            Find your bird flock and click the red button marked <strong>Log Mortality</strong>. Enter the dead count and click <strong>Save</strong>.
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Logging Feed Bags Received (Restock)</strong>
+                            When a truck delivers feed, click <strong>+ Add Stock</strong>, enter the number of bags placed into the feed store, and submit.
                         </div>
                     </div>
                 </div>
 
-                <!-- REAL SCREENSHOT -->
                 <div class="pt-2">
                     <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/screen_chickens.png" alt="Flock Management Screen" class="w-full h-auto object-cover" />
-                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
-                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
-                            Click Log Mortality
-                        </div>
-                        <div class="absolute top-20 left-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
-                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
-                            Flock Management Menu
+                        <img src="/docs/screen_feed.png" alt="Feed Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-amber-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            Feed Distribution
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 2.1: Live Flock Management screen for recording dead birds.</p>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 2.1: Feed Consumption entry screen.</p>
                 </div>
             </div>
 
-            <!-- TASK 3: FEEDING LOGS -->
-            <div id="feed-guide" class="step-box space-y-6 scroll-mt-6">
+            <!-- SECTION 3: MORTALITY -->
+            <div id="mortality-logging" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Staff Task 3</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Record Daily Feed Usage</h2>
+                    <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest bg-amber-50 px-2.5 py-1 rounded">Duty 3</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mt-2">Mortality & Health Incident Logging</h3>
                 </div>
 
-                <div class="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
-                        <span class="click-badge">1</span>
+                <div class="space-y-4 text-xs md:text-sm text-slate-700">
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">1</span>
                         <div>
-                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click 'Feed & Inventory' on Left Menu</strong>
-                            Click <strong>Feed & Inventory</strong> on the left side of your screen.
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Logging Dead Birds</strong>
+                            Navigate to <code>/dashboard/chickens</code>. Click <strong>+ Log Mortality</strong>. Select the affected flock batch and enter the count of dead birds removed during morning inspection.
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/80">
-                        <span class="click-badge">2</span>
+                    <div class="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100/80">
+                        <span class="click-badge-amber">2</span>
                         <div>
-                            <strong class="text-indigo-950 font-bold block text-sm mb-1">Click '+ Record Feed Usage'</strong>
-                            Type in the number of bags or Kilograms fed to your birds and click <strong>Submit</strong>.
+                            <strong class="text-amber-950 font-bold block text-sm mb-1">Recording Symptoms for the Farm Manager</strong>
+                            Type any visible symptoms into the notes box (e.g. <em>drooping wings, blood in droppings, coughing</em>). When you save, the live batch population adjusts automatically and an alert is flagged for the farm vet.
                         </div>
                     </div>
                 </div>
 
-                <!-- REAL SCREENSHOT -->
                 <div class="pt-2">
                     <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/screen_feed.png" alt="Feed Inventory Screen" class="w-full h-auto object-cover" />
-                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-pulse">
-                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">2</span>
-                            Click Record Feed Usage
+                        <img src="/docs/screen_health.png" alt="Health Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-amber-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            Health Incident Logging
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 3.1: Live Feed Inventory screen for recording daily usage.</p>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 3.1: Mortality and health reporting interface.</p>
                 </div>
             </div>
 
-            <!-- TASK 4: COOP INSPECTION -->
-            <div id="housing-guide" class="step-box space-y-6 scroll-mt-6">
+            <!-- SECTION 4: HOUSING & CLIMATE -->
+            <div id="pen-inspection" class="step-box space-y-6 scroll-mt-6">
                 <div class="border-b border-slate-100 pb-4">
-                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2.5 py-1 rounded">Staff Task 4</span>
-                    <h2 class="text-2xl font-extrabold text-slate-900 mt-2">How to Inspect Pen Capacity & Coops</h2>
+                    <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest bg-amber-50 px-2.5 py-1 rounded">Duty 4</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mt-2">Coop Pen Inspection, Temperature & Hygiene</h3>
                 </div>
 
-                <!-- REAL SCREENSHOT -->
-                <div class="pt-2">
-                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="/docs/screen_housing.png" alt="Housing Coops Screen" class="w-full h-auto object-cover" />
-                        <div class="absolute top-4 left-4 flex items-center gap-2 bg-red-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
-                            <span class="w-4 h-4 rounded-full bg-white text-red-600 flex items-center justify-center font-bold text-[10px]">1</span>
-                            Housing Coops Menu
+                <div class="space-y-4 text-xs md:text-sm text-slate-700">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                            <strong class="text-slate-900 font-bold block">🌡️ Temperature & Humidity</strong>
+                            <p class="text-slate-600">Check pen thermometer. Record morning and afternoon temperature. High temperatures ($>32^\circ\text{C}$) trigger cooling alarms.</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                            <strong class="text-slate-900 font-bold block">💧 Drinker & Nipple Line Check</strong>
+                            <p class="text-slate-600">Inspect water pressure, clean bell drinkers, and check for leaks to prevent wet litter ammonia buildup.</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                            <strong class="text-slate-900 font-bold block">🧹 Litter Hygiene & Turning</strong>
+                            <p class="text-slate-600">Log litter rake status and bedding replacements to ensure dry, parasite-free living conditions for hens.</p>
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 4.1: Live Housing screen for checking pen capacity and bird counts.</p>
+                </div>
+
+                <div class="pt-2">
+                    <div class="relative rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src="/docs/screen_housing.png" alt="Housing Screen" class="w-full h-auto object-cover" />
+                        <div class="absolute top-4 right-4 flex items-center gap-2 bg-amber-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg border-2 border-white">
+                            Pen Coop Management
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-semibold text-center mt-2">Figure 4.1: Pen environmental inspection screen.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 5: SHIFT CHECKLIST -->
+            <div id="shift-checklist" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest bg-amber-50 px-2.5 py-1 rounded">Duty 5</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mt-2">Daily Attendant Shift Checklist (Opening & Closing)</h3>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl bg-amber-50/60 border border-amber-200 space-y-2">
+                            <strong class="text-amber-950 font-bold block text-sm">🌅 Morning Shift Routine (6:00 AM – 12:00 PM)</strong>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                <li>Turn on coop lighting and check water lines.</li>
+                                <li>Inspect pens for dead birds and log mortality immediately.</li>
+                                <li>Distribute morning feed rations to troughs.</li>
+                                <li>Execute first egg collection (approx. 10:00 AM).</li>
+                                <li>Log collected eggs and damaged egg counts.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 rounded-xl bg-orange-50/60 border border-orange-200 space-y-2">
+                            <strong class="text-orange-950 font-bold block text-sm">🌇 Evening Shift Routine (2:00 PM – 6:00 PM)</strong>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                <li>Execute second egg collection (approx. 3:00 PM).</li>
+                                <li>Top up water drinkers and check medication tanks.</li>
+                                <li>Inspect pen temperature and adjust ventilation shutters.</li>
+                                <li>Lock feed stores and verify predator exclusion barriers.</li>
+                                <li>Sign off shift log in the staff portal.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: LANGUAGE SELECTOR -->
+            <div id="language-support" class="step-box space-y-6 scroll-mt-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest bg-amber-50 px-2.5 py-1 rounded">Feature 6</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900 mt-2">Instant Multi-Language Switcher</h3>
+                </div>
+
+                <div class="space-y-4 text-xs md:text-sm text-slate-700">
+                    <p class="text-slate-600">
+                        Field staff can operate PFMS in their preferred native language. Use the language selector located at the top-right of your screen or login page to switch between:
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 font-bold text-center">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200">🇬🇧 English (EN)</div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200">🇨🇳 中文 (ZH)</div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200">🇮🇩 Indonesia (ID)</div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200">🇮🇳 हिन्दी (HI)</div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200">🇹🇿 Kiswahili (SW)</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Footer -->
-            <footer class="pt-6 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium">
-                <p>&copy; 2026 Poultry Management System (PMS). Staff Role Operations Manual.</p>
+            <footer class="pt-8 border-t border-slate-200/80 text-center text-slate-400 text-xs font-medium space-y-2">
+                <p>&copy; 2026 Poultry Farm Management System (PFMS). All Rights Reserved.</p>
+                <div class="flex items-center justify-center gap-4 text-slate-500">
+                    <a href="/documentation" class="hover:text-amber-600">Documentation Directory</a>
+                    <span>•</span>
+                    <a href="/documentation/administration-guide.html" class="hover:text-indigo-600">Admin Governance Guide</a>
+                    <span>•</span>
+                    <a href="/documentation/superadmin-setup-guide.html" class="hover:text-purple-600">Super Admin Setup Guide</a>
+                </div>
             </footer>
 
         </main>

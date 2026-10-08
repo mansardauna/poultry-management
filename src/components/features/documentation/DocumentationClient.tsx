@@ -93,9 +93,9 @@ export function DocumentationClient() {
 
             <div className="mt-8 pt-6 border-t border-slate-100 space-y-2">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block px-1">Master Guides</span>
-              <a href="/documentation/setup-guide.html" className="block px-1 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600">Setup Guide →</a>
-              <a href="/documentation/administration-guide.html" className="block px-1 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600">Admin Guide →</a>
-              <a href="/documentation/usage-guide.html" className="block px-1 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600">Usage Guide →</a>
+              <a href="/documentation/usage-guide.html" className="block px-1 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600">Staff Usage Guide →</a>
+              <a href="/documentation/administration-guide.html" className="block px-1 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600">Admin Governance Guide →</a>
+              <a href="/documentation/superadmin-setup-guide.html" className="block px-1 py-1.5 text-xs font-semibold text-slate-600 hover:text-purple-600">Super Admin Master Guide →</a>
             </div>
           </div>
         </div>

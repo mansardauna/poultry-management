@@ -65,7 +65,7 @@ export function LandingNav({
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
             <Link href="/about" className={`hover:text-indigo-600 transition-colors ${activePath === '/about' ? 'text-indigo-600 font-semibold' : ''}`}>{t("About")}</Link>
             <Link href="/pricing" className={`hover:text-indigo-600 transition-colors ${activePath === '/pricing' ? 'text-indigo-600 font-semibold' : ''}`}>{t("Pricing")}</Link>
-            <Link href="/documentation" className={`hover:text-indigo-600 transition-colors ${activePath === '/documentation' || activePath === '/documentation/index.html' ? 'text-indigo-600 font-semibold' : ''}`}>{t("Documentation")}</Link>
+            <Link href="/documentation" className={`hover:text-indigo-600 transition-colors ${activePath === '/documentation' ? 'text-indigo-600 font-semibold' : ''}`}>{t("Documentation")}</Link>
             <Link href="/contact" className={`hover:text-indigo-600 transition-colors ${activePath === '/contact' ? 'text-indigo-600 font-semibold' : ''}`}>{t("Contact")}</Link>
           </div>
           
@@ -124,7 +124,7 @@ export function LandingNav({
             <Link 
               href="/documentation" 
               onClick={() => setMobileMenuOpen(false)}
-              className={`px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors ${activePath === '/documentation' || activePath === '/documentation/index.html' ? 'text-indigo-600 bg-indigo-50/50' : ''}`}
+              className={`px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors ${activePath === '/documentation' ? 'text-indigo-600 bg-indigo-50/50' : ''}`}
             >
               {t("Documentation")}
             </Link>
