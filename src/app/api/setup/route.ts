@@ -242,7 +242,7 @@ export async function POST(request: Request) {
     // ---- Local database install (MySQL / PostgreSQL): fully independent of Supabase ----
     if (engine !== 'supabase') {
       try {
-        const { ensureAuthSchema, upsertSuperAdmin, saveDatabaseConfig, resetDatabaseConfigCache } =
+        const { ensureFullSchema, upsertSuperAdmin, saveDatabaseConfig, resetDatabaseConfigCache, getMysqlPool } =
           await import('@/lib/authdb');
 
         const dbHost = engine === 'mysql' ? mysqlHost.trim() : postgresHost.trim();
@@ -267,10 +267,54 @@ export async function POST(request: Request) {
               postgres: { host: dbHost, port: Number(postgresPort), database: dbName, user: dbUser, password: dbPassword },
             };
 
-        await ensureAuthSchema(localConfig);
+        await ensureFullSchema(localConfig);
         await upsertSuperAdmin(localConfig, cleanEmail, superAdminPassword);
         await saveDatabaseConfig(localConfig);
         resetDatabaseConfigCache();
+
+        // Persist gateway and database configurations into systemSettings
+        try {
+          if (engine === 'mysql') {
+            const pool = await getMysqlPool(localConfig);
+            const gatewaysPayload = {
+              paystackPublicKey,
+              paystackSecretKey,
+              stripePublicKey,
+              stripeSecretKey,
+              stripeWebhookSecret,
+              resendApiKey,
+              fromEmail,
+              platformName,
+              currencySymbol,
+              proPriceMonthly: Number(proPriceMonthly),
+              proPriceAnnual: Number(proPriceAnnual),
+              enterprisePriceMonthly: Number(enterprisePriceMonthly),
+              enterprisePriceAnnual: Number(enterprisePriceAnnual),
+              isSetupCompleted: true,
+              updatedAt: new Date().toISOString(),
+            };
+            const dbDriverPayload = {
+              databaseType: engine,
+              mysqlHost: dbHost,
+              mysqlPort: Number(mysqlPort),
+              mysqlDatabase: dbName,
+              mysqlUser: dbUser,
+              isSetupCompleted: true,
+            };
+            await pool.query(
+              `INSERT INTO systemSettings (id, workspaceId, adminName, updatedAt)
+               VALUES (?, ?, ?, NOW())
+               ON DUPLICATE KEY UPDATE adminName = VALUES(adminName), updatedAt = NOW()`,
+              ['gateways_config', 'global', JSON.stringify(gatewaysPayload)]
+            );
+            await pool.query(
+              `INSERT INTO systemSettings (id, workspaceId, adminName, updatedAt)
+               VALUES (?, ?, ?, NOW())
+               ON DUPLICATE KEY UPDATE adminName = VALUES(adminName), updatedAt = NOW()`,
+              ['database_config', 'global', JSON.stringify(dbDriverPayload)]
+            );
+          }
+        } catch (_settingsErr) {}
 
         const localResponse = NextResponse.json({
           success: true,

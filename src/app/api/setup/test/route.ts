@@ -101,18 +101,50 @@ export async function POST(request: Request) {
   if (type === 'mysql') {
     const cfg = body.mysql || {};
     let conn: mysql.Connection | null = null;
+    const dbName = (cfg.database || 'poultry_db').trim();
     try {
-      conn = await Promise.race([
-        mysql.createConnection({
-          host: cfg.host || 'localhost',
-          port: Number(cfg.port || 3306),
-          database: cfg.database || 'poultry_db',
-          user: cfg.user || 'root',
-          password: cfg.password || '',
-          connectTimeout: TEST_TIMEOUT_MS,
-        }),
-        rejectAfter(TEST_TIMEOUT_MS),
-      ]);
+      try {
+        conn = await Promise.race([
+          mysql.createConnection({
+            host: cfg.host || 'localhost',
+            port: Number(cfg.port || 3306),
+            database: dbName,
+            user: cfg.user || 'root',
+            password: cfg.password || '',
+            connectTimeout: TEST_TIMEOUT_MS,
+          }),
+          rejectAfter(TEST_TIMEOUT_MS),
+        ]);
+      } catch (connErr: unknown) {
+        const errMsg = connErr instanceof Error ? connErr.message : '';
+        if (errMsg.includes('ER_BAD_DB_ERROR') || errMsg.includes('Unknown database')) {
+          const rootConn = await Promise.race([
+            mysql.createConnection({
+              host: cfg.host || 'localhost',
+              port: Number(cfg.port || 3306),
+              user: cfg.user || 'root',
+              password: cfg.password || '',
+              connectTimeout: TEST_TIMEOUT_MS,
+            }),
+            rejectAfter(TEST_TIMEOUT_MS),
+          ]);
+          await rootConn.query(`CREATE DATABASE IF NOT EXISTS \`${dbName.replace(/`/g, '')}\``);
+          await rootConn.end().catch(() => {});
+          conn = await Promise.race([
+            mysql.createConnection({
+              host: cfg.host || 'localhost',
+              port: Number(cfg.port || 3306),
+              database: dbName,
+              user: cfg.user || 'root',
+              password: cfg.password || '',
+              connectTimeout: TEST_TIMEOUT_MS,
+            }),
+            rejectAfter(TEST_TIMEOUT_MS),
+          ]);
+        } else {
+          throw connErr;
+        }
+      }
       await Promise.race([conn.query('SELECT 1'), rejectAfter(TEST_TIMEOUT_MS)]);
       return NextResponse.json({
         connected: true,

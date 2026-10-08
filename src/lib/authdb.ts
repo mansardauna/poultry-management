@@ -269,6 +269,26 @@ export async function ensureAuthSchema(cfg: DatabaseConfig): Promise<void> {
   }
 }
 
+export async function ensureFullSchema(cfg: DatabaseConfig): Promise<void> {
+  await ensureAuthSchema(cfg);
+  if (cfg.engine === 'mysql') {
+    try {
+      const schemaPath = path.join(process.cwd(), 'db', 'schema.sql');
+      const sql = await fs.readFile(schemaPath, 'utf8');
+      const pool = await getMysqlPool(cfg);
+      const statements = sql
+        .split(';')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && !s.startsWith('--'));
+      for (const statement of statements) {
+        if (statement.toUpperCase().startsWith('CREATE TABLE')) {
+          await pool.query(statement).catch(() => {});
+        }
+      }
+    } catch (_e) {}
+  }
+}
+
 // ---- User lookups ----
 
 export async function findUserByLogin(
@@ -318,7 +338,7 @@ export async function upsertSuperAdmin(cfg: DatabaseConfig, email: string, passw
     } else {
       await pool.query(
         'INSERT INTO users (id, username, email, passwordHash, role, workspaceId) VALUES (?, ?, ?, ?, ?, ?)',
-        [id, username, cleanEmail, passwordHash, 'SuperAdmin', 'main-org_owner_main'],
+        [id, username, cleanEmail, passwordHash, 'SuperAdmin', 'org_superadmin'],
       );
     }
   } else if (cfg.engine === 'postgres') {
@@ -332,7 +352,7 @@ export async function upsertSuperAdmin(cfg: DatabaseConfig, email: string, passw
     } else {
       await pool.query(
         'INSERT INTO users (id, username, email, "passwordHash", role, "workspaceId") VALUES ($1, $2, $3, $4, $5, $6)',
-        [id, username, cleanEmail, passwordHash, 'SuperAdmin', 'main-org_owner_main'],
+        [id, username, cleanEmail, passwordHash, 'SuperAdmin', 'org_superadmin'],
       );
     }
   }
