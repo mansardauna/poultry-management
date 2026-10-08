@@ -1,8 +1,7 @@
 # 🐔 Poultry Farm Management System (PFMS) — Developer System Architecture & Technical Handbook
 
-> **Version**: 2.0.0-Production  
 > **Framework**: Next.js 16.2.6 (App Router & Turbopack)  
-> **Database & Auth**: Supabase PostgreSQL & Supabase Auth (`@supabase/supabase-js`)  
+> **Database & Auth**: Supabase PostgreSQL, Native MySQL / PostgreSQL & Signed JWT Sessions  
 > **UI Architecture**: TailwindCSS, Material UI (MUI v6), Lucide Icons, Framer Motion  
 > **Payment Gateways**: Paystack (NGN/Local) & Stripe (USD/Global)  
 
@@ -191,30 +190,68 @@ Accessible **only** by authenticated `SuperAdmin` roles (e.g. `owner@poultry.com
 
 ---
 
-## 9. API Route Catalog
+## 9. API Route Catalog (Complete 41 Endpoints)
 
+### SuperAdmin Governance Endpoints
 | Endpoint | Method | Role Required | Description |
 | :--- | :---: | :---: | :--- |
-| `/api/auth/signup` | `POST` | Public | Registers a new farm admin, creates tenant organization and default workspace. |
-| `/api/auth/login` | `POST` | Public | Authenticates users & staff, handles 2FA TOTP verification, sets signed JWT session. |
-| `/api/auth/logout` | `POST` | Authenticated | Clears auth session and UI cookies. |
-| `/api/auth/me` | `GET` | Authenticated | Returns currently authenticated user identity and active tenant workspace. |
-| `/api/all` | `GET` | Authenticated | Fetches complete operational farm datasets for active tenant workspace. |
-| `/api/batches` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager, Staff | Manage flock batches, pen allocations, and mortality logs. |
-| `/api/eggs` | `GET`, `POST` | Admin, Manager, Staff | Log daily egg production, good eggs vs damaged eggs grading. |
-| `/api/feeds` | `GET`, `POST` | Admin, Manager, Staff | Log feed inventory, restocking, and daily consumption. |
-| `/api/sales` | `GET`, `POST`, `DELETE` | Admin, Manager | Manage customer orders, sales ledger, and invoice generation. |
-| `/api/finance` | `GET`, `POST` | Admin, Manager | Expense tracking, financial categorization, and net profit rollups. |
-| `/api/staff` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager | Add staff, manage role permissions, assign shifts, and disburse payroll. |
-| `/api/pay-invoice` | `POST` | Public | Public payment endpoint for invoices: settles online Paystack/Stripe or verifies offline transfer. |
-| `/api/checkout` | `POST` | Admin | Initiates Paystack/Stripe checkout session for tenant plan upgrades. |
-| `/api/webhooks/paystack` | `POST` | Gateway | Receives Paystack HMAC-verified webhook notifications for auto-settlement. |
-| `/api/webhooks/stripe` | `POST` | Gateway | Receives Stripe webhook notifications for auto-settlement. |
-| `/api/admin/gateways` | `GET`, `POST` | SuperAdmin | Manage Paystack, Stripe, AI provider, and SMTP email credentials. |
-| `/api/admin/plans` | `GET`, `POST`, `PUT`, `DELETE` | SuperAdmin / Public GET | Manage SaaS subscription plans, multi-currency rates, and quotas. |
-| `/api/admin/tenants` | `GET`, `POST`, `PUT`, `DELETE` | SuperAdmin | Tenant fleet directory, subscription overrides, and one-click impersonation. |
-| `/api/admin/cms` | `GET`, `POST` | SuperAdmin / Public GET | Landing page CMS, hero banner, announcement banner, and legal footer. |
-| `/api/admin/upload-logo` | `POST` | SuperAdmin | Upload custom platform brand logo and favicon assets. |
+| `/api/admin/cms` | `GET`, `POST` | SuperAdmin / Public GET | Landing page CMS hero banner, announcements, feature highlights, and legal footer links. |
+| `/api/admin/gateways` | `GET`, `POST` | SuperAdmin | Manage Paystack, Stripe, Multi-Provider AI (Gemini, OpenAI, Groq, DeepSeek, etc.), and SMTP credentials. |
+| `/api/admin/plans` | `GET`, `POST`, `PUT`, `DELETE` | SuperAdmin / Public GET | Manage SaaS subscription plans, multi-currency rates, and quota boundaries. |
+| `/api/admin/tenants` | `GET`, `POST`, `PUT`, `DELETE` | SuperAdmin | Tenant fleet directory, subscription overrides, account suspension, and one-click impersonation. |
+| `/api/admin/upgrade` | `POST` | SuperAdmin | Direct manual tenant tier elevation and subscription validity extension without card charges. |
+| `/api/admin/upload-logo` | `POST` | SuperAdmin | Multipart image upload handler for platform white-label brand logos and favicon icons. |
+
+### Authentication & Identity Endpoints
+| Endpoint | Method | Role Required | Description |
+| :--- | :---: | :---: | :--- |
+| `/api/auth/signup` | `POST` | Public | Registers a new farm admin, creates tenant organization and default workspace with signed session. |
+| `/api/auth/login` | `POST` | Public | Authenticates credentials, enforces 2FA TOTP challenges, applies rate limits, and issues JWT session. |
+| `/api/auth/logout` | `POST` | Authenticated | Clears auth session token and UI state cookies. |
+| `/api/auth/me` | `GET` | Authenticated | Resolves currently signed session payload, user identity, active role, org ID, and workspace ID. |
+| `/api/auth/2fa` | `POST` | Authenticated | Generates TOTP secret/QR code, verifies activation codes, and handles 2FA disablement. |
+| `/api/auth/reset-password` | `POST` | Public | Issues time-limited password recovery tokens and executes secure password resets. |
+
+### Farm Operations & Management Endpoints
+| Endpoint | Method | Role Required | Description |
+| :--- | :---: | :---: | :--- |
+| `/api/all` | `GET` | Authenticated | Consolidated rollup fetching complete operational datasets for dashboard initialization. |
+| `/api/batches` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager, Staff | Flock batch lifecycle, acquisition costs, bird population, breed selection, and pen assignments. |
+| `/api/eggs` | `GET`, `POST` | Admin, Manager, Staff | Daily egg collection, good eggs vs damaged eggs grading, and Hen-Day production rollups. |
+| `/api/feeds` | `GET`, `POST` | Admin, Manager, Staff | Feed inventory stock deliveries, daily coop consumption, and feed conversion ratios (FCR). |
+| `/api/sales` | `GET`, `POST`, `DELETE` | Admin, Manager | Sales orders, customer invoices, line item pricing, payment status, and automated sales ledger. |
+| `/api/finance` | `GET`, `POST` | Admin, Manager | Farm accounting, categorized expense tracking (feed, medicine, wages), and net profit analysis. |
+| `/api/health` | `GET`, `POST` | Admin, Manager, Staff | Vaccination calendar schedules, disease incident reporting, and veterinary treatment logs. |
+| `/api/housing` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager, Staff | Coop pen infrastructure, bird density capacity, ventilation status, and room climate logs. |
+| `/api/inventory` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager | General farm equipment, egg packaging trays, medicine stock, and asset depreciations. |
+| `/api/contacts` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager | Customer, feed supplier, and veterinary contractor address book with order histories. |
+| `/api/staff` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager | Staff member accounts, role assignment, payroll disbursement, and shift task checklists. |
+| `/api/staff/validate` | `POST` | Public | Validates attendant credentials without creating a full admin session (for rapid attendance PINs). |
+
+### Commercial Billing, Checkout & Webhooks
+| Endpoint | Method | Role Required | Description |
+| :--- | :---: | :---: | :--- |
+| `/api/pay-invoice` | `POST` | Public | Public payment settlement for invoices (/pay-invoice/[id]): settles online Paystack/Stripe or verifies offline transfer with idempotency. |
+| `/api/checkout` | `POST` | Admin | Initiates Paystack or Stripe checkout redirect sessions for tenant SaaS plan subscriptions. |
+| `/api/checkout/sync` | `POST` | Admin | Synchronizes client-side payment completion with database subscription status. |
+| `/api/subscription/cancel` | `POST` | Admin | Schedules recurring subscription cancellation at the conclusion of the active billing cycle. |
+| `/api/plans` | `GET` | Public | Public cached listing of active subscription plans, pricing tiers, and quota boundaries. |
+| `/api/webhooks/paystack` | `POST` | Gateway | Receives Paystack HMAC-SHA512 verified webhook notifications for charge.success and invoice events. |
+| `/api/webhooks/stripe` | `POST` | Gateway | Receives Stripe webhook notifications for invoice.paid and checkout.session.completed events. |
+
+### Enterprise, AI, Media & System Integrations
+| Endpoint | Method | Role Required | Description |
+| :--- | :---: | :---: | :--- |
+| `/api/enterprise` | `GET`, `POST` | Admin (Enterprise) | Multi-branch enterprise aggregation, centralized feed pool allocations, and group analytics. |
+| `/api/workspaces` | `GET`, `POST`, `PUT`, `DELETE` | Admin | Branch workspace CRUD, switching active branch context, and tenant isolation rules. |
+| `/api/ai-parse` | `POST` | Authenticated / Bearer | AI natural language parser translating voice/text attendant transcripts into structured farm logs. |
+| `/api/cctv` | `GET`, `POST`, `PUT`, `DELETE` | Admin, Manager | RTSP surveillance camera streams, live video feeds, and predator motion alarm events. |
+| `/api/branding` | `GET`, `POST` | Public / Admin | White-label branding settings, custom farm title, brand colors, and public logo resolution. |
+| `/api/settings` | `GET`, `POST` | Admin | Farm workspace configuration, currency preferences, daily egg drop thresholds, and heat alerts. |
+| `/api/notifications` | `GET`, `PUT`, `DELETE` | Authenticated | Fetches active in-app notifications, marks alerts as read, and clears dismissed warnings. |
+| `/api/notifications/dispatch` | `POST` | Admin / Internal | Dispatches immediate alerts for mortality spikes, low feed thresholds, and shift reminders. |
+| `/api/setup` | `GET`, `POST` | Public (Guarded) | 5-step installation wizard backend: database initialization, master credentials seeding, and sealing. |
+| `/api/setup/test` | `POST` | Public (Guarded) | Tests live database connection credentials during Step 1 of the installation wizard. |
 
 ---
 
@@ -270,4 +307,4 @@ Authenticated Operational Dashboard (/dashboard)
 
 ---
 
-*Document compiled and verified for Google Antigravity & Poultry Farm Management System v2.0.*
+*Document compiled and verified for Poultry Farm Management System (PFMS).*
